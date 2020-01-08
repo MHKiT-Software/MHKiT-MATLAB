@@ -18,7 +18,7 @@ function figure=plot_discharge_timeseries(Q,varargin)
 %     figure: Plot of discharge vs. time
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-figure=plot(datetime(Q.time, 'convertfrom','posixtime'),Q.Discharge);
+figure=plot(datetime(1470144960, 'convertfrom','posixtime')Q.time,Q.Discharge);
 grid on
 xlabel('Time','FontSize',20)
 ylabel('Discharge [m^{3}/s]','FontSize',20)

@@ -1,0 +1,407 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Wave module &mdash; MHKiT-Matlab 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/mhkit.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/mhkit.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> MHKiT-Matlab
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="mhkit.html">API documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MHKiT-Matlab</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Wave module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/wave.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="wave-module">
+<span id="wave"></span><h1>Wave module<a class="headerlink" href="#wave-module" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="mhkit.wave.html#module-mhkit.wave" title="mhkit.wave"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">wave</span></code></a> module contains a set of functions to
+calculate quantities of interest for wave energy converters (WEC).
+The wave module contains the following submodules:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="mhkit.wave.html#module-mhkit.wave.io" title="mhkit.wave.io"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">io</span></code></a>: Loads data from standard formats</p></li>
+<li><p><a class="reference internal" href="mhkit.wave.html#module-mhkit.wave.resource" title="mhkit.wave.resource"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">resource</span></code></a>: Computes resource metrics such as spectra and significant wave height</p></li>
+<li><p><a class="reference internal" href="mhkit.wave.html#module-mhkit.wave.performance" title="mhkit.wave.performance"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">performance</span></code></a>: Computes performance metrics such as capture length matrix and mean annual energy production</p></li>
+<li><p><a class="reference internal" href="mhkit.wave.html#module-mhkit.wave.graphics" title="mhkit.wave.graphics"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">graphics</span></code></a>: Generates graphics</p></li>
+</ul>
+<div class="section" id="data-formats-and-io">
+<h2>Data formats and IO<a class="headerlink" href="#data-formats-and-io" title="Permalink to this headline">¶</a></h2>
+<p>As with other modules in the MHKiT Matlab package, the MHKit Python modules are used
+within the wave module.  The wave module uses wave elevation and spectra data.</p>
+<ul class="simple">
+<li><p><strong>Wave elevation data</strong> is time-series data stored as an array which is converted to a pandas DataFrame with a time index.  The column names describe the type of data in each column.</p></li>
+<li><p><strong>Spectra data</strong> can be stored in a structure with frequency, type, and spectrum field names or converted to a pandas DataFrame where the index is a <cite>descriptor</cite> and columns are
+frequency.  The descriptor(type)/frequency can be time (in seconds or a DateTime index), or some other information that
+defines each row of the spectra data.  For example, if spectra data is computed using the JONSWAP method,
+the index or type is a string that includes the significant wave height and peak period used to compute the
+spectra in each row.</p></li>
+</ul>
+</div>
+<div class="section" id="file-io">
+<h2>File IO<a class="headerlink" href="#file-io" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="mhkit.wave.html#module-mhkit.wave.io" title="mhkit.wave.io"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">io</span></code></a> submodule contains the following function to load National Data Buoy Center (NDBC)
+data file into a pandas DataFrame, including real time and historical data.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 66%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>read_NDBC_file</p></td>
+<td><p>Reads a NDBC wave buoy data file (from <a class="reference external" href="https://www.ndbc.noaa.gov">https://www.ndbc.noaa.gov</a>) into a structure.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="wave-resource">
+<h2>Wave resource<a class="headerlink" href="#wave-resource" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="mhkit.wave.html#module-mhkit.wave.resource" title="mhkit.wave.resource"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">resource</span></code></a> submodule contains methods to compute wave energy spectra and various metrics from the spectra.</p>
+<p>The following options exist to compute wave energy spectra:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 46%" />
+<col style="width: 54%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>create_spectra</p></td>
+<td><p>Calculates a spectra of user defined type.</p></td>
+</tr>
+<tr class="row-odd"><td><p>elevation_spectrum</p></td>
+<td><p>Calculates wave spectra from wave probe timeseries.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The following metrics can be computed from the spectra:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 63%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>average_crest_period</p></td>
+<td><p>Calculate the average creat period from spectra.</p></td>
+</tr>
+<tr class="row-odd"><td><p>average_wave_period</p></td>
+<td><p>Calculates the average wave period from spectra</p></td>
+</tr>
+<tr class="row-even"><td><p>average_zero_crossing_period</p></td>
+<td><p>Calculates wave average zero crossing period from spectra</p></td>
+</tr>
+<tr class="row-odd"><td><p>energy_flux</p></td>
+<td><p>Calculates the omnidirectional wave energy flux of the spectra</p></td>
+</tr>
+<tr class="row-even"><td><p>energy_period</p></td>
+<td><p>Calculates the energy period</p></td>
+</tr>
+<tr class="row-odd"><td><p>frequency_moment</p></td>
+<td><p>Calculates the Nth frequency moment of the spectrum</p></td>
+</tr>
+<tr class="row-even"><td><p>peak_period</p></td>
+<td><p>Calculates wave energy period from spectra</p></td>
+</tr>
+<tr class="row-odd"><td><p>significant_wave_height</p></td>
+<td><p>Calculates wave height from spectra</p></td>
+</tr>
+<tr class="row-even"><td><p>spectral_bandwidth</p></td>
+<td><p>Calculates bandwidth from spectra</p></td>
+</tr>
+<tr class="row-odd"><td><p>spectral_width</p></td>
+<td><p>Calculates wave spectral width from spectra</p></td>
+</tr>
+<tr class="row-even"><td><p>surface_elevation</p></td>
+<td><p>Calculates wave elevation time series from spectrum using a random phase</p></td>
+</tr>
+<tr class="row-odd"><td><p>wave_celerity</p></td>
+<td><p>Calculates wave celerity (group velocity)</p></td>
+</tr>
+<tr class="row-even"><td><p>wave_number</p></td>
+<td><p>Calculates wave number</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="wave-performance">
+<h2>Wave performance<a class="headerlink" href="#wave-performance" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="mhkit.wave.html#module-mhkit.wave.performance" title="mhkit.wave.performance"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">performance</span></code></a> submodule contains functions to compute capture length, statistics,
+performance matrices, and mean annual energy production.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>dc_power</p></td>
+<td><p>Calculates the real power from DC voltage and current.</p></td>
+</tr>
+<tr class="row-odd"><td><p>ac_power_three_phase</p></td>
+<td><p>Calculates the real power from three phase ac voltage and current.</p></td>
+</tr>
+<tr class="row-even"><td><p>capture_length</p></td>
+<td><p>Calculates the capture length (often called capture width).</p></td>
+</tr>
+<tr class="row-odd"><td><p>capture_length_matrix</p></td>
+<td><p>Generates a capture length matrix for a given statistic</p></td>
+</tr>
+<tr class="row-even"><td><p>mean_annual_energy_production_matrix</p></td>
+<td><p>Calculates mean annual energy production (MAEP) from matrix data along with data frequency in each bin</p></td>
+</tr>
+<tr class="row-odd"><td><p>mean_annual_energy_production_timeseeries</p></td>
+<td><p>Calculates mean annual energy production (MAEP) from timeseries</p></td>
+</tr>
+<tr class="row-even"><td><p>power_matrix</p></td>
+<td><p>Generates a power matrix from a capture length matrix and wave energy flux matrix</p></td>
+</tr>
+<tr class="row-odd"><td><p>wave_energy_flux_matrix</p></td>
+<td><p>Generates a wave eneergy flux matrix for a given statistic</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="graphics">
+<h2>Graphics<a class="headerlink" href="#graphics" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="mhkit.wave.html#module-mhkit.wave.graphics" title="mhkit.wave.graphics"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">graphics</span></code></a> submodule contains functions to plot wave data and related metrics.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 45%" />
+<col style="width: 55%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>plot_elevation_timeseries</p></td>
+<td><p>Plots wave elevation timeseries</p></td>
+</tr>
+<tr class="row-odd"><td><p>plot_matrix</p></td>
+<td><p>Plots the matrix with Hm0 and Te on the y and x axis</p></td>
+</tr>
+<tr class="row-even"><td><p>plot_spectrum</p></td>
+<td><p>Plots wave amplitude spectrum</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, National Renewable Energy Laboratory, Pacific Northwest National Laboratory, and Sandia National Laboratories
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
