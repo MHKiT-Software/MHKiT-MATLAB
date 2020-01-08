@@ -1,4 +1,4 @@
-function [ebb,flood]=principal_flow_direction(directions,width_dir)
+function [ebb,flood]=principal_flow_directions(directions,width_dir)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Calculates the principal flow directions of current data
 %     The weighted average (over the working velocity range of the TEC) 
