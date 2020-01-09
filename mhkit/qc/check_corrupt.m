@@ -17,7 +17,7 @@ function results = check_corrupt(data,vals,varargin)
 %             data.values: 2D array of doubles with arbitrary number of columns
 %             data.time:   1D array of datetimes or posix times
 %
-%     vals: Array of floats
+%     vals: cell array of floats
 %         Array of at least two corrupt data values
 %         Use cell array for one value, or pack array with NaN 
 %         (A single value array becomes a non-iterable scalar in python and
@@ -56,9 +56,10 @@ function results = check_corrupt(data,vals,varargin)
   if (isa(data,'py.pandas.core.frame.DataFrame')~=1)
     data=qc_data_to_dataframe(data);
   end
-
+   vals = py.list(vals);
   % Must use optional qc arguments in order, for now.
   if nargin == 2
+     
     r = struct(py.pecos.monitoring.check_corrupt(data,vals));
   elseif nargin == 3
     r = struct(py.pecos.monitoring.check_corrupt(data,vals,varargin{1}));

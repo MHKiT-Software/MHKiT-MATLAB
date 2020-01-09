@@ -18,7 +18,7 @@ function results = check_delta(data,bound,varargin)
 %             data.values: 2D array of doubles with arbitrary number of columns
 %             data.time:   1D array of datetimes or posix times
 %
-%     bound: array of floats
+%     bound: cell array of floats
 %         [lower bound, upper bound] for min/max delta checking
 %         NaN or py.None can be used for either bound 
 %
@@ -30,8 +30,12 @@ function results = check_delta(data,bound,varargin)
 %         Size of rolling window (in seconds) used to compute delta
 %         default = 3600
 %
-%     absolute_value: logical (optional)
-%         Use the absolute value of delta, default = 1 (True)
+%     direction: string (optional)
+%         Options: 'positive', 'negative', or py.None (default)
+%           If direction is positive, then only identify positive deltas
+%           (the min occurs before the max)
+%           If direction is negative, then only identify negative deltas (the max occurs before the min)
+%           If direction is py.None, then identify both positive and negative deltas
 %
 %     min_failures: int (optional)
 %
@@ -64,28 +68,28 @@ function results = check_delta(data,bound,varargin)
   if (isa(data,'py.pandas.core.frame.DataFrame')~=1)
     data=qc_data_to_dataframe(data);
   end
-
+  bound = py.list(bound);
   if nargin == 2
-    bound = py.list(bound);
+    
     r = struct(py.pecos.monitoring.check_delta(data,bound));
   elseif nargin == 3
-      bound = py.list(bound);
+      
     r = struct(py.pecos.monitoring.check_delta(data,bound,...
 	      varargin{1}));
   elseif nargin == 4
-      bound = py.list(bound);
+      
     r = struct(py.pecos.monitoring.check_delta(data,bound,...
 	      varargin{1},varargin{2}));
   elseif nargin == 5
-      bound = py.list(bound);
+      
     r = struct(py.pecos.monitoring.check_delta(data,bound,...
 	      varargin{1},varargin{2},varargin{3}));
   elseif nargin == 6
-      bound = py.list(bound);
+      
     r = struct(py.pecos.monitoring.check_delta(data,bound,...
 	      varargin{1},varargin{2},varargin{3},varargin{4}));
   elseif nargin == 7
-      bound = py.list(bound);
+      
     r = struct(py.pecos.monitoring.check_delta(data,bound,...
 	      varargin{1},varargin{2},varargin{3},varargin{4},varargin{5}));
   else

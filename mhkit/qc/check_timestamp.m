@@ -36,7 +36,7 @@ function results = check_timestamp(data, freq, varargin)
 %         (specified by freq) and data is not reindexed
 %
 %     Must set previous arguments to use later optional arguments
-%     (i.e. must set key to use min_failures).
+%     (i.e. must set expected_start_time and expected_end_time to use min_failures).
 %     
 % Returns
 % ---------
