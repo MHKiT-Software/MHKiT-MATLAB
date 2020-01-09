@@ -21,7 +21,7 @@ function figure=plot_discharge_timeseries(Q,varargin)
 figure=plot(datetime(Q.time, 'convertfrom','posixtime'),Q.Discharge);
 datetick('x',1,'keeplimits');
 grid on
-xlabel('Time','FontSize',20)
+xlabel('Date','FontSize',20)
 ylabel('Discharge [m^{3}/s]','FontSize',20)
 
 if nargin ==2
