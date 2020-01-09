@@ -62,7 +62,10 @@ function results = check_increment(data,bound,varargin)
   end
 
   if nargin == 2
-    r = struct(py.pecos.monitoring.check_increment(data,bound));
+    x=py.list(bound);
+    %x=py.mhkit_python_utils.pandas_dataframe.lis(x,bound2);
+    disp(x)
+    r = struct(py.pecos.monitoring.check_increment(data,x));
   elseif nargin == 3
     r = struct(py.pecos.monitoring.check_increment(data,bound,...
 	      varargin{1}));

@@ -26,7 +26,7 @@ py.importlib.import_module('mhkit');
 py.importlib.import_module('numpy');
 
 directions = py.numpy.array(directions);
-dir = py.mhkit.tidal.resource.principal_flow_direction(directions,width_dir);
+dir = py.mhkit.tidal.resource.principal_flow_directions(directions,width_dir);
 dirc=cell(dir);
 ebb = dirc{1};
 flood = dirc{2};

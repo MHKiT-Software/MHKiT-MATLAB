@@ -66,20 +66,26 @@ function results = check_delta(data,bound,varargin)
   end
 
   if nargin == 2
+    bound = py.list(bound);
     r = struct(py.pecos.monitoring.check_delta(data,bound));
   elseif nargin == 3
+      bound = py.list(bound);
     r = struct(py.pecos.monitoring.check_delta(data,bound,...
 	      varargin{1}));
   elseif nargin == 4
+      bound = py.list(bound);
     r = struct(py.pecos.monitoring.check_delta(data,bound,...
 	      varargin{1},varargin{2}));
   elseif nargin == 5
+      bound = py.list(bound);
     r = struct(py.pecos.monitoring.check_delta(data,bound,...
 	      varargin{1},varargin{2},varargin{3}));
   elseif nargin == 6
+      bound = py.list(bound);
     r = struct(py.pecos.monitoring.check_delta(data,bound,...
 	      varargin{1},varargin{2},varargin{3},varargin{4}));
   elseif nargin == 7
+      bound = py.list(bound);
     r = struct(py.pecos.monitoring.check_delta(data,bound,...
 	      varargin{1},varargin{2},varargin{3},varargin{4},varargin{5}));
   else
