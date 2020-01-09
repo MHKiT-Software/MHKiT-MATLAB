@@ -1,4 +1,4 @@
-function results = check_range(data, range, varargin)
+function results = check_range(data, bound, varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Check for data that is outside expected range
@@ -17,7 +17,7 @@ function results = check_range(data, range, varargin)
 %             data.values: 2D array of doubles with arbitrary number of columns
 %             data.time:   1D array of datetimes or posix times
 %
-%     range: list of floats
+%     bound: cell array of floats
 %         [lower bound, upper bound] for range checking
 %         NaN or py.None can be used for either bound 
 %
@@ -57,11 +57,14 @@ function results = check_range(data, range, varargin)
   
   % Must use optional qc arguments in order, for now.
   if nargin == 2
-    r = struct(py.pecos.monitoring.check_range(data, range));
+      bound = py.list(bound);
+    r = struct(py.pecos.monitoring.check_range(data, bound));
   elseif nargin == 3
-    r = struct(py.pecos.monitoring.check_range(data,range,varargin{1}));
+      bound = py.list(bound);
+    r = struct(py.pecos.monitoring.check_range(data,bound,varargin{1}));
   elseif nargin == 4
-    r = struct(py.pecos.monitoring.check_range(data,range,varargin{1},varargin{2}));
+      bound = py.list(bound);
+    r = struct(py.pecos.monitoring.check_range(data,bound,varargin{1},varargin{2}));
   else
     ME = MException('MATLAB:qc_range','incorrect number of arguments (2 to 4)');
         throw(ME);

@@ -17,7 +17,7 @@ function results = check_increment(data,bound,varargin)
 %             data.values: 2D array of doubles with arbitrary number of columns
 %             data.time:   1D array of datetimes or posix times
 %
-%     bound: list of floats
+%     bound: cell array of floats
 %         [lower bound, upper bound] for min/max difference
 %         NaN or py.None can be used for either bound 
 %
@@ -60,12 +60,10 @@ function results = check_increment(data,bound,varargin)
   if (isa(data,'py.pandas.core.frame.DataFrame')~=1)
     data=qc_data_to_dataframe(data);
   end
-
+  bound=py.list(bound);
   if nargin == 2
-    x=py.list(bound);
-    %x=py.mhkit_python_utils.pandas_dataframe.lis(x,bound2);
-    disp(x)
-    r = struct(py.pecos.monitoring.check_increment(data,x));
+    
+    r = struct(py.pecos.monitoring.check_increment(data,bound));
   elseif nargin == 3
     r = struct(py.pecos.monitoring.check_increment(data,bound,...
 	      varargin{1}));

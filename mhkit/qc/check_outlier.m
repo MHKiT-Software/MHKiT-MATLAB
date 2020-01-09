@@ -19,7 +19,7 @@ function results = check_outlier(data,bound,varargin)
 %             data.values: 2D array of doubles with arbitrary number of columns
 %             data.time:   1D array of datetimes or posix times
 %
-%     bound: array of floats
+%     bound: cell array of floats
 %         [lower bound, upper bound] of standard deviations from mean allowed
 %         NaN or py.None can be used for either bound 
 %
@@ -66,7 +66,7 @@ function results = check_outlier(data,bound,varargin)
   if (isa(data,'py.pandas.core.frame.DataFrame')~=1)
     data=qc_data_to_dataframe(data);
   end
-
+  bound = py.list(bound);
   if nargin == 2
     r = struct(py.pecos.monitoring.check_outlier(data,bound));
   elseif nargin == 3
