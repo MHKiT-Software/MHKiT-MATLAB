@@ -38,7 +38,9 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/mhkit.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Wave module" href="mhkit.wave.html" />
+    <link rel="prev" title="API documentation" href="mhkit.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,8 +84,28 @@
               
             
             
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../mhkit.html">API documentation</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units and notation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../qc.html">Quality control analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wave.html">Wave module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../river.html">River module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tidal.html">Tidal module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/mhkit.html">Matlab Live Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">Copyright and license</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">Release notes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="mhkit.html">API documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mhkit.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">QC module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mhkit.wave.html">Wave module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mhkit.river.html">River module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mhkit.tidal.html">Tidal module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mhkit.utils.html">Utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
@@ -128,6 +150,8 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="mhkit.html">API documentation</a> &raquo;</li>
         
       <li>QC module</li>
     
@@ -193,7 +217,7 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
-<li><p><strong>vals</strong> (<em>Array of floats</em>) – Array of at least two corrupt data values
+<li><p><strong>vals</strong> (<em>cell array of floats</em>) – Array of at least two corrupt data values
 Use cell array for one value, or pack array with NaN
 (A single value array becomes a non-iterable scalar in python and
 will cause an error.)</p></li>
@@ -241,13 +265,20 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
-<li><p><strong>bound</strong> (<em>array of floats</em>) – [lower bound, upper bound] for min/max delta checking
+<li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] for min/max delta checking
 NaN or py.None can be used for either bound</p></li>
 <li><p><strong>key</strong> (<em>string (optional)</em>) – Data column name or translation dictionary key.  If not specified
 or set to py.None, all columns are used for test.</p></li>
 <li><p><strong>window</strong> (<em>int (optional)</em>) – Size of rolling window (in seconds) used to compute delta
 default = 3600</p></li>
-<li><p><strong>absolute_value</strong> (<em>logical (optional)</em>) – Use the absolute value of delta, default = 1 (True)</p></li>
+<li><p><strong>direction</strong> (<em>string (optional)</em>) – <dl class="simple">
+<dt>Options: ‘positive’, ‘negative’, or py.None (default)</dt><dd><p>If direction is positive, then only identify positive deltas
+(the min occurs before the max)
+If direction is negative, then only identify negative deltas (the max occurs before the min)
+If direction is py.None, then identify both positive and negative deltas</p>
+</dd>
+</dl>
+</p></li>
 <li><p><strong>min_failures</strong> (<em>int (optional)</em>) – Minimum number of consecutive failures required for reporting,
 default = 1</p></li>
 <li><p><strong>set previous arguments to use later optional arguments</strong> (<em>Must</em>) – </p></li>
@@ -289,7 +320,7 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
-<li><p><strong>bound</strong> (<em>list of floats</em>) – [lower bound, upper bound] for min/max difference
+<li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] for min/max difference
 NaN or py.None can be used for either bound</p></li>
 <li><p><strong>key</strong> (<em>string (optional)</em>) – Data column name or translation dictionary key.  If not specified
 or set to py.None, all columns are used for test.</p></li>
@@ -381,7 +412,7 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
-<li><p><strong>bound</strong> (<em>array of floats</em>) – [lower bound, upper bound] of standard deviations from mean allowed
+<li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] of standard deviations from mean allowed
 NaN or py.None can be used for either bound</p></li>
 <li><p><strong>key</strong> (<em>string (optional)</em>) – Data column name or translation dictionary key.  If not specified
 or set to py.None, all columns are used for test.</p></li>
@@ -414,7 +445,7 @@ Logical mask of QC results (1 = passed, 0 = failed QC test)</p>
 
 <dl class="function">
 <dt id="mhkit.qc.check_range">
-<code class="sig-prename descclassname">mhkit.qc.</code><code class="sig-name descname">check_range</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">range</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.qc.check_range" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mhkit.qc.</code><code class="sig-name descname">check_range</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">bound</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.qc.check_range" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
 <div><p>Check for data that is outside expected range</p>
 </div></blockquote>
@@ -430,7 +461,7 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
-<li><p><strong>range</strong> (<em>list of floats</em>) – [lower bound, upper bound] for range checking
+<li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] for range checking
 NaN or py.None can be used for either bound</p></li>
 <li><p><strong>key</strong> (<em>string (optional)</em>) – Data column name or translation dictionary key.  If not specified
 or set to py.None, all columns are used for test.</p></li>
@@ -485,7 +516,7 @@ default = 1</p></li>
 If 0 (False), times only need to occur once or more within each interval
 (specified by freq) and data is not reindexed</p></li>
 <li><p><strong>set previous arguments to use later optional arguments</strong> (<em>Must</em>) – </p></li>
-<li><p><strong>must set key to use min_failures).</strong> (<em>(i.e.</em>) – </p></li>
+<li><p><strong>must set expected_start_time and expected_end_time to use min_failures).</strong> (<em>(i.e.</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -554,7 +585,7 @@ default = 1</p></li>
 If 0 (False), times only need to occur once or more within each interval
 (specified by freq) and data is not reindexed</p></li>
 <li><p><strong>set previous arguments to use later optional arguments</strong> (<em>Must</em>) – </p></li>
-<li><p><strong>must set key to use min_failures).</strong> (<em>(i.e.</em>) – </p></li>
+<li><p><strong>must set expected_start_time and expected_end_time to use min_failures).</strong> (<em>(i.e.</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -635,7 +666,7 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
-<li><p><strong>vals</strong> (<em>Array of floats</em>) – Array of at least two corrupt data values
+<li><p><strong>vals</strong> (<em>cell array of floats</em>) – Array of at least two corrupt data values
 Use cell array for one value, or pack array with NaN
 (A single value array becomes a non-iterable scalar in python and
 will cause an error.)</p></li>
@@ -666,7 +697,7 @@ Logical mask of QC results (1 = passed, 0 = failed QC test)</p>
 
 <dl class="function">
 <dt>
-<code class="sig-prename descclassname">mhkit.qc.</code><code class="sig-name descname">check_range</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">range</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span></dt>
+<code class="sig-prename descclassname">mhkit.qc.</code><code class="sig-name descname">check_range</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">bound</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span></dt>
 <dd><blockquote>
 <div><p>Check for data that is outside expected range</p>
 </div></blockquote>
@@ -682,7 +713,7 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
-<li><p><strong>range</strong> (<em>list of floats</em>) – [lower bound, upper bound] for range checking
+<li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] for range checking
 NaN or py.None can be used for either bound</p></li>
 <li><p><strong>key</strong> (<em>string (optional)</em>) – Data column name or translation dictionary key.  If not specified
 or set to py.None, all columns are used for test.</p></li>
@@ -728,13 +759,20 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
-<li><p><strong>bound</strong> (<em>array of floats</em>) – [lower bound, upper bound] for min/max delta checking
+<li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] for min/max delta checking
 NaN or py.None can be used for either bound</p></li>
 <li><p><strong>key</strong> (<em>string (optional)</em>) – Data column name or translation dictionary key.  If not specified
 or set to py.None, all columns are used for test.</p></li>
 <li><p><strong>window</strong> (<em>int (optional)</em>) – Size of rolling window (in seconds) used to compute delta
 default = 3600</p></li>
-<li><p><strong>absolute_value</strong> (<em>logical (optional)</em>) – Use the absolute value of delta, default = 1 (True)</p></li>
+<li><p><strong>direction</strong> (<em>string (optional)</em>) – <dl class="simple">
+<dt>Options: ‘positive’, ‘negative’, or py.None (default)</dt><dd><p>If direction is positive, then only identify positive deltas
+(the min occurs before the max)
+If direction is negative, then only identify negative deltas (the max occurs before the min)
+If direction is py.None, then identify both positive and negative deltas</p>
+</dd>
+</dl>
+</p></li>
 <li><p><strong>min_failures</strong> (<em>int (optional)</em>) – Minimum number of consecutive failures required for reporting,
 default = 1</p></li>
 <li><p><strong>set previous arguments to use later optional arguments</strong> (<em>Must</em>) – </p></li>
@@ -778,7 +816,7 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
-<li><p><strong>bound</strong> (<em>array of floats</em>) – [lower bound, upper bound] of standard deviations from mean allowed
+<li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] of standard deviations from mean allowed
 NaN or py.None can be used for either bound</p></li>
 <li><p><strong>key</strong> (<em>string (optional)</em>) – Data column name or translation dictionary key.  If not specified
 or set to py.None, all columns are used for test.</p></li>
@@ -816,6 +854,15 @@ Logical mask of QC results (1 = passed, 0 = failed QC test)</p>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="mhkit.wave.html" class="btn btn-neutral float-right" title="Wave module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="mhkit.html" class="btn btn-neutral float-left" title="API documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

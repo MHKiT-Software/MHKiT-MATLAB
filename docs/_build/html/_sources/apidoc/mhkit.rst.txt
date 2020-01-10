@@ -18,3 +18,4 @@ Modules
     mhkit.wave
     mhkit.river
     mhkit.tidal
+    mhkit.utils

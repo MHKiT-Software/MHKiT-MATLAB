@@ -38,7 +38,9 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/mhkit.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tidal module" href="tidal.html" />
+    <link rel="prev" title="Wave module" href="wave.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,8 +84,25 @@
               
             
             
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="mhkit.html">API documentation</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units and notation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qc.html">Quality control analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wave.html">Wave module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">River module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#data-format">Data format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#file-io">File IO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#river-resource">River resource</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#river-device">River device</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#graphics">Graphics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tidal.html">Tidal module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/mhkit.html">Matlab Live Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developers.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">Copyright and license</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whatsnew.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/mhkit.html">API documentation</a></li>
 </ul>
 
             
@@ -174,14 +193,14 @@
 </style>
 <div class="section" id="river-module">
 <span id="river"></span><h1>River module<a class="headerlink" href="#river-module" title="Permalink to this headline">¶</a></h1>
-<p>The <a class="reference internal" href="mhkit.river.html#module-mhkit.river" title="mhkit.river"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">river</span></code></a> module contains a set of functions to
+<p>The <code class="xref mat mat-class docutils literal notranslate"><span class="pre">mhkit/river</span></code> module contains a set of functions to
 calculate quantities of interest for river energy converters (REC).
 The river module contains the following submodules:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="mhkit.river.html#module-mhkit.river.io" title="mhkit.river.io"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">io</span></code></a>: Loads data from standard formats</p></li>
-<li><p><a class="reference internal" href="mhkit.river.html#module-mhkit.river.resource" title="mhkit.river.resource"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">resource</span></code></a>: Computes resource metrics such as exceedance probability, velocity, and power</p></li>
-<li><p><a class="reference internal" href="mhkit.tidal.html#module-mhkit.river.device" title="mhkit.river.device"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">device</span></code></a>: Computes device metrics such as equivalent diameter and capture area</p></li>
-<li><p><a class="reference internal" href="mhkit.tidal.html#module-mhkit.river.graphics" title="mhkit.river.graphics"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">graphics</span></code></a>: Generates graphics</p></li>
+<li><p><code class="xref mat mat-class docutils literal notranslate"><span class="pre">mhkit/river/io</span></code>: Loads data from standard formats</p></li>
+<li><p><code class="xref mat mat-class docutils literal notranslate"><span class="pre">mhkit/river/resource</span></code>: Computes resource metrics such as exceedance probability, velocity, and power</p></li>
+<li><p><code class="xref mat mat-class docutils literal notranslate"><span class="pre">mhkit/river/device</span></code>: Computes device metrics such as equivalent diameter and capture area</p></li>
+<li><p><code class="xref mat mat-class docutils literal notranslate"><span class="pre">mhkit/river/graphics</span></code>: Generates graphics</p></li>
 </ul>
 <div class="section" id="data-format">
 <h2>Data format<a class="headerlink" href="#data-format" title="Permalink to this headline">¶</a></h2>
@@ -192,135 +211,112 @@ The river module contains the following submodules:</p>
 Time can be specified in datetime or in seconds.  The column names describe the type of data in each column.</p></li>
 </ul>
 </div>
-<div class="section" id="io">
-<h2>IO<a class="headerlink" href="#io" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference internal" href="mhkit.river.html#module-mhkit.river.io" title="mhkit.river.io"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">io</span></code></a> submodule contains the following functions to
+<div class="section" id="file-io">
+<h2>File IO<a class="headerlink" href="#file-io" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="xref mat mat-class docutils literal notranslate"><span class="pre">mhkit/river/io</span></code> submodule contains the following functions to
 load USGS Discharge data into structures.</p>
-<table class="docutils align-default">
+<table class="longtable docutils align-default">
 <colgroup>
-<col style="width: 30%" />
-<col style="width: 70%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Functions</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
 <tbody>
-<tr class="row-even"><td><p>read_usgs_file</p></td>
-<td><p>Reads a USGS JSON data file (from <a class="reference external" href="https://waterdata.usgs.gov/nwis">https://waterdata.usgs.gov/nwis</a>) into a structure</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.io.read_usgs_file" title="mhkit.river.io.read_usgs_file"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">read_usgs_file</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p>request_usgs_file</p></td>
-<td><p>Loads USGS data directly from <a class="reference external" href="https://waterdata.usgs.gov/nwis">https://waterdata.usgs.gov/nwis</a> using a GET request into a structure</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.io.request_usgs_data" title="mhkit.river.io.request_usgs_data"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">request_usgs_data</span></code></a></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="resource">
-<h2>Resource<a class="headerlink" href="#resource" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference internal" href="mhkit.river.html#module-mhkit.river.resource" title="mhkit.river.resource"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">resource</span></code></a> submodule uses discharge data to compute
+<div class="section" id="river-resource">
+<h2>River resource<a class="headerlink" href="#river-resource" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="apidoc/mhkit.river.html#module-mhkit.river.resource" title="mhkit.river.resource"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">resource</span></code></a> submodule uses discharge data to compute
 exeedance probability, velocity, and power.  The module also contains functions
 to compute the Froude number and to fit a polynomial to a series of points.
 The polynomial is used to estimate the relationship between discharge and velocity
 or velocity and power at an individual turbine.</p>
-<table class="docutils align-default">
+<table class="longtable docutils align-default">
 <colgroup>
-<col style="width: 27%" />
-<col style="width: 73%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Functions</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
 <tbody>
-<tr class="row-even"><td><p>Froude_number</p></td>
-<td><p>Calculate the Froude Number of the river, channel or duct flow, to check subcritical flow assumption (if Fr &lt;1).</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.resource.Froude_number" title="mhkit.river.resource.Froude_number"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">Froude_number</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p>polynomial_fit</p></td>
-<td><p>Returns a polynomial fit for y given x of order n with an R-squared score of the fit</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.resource.polynomial_fit" title="mhkit.river.resource.polynomial_fit"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">polynomial_fit</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p>exceedance_probability</p></td>
-<td><p>Calculates the exceedance probability</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.resource.exceedance_probability" title="mhkit.river.resource.exceedance_probability"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">exceedance_probability</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p>discharge_to_velocity</p></td>
-<td><p>Calculates velocity given discharge data and the relationship between discharge and velocity at an individual turbine</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.resource.discharge_to_velocity" title="mhkit.river.resource.discharge_to_velocity"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">discharge_to_velocity</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p>velocity_to_power</p></td>
-<td><p>Calculates power given velocity data and the relationship between velocity and power from an individual turbine</p></td>
-</tr>
-<tr class="row-odd"><td><p>energy_produced</p></td>
-<td><p>Returns the energy produced for a given time period provided exceedence probability and power.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.resource.velocity_to_power" title="mhkit.river.resource.velocity_to_power"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">velocity_to_power</span></code></a></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="device">
-<h2>Device<a class="headerlink" href="#device" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference internal" href="mhkit.tidal.html#module-mhkit.river.device" title="mhkit.river.device"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">device</span></code></a> submodule contains functions to compute equivalent diameter
+<div class="section" id="river-device">
+<h2>River device<a class="headerlink" href="#river-device" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="apidoc/mhkit.river.html#module-mhkit.river.device" title="mhkit.river.device"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">device</span></code></a> submodule contains functions to compute equivalent diameter
 and capture area for circular, ducted, rectangular, adn multiple circular devices.
 A circular device is a vertical axis water turbine (VAWT). A
 rectangular device is a horizontal axis water turbine. A ducted device
 is an enclosed VAWT. A multiple-circular devices is a device with
 multiple VAWTs per device.</p>
-<table class="docutils align-default">
+<table class="longtable docutils align-default">
 <colgroup>
-<col style="width: 32%" />
-<col style="width: 68%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Functions</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
 <tbody>
-<tr class="row-even"><td><p>circular</p></td>
-<td><p>Calculates the equivalent diameter and projected capture area of a circular turbine</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.device.circular" title="mhkit.river.device.circular"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">circular</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p>ducted</p></td>
-<td><p>Calculates the equivalent diameter and projected capture area of a ducted turbine</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.device.ducted" title="mhkit.river.device.ducted"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">ducted</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p>multiple_circular</p></td>
-<td><p>Calculates the equivalent diameter and projected capture area of a multiple circular turbine</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.device.rectangular" title="mhkit.river.device.rectangular"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">rectangular</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p>rectangular</p></td>
-<td><p>Calculates the equivalent diameter and projected capture area of a retangular turbine</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.device.multiple_circular" title="mhkit.river.device.multiple_circular"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">multiple_circular</span></code></a></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="graphics">
 <h2>Graphics<a class="headerlink" href="#graphics" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference internal" href="mhkit.tidal.html#module-mhkit.river.graphics" title="mhkit.river.graphics"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">graphics</span></code></a> submodule contains functions to plot river data and related metrics.
-The functions are designed to work in parallel with the <a class="reference internal" href="mhkit.river.html#module-mhkit.river.resource" title="mhkit.river.resource"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">resource</span></code></a> submodule.</p>
-<table class="docutils align-default">
+<p>The <a class="reference internal" href="apidoc/mhkit.river.html#module-mhkit.river.graphics" title="mhkit.river.graphics"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">graphics</span></code></a> submodule contains functions to plot river data and related metrics.
+The functions are designed to work in parallel with the <a class="reference internal" href="apidoc/mhkit.river.html#module-mhkit.river.resource" title="mhkit.river.resource"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">resource</span></code></a> submodule.</p>
+<table class="longtable docutils align-default">
 <colgroup>
-<col style="width: 37%" />
-<col style="width: 63%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Functions</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
 <tbody>
-<tr class="row-even"><td><p>plot_discharge_timeseries</p></td>
-<td><p>Plots discharge vs time</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.graphics.plot_flow_duration_curve" title="mhkit.river.graphics.plot_flow_duration_curve"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">plot_flow_duration_curve</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p>plot_discharge_vs_velocity</p></td>
-<td><p>Plots discharge vs velocity</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.graphics.plot_velocity_duration_curve" title="mhkit.river.graphics.plot_velocity_duration_curve"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">plot_velocity_duration_curve</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p>plot_flow_duration_curve</p></td>
-<td><p>Plots discharge vs exceedance probability as a Flow Duration Curve (FDC)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.graphics.plot_power_duration_curve" title="mhkit.river.graphics.plot_power_duration_curve"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">plot_power_duration_curve</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p>plot_power_duration_curve</p></td>
-<td><p>Plots power vs exceedance probability as a Flow Duration Curve (FDC)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.graphics.plot_discharge_timeseries" title="mhkit.river.graphics.plot_discharge_timeseries"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">plot_discharge_timeseries</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p>plot_velocity_duration_curve</p></td>
-<td><p>Plots velocity vs exceedance probability as a Flow Duration Curve (FDC)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.graphics.plot_discharge_vs_velocity" title="mhkit.river.graphics.plot_discharge_vs_velocity"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">plot_discharge_vs_velocity</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p>plot_velocity_vs_power</p></td>
-<td><p>Plots velocity vs power along with a polynomial fit</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.graphics.plot_velocity_vs_power" title="mhkit.river.graphics.plot_velocity_vs_power"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">plot_velocity_vs_power</span></code></a></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -332,6 +328,15 @@ The functions are designed to work in parallel with the <a class="reference inte
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tidal.html" class="btn btn-neutral float-right" title="Tidal module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="wave.html" class="btn btn-neutral float-left" title="Wave module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

@@ -1,8 +1,10 @@
-.. _license:
+.. raw:: latex
 
-License
-=======
-MHKiT-Python is copyright through the National Renewable Energy Laboratory, 
+    \clearpage
+
+Copyright and license
+================================
+MHKiT-Matlab is copyright through the National Renewable Energy Laboratory, 
 Pacific Northwest National Laboratory, and Sandia National Laboratories.
 The software is distributed under the Revised BSD License.
 

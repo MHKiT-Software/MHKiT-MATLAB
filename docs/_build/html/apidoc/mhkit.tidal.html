@@ -38,7 +38,9 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/mhkit.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Utils module" href="mhkit.utils.html" />
+    <link rel="prev" title="River module" href="mhkit.river.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,8 +84,28 @@
               
             
             
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../mhkit.html">API documentation</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units and notation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../qc.html">Quality control analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wave.html">Wave module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../river.html">River module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tidal.html">Tidal module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/mhkit.html">Matlab Live Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">Copyright and license</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">Release notes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="mhkit.html">API documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mhkit.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mhkit.qc.html">QC module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mhkit.wave.html">Wave module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mhkit.river.html">River module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Tidal module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mhkit.utils.html">Utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
@@ -128,6 +150,8 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="mhkit.html">API documentation</a> &raquo;</li>
         
       <li>Tidal module</li>
     
@@ -174,307 +198,6 @@
 </style>
 <div class="section" id="tidal-module">
 <h1>Tidal module<a class="headerlink" href="#tidal-module" title="Permalink to this headline">¶</a></h1>
-<p>The tidal module contains a set of functions to
-calculate quantities of interest for tidal energy converters (TEC).</p>
-<span class="target" id="module-mhkit.tidal"></span><div class="section" id="module-mhkit.tidal.io">
-<span id="io"></span><h2>IO<a class="headerlink" href="#module-mhkit.tidal.io" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="mhkit.tidal.io.read_noaa_json">
-<code class="sig-prename descclassname">mhkit.tidal.io.</code><code class="sig-name descname">read_noaa_json</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.tidal.io.read_noaa_json" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Returns site structure from a json saved from the
-request_noaa_data</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>filename</strong> (<em>string</em>) – filename with path of json file to load</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><p><strong>data</strong> (<em>Structure</em>)</p>
-<p>data.Data: Timeseries Site data, will be named based on parameters in JSON file</p>
-<p>data.time</p>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.tidal.io.request_noaa_data">
-<code class="sig-prename descclassname">mhkit.tidal.io.</code><code class="sig-name descname">request_noaa_data</code><span class="sig-paren">(</span><em class="sig-param">station</em>, <em class="sig-param">parameter</em>, <em class="sig-param">start_date</em>, <em class="sig-param">end_date</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.tidal.io.request_noaa_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads NOAA current data directly from <a class="reference external" href="https://tidesandcurrents.noaa.gov/api/">https://tidesandcurrents.noaa.gov/api/</a> using a
-GET request into a structure. NOAA sets max of 31 days between start and end date.
-See <a class="reference external" href="https://co-ops.nos.noaa.gov/api/">https://co-ops.nos.noaa.gov/api/</a> for options. All times are reported as GMT and metric
-units are returned for data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>station</strong> (<em>str</em>) – NOAA current station number (e.g. ‘s08010’)</p></li>
-<li><p><strong>parameter</strong> (<em>str</em>) – NOAA paramter (e.g. ‘currents’)</p></li>
-<li><p><strong>start_date</strong> (<em>str</em>) – Start date in the format yyyyMMdd</p></li>
-<li><p><strong>end_date</strong> (<em>str</em>) – End date in the format yyyyMMdd</p></li>
-<li><p><strong>proxy</strong> (<em>structure (optional)</em>) – To request data from behind a firewall, define a structure of proxy settings,
-for example proxy.http = “localhost:8080”</p></li>
-<li><p><strong>write_json</strong> (<em>str (optional)</em>) – Name of json file to write data</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><p><strong>data</strong> (<em>structure</em>)</p>
-<p>data.id: station ID</p>
-<p>data.name: station name</p>
-<p>data.lat: station Latitude</p>
-<p>data.lon: station Longitude</p>
-<p>data.vars: this will vary depending on parameter input.</p>
-<p>data.time: epoch time [s]</p>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
-<div class="section" id="module-mhkit.tidal.resource">
-<span id="resource"></span><h2>Resource<a class="headerlink" href="#module-mhkit.tidal.resource" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="mhkit.tidal.resource.principal_flow_directions">
-<code class="sig-prename descclassname">mhkit.tidal.resource.</code><code class="sig-name descname">principal_flow_directions</code><span class="sig-paren">(</span><em class="sig-param">directions</em>, <em class="sig-param">width_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.tidal.resource.principal_flow_directions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the principal flow directions of current data
-The weighted average (over the working velocity range of the TEC)
-should be considered to be the principal direction of the current,
-and should be used for both the ebb and flood cycles to determine
-the TEC optimum orientation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>directions</strong> (<em>vector</em>) – flow directions [degrees]</p></li>
-<li><p><strong>width_dir</strong> (<em>int or vector</em>) – width of direction bins [degrees]</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>ebb</strong> (<em>float</em>) – principal ebb direction [degrees]</p></li>
-<li><p><strong>flood</strong> (<em>float</em>) – principal flood direction [degrees]</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
-<div class="section" id="module-mhkit.river.device">
-<span id="device"></span><h2>Device<a class="headerlink" href="#module-mhkit.river.device" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="mhkit.river.device.circular">
-<code class="sig-prename descclassname">mhkit.river.device.</code><code class="sig-name descname">circular</code><span class="sig-paren">(</span><em class="sig-param">diameter</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.device.circular" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Calculates the equivalent diameter and projected capture area of a
-circular turbine</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>diameter</strong> (<em>float</em>) – Turbine diameter [m]</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>D_E</strong> (<em>float</em>) – Equivalent diameter [m]</p></li>
-<li><p><strong>projected_capture_area</strong> (<em>float</em>) – Projected capture area [m^2]</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.device.ducted">
-<code class="sig-prename descclassname">mhkit.river.device.</code><code class="sig-name descname">ducted</code><span class="sig-paren">(</span><em class="sig-param">diameter</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.device.ducted" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Calculates the equivalent diameter and projected capture area of a
-ducted turbine</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>diameter</strong> (<em>float</em>) – ducted diameter [m]</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>D_E</strong> (<em>float</em>) – Equivalent diameter [m]</p></li>
-<li><p><strong>projected_capture_area</strong> (<em>float</em>) – Projected capture area [m^2]</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.device.multiple_circular">
-<code class="sig-prename descclassname">mhkit.river.device.</code><code class="sig-name descname">multiple_circular</code><span class="sig-paren">(</span><em class="sig-param">diameters</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.device.multiple_circular" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Calculates the equivalent diameter and projected capture area of a
-multiple circular turbine</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>diameters</strong> (<em>array or vector</em>) – vector of device diameters [m]</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>D_E</strong> (<em>float</em>) – Equivalent diameter [m]</p></li>
-<li><p><strong>projected_capture_area</strong> (<em>float</em>) – Projected capture area [m^2]</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.device.rectangular">
-<code class="sig-prename descclassname">mhkit.river.device.</code><code class="sig-name descname">rectangular</code><span class="sig-paren">(</span><em class="sig-param">h</em>, <em class="sig-param">w</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.device.rectangular" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Calculates the equivalent diameter and projected capture area of a
-retangular turbine</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>h</strong> (<em>float</em>) – Turbine height [m]</p></li>
-<li><p><strong>w</strong> (<em>float</em>) – Turbine width [m]</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>D_E</strong> (<em>float</em>) – Equivalent diameter [m]</p></li>
-<li><p><strong>projected_capture_area</strong> (<em>float</em>) – Projected capture area [m^2]</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
-<div class="section" id="module-mhkit.river.graphics">
-<span id="graphics"></span><h2>Graphics<a class="headerlink" href="#module-mhkit.river.graphics" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="mhkit.river.graphics.plot_discharge_timeseries">
-<code class="sig-prename descclassname">mhkit.river.graphics.</code><code class="sig-name descname">plot_discharge_timeseries</code><span class="sig-paren">(</span><em class="sig-param">Q</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.graphics.plot_discharge_timeseries" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Plots discharge vs time</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>Q</strong> (<em>structure</em>) – <p>Q.Discharge=Discharge [m/s]</p>
-<p>Q.time= time</p>
-</p></li>
-<li><p><strong>title</strong> (<em>string (optional)</em>) – title for the plot</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>figure</strong> (<em>Plot of discharge vs. time</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.graphics.plot_discharge_vs_velocity">
-<code class="sig-prename descclassname">mhkit.river.graphics.</code><code class="sig-name descname">plot_discharge_vs_velocity</code><span class="sig-paren">(</span><em class="sig-param">Q</em>, <em class="sig-param">V</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.graphics.plot_discharge_vs_velocity" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Plots discharge vs velocity</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>Q</strong> (<em>array</em>) – Discharge [m/s]</p></li>
-<li><p><strong>V</strong> (<em>array</em>) – Velocity [m/s]</p></li>
-<li><p><strong>title</strong> – title for the plot</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>figure</strong> (<em>plot of discharge vs. velocity</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.graphics.plot_flow_duration_curve">
-<code class="sig-prename descclassname">mhkit.river.graphics.</code><code class="sig-name descname">plot_flow_duration_curve</code><span class="sig-paren">(</span><em class="sig-param">Q</em>, <em class="sig-param">F</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.graphics.plot_flow_duration_curve" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Plots discharge vs exceedance probability as a Flow Duration Curve (FDC)</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>Q</strong> (<em>array</em>) – Discharge [m/s]</p></li>
-<li><p><strong>F</strong> (<em>array</em>) – Exceedance probability [unitless]</p></li>
-<li><p><strong>title</strong> (<em>string (optional)</em>) – title for the plot</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>figure</strong> (<em>plot of discharge vs. exceedance probability</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.graphics.plot_power_duration_curve">
-<code class="sig-prename descclassname">mhkit.river.graphics.</code><code class="sig-name descname">plot_power_duration_curve</code><span class="sig-paren">(</span><em class="sig-param">P</em>, <em class="sig-param">F</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.graphics.plot_power_duration_curve" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Plots power vs exceedance probability as a Flow Duration Curve (FDC)</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>P</strong> (<em>array</em>) – Power [W]</p></li>
-<li><p><strong>F</strong> (<em>array</em>) – Exceedance probability [unitless]</p></li>
-<li><p><strong>title</strong> (<em>string (Optional)</em>) – title for the plot</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>figure</strong> (<em>plot of power vs. exceedance probability</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.graphics.plot_velocity_duration_curve">
-<code class="sig-prename descclassname">mhkit.river.graphics.</code><code class="sig-name descname">plot_velocity_duration_curve</code><span class="sig-paren">(</span><em class="sig-param">V</em>, <em class="sig-param">F</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.graphics.plot_velocity_duration_curve" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Plots velocity vs exceedance probability as a Flow Duration Curve (FDC)</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>array</em>) – Velocity [m/s]</p></li>
-<li><p><strong>F</strong> (<em>array</em>) – Exceedance probability [unitless]</p></li>
-<li><p><strong>title</strong> (<em>string (optional)</em>) – title for the plot</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>figure</strong> (<em>plot of velocity vs. exceedance probability</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.graphics.plot_velocity_vs_power">
-<code class="sig-prename descclassname">mhkit.river.graphics.</code><code class="sig-name descname">plot_velocity_vs_power</code><span class="sig-paren">(</span><em class="sig-param">V</em>, <em class="sig-param">P</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.graphics.plot_velocity_vs_power" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Plots velocity vs power along with a polynomial fit</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>array</em>) – Velocity [m/s]</p></li>
-<li><p><strong>P</strong> (<em>array</em>) – Power [W]</p></li>
-<li><p><strong>title</strong> (<em>string (optional)</em>) – title for the plot</p></li>
-<li><p><strong>polynomial_coeff</strong> (<em>array (optional)</em>) – polynomial coefficients which can be computed from
-polynomial_fit.m. Expects poly.coef</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>figure</strong> (<em>plot of velocity vs. power</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
 </div>
 
 
@@ -482,6 +205,15 @@ polynomial_fit.m. Expects poly.coef</p></li>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="mhkit.utils.html" class="btn btn-neutral float-right" title="Utils module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="mhkit.river.html" class="btn btn-neutral float-left" title="River module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

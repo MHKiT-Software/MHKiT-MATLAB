@@ -18,22 +18,23 @@ designed for quality control analysis of timeseries data.  Pecos was originally 
 
 Note, that the quality control functions require that the data has a datatime index.  
 Other functionality in MHKiT-Matlab can use data that has datatime or numeric indexes.  
+MHKiT-Matlab includes a utility function in the :class:`~mhkit.utils` module that converts numeric indexes into datetime indexes.
 
+.. autosummary::
+
+   ~mhkit.utils.index_to_datetime
    
-The following quality control functions are available in MHKiT-Matlab.  
+The following quality control functions are available in MHKiT-Python.  
 Additional functionality, including graphics and reports, can be included in quality control analysis by using Pecos directly. More information on the quality control functions be found at https://pecos.readthedocs.io.
 
-===========================================  =========================
-Functions                                    Description
-===========================================  =========================
-qc_corrupt                                   Calculates the equivalent diameter and projected capture area of a circular turbine
-qc_delta                                     Calculates the equivalent diameter and projected capture area of a ducted turbine
-qc_increment                                 Calculates the equivalent diameter and projected capture area of a multiple circular turbine
-qc_missing                                   Calculates the equivalent diameter and projected capture area of a retangular turbine
-qc_outlier
-qc_range
-qc_timestamp
-===========================================  ========================= 
+.. autosummary::
+
+   ~mhkit.qc.check_timestamp
+   ~mhkit.qc.check_missing
+   ~mhkit.qc.check_corrupt
+   ~mhkit.qc.check_range
+   ~mhkit.qc.check_delta
+   ~mhkit.qc.check_outlier
 
 Each function returns the following information:
 
@@ -41,7 +42,7 @@ Each function returns the following information:
 * Boolean mask (indicates if data failed a test)
 * Summary of the quality control test results
 
-The clean data can be used directly in MHKiT-Matlab analysis, or the missing values can be replaced using various methods.  
+The clean data can be used directly in MHKiT-Python analysis, or the missing values can be replaced using various methods.  
 Data replacement strategies are generally defined on a case by case basis. If large sections of the data failed quality control tests, the data might not be suitable for use.
 Replacement strategies can be applied to the entire data set, or vary by data column or by time.
 Possible strategies include:
@@ -52,6 +53,8 @@ Possible strategies include:
 * Replacing missing data with data from a redundant sensor
 * Replacing missing data with values from a model
 
+These strategies can be accomplished using the Pandas methods ``interpolate``, ``replace``, and ``fillna``.  
+See Pandas documentation for more details.
 
 The `quality control analysis <examples/qc_example.html>`_ example illustrates quality control analysis using MHK data.
 
