@@ -85,23 +85,12 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../units.html">Units and notation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../qc.html">Quality control analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../wave.html">Wave module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../river.html">River module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tidal.html">Tidal module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/mhkit.html">Matlab Live Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developers.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../license.html">Copyright and license</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">Release notes</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="mhkit.html">API documentation</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="mhkit.html#modules">Modules</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">QC module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mhkit.wave.html">Wave module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mhkit.river.html">River module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mhkit.tidal.html">Tidal module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="mhkit.utils.html">Utils module</a></li>
 </ul>
 </li>
 </ul>
@@ -196,6 +185,7 @@
     text-align: unset;
 }
 </style>
+<p>Return to MHKiT <a class="reference external" href="https://mhkit-code-hub.github.io/MHKiT/index.html">documentation</a></p>
 <div class="section" id="qc-module">
 <h1>QC module<a class="headerlink" href="#qc-module" title="Permalink to this headline">¶</a></h1>
 <p>The QC module includes quality control functions from Pecos, see <a class="reference external" href="https://pecos.readthedocs.io">https://pecos.readthedocs.io</a> for more details.</p>
@@ -213,8 +203,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>qcdata structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>vals</strong> (<em>cell array of floats</em>) – Array of at least two corrupt data values
@@ -261,8 +251,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>qcdata structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] for min/max delta checking
@@ -316,8 +306,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>qcdata structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] for min/max difference
@@ -363,8 +353,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>data structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>key</strong> (<em>string (optional)</em>) – Data column name or translation dictionary key.  If not specified
@@ -408,8 +398,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>qcdata structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] of standard deviations from mean allowed
@@ -457,8 +447,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>qcdata structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] for range checking
@@ -502,8 +492,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>qcdata structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>freq</strong> (<em>int</em>) – Expected time series frequency, in seconds</p></li>
@@ -544,15 +534,10 @@ Logical mask of QC results (1 = passed, 0 = failed QC test)</p>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>qc data structure</em>) – <p>structure of form:</p>
-<blockquote>
-<div><p>data.values
-data.time</p>
-</div></blockquote>
-</p>
+<dd class="field-odd"><p><strong>data</strong> – </p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>results</strong> (<em>pandas dataframe</em>)</p>
+<dd class="field-even"><p><strong>results</strong> (<em>Pandas DataFrame</em>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -571,8 +556,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>qcdata structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>freq</strong> (<em>int</em>) – Expected time series frequency, in seconds</p></li>
@@ -619,8 +604,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>data structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>key</strong> (<em>string (optional)</em>) – Data column name or translation dictionary key.  If not specified
@@ -662,8 +647,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>qcdata structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>vals</strong> (<em>cell array of floats</em>) – Array of at least two corrupt data values
@@ -709,8 +694,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>qcdata structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] for range checking
@@ -755,8 +740,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>qcdata structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] for min/max delta checking
@@ -812,8 +797,8 @@ py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))</p>
 <p>OR</p>
 <p>qcdata structure of form:</p>
 <blockquote>
-<div><p>data.values: 2D array of doubles with arbitrary number of columns
-data.time:   1D array of datetimes or posix times</p>
+<div><p>data.values: 2D array of doubles with arbitrary number of columns</p>
+<p>data.time:   1D array of datetimes or posix times</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>bound</strong> (<em>cell array of floats</em>) – [lower bound, upper bound] of standard deviations from mean allowed

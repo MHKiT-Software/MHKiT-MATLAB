@@ -31,17 +31,6 @@ Table of contents
 .. toctree::
    :maxdepth: 1
 
-   installation
-   units
-   qc
-   wave
-   river
-   tidal
-   examples/mhkit
-   examples/*
-   developers
-   license
-   whatsnew
    apidoc/mhkit
 
 Indices and tables

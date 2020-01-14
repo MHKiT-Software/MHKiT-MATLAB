@@ -1,5 +1,7 @@
 .. _api_documentation:
 
+ Return to MHKiT `documentation <https://mhkit-code-hub.github.io/MHKiT/index.html>`_
+
 API documentation
 ===================
 
@@ -18,4 +20,3 @@ Modules
     mhkit.wave
     mhkit.river
     mhkit.tidal
-    mhkit.utils

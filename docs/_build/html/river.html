@@ -38,9 +38,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/mhkit.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Tidal module" href="tidal.html" />
-    <link rel="prev" title="Wave module" href="wave.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -84,24 +82,7 @@
               
             
             
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="units.html">Units and notation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="qc.html">Quality control analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="wave.html">Wave module</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">River module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#data-format">Data format</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#file-io">File IO</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#river-resource">River resource</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#river-device">River device</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#graphics">Graphics</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="tidal.html">Tidal module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/mhkit.html">Matlab Live Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="developers.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="license.html">Copyright and license</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whatsnew.html">Release notes</a></li>
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="apidoc/mhkit.html">API documentation</a></li>
 </ul>
 
@@ -263,7 +244,7 @@ or velocity and power at an individual turbine.</p>
 </div>
 <div class="section" id="river-device">
 <h2>River device<a class="headerlink" href="#river-device" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference internal" href="apidoc/mhkit.river.html#module-mhkit.river.device" title="mhkit.river.device"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">device</span></code></a> submodule contains functions to compute equivalent diameter
+<p>The <a class="reference internal" href="apidoc/mhkit.tidal.html#module-mhkit.river.device" title="mhkit.river.device"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">device</span></code></a> submodule contains functions to compute equivalent diameter
 and capture area for circular, ducted, rectangular, adn multiple circular devices.
 A circular device is a vertical axis water turbine (VAWT). A
 rectangular device is a horizontal axis water turbine. A ducted device
@@ -275,16 +256,16 @@ multiple VAWTs per device.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.device.circular" title="mhkit.river.device.circular"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">circular</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.tidal.html#mhkit.river.device.circular" title="mhkit.river.device.circular"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">circular</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.device.ducted" title="mhkit.river.device.ducted"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">ducted</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="apidoc/mhkit.tidal.html#mhkit.river.device.ducted" title="mhkit.river.device.ducted"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">ducted</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.device.rectangular" title="mhkit.river.device.rectangular"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">rectangular</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="apidoc/mhkit.tidal.html#mhkit.river.device.rectangular" title="mhkit.river.device.rectangular"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">rectangular</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="apidoc/mhkit.river.html#mhkit.river.device.multiple_circular" title="mhkit.river.device.multiple_circular"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">multiple_circular</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="apidoc/mhkit.tidal.html#mhkit.river.device.multiple_circular" title="mhkit.river.device.multiple_circular"><code class="xref mat mat-obj docutils literal notranslate"><span class="pre">multiple_circular</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -328,15 +309,6 @@ The functions are designed to work in parallel with the <a class="reference inte
            
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="tidal.html" class="btn btn-neutral float-right" title="Tidal module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="wave.html" class="btn btn-neutral float-left" title="Wave module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
   
 
   <hr/>

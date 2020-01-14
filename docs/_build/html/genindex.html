@@ -84,16 +84,6 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="units.html">Units and notation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="qc.html">Quality control analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="wave.html">Wave module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="river.html">River module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tidal.html">Tidal module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/mhkit.html">Matlab Live Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="developers.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="license.html">Copyright and license</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whatsnew.html">Release notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apidoc/mhkit.html">API documentation</a></li>
 </ul>
 
@@ -214,7 +204,7 @@
 </li>
       <li><a href="apidoc/mhkit.qc.html#mhkit.qc.check_timestamp">check_timestamp() (in module mhkit.qc)</a>, <a href="apidoc/mhkit.qc.html#mhkit.qc.check_timestamp">[1]</a>
 </li>
-      <li><a href="apidoc/mhkit.river.html#mhkit.river.device.circular">circular() (in module mhkit.river.device)</a>
+      <li><a href="apidoc/mhkit.river.html#mhkit.river.device.circular">circular() (in module mhkit.river.device)</a>, <a href="apidoc/mhkit.tidal.html#mhkit.river.device.circular">[1]</a>
 </li>
       <li><a href="apidoc/mhkit.wave.html#mhkit.wave.resource.create_spectra">create_spectra() (in module mhkit.wave.resource)</a>
 </li>
@@ -230,7 +220,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/mhkit.river.html#mhkit.river.resource.discharge_to_velocity">discharge_to_velocity() (in module mhkit.river.resource)</a>
 </li>
-      <li><a href="apidoc/mhkit.river.html#mhkit.river.device.ducted">ducted() (in module mhkit.river.device)</a>
+      <li><a href="apidoc/mhkit.river.html#mhkit.river.device.ducted">ducted() (in module mhkit.river.device)</a>, <a href="apidoc/mhkit.tidal.html#mhkit.river.device.ducted">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -278,15 +268,23 @@
 </li>
       <li><a href="apidoc/mhkit.river.html#module-mhkit.river">mhkit.river (module)</a>
 </li>
-      <li><a href="apidoc/mhkit.river.html#module-mhkit.river.device">mhkit.river.device (module)</a>
+      <li><a href="apidoc/mhkit.river.html#module-mhkit.river.device">mhkit.river.device (module)</a>, <a href="apidoc/mhkit.tidal.html#module-mhkit.river.device">[1]</a>
 </li>
       <li><a href="apidoc/mhkit.river.html#module-mhkit.river.graphics">mhkit.river.graphics (module)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/mhkit.river.html#module-mhkit.river.io">mhkit.river.io (module)</a>
 </li>
       <li><a href="apidoc/mhkit.river.html#module-mhkit.river.resource">mhkit.river.resource (module)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/mhkit.tidal.html#module-mhkit.tidal">mhkit.tidal (module)</a>
+</li>
+      <li><a href="apidoc/mhkit.tidal.html#module-mhkit.tidal.graphics">mhkit.tidal.graphics (module)</a>
+</li>
+      <li><a href="apidoc/mhkit.tidal.html#module-mhkit.tidal.io">mhkit.tidal.io (module)</a>
+</li>
+      <li><a href="apidoc/mhkit.tidal.html#module-mhkit.tidal.resource">mhkit.tidal.resource (module)</a>
 </li>
       <li><a href="apidoc/mhkit.wave.html#module-mhkit.wave">mhkit.wave (module)</a>
 </li>
@@ -298,7 +296,7 @@
 </li>
       <li><a href="apidoc/mhkit.wave.html#module-mhkit.wave.resource">mhkit.wave.resource (module)</a>
 </li>
-      <li><a href="apidoc/mhkit.river.html#mhkit.river.device.multiple_circular">multiple_circular() (in module mhkit.river.device)</a>
+      <li><a href="apidoc/mhkit.river.html#mhkit.river.device.multiple_circular">multiple_circular() (in module mhkit.river.device)</a>, <a href="apidoc/mhkit.tidal.html#mhkit.river.device.multiple_circular">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -308,6 +306,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/mhkit.wave.html#mhkit.wave.resource.peak_period">peak_period() (in module mhkit.wave.resource)</a>
 </li>
+      <li><a href="apidoc/mhkit.tidal.html#mhkit.tidal.graphics.plot_current_timeseries">plot_current_timeseries() (in module mhkit.tidal.graphics)</a>
+</li>
       <li><a href="apidoc/mhkit.river.html#mhkit.river.graphics.plot_discharge_timeseries">plot_discharge_timeseries() (in module mhkit.river.graphics)</a>
 </li>
       <li><a href="apidoc/mhkit.river.html#mhkit.river.graphics.plot_discharge_vs_velocity">plot_discharge_vs_velocity() (in module mhkit.river.graphics)</a>
@@ -316,11 +316,15 @@
 </li>
       <li><a href="apidoc/mhkit.river.html#mhkit.river.graphics.plot_flow_duration_curve">plot_flow_duration_curve() (in module mhkit.river.graphics)</a>
 </li>
+      <li><a href="apidoc/mhkit.tidal.html#mhkit.tidal.graphics.plot_joint_probability_distribution">plot_joint_probability_distribution() (in module mhkit.tidal.graphics)</a>
+</li>
       <li><a href="apidoc/mhkit.wave.html#mhkit.wave.graphics.plot_matrix">plot_matrix() (in module mhkit.wave.graphics)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/mhkit.river.html#mhkit.river.graphics.plot_power_duration_curve">plot_power_duration_curve() (in module mhkit.river.graphics)</a>
+</li>
+      <li><a href="apidoc/mhkit.tidal.html#mhkit.tidal.graphics.plot_rose">plot_rose() (in module mhkit.tidal.graphics)</a>
 </li>
       <li><a href="apidoc/mhkit.wave.html#mhkit.wave.graphics.plot_spectrum">plot_spectrum() (in module mhkit.wave.graphics)</a>
 </li>
@@ -331,6 +335,8 @@
       <li><a href="apidoc/mhkit.river.html#mhkit.river.resource.polynomial_fit">polynomial_fit() (in module mhkit.river.resource)</a>
 </li>
       <li><a href="apidoc/mhkit.wave.html#mhkit.wave.performance.power_matrix">power_matrix() (in module mhkit.wave.performance)</a>
+</li>
+      <li><a href="apidoc/mhkit.tidal.html#mhkit.tidal.resource.principal_flow_directions">principal_flow_directions() (in module mhkit.tidal.resource)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -348,11 +354,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/mhkit.wave.html#mhkit.wave.io.read_NDBC_file">read_NDBC_file() (in module mhkit.wave.io)</a>
 </li>
+      <li><a href="apidoc/mhkit.tidal.html#mhkit.tidal.io.read_noaa_json">read_noaa_json() (in module mhkit.tidal.io)</a>
+</li>
       <li><a href="apidoc/mhkit.river.html#mhkit.river.io.read_usgs_file">read_usgs_file() (in module mhkit.river.io)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidoc/mhkit.river.html#mhkit.river.device.rectangular">rectangular() (in module mhkit.river.device)</a>
+      <li><a href="apidoc/mhkit.river.html#mhkit.river.device.rectangular">rectangular() (in module mhkit.river.device)</a>, <a href="apidoc/mhkit.tidal.html#mhkit.river.device.rectangular">[1]</a>
+</li>
+      <li><a href="apidoc/mhkit.tidal.html#mhkit.tidal.io.request_noaa_data">request_noaa_data() (in module mhkit.tidal.io)</a>
 </li>
       <li><a href="apidoc/mhkit.river.html#mhkit.river.io.request_usgs_data">request_usgs_data() (in module mhkit.river.io)</a>
 </li>
