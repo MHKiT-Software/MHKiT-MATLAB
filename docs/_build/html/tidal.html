@@ -83,7 +83,7 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="mhkit.html">API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/mhkit.html">API documentation</a></li>
 </ul>
 
             
@@ -174,126 +174,8 @@
 </style>
 <div class="section" id="tidal-module">
 <span id="tidal"></span><h1>Tidal module<a class="headerlink" href="#tidal-module" title="Permalink to this headline">¶</a></h1>
-<p>The <a class="reference internal" href="mhkit.tidal.html#module-mhkit.tidal" title="mhkit.tidal"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">tidal</span></code></a> module is in development and will contain a set of functions to help the user
+<p>The <a class="reference internal" href="apidoc/mhkit.tidal.html#module-mhkit.tidal" title="mhkit.tidal"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">tidal</span></code></a> module is in development and will contain a set of functions to help the user
 calculate relevant quantities of interest for tidal energy converters (TEC).</p>
-<div class="section" id="io">
-<h2>IO<a class="headerlink" href="#io" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference internal" href="mhkit.tidal.html#module-mhkit.tidal.io" title="mhkit.tidal.io"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">io</span></code></a> submodule contains the following functions to
-load USGS Discharge data into structures.</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 28%" />
-<col style="width: 72%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Functions</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>read_noaa_json</p></td>
-<td><p>Returns site structure from a json saved from the request_noaa_data function</p></td>
-</tr>
-<tr class="row-odd"><td><p>request_noaa_data</p></td>
-<td><p>Loads NOAA current data directly from <a class="reference external" href="https://tidesandcurrents.noaa.gov/api/">https://tidesandcurrents.noaa.gov/api/</a> using a GET request into a structure</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="resource">
-<h2>Resource<a class="headerlink" href="#resource" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference internal" href="mhkit.tidal.html#module-mhkit.tidal.resource" title="mhkit.tidal.resource"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">resource</span></code></a> submodule uses discharge data to compute
-exeedance probability, velocity, and power.  The module also contains functions
-to compute the Froude number and to fit a polynomial to a series of points.
-The polynomial is used to estimate the relationship between discharge and velocity
-or velocity and power at an individual turbine.</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 28%" />
-<col style="width: 72%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Functions</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>principal_flow_direction</p></td>
-<td><p>Calculates the principal flow directions of current data</p></td>
-</tr>
-<tr class="row-odd"><td><p>Froude_number</p></td>
-<td><p>Calculate the Froude Number of the river, channel or duct flow, to check subcritical flow assumption (if Fr &lt;1).</p></td>
-</tr>
-<tr class="row-even"><td><p>exceedance_probability</p></td>
-<td><p>Calculates the exceedance probability</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="device">
-<h2>Device<a class="headerlink" href="#device" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="xref mat mat-class docutils literal notranslate"><span class="pre">device</span></code> submodule contains functions to compute equivalent diameter
-and capture area for circular, ducted, rectangular, adn multiple circular devices.
-A circular device is a vertical axis water turbine (VAWT). A
-rectangular device is a horizontal axis water turbine. A ducted device
-is an enclosed VAWT. A multiple-circular devices is a device with
-multiple VAWTs per device.</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 32%" />
-<col style="width: 68%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Functions</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>circular</p></td>
-<td><p>Calculates the equivalent diameter and projected capture area of a circular turbine</p></td>
-</tr>
-<tr class="row-odd"><td><p>ducted</p></td>
-<td><p>Calculates the equivalent diameter and projected capture area of a ducted turbine</p></td>
-</tr>
-<tr class="row-even"><td><p>multiple_circular</p></td>
-<td><p>Calculates the equivalent diameter and projected capture area of a multiple circular turbine</p></td>
-</tr>
-<tr class="row-odd"><td><p>rectangular</p></td>
-<td><p>Calculates the equivalent diameter and projected capture area of a retangular turbine</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="graphics">
-<h2>Graphics<a class="headerlink" href="#graphics" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="xref mat mat-class docutils literal notranslate"><span class="pre">graphics</span></code> submodule contains functions to plot river data and related metrics.
-The functions are designed to work in parallel with the <a class="reference internal" href="mhkit.tidal.html#module-mhkit.tidal.resource" title="mhkit.tidal.resource"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">resource</span></code></a> submodule.</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 26%" />
-<col style="width: 74%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Functions</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>plot_velocity_duration_curve</p></td>
-<td><p>Plots velocity vs exceedance probability as a Flow Duration Curve (FDC)</p></td>
-</tr>
-<tr class="row-odd"><td><p>plot_rose</p></td>
-<td><p>Creates a polar histogram. Direction angles from binned histogram must be specified such that 0  degrees is north.</p></td>
-</tr>
-<tr class="row-even"><td><p>plot_joint_probability_distribution</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>plot_current_timeseries</p></td>
-<td><p>Returns a plot of velocity from an array of direction and speed data in the direction of the supplied principal_direction.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
 </div>
 
 

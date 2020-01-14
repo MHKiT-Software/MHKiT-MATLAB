@@ -26,7 +26,6 @@ datap = py.mhkit.tidal.io.read_noaa_json(filename);
 datac=cell(datap);
 data=struct(datac{2});
 data_df=datac{1};
-disp(data_df)
 
 fields=fieldnames(data);
 for idx = 1:length(fields)

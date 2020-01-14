@@ -7,14 +7,15 @@ function df = qc_data_to_dataframe(data)
 % ------------
 %
 %     data: qc data structure
-%          structure of form:
 %
-%             data.values
-%             data.time
+%
+%         data.values
+%
+%         data.time
 %     
 % Returns
 % ---------
-%     results: pandas dataframe
+%     results: Pandas DataFrame
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

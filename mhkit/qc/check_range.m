@@ -15,6 +15,7 @@ function results = check_range(data, bound, varargin)
 %          qcdata structure of form:
 %
 %             data.values: 2D array of doubles with arbitrary number of columns
+%
 %             data.time:   1D array of datetimes or posix times
 %
 %     bound: cell array of floats

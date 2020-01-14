@@ -28,8 +28,8 @@ sortT=sortrows(T,'F','descend');
 
 figure=plot(sortT.V,sortT.F);
 grid on
-ylabel('Velocity [m^{3}/s]','FontSize',20)
-xlabel('Exceedance Probability','FontSize',20)
+xlabel('Velocity [m^{3}/s]','FontSize',20)
+ylabel('Exceedance Probability','FontSize',20)
 
 
 if nargin == 3

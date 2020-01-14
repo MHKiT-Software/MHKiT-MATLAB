@@ -1,5 +1,7 @@
 .. _api_documentation:
 
+ Return to MHKiT `documentation <https://mhkit-code-hub.github.io/MHKiT/index.html>`_
+
 API documentation
 ===================
 

@@ -1,3 +1,5 @@
+Return to MHKiT `documentation <https://mhkit-code-hub.github.io/MHKiT/index.html>`_
+
 QC module
 ===================
 

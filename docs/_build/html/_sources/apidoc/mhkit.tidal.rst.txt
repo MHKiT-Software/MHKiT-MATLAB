@@ -1,7 +1,9 @@
+Return to MHKiT `documentation <https://mhkit-code-hub.github.io/MHKiT/index.html>`_
+
 Tidal module
 ===================
 The tidal module contains a set of functions to 
-calculate quantities of interest for tidal energy converters (TEC).
+calculate quantities of interest for tidal energy converters.
 
 .. automodule:: mhkit.tidal
     :members:
@@ -22,16 +24,18 @@ Resource
     :undoc-members:
     :show-inheritance:
 
-Device
+Graphics
 ---------
-.. automodule:: mhkit.river.device
+.. automodule:: mhkit.tidal.graphics
     :members:
     :undoc-members:
     :show-inheritance:
-	
-Graphics
------------ 
-.. automodule:: mhkit.river.graphics
+
+Note: Tidal device functions are the same as the River device functions
+
+Device
+---------
+.. automodule:: mhkit.river.device
     :members:
     :undoc-members:
     :show-inheritance:

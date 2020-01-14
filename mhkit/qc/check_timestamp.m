@@ -14,6 +14,7 @@ function results = check_timestamp(data, freq, varargin)
 %          qcdata structure of form:
 %
 %             data.values: 2D array of doubles with arbitrary number of columns
+%
 %             data.time:   1D array of datetimes or posix times
 %
 %     freq: int

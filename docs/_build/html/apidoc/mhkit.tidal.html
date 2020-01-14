@@ -38,7 +38,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/mhkit.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="River module" href="mhkit.river.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,8 +83,23 @@
               
             
             
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../mhkit.html">API documentation</a></li>
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="mhkit.html">API documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mhkit.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mhkit.qc.html">QC module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mhkit.wave.html">Wave module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mhkit.river.html">River module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Tidal module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-mhkit.tidal.io">IO</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-mhkit.tidal.resource">Resource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-mhkit.tidal.graphics">Graphics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-mhkit.river.device">Device</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
@@ -129,6 +145,8 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
+          <li><a href="mhkit.html">API documentation</a> &raquo;</li>
+        
       <li>Tidal module</li>
     
     
@@ -172,10 +190,11 @@
     text-align: unset;
 }
 </style>
+<p>Return to MHKiT <a class="reference external" href="https://mhkit-code-hub.github.io/MHKiT/index.html">documentation</a></p>
 <div class="section" id="tidal-module">
 <h1>Tidal module<a class="headerlink" href="#tidal-module" title="Permalink to this headline">¶</a></h1>
 <p>The tidal module contains a set of functions to
-calculate quantities of interest for tidal energy converters (TEC).</p>
+calculate quantities of interest for tidal energy converters.</p>
 <span class="target" id="module-mhkit.tidal"></span><div class="section" id="module-mhkit.tidal.io">
 <span id="io"></span><h2>IO<a class="headerlink" href="#module-mhkit.tidal.io" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -258,6 +277,101 @@ the TEC optimum orientation.</p>
 </dl>
 </dd></dl>
 
+</div>
+<div class="section" id="module-mhkit.tidal.graphics">
+<span id="graphics"></span><h2>Graphics<a class="headerlink" href="#module-mhkit.tidal.graphics" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mhkit.tidal.graphics.plot_current_timeseries">
+<code class="sig-prename descclassname">mhkit.tidal.graphics.</code><code class="sig-name descname">plot_current_timeseries</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">principal_direction</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.tidal.graphics.plot_current_timeseries" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Returns a plot of velocity from an array of direction and speed
+data in the direction of the supplied principal_direction.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>structure</em>) – <dl class="simple">
+<dt>data.time: vector</dt><dd><p>days from January 0, 0000 in the proleptic ISO calendar</p>
+</dd>
+<dt>data.d: vector</dt><dd><p>time-series of directions [degrees]</p>
+</dd>
+<dt>data.s: vector</dt><dd><p>time-series of speeds [cm/s]</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>principal_direction</strong> (<em>numeric</em>) – Direction to compute the velocity in [degrees]</p></li>
+<li><p><strong>title</strong> (<em>string (optional)</em>) – title for the plot</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>figure</strong> (<em>timeseries plot of current-speed velocity</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mhkit.tidal.graphics.plot_joint_probability_distribution">
+<code class="sig-prename descclassname">mhkit.tidal.graphics.</code><code class="sig-name descname">plot_joint_probability_distribution</code><span class="sig-paren">(</span><em class="sig-param">Q</em>, <em class="sig-param">width_dir</em>, <em class="sig-param">width_vel</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.tidal.graphics.plot_joint_probability_distribution" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Creates a polar histogram. Direction angles from binned histogram must
+be specified such that 0 is north.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>structure</em>) – <dl class="simple">
+<dt>data.time: vector</dt><dd><p>days from January 0, 0000 in the proleptic ISO calendar</p>
+</dd>
+<dt>data.d: vector</dt><dd><p>time-series of directions [degrees]</p>
+</dd>
+<dt>data.s: vector</dt><dd><p>time-series of speeds [cm/s]</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>width_dir</strong> (<em>float</em>) – Width of directional bins for histogram in degrees</p></li>
+<li><p><strong>width_vel</strong> (<em>float</em>) – Width of velocity bins for histogram in m/s</p></li>
+<li><p><strong>flood_ebb</strong> (<em>2 element vector (optional)</em>) – Direction in degrees added to theta ticks</p></li>
+<li><p><strong>title</strong> (<em>string (optional)</em>) – title for the plot</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>figure handle to joint probability distribution plot</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mhkit.tidal.graphics.plot_rose">
+<code class="sig-prename descclassname">mhkit.tidal.graphics.</code><code class="sig-name descname">plot_rose</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">width_dir</em>, <em class="sig-param">width_vel</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.tidal.graphics.plot_rose" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Creates a polar histogram. Direction angles from binned histogram must
+be specified such that 0  degrees is north.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>structure</em>) – <dl class="simple">
+<dt>data.time: vector</dt><dd><p>days from January 0, 0000 in the proleptic ISO calendar</p>
+</dd>
+<dt>data.d: vector</dt><dd><p>time-series of directions [degrees]</p>
+</dd>
+<dt>data.s: vector</dt><dd><p>time-series of speeds [cm/s]</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>width_dir</strong> (<em>float</em>) – Width of directional bins for histogram in degrees</p></li>
+<li><p><strong>width_vel</strong> (<em>float</em>) – Width of velocity bins for histogram in m/s</p></li>
+<li><p><strong>flood_ebb</strong> (<em>2 element vector (optional)</em>) – Direction in degrees added to theta ticks</p></li>
+<li><p><strong>title</strong> (<em>string (optional)</em>) – title for the plot</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>figure handle to water current rose plot</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Note: Tidal device functions are the same as the River device functions</p>
 </div>
 <div class="section" id="module-mhkit.river.device">
 <span id="device"></span><h2>Device<a class="headerlink" href="#module-mhkit.river.device" title="Permalink to this headline">¶</a></h2>
@@ -349,132 +463,6 @@ retangular turbine</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-mhkit.river.graphics">
-<span id="graphics"></span><h2>Graphics<a class="headerlink" href="#module-mhkit.river.graphics" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="mhkit.river.graphics.plot_discharge_timeseries">
-<code class="sig-prename descclassname">mhkit.river.graphics.</code><code class="sig-name descname">plot_discharge_timeseries</code><span class="sig-paren">(</span><em class="sig-param">Q</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.graphics.plot_discharge_timeseries" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Plots discharge vs time</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>Q</strong> (<em>structure</em>) – <p>Q.Discharge=Discharge [m/s]</p>
-<p>Q.time= time</p>
-</p></li>
-<li><p><strong>title</strong> (<em>string (optional)</em>) – title for the plot</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>figure</strong> (<em>Plot of discharge vs. time</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.graphics.plot_discharge_vs_velocity">
-<code class="sig-prename descclassname">mhkit.river.graphics.</code><code class="sig-name descname">plot_discharge_vs_velocity</code><span class="sig-paren">(</span><em class="sig-param">Q</em>, <em class="sig-param">V</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.graphics.plot_discharge_vs_velocity" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Plots discharge vs velocity</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>Q</strong> (<em>array</em>) – Discharge [m/s]</p></li>
-<li><p><strong>V</strong> (<em>array</em>) – Velocity [m/s]</p></li>
-<li><p><strong>title</strong> – title for the plot</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>figure</strong> (<em>plot of discharge vs. velocity</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.graphics.plot_flow_duration_curve">
-<code class="sig-prename descclassname">mhkit.river.graphics.</code><code class="sig-name descname">plot_flow_duration_curve</code><span class="sig-paren">(</span><em class="sig-param">Q</em>, <em class="sig-param">F</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.graphics.plot_flow_duration_curve" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Plots discharge vs exceedance probability as a Flow Duration Curve (FDC)</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>Q</strong> (<em>array</em>) – Discharge [m/s]</p></li>
-<li><p><strong>F</strong> (<em>array</em>) – Exceedance probability [unitless]</p></li>
-<li><p><strong>title</strong> (<em>string (optional)</em>) – title for the plot</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>figure</strong> (<em>plot of discharge vs. exceedance probability</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.graphics.plot_power_duration_curve">
-<code class="sig-prename descclassname">mhkit.river.graphics.</code><code class="sig-name descname">plot_power_duration_curve</code><span class="sig-paren">(</span><em class="sig-param">P</em>, <em class="sig-param">F</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.graphics.plot_power_duration_curve" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Plots power vs exceedance probability as a Flow Duration Curve (FDC)</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>P</strong> (<em>array</em>) – Power [W]</p></li>
-<li><p><strong>F</strong> (<em>array</em>) – Exceedance probability [unitless]</p></li>
-<li><p><strong>title</strong> (<em>string (Optional)</em>) – title for the plot</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>figure</strong> (<em>plot of power vs. exceedance probability</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.graphics.plot_velocity_duration_curve">
-<code class="sig-prename descclassname">mhkit.river.graphics.</code><code class="sig-name descname">plot_velocity_duration_curve</code><span class="sig-paren">(</span><em class="sig-param">V</em>, <em class="sig-param">F</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.graphics.plot_velocity_duration_curve" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Plots velocity vs exceedance probability as a Flow Duration Curve (FDC)</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>array</em>) – Velocity [m/s]</p></li>
-<li><p><strong>F</strong> (<em>array</em>) – Exceedance probability [unitless]</p></li>
-<li><p><strong>title</strong> (<em>string (optional)</em>) – title for the plot</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>figure</strong> (<em>plot of velocity vs. exceedance probability</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mhkit.river.graphics.plot_velocity_vs_power">
-<code class="sig-prename descclassname">mhkit.river.graphics.</code><code class="sig-name descname">plot_velocity_vs_power</code><span class="sig-paren">(</span><em class="sig-param">V</em>, <em class="sig-param">P</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.graphics.plot_velocity_vs_power" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Plots velocity vs power along with a polynomial fit</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>array</em>) – Velocity [m/s]</p></li>
-<li><p><strong>P</strong> (<em>array</em>) – Power [W]</p></li>
-<li><p><strong>title</strong> (<em>string (optional)</em>) – title for the plot</p></li>
-<li><p><strong>polynomial_coeff</strong> (<em>array (optional)</em>) – polynomial coefficients which can be computed from
-polynomial_fit.m. Expects poly.coef</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>figure</strong> (<em>plot of velocity vs. power</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
 </div>
 
 
@@ -482,6 +470,13 @@ polynomial_fit.m. Expects poly.coef</p></li>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="mhkit.river.html" class="btn btn-neutral float-left" title="River module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
