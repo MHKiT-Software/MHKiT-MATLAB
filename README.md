@@ -10,7 +10,7 @@ data processing and visualization.  The software package include functionality f
 * Tidal resource and device
 * Data visualization
 
-See the [documentation ] (https://mhkit-code-hub.github.io/MHKiT/index.html) for more information about MHKiT. 
+See the [documentation](https://mhkit-code-hub.github.io/MHKiT/index.html) for more information about MHKiT. 
 
 Installation
 ------------------------
