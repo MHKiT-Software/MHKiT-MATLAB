@@ -21,7 +21,7 @@ See [installation instructions](https://mhkit-code-hub.github.io/MHKiT/installat
 
 Copyright and license
 ------------------------
-MHKiT mhkit_python_utils is copyright through the National Renewable Energy Laboratory, 
+MHKiT is copyright through the National Renewable Energy Laboratory, 
 Pacific Northwest National Laboratory, and Sandia National Laboratories. 
 The software is distributed under the Revised BSD License.
 
