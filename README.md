@@ -10,6 +10,8 @@ data processing and visualization.  The software package include functionality f
 * Tidal resource and device
 * Data visualization
 
+See the [documentation ] (https://mhkit-code-hub.github.io/MHKiT/index.html) for more information about MHKiT. 
+
 Installation
 ------------------------
 MHKiT-Matlab consists of functions which wrap the MHKiT-Python functions. Therefore, MHKiT-Matlab requires Python (3.6, or 3.7) along with several Python 
