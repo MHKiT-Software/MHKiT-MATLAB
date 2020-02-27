@@ -90,10 +90,10 @@
 <li class="toctree-l3"><a class="reference internal" href="mhkit.wave.html">Wave module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mhkit.river.html">River module</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Tidal module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#module-mhkit.tidal.io">IO</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-mhkit.tidal.resource">Resource</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-mhkit.tidal.graphics">Graphics</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-mhkit.river.device">Device</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#io">IO</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#resource">Resource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#device">Device</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphics">Graphics</a></li>
 </ul>
 </li>
 </ul>
@@ -195,9 +195,131 @@
 <h1>Tidal module<a class="headerlink" href="#tidal-module" title="Permalink to this headline">¶</a></h1>
 <p>The tidal module contains a set of functions to
 calculate quantities of interest for tidal energy converters.</p>
-<span class="target" id="module-mhkit.tidal"></span><div class="section" id="module-mhkit.tidal.io">
-<span id="io"></span><h2>IO<a class="headerlink" href="#module-mhkit.tidal.io" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<div class="section" id="io">
+<h2>IO<a class="headerlink" href="#io" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#module-mhkit.tidal.io" title="mhkit.tidal.io"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">io</span></code></a> submodule contains the following functions to
+load USGS Discharge data into structures.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>read_noaa_json</p></td>
+<td><p>Returns site structure from a json saved from the request_noaa_data function</p></td>
+</tr>
+<tr class="row-odd"><td><p>request_noaa_data</p></td>
+<td><p>Loads NOAA current data directly from <a class="reference external" href="https://tidesandcurrents.noaa.gov/api/">https://tidesandcurrents.noaa.gov/api/</a> using a GET request into a structure</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="resource">
+<h2>Resource<a class="headerlink" href="#resource" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#module-mhkit.tidal.resource" title="mhkit.tidal.resource"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">resource</span></code></a> submodule uses discharge data to compute
+exeedance probability, velocity, and power.  The module also contains functions
+to compute the Froude number and to fit a polynomial to a series of points.
+The polynomial is used to estimate the relationship between discharge and velocity
+or velocity and power at an individual turbine.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>principal_flow_direction</p></td>
+<td><p>Calculates the principal flow directions of current data</p></td>
+</tr>
+<tr class="row-odd"><td><p>Froude_number</p></td>
+<td><p>Calculate the Froude Number of the river, channel or duct flow, to check subcritical flow assumption (if Fr &lt;1).</p></td>
+</tr>
+<tr class="row-even"><td><p>exceedance_probability</p></td>
+<td><p>Calculates the exceedance probability</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="device">
+<h2>Device<a class="headerlink" href="#device" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="xref mat mat-class docutils literal notranslate"><span class="pre">device</span></code> submodule contains functions to compute equivalent diameter
+and capture area for circular, ducted, rectangular, adn multiple circular devices.
+A circular device is a vertical axis water turbine (VAWT). A
+rectangular device is a horizontal axis water turbine. A ducted device
+is an enclosed VAWT. A multiple-circular devices is a device with
+multiple VAWTs per device.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>circular</p></td>
+<td><p>Calculates the equivalent diameter and projected capture area of a circular turbine</p></td>
+</tr>
+<tr class="row-odd"><td><p>ducted</p></td>
+<td><p>Calculates the equivalent diameter and projected capture area of a ducted turbine</p></td>
+</tr>
+<tr class="row-even"><td><p>multiple_circular</p></td>
+<td><p>Calculates the equivalent diameter and projected capture area of a multiple circular turbine</p></td>
+</tr>
+<tr class="row-odd"><td><p>rectangular</p></td>
+<td><p>Calculates the equivalent diameter and projected capture area of a retangular turbine</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="graphics">
+<h2>Graphics<a class="headerlink" href="#graphics" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#module-mhkit.tidal.graphics" title="mhkit.tidal.graphics"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">graphics</span></code></a> submodule contains functions to plot river data and related metrics.
+The functions are designed to work in parallel with the <a class="reference internal" href="#module-mhkit.tidal.resource" title="mhkit.tidal.resource"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">resource</span></code></a> submodule.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>plot_velocity_duration_curve</p></td>
+<td><p>Plots velocity vs exceedance probability as a Flow Duration Curve (FDC)</p></td>
+</tr>
+<tr class="row-odd"><td><p>plot_rose</p></td>
+<td><p>Creates a polar histogram. Direction angles from binned histogram must be specified such that 0  degrees is north.</p></td>
+</tr>
+<tr class="row-even"><td><p>plot_joint_probability_distribution</p></td>
+<td><p>Creates a polar histogram. Direction angles from binned histogram must be specified such that 0 is north.</p></td>
+</tr>
+<tr class="row-odd"><td><p>plot_current_timeseries</p></td>
+<td><p>Returns a plot of velocity from an array of direction and speed data in the direction of the supplied principal_direction.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The names of the functions below are of the convention path.path.path.function. Only the function name is used when calling the function in MATLAB. For example, to call on “mhkit.tidal.io.request_noaa_data” simply
+use request_noaa_data().</p>
+</div>
+<span class="target" id="module-mhkit.tidal"></span><div class="section" id="id1">
+<h3>IO<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-mhkit.tidal.io"></span><dl class="function">
 <dt id="mhkit.tidal.io.read_noaa_json">
 <code class="sig-prename descclassname">mhkit.tidal.io.</code><code class="sig-name descname">read_noaa_json</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.tidal.io.read_noaa_json" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
@@ -250,9 +372,9 @@ for example proxy.http = “localhost:8080”</p></li>
 </dd></dl>
 
 </div>
-<div class="section" id="module-mhkit.tidal.resource">
-<span id="resource"></span><h2>Resource<a class="headerlink" href="#module-mhkit.tidal.resource" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<div class="section" id="id2">
+<h3>Resource<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-mhkit.tidal.resource"></span><dl class="function">
 <dt id="mhkit.tidal.resource.principal_flow_directions">
 <code class="sig-prename descclassname">mhkit.tidal.resource.</code><code class="sig-name descname">principal_flow_directions</code><span class="sig-paren">(</span><em class="sig-param">directions</em>, <em class="sig-param">width_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.tidal.resource.principal_flow_directions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the principal flow directions of current data
@@ -278,9 +400,9 @@ the TEC optimum orientation.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-mhkit.tidal.graphics">
-<span id="graphics"></span><h2>Graphics<a class="headerlink" href="#module-mhkit.tidal.graphics" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<div class="section" id="id3">
+<h3>Graphics<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-mhkit.tidal.graphics"></span><dl class="function">
 <dt id="mhkit.tidal.graphics.plot_current_timeseries">
 <code class="sig-prename descclassname">mhkit.tidal.graphics.</code><code class="sig-name descname">plot_current_timeseries</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">principal_direction</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.tidal.graphics.plot_current_timeseries" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
@@ -373,9 +495,9 @@ be specified such that 0  degrees is north.</p>
 
 <p>Note: Tidal device functions are the same as the River device functions</p>
 </div>
-<div class="section" id="module-mhkit.river.device">
-<span id="device"></span><h2>Device<a class="headerlink" href="#module-mhkit.river.device" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<div class="section" id="id4">
+<h3>Device<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-mhkit.river.device"></span><dl class="function">
 <dt id="mhkit.river.device.circular">
 <code class="sig-prename descclassname">mhkit.river.device.</code><code class="sig-name descname">circular</code><span class="sig-paren">(</span><em class="sig-param">diameter</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.river.device.circular" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
@@ -462,6 +584,7 @@ retangular turbine</p>
 </dl>
 </dd></dl>
 
+</div>
 </div>
 </div>
 

@@ -89,10 +89,14 @@
 <li class="toctree-l2 current"><a class="reference internal" href="mhkit.html#modules">Modules</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="mhkit.qc.html">QC module</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Wave module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#file-io">File IO</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#wave-resource">Wave resource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#wave-performance">Wave performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphics">Graphics</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-mhkit.wave.io">IO</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-mhkit.wave.resource">Resource</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-mhkit.wave.performance">Performance</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-mhkit.wave.graphics">Graphics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Graphics</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="mhkit.river.html">River module</a></li>
@@ -196,7 +200,178 @@
 <h1>Wave module<a class="headerlink" href="#wave-module" title="Permalink to this headline">¶</a></h1>
 <p>The wave module contains a set of functions to
 calculate quantities of interest for wave energy converters (WEC).</p>
-<span class="target" id="module-mhkit.wave"></span><div class="section" id="module-mhkit.wave.io">
+<div class="section" id="file-io">
+<h2>File IO<a class="headerlink" href="#file-io" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#module-mhkit.wave.io" title="mhkit.wave.io"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">io</span></code></a> submodule contains the following function to load National Data Buoy Center (NDBC)
+data file into a pandas DataFrame, including real time and historical data.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 66%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>read_NDBC_file</p></td>
+<td><p>Reads a NDBC wave buoy data file (from <a class="reference external" href="https://www.ndbc.noaa.gov">https://www.ndbc.noaa.gov</a>) into a structure.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="wave-resource">
+<h2>Wave resource<a class="headerlink" href="#wave-resource" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#module-mhkit.wave.resource" title="mhkit.wave.resource"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">resource</span></code></a> submodule contains methods to compute wave energy spectra and various metrics from the spectra.</p>
+<p>The following options exist to compute wave energy spectra:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 46%" />
+<col style="width: 54%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>create_spectra</p></td>
+<td><p>Calculates a spectra of user defined type.</p></td>
+</tr>
+<tr class="row-odd"><td><p>elevation_spectrum</p></td>
+<td><p>Calculates wave spectra from wave probe timeseries.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The following metrics can be computed from the spectra:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 63%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>average_crest_period</p></td>
+<td><p>Calculate the average creat period from spectra.</p></td>
+</tr>
+<tr class="row-odd"><td><p>average_wave_period</p></td>
+<td><p>Calculates the average wave period from spectra</p></td>
+</tr>
+<tr class="row-even"><td><p>average_zero_crossing_period</p></td>
+<td><p>Calculates wave average zero crossing period from spectra</p></td>
+</tr>
+<tr class="row-odd"><td><p>energy_flux</p></td>
+<td><p>Calculates the omnidirectional wave energy flux of the spectra</p></td>
+</tr>
+<tr class="row-even"><td><p>energy_period</p></td>
+<td><p>Calculates the energy period</p></td>
+</tr>
+<tr class="row-odd"><td><p>frequency_moment</p></td>
+<td><p>Calculates the Nth frequency moment of the spectrum</p></td>
+</tr>
+<tr class="row-even"><td><p>peak_period</p></td>
+<td><p>Calculates wave energy period from spectra</p></td>
+</tr>
+<tr class="row-odd"><td><p>significant_wave_height</p></td>
+<td><p>Calculates wave height from spectra</p></td>
+</tr>
+<tr class="row-even"><td><p>spectral_bandwidth</p></td>
+<td><p>Calculates bandwidth from spectra</p></td>
+</tr>
+<tr class="row-odd"><td><p>spectral_width</p></td>
+<td><p>Calculates wave spectral width from spectra</p></td>
+</tr>
+<tr class="row-even"><td><p>surface_elevation</p></td>
+<td><p>Calculates wave elevation time series from spectrum using a random phase</p></td>
+</tr>
+<tr class="row-odd"><td><p>wave_celerity</p></td>
+<td><p>Calculates wave celerity (group velocity)</p></td>
+</tr>
+<tr class="row-even"><td><p>wave_number</p></td>
+<td><p>Calculates wave number</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="wave-performance">
+<h2>Wave performance<a class="headerlink" href="#wave-performance" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#module-mhkit.wave.performance" title="mhkit.wave.performance"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">performance</span></code></a> submodule contains functions to compute capture length, statistics,
+performance matrices, and mean annual energy production.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>dc_power</p></td>
+<td><p>Calculates the real power from DC voltage and current.</p></td>
+</tr>
+<tr class="row-odd"><td><p>ac_power_three_phase</p></td>
+<td><p>Calculates the real power from three phase ac voltage and current.</p></td>
+</tr>
+<tr class="row-even"><td><p>capture_length</p></td>
+<td><p>Calculates the capture length (often called capture width).</p></td>
+</tr>
+<tr class="row-odd"><td><p>capture_length_matrix</p></td>
+<td><p>Generates a capture length matrix for a given statistic</p></td>
+</tr>
+<tr class="row-even"><td><p>mean_annual_energy_production_matrix</p></td>
+<td><p>Calculates mean annual energy production (MAEP) from matrix data along with data frequency in each bin</p></td>
+</tr>
+<tr class="row-odd"><td><p>mean_annual_energy_production_timeseeries</p></td>
+<td><p>Calculates mean annual energy production (MAEP) from timeseries</p></td>
+</tr>
+<tr class="row-even"><td><p>power_matrix</p></td>
+<td><p>Generates a power matrix from a capture length matrix and wave energy flux matrix</p></td>
+</tr>
+<tr class="row-odd"><td><p>wave_energy_flux_matrix</p></td>
+<td><p>Generates a wave eneergy flux matrix for a given statistic</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="graphics">
+<h2>Graphics<a class="headerlink" href="#graphics" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#module-mhkit.wave.graphics" title="mhkit.wave.graphics"><code class="xref mat mat-class docutils literal notranslate"><span class="pre">graphics</span></code></a> submodule contains functions to plot wave data and related metrics.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 45%" />
+<col style="width: 55%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Functions</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>plot_elevation_timeseries</p></td>
+<td><p>Plots wave elevation timeseries</p></td>
+</tr>
+<tr class="row-odd"><td><p>plot_matrix</p></td>
+<td><p>Plots the matrix with Hm0 and Te on the y and x axis</p></td>
+</tr>
+<tr class="row-even"><td><p>plot_spectrum</p></td>
+<td><p>Plots wave amplitude spectrum</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The names of the functions below are of the convention path.path.path.function. Only the function name is used when calling the function in MATLAB. For example, to call on “mhkit.wave.io.read_NDBC_file” simply
+use read_NDBC_file().</p>
+</div>
+<span class="target" id="module-mhkit.wave"></span></div>
+<div class="section" id="module-mhkit.wave.io">
 <span id="io"></span><h2>IO<a class="headerlink" href="#module-mhkit.wave.io" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="mhkit.wave.io.read_NDBC_file">
@@ -944,9 +1119,9 @@ a degree of freedom of 1 in accordance with IEC/TS 62600-100.</p></li>
 </dd></dl>
 
 </div>
-<div class="section" id="module-mhkit.wave.graphics">
-<span id="graphics"></span><h2>Graphics<a class="headerlink" href="#module-mhkit.wave.graphics" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<div class="section" id="id1">
+<h2>Graphics<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-mhkit.wave.graphics"></span><dl class="function">
 <dt id="mhkit.wave.graphics.plot_elevation_timeseries">
 <code class="sig-prename descclassname">mhkit.wave.graphics.</code><code class="sig-name descname">plot_elevation_timeseries</code><span class="sig-paren">(</span><em class="sig-param">wave_elevation</em><span class="sig-paren">)</span><a class="headerlink" href="#mhkit.wave.graphics.plot_elevation_timeseries" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
