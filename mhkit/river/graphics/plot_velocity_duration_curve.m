@@ -28,7 +28,7 @@ sortT=sortrows(T,'F','descend');
 
 figure=plot(sortT.V,sortT.F);
 grid on
-xlabel('Velocity [m^{3}/s]','FontSize',20)
+xlabel('Velocity [m/s]','FontSize',20)
 ylabel('Exceedance Probability','FontSize',20)
 
 

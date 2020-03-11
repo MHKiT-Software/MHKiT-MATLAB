@@ -24,7 +24,7 @@ function figure=plot_velocity_vs_power(V,P,varargin)
 
 figure=plot(V,P,'o');
 grid on
-xlabel('Velocity [m^{3}/s]','FontSize',20)
+xlabel('Velocity m/s]','FontSize',20)
 ylabel('Power [W]','FontSize',20)
 
 if nargin == 3
