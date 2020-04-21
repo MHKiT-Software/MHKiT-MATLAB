@@ -1,4 +1,4 @@
-function S=create_spectra(spectra_type,frequency,Tp,varargin)
+function S1=create_spectra(spectra_type,frequency,Tp,varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates wave spectra of user specified type
@@ -51,7 +51,7 @@ if strcmp(spectra_type,'pierson_moskowitz_spectrum')
     if nargin ==3
         S=py.mhkit.wave.resource.pierson_moskowitz_spectrum(frequency,Tp);
     else
-        ME = MException('MATLAB:create_spectra','inncorrect number of arguments');
+        ME = MException('MATLAB:create_spectra','incorrect number of arguments');
          throw(ME);
     end
     
@@ -80,13 +80,13 @@ else
     throw(ME);
 end
 
-S.spectrum=double(py.array.array('d',py.numpy.nditer(S.values))).';
+S1.spectrum=double(py.array.array('d',py.numpy.nditer(S.values))).';
 char_arr=char(S.index.values);
-S.type=spectra_type;
-S.frequency=double(py.array.array('d',py.numpy.nditer(S.index))).';
-S.Tp=Tp;
+S1.type=spectra_type;
+S1.frequency=double(py.array.array('d',py.numpy.nditer(S.index))).';
+S1.Tp=Tp;
 if nargin == 4 
-    S.Hs=varargin{1};
+    S1.Hs=varargin{1};
 end
 
 

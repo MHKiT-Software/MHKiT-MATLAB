@@ -1,4 +1,4 @@
-function Hm0=significant_wave_height(S)
+function Hm0=significant_wave_height(S,varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates wave height from spectra
@@ -19,6 +19,9 @@ function Hm0=significant_wave_height(S)
 %           time series, date stamp etc.
 %
 %           S.frequency: frequency (Hz)
+%
+%     frequency_bins: vector (optional) 
+%       Bin widths for frequency of S. Required for unevenly sized bins 
 %         
 % Returns
 % ---------
@@ -32,6 +35,14 @@ py.importlib.import_module('mhkit');
 py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit_python_utils');
 
+if nargin == 2
+    freq_bins = py.numpy.array(varargin{1});
+elseif nargin == 1
+    freq_bins = py.None;
+else
+    ME = MException('MATLAB:significant_wave_height','Incorrect number of input arguments');
+        throw(ME);
+end
 if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(S)==1)
         x=size(S.spectrum);
@@ -42,9 +53,9 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
                 li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
             
             end
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(uint32(S.frequency(:,1)),li,int32(x(2)));
+            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency(:,1),li,x(2));
         elseif x(2)==1
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(uint32(S.frequency),py.numpy.array(S.spectrum),int32(x(2)));
+            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency,py.numpy.array(S.spectrum),x(2));
         end
         
     else
@@ -53,5 +64,5 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     end
 end
 
-Hm0=py.mhkit.wave.resource.significant_wave_height(S);
+Hm0=py.mhkit.wave.resource.significant_wave_height(S,pyargs('frequency_bins',freq_bins));
 Hm0=double(Hm0.values);

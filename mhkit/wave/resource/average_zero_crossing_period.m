@@ -1,4 +1,4 @@
-function Tz=average_zero_crossing_period(S)
+function Tz=average_zero_crossing_period(S,varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Calculates wave average zero crossing period from spectra
@@ -20,6 +20,9 @@ function Tz=average_zero_crossing_period(S)
 %
 %           S.frequency: frequency (Hz)
 %
+%     frequency_bins: vector (optional) 
+%       Bin widths for frequency of S. Required for unevenly sized bins
+%
 % Returns
 % ---------
 %    Tz: double
@@ -31,6 +34,15 @@ function Tz=average_zero_crossing_period(S)
 py.importlib.import_module('mhkit');
 py.importlib.import_module('mhkit_python_utils');
 
+if nargin == 2
+    freq_bins = py.numpy.array(varargin{1});
+elseif nargin == 1
+    freq_bins = py.None;
+else
+    ME = MException('MATLAB:average_zero_crossing_period','Incorrect number of input arguments');
+        throw(ME);
+end
+
 if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(S)==1)
         x=size(S.spectrum);
@@ -41,9 +53,9 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
                 li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
             
             end
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(uint32(S.frequency(:,1)),li,int32(x(2)));
+            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency(:,1),li,x(2));
         elseif x(2)==1
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(uint32(S.frequency),py.numpy.array(S.spectrum),int32(x(2)));
+            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency,py.numpy.array(S.spectrum),x(2));
         end
     else
         ME = MException('MATLAB:average_zero_crossing_period','S needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
@@ -51,6 +63,6 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     end
 end
 
-Tz=py.mhkit.wave.resource.average_zero_crossing_period(S);
+Tz=py.mhkit.wave.resource.average_zero_crossing_period(S,pyargs('frequency_bins',freq_bins));
 
 Tz=double(Tz.values);

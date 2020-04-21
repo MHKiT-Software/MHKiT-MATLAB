@@ -1,4 +1,4 @@
-function m=frequency_moment(S,N)
+function m=frequency_moment(S,N,varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates the Nth frequency moment of the spectrum
@@ -22,6 +22,9 @@ function m=frequency_moment(S,N)
 %   
 %    N: int
 %       Moment (0 for 0th, 1 for 1st ....)
+%
+%    frequency_bins: vector (optional) 
+%       Bin widths for frequency of S. Required for unevenly sized bins 
 %
 % Returns
 % ---------
@@ -51,10 +54,17 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
             S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency,py.numpy.array(S.spectrum),x(2));
         end
     else
-        ME = MException('MATLAB:significant_wave_height','S needs to be a Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
+        ME = MException('MATLAB:frequency_moment','S needs to be a Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
         throw(ME);
     end
 end
 
-m=py.mhkit.wave.resource.frequency_moment(S,int32(N));
+if nargin == 3
+    m=py.mhkit.wave.resource.frequency_moment(S,int32(N),pyargs('frequency_bins',py.numpy.array(varargin{1})));
+elseif nargin == 2
+    m=py.mhkit.wave.resource.frequency_moment(S,int32(N));
+else
+    ME = MException('MATLAB:frequency_moment','Incorrect number of arguments');
+        throw(ME);
+end
 m=double(m.values);
