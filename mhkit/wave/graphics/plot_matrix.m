@@ -16,7 +16,7 @@ function figure=plot_matrix(M,Mtype)
 %         M.stat
 %
 %    Mtype: string
-%         type of matrix (i.e. power, caplture length, etc.) to be be used
+%         type of matrix (i.e. power, capture length, etc.) to be used
 %         in plot title 
 %
 % Returns
