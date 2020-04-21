@@ -57,7 +57,7 @@ if (isa(k,'py.pandas.core.frame.DataFrame')~=1)
             k=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(k.frequency,py.numpy.array(k.values),1);
         %end
     else
-        ME = MException('MATLAB:wave_celerity','S needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
+        ME = MException('MATLAB:wave_celerity','k needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
         throw(ME);
     end
 end
