@@ -22,7 +22,7 @@ function e=spectral_bandwidth(S)
 %
 % Returns
 % ---------
-%    e: float
+%    e: double
 %        Spectral BandWidth
 %
 %
