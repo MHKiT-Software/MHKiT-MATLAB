@@ -25,7 +25,7 @@ function e=spectral_bandwidth(S,varargin)
 %
 % Returns
 % ---------
-%    e: float
+%    e: double
 %        Spectral BandWidth
 %
 %
@@ -65,5 +65,7 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     end
 end
 
+
 e0=py.mhkit.wave.resource.spectral_bandwidth(S,pyargs('frequency_bins',freq_bins));
 e=double(e0.values);
+
