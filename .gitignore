@@ -32,3 +32,4 @@ Thumbs.db
 *egg-info
 *build
 *.prj
+.gitignore
