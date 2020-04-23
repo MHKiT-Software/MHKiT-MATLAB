@@ -1,4 +1,4 @@
-function Te=energy_period(S)
+function Te=energy_period(S,varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
@@ -20,6 +20,10 @@ function Te=energy_period(S)
 %
 %           S.frequency: frequency (Hz)
 %
+%     frequency_bins: vector (optional) 
+%       Bin widths for frequency of S. Required for unevenly sized bins
+%
+%
 % Returns
 % ---------
 %    Te: float
@@ -31,6 +35,15 @@ function Te=energy_period(S)
 py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit');
 py.importlib.import_module('mhkit_python_utils');
+
+if nargin == 2
+    freq_bins = py.numpy.array(varargin{1});
+elseif nargin == 1
+    freq_bins = py.None;
+else
+    ME = MException('MATLAB:energy_period','Incorrect number of input arguments');
+        throw(ME);
+end
 
 if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(S)==1)
@@ -48,10 +61,10 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
         end
         
     else
-        ME = MException('MATLAB:significant_wave_height','S needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
+        ME = MException('MATLAB:energy_period','S needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
         throw(ME);
     end
 end
 
-Te=py.mhkit.wave.resource.energy_period(S);
+Te=py.mhkit.wave.resource.energy_period(S,pyargs('frequency_bins',freq_bins));
 Te=double(Te.values);
