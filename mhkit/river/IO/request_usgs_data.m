@@ -1,4 +1,4 @@
-function datast=request_usgs_data(station, parameter, start_date, end_date,varargin)
+function datast=request_usgs_data(station, parameter, start_date, end_date,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Loads USGS data directly from https://waterdata.usgs.gov/nwis into a structure using a 
@@ -22,13 +22,16 @@ function datast=request_usgs_data(station, parameter, start_date, end_date,varar
 %     data_type : str (optional)
 %         Data type, options include 'Daily' (return the mean daily value) and 
 %         'Instantaneous'.
+%         to call: request_usgs_data(station,parameter,start_date.end_date,"data_type",data_type)
 %
-%     proxy : dict or None (optional)
+%     proxy : structure or None (optional)
 %          To request data from behind a firewall, define a dictionary of proxy settings, 
-%          for example {"http": 'localhost:8080'}
+%          for example proxy.http = "localhost:8080"
+%         to call: request_usgs_data(station,parameter,start_date.end_date,"proxy",proxy)
 %
 %     write_json : str or None (optional)
 %         Name of json file to write data
+%         to call: request_usgs_data(station,parameter,start_date.end_date,"write_json",write_json)
 %         
 % Returns
 % -------
@@ -43,77 +46,23 @@ function datast=request_usgs_data(station, parameter, start_date, end_date,varar
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%% NOTE: TODO: still need to add creation of dictionary from structure
-%%%%% for proxy argument 
+arguments
+    station 
+    parameter
+    start_date
+    end_date
+    options.data_type = 'Daily';
+    options.proxy = py.None;
+    options.write_json = py.None; 
+end
 
 py.importlib.import_module('mhkit');
 
-if nargin > 4
-    if nargin > 7
-        ME = MException('MATLAB:request_usgs_data','Incorrect number of input arguments, too many agruments, requires 7 at most, %d arguments passed',nargin);
-        throw(ME);
-    
-    elseif nargin == 5
-        
-            if any([strcmp(varargin{1},'Daily'), strcmp(varargin{1},'Instantaneous')]) 
-                datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',varargin{1}));
-            elseif contains(varargin{1},'.json')
-                datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('write_json',varargin{1}));
-            
-        elseif (isa(varargin{1},'py.dict')==1)
-            datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('proxy',varargin{1}));
-        else
-           ME = MException('MATLAB:request_usgs_data','One or more optional argument is of the wrong type');
-           throw(ME); 
-        end
-        
-        
-    elseif nargin == 6
-        if any([strcmp(varargin{1},'Daily'), strcmp(varargin{1},'Instantaneous')]) & contains(varargin{2},'.json')
-        	datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',varargin{1}, 'write_json',varargin{2}));
-        elseif any([strcmp(varargin{2},'Daily'), strcmp(varargin{2},'Instantaneous')]) & contains(varargin{1},'.json')
-            datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',varargin{2}, 'write_json',varargin{1}));
-        elseif any([strcmp(varargin{1},'Daily'), strcmp(varargin{1},'Instantaneous')]) & (isa(varargin{2},'py.dict')==1)
-            datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',varargin{1}, 'proxy',varargin{2}));
-        elseif any([strcmp(varargin{2},'Daily'), strcmp(varargin{2},'Instantaneous')]) & (isa(varargin{1},'py.dict')==1)
-            datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',varargin{2}, 'proxy',varargin{1}));
-        elseif (isa(varargin{1},'py.dict')==1) & contains(varargin{2},'.json')
-            datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('write_json',varargin{2}, 'proxy',varargin{1}));
-        elseif (isa(varargin{2},'py.dict')==1) & contains(varargin{1},'.json')
-            datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('write_json',varargin{1}, 'proxy',varargin{2}));
-        else 
-            ME = MException('MATLAB:request_usgs_data','One or more optional argument is of the wrong type');
-            throw(ME);
-        end
-    elseif nargin == 7 
-        if any([strcmp(varargin{1},'Daily'), strcmp(varargin{1},'Instantaneous')]) & contains(varargin{2},'.json') & (isa(varargin{3},'py.dict')==1)
-            datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',varargin{1},...
-                'write_json',varargin{2}, 'proxy',varargin{3}));
-        elseif any([strcmp(varargin{1},'Daily'), strcmp(varargin{1},'Instantaneous')]) & contains(varargin{3},'.json') & (isa(varargin{2},'py.dict')==1)
-            datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',varargin{1},...
-                'write_json',varargin{3}, 'proxy',varargin{2}));
-        elseif any([strcmp(varargin{2},'Daily'), strcmp(varargin{2},'Instantaneous')]) & contains(varargin{3},'.json') & (isa(varargin{1},'py.dict')==1)
-            datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',varargin{2},...
-                'write_json',varargin{3}, 'proxy',varargin{1}));
-        elseif any([strcmp(varargin{2},'Daily'), strcmp(varargin{2},'Instantaneous')]) & contains(varargin{1},'.json') & (isa(varargin{3},'py.dict')==1)
-            datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',varargin{2},...
-                'write_json',varargin{1}, 'proxy',varargin{3}));
-        elseif any([strcmp(varargin{3},'Daily'), strcmp(varargin{3},'Instantaneous')]) & contains(varargin{1},'.json') & (isa(varargin{2},'py.dict')==1)
-            datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',varargin{3},...
-                'write_json',varargin{1}, 'proxy',varargin{2}));
-        elseif any([strcmp(varargin{3},'Daily'), strcmp(varargin{3},'Instantaneous')]) & contains(varargin{2},'.json') & (isa(varargin{1},'py.dict')==1)
-            datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',varargin{3},...
-                'write_json',varargin{2}, 'proxy',varargin{1}));
-        else
-            ME = MException('MATLAB:request_usgs_data','One or more optional argument is of the wrong type');
-            throw(ME);
-        end
-    end
-    
-else
-    datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date);
+if (isa(options.proxy,'py.NoneType')~=1)
+    options.proxy=py.dict(options.proxy);
 end
-
+datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',options.data_type,...
+      'write_json',options.write_json, 'proxy',options.proxy));
 
 xx=cell(datapd.axes);
 v=xx{2};
