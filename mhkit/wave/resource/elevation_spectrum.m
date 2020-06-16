@@ -1,4 +1,4 @@
-function S=elevation_spectrum(ts,sample_rate,nnft,time,varargin)
+function S=elevation_spectrum(ts,sample_rate,nnft,time,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates wave spectra from wave probe timeseries
@@ -9,21 +9,29 @@ function S=elevation_spectrum(ts,sample_rate,nnft,time,varargin)
 %           Wave probe time-series data, with each column a different time
 %           series
 %
-%     sampleRate: float
+%     sample_rate: float
 %           Data frequency (Hz)
 %
-%     nnft: int
+%     nnft: integer
+%           Number of bins in the Fast Fourier Transform
 %
 %     time: vector or table
 %           time (s)
 %
-%     window: string scalar (Optional)
+%     window: string (Optional)
 %        Signal window type. "hamming" is used by default given the broadband 
 %        nature of waves. See scipy.signal.get_window for more options.
+%        to call: elevation_spectrum(ts,sample_rate,nnft,time,"window",window)
 %
 %     detrend: logical (Optional)
 %        Specifies if a linear trend is removed from the data before calculating 
 %        the wave energy spectrum.  Data is detrended by default.
+%        to call: elevation_spectrum(ts,sample_rate,nnft,time,"detrend",detrend)
+%
+%     noverlap: integer (Optional)
+%       Number of points to overlap between segments. If None,
+%       noverlap = nperseg / 2.  Defaults to None.
+%       to call: elevation_spectrum(ts,sample_rate,nnft,time,"noverlap",noverlap)
 %
 % Returns
 % ---------
@@ -41,6 +49,16 @@ function S=elevation_spectrum(ts,sample_rate,nnft,time,varargin)
 %         S.nnft: nnft
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments
+    ts 
+    sample_rate
+    nnft
+    time
+    options.window = "hamming";
+    options.detrend = true;
+    options.noverlap = py.None;
+end
 
 py.importlib.import_module('mhkit');
 py.importlib.import_module('numpy');
@@ -69,45 +87,18 @@ if (isa(ts,'py.pandas.core.frame.DataFrame')~=1)
     
 end
 nnft=int32(nnft);
-if nargin > 4
-    if nargin > 6
-        ME = MException('MATLAB:elevation_spectrum','Incorrect number of input arguments, too many agruments, requires 6 at most, %d arguments passed',nargin);
-        throw(ME);
-    
-    elseif nargin == 5
-        if any(isStringScalar(varargin{1}))
-            spectra=py.mhkit.wave.resource.elevation_spectrum(ts,sample_rate,nnft,pyargs('window',varargin{1}));
-        end
-        if any([varargin{1}==true, varargin{1}==false])
-            spectra=py.mhkit.wave.resource.elevation_spectrum(ts,sample_rate,nnft,pyargs('detrend',varargin{1}));
-        end
-        
-    elseif any(isStringScalar(varargin{1})) & any([varargin{2}==true, varargin{2}==false])
-        spectra=py.mhkit.wave.resource.elevation_spectrum(ts,sample_rate,nnft,pyargs('window',varargin{1},'detrend',varargin{2}));
-    elseif any(isStringScalar(varargin{2})) & any([varargin{1}==true, varargin{1}==false])
-        spectra=py.mhkit.wave.resource.elevation_spectrum(ts,sample_rate,nnft,pyargs('window',varargin{2}, 'detrend',varargin{1}));
-    else
-        ME = MException('MATLAB:elevation_spectrum','One or more optional argument is of the wrong type');
-        throw(ME);
-    end
-else
-    spectra=py.mhkit.wave.resource.elevation_spectrum(ts,sample_rate,nnft);
-end
 
 
+spectra=py.mhkit.wave.resource.elevation_spectrum(ts,sample_rate,nnft,pyargs('window',options.window,'detrend',options.detrend,'noverlap',options.noverlap));
  vals=double(py.array.array('d',py.numpy.nditer(spectra.values)));
  sha=cell(spectra.values.shape);
  x=int64(sha{1,1});
  y=int64(sha{1,2});
  vals=reshape(vals,[x,y]);
 
-si=size(vals);
 
 S.spectrum=vals;
-% for i=1:si(2)
-%    wave_spectra.spectrum{i}=vals(:,i);
-%    wave_spectra.spectrum{i}=[wave_spectra.spectrum{i}];
-% end
+
 S.type='Spectra from Timeseries';
 
 S.frequency=double(py.array.array('d',py.numpy.nditer(spectra.index))).';

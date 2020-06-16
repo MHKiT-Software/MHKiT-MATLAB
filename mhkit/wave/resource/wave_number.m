@@ -1,4 +1,4 @@
-function k=wave_number(f,h,varargin)
+function k=wave_number(f,h,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Calculates wave number
@@ -12,13 +12,13 @@ function k=wave_number(f,h,varargin)
 %
 %    rho: float (optional)
 %         water density (kg/m^3)
+%         to call: wave_number(f,h,"rho",rho)
 %
 %    g: float (optional)
 %         gravitational acceleration (m/s^2)
+%         to call: wave_number(f,h,"g",g)
 %
 %
-%     NOTE: In matlab, if you set one optional parameter, you must set
-%     both, rho first, then g
 %         
 %
 % Returns
@@ -33,21 +33,19 @@ function k=wave_number(f,h,varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+arguments
+    f 
+    h
+    options.rho = 1025;
+    options.g = 9.80665;
+end
 py.importlib.import_module('mhkit');
 
 f=py.numpy.array(f);
 
+ 
+kdf=py.mhkit.wave.resource.wave_number(f,h,pyargs('rho',options.rho,'g',options.rho));
 
-if nargin == 4 
-    kdf=py.mhkit.wave.resource.wave_number(f,h,pyargs('rho',varargin{1},'g',varargin{2}));
-elseif nargin == 2
-    kdf=py.mhkit.wave.resource.wave_number(f,h);
-
-else
-    ME = MException('MATLAB:wave_number','incorrect number of arguments');
-        throw(ME);
-end
 
 
 k.values=double(py.array.array('d',py.numpy.nditer(kdf.values)));

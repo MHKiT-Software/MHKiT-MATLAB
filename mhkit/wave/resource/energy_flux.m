@@ -1,4 +1,4 @@
-function J=energy_flux(S,h,varargin)
+function J=energy_flux(S,h,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
@@ -25,12 +25,12 @@ function J=energy_flux(S,h,varargin)
 %
 %    rho: float (optional)
 %         water density (kg/m^3)
+%         to call: energy_flux(S,h,"rho",rho)
+%
 %    g: float (optional)
 %         gravitational acceleration (m/s^2)
+%         to call: energy_flux(S,h,"g",g)
 %
-%     NOTE: In matlab, if you set one optional parameter, you must set
-%     both, rho first, then g
-%         
 % Returns
 % -------
 %     J: double
@@ -39,7 +39,13 @@ function J=energy_flux(S,h,varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+arguments
+    S 
+    h
+    options.rho = 1025;
+    options.g = 9.80665;
+    
+end
 
 py.importlib.import_module('mhkit');
 py.importlib.import_module('mhkit_python_utils');
@@ -66,14 +72,9 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
 end
 
 
-if nargin == 4 
-    J=py.mhkit.wave.resource.energy_flux(S,h,pyargs('rho',varargin{1},'g',varargin{2}));
-elseif nargin == 2
-    J=py.mhkit.wave.resource.energy_flux(S,h);
-else
-    ME = MException('MATLAB:energy_flux','incorrect number of arguments');
-        throw(ME);
-end
+
+J=py.mhkit.wave.resource.energy_flux(S,h,pyargs('rho',options.rho,'g',options.g));
+
 
 
 J=double(J.values);
