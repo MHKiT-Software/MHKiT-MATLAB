@@ -59,6 +59,7 @@ end
 
 figure = scatter(x,vmean);
 hold on
+grid on
 scatter(x,vmax)
 scatter(x,vmin)
 if size(options.vstdev) == size(x)
@@ -72,5 +73,6 @@ title(options.title)
 xlabel(options.xlabel)
 ylabel(options.ylabel)
 
+hold off
 
 
