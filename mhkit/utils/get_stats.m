@@ -38,13 +38,13 @@ li2 = py.list();
  if any(isdatetime(data.time(1)))
     data.time=posixtime(data.time);
  end
- datapd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(data.time,li,si(1),pyargs('cols',li2))
- datapd.index=py.pecos.utils.index_to_datetime(datapd.index)
+ datapd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(data.time,li,si(1),pyargs('cols',li2));
+ datapd.index=py.pecos.utils.index_to_datetime(datapd.index);
  
  if nargin == 3 
      stat_py = py.mhkit.utils.get_stats(datapd,freq,pyargs('period',varargin{1}));
  elseif nargin == 2
-      stat_py = py.mhkit.utils.get_stats(datapd,int32(freq)) 
+      stat_py = py.mhkit.utils.get_stats(datapd,int32(freq)); 
  else
      ME = MException('MATLAB:get_stats','Incorrect number of input arguments');
         throw(ME);
