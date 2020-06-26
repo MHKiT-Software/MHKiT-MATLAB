@@ -47,5 +47,5 @@ y=int64(sha{1,2});
 vals=reshape(vals,[x,y]);
 
 frequency.frequency = vals;
-frequency.time = time; 
+frequency.time = time(2:end); 
 
