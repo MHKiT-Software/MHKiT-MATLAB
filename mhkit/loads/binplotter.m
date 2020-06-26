@@ -75,4 +75,8 @@ legend({'mean','max','min'},'Location','northeast')
 title(options.title)
 xlabel(options.xlabel)
 ylabel(options.ylabel)
+
+if strlength(options.savepath) > 1
+    saveas(figure, options.savepath)
+end 
 hold off

@@ -11,7 +11,7 @@ function DEL=damage_equivalent_load(var,m,options)
 %     m : double or int 
 %         fatigue slope factor of material  
 %
-%     binNum : int (optional) 
+%     bin_num : int (optional) 
 %         number of bins for rainflow counting method (minimum=100)
 %         to call: get_DELs(data,chan_info,"binNum",binNum)
 %
@@ -30,7 +30,7 @@ function DEL=damage_equivalent_load(var,m,options)
 arguments
     var 
     m
-    options.binNum {mustBeNumeric} = 100;
+    options.bin_num {mustBeNumeric} = 100;
     options.t {mustBeNumeric} = 600;
 end
 
@@ -39,6 +39,6 @@ py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit_python_utils');
 
 
-DEL = py.mhkit.loads.damage_equivalent_load(var,m,pyargs('binNum',int32(options.binNum),'t',int32(options.t)));
+DEL = py.mhkit.loads.damage_equivalent_load(var,m,pyargs('bin_num',int32(options.bin_num),'t',int32(options.t)));
 
 

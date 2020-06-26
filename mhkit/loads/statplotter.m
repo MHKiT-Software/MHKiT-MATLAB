@@ -73,6 +73,11 @@ title(options.title)
 xlabel(options.xlabel)
 ylabel(options.ylabel)
 
+len = strlength(options.savepath);
+if len > 1
+    saveas(figure, options.savepath);
+end 
+
 hold off
 
 
