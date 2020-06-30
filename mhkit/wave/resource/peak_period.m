@@ -53,7 +53,7 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
         throw(ME);
     end
 end
-disp(S.index.values)
+
 Tp=py.mhkit.wave.resource.peak_period(S);
 disp(double(Tp.values))
 Tp=double(Tp.values);
