@@ -1,4 +1,4 @@
-function stats=get_stats(data,freq,varargin)
+function stats=get_statistics(data,freq,varargin)
 
 %%%%%%%%%%%%%%%%%%%%
 %     function used to obtain statistics from a dataset 
@@ -42,9 +42,9 @@ li2 = py.list();
  datapd.index=py.pecos.utils.index_to_datetime(datapd.index);
  
  if nargin == 3 
-     stat_py = py.mhkit.utils.get_stats(datapd,freq,pyargs('period',varargin{1}));
+     stat_py = py.mhkit.utils.get_statistics(datapd,freq,pyargs('period',varargin{1}));
  elseif nargin == 2
-      stat_py = py.mhkit.utils.get_stats(datapd,int32(freq)); 
+      stat_py = py.mhkit.utils.get_statistics(datapd,int32(freq)); 
  else
      ME = MException('MATLAB:get_stats','Incorrect number of input arguments');
         throw(ME);
