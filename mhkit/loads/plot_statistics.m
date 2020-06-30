@@ -1,4 +1,4 @@
-function figure=statplotter(x,vmean,vmin,vmax,options)
+function figure=plot_statistics(x,vmean,vmin,vmax,options)
 
 %%%%%%%%%%%%%%%%%%%%
 %     plot showing standard raw statistics of variable 

@@ -1,4 +1,4 @@
-function datast=bin_stats(data,x,bin_edges)
+function datast=bin_statistics(data,x,bin_edges)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates bin statistics against "x" according to IEC
@@ -51,7 +51,7 @@ li2 = py.list();
  ind = 1:1:indlen(1);
 datapd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(ind,li,si(1),pyargs('cols',li2));
 
-stat_py = py.mhkit.loads.bin_stats(datapd,py.numpy.array(x),py.numpy.array(bin_edges));
+stat_py = py.mhkit.loads.bin_statistics(datapd,py.numpy.array(x),py.numpy.array(bin_edges));
 
 averages = double(py.array.array('d',py.numpy.nditer(stat_py{1})));
 std = double(py.array.array('d',py.numpy.nditer(stat_py{2})));

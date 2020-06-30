@@ -1,4 +1,4 @@
-function figure=binplotter(bcenters,bmean,bmax,bmin,bstdmean,bstdmax,bstdmin,options)
+function figure=plot_bin_statistics(bcenters,bmean,bmax,bmin,bstdmean,bstdmax,bstdmin,options)
 
 %%%%%%%%%%%%%%%%%%%%
 %     plot showing standard binned statistics of single variable 
