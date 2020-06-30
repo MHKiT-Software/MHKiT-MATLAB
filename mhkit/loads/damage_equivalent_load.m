@@ -15,9 +15,9 @@ function DEL=damage_equivalent_load(var,m,options)
 %         number of bins for rainflow counting method (minimum=100)
 %         to call: get_DELs(data,chan_info,"binNum",binNum)
 %
-%     t : double or int (optional)
-%         Used to control DEL frequency. Default for 1Hz is 600 seconds for 10min data
-%         to call: get_DELs(data,chan_info,"t",t)
+%     data_length : double or int (optional)
+%         Used to control DEL frequency. Length of data in sec. Default for 1Hz is 600 seconds for 10min data
+%         to call: get_DELs(data,chan_info,"data_length",t)
 %     
 % Returns
 % ---------
@@ -31,7 +31,7 @@ arguments
     var 
     m
     options.bin_num {mustBeNumeric} = 100;
-    options.t {mustBeNumeric} = 600;
+    options.data_length {mustBeNumeric} = 600;
 end
 
 py.importlib.import_module('mhkit');
@@ -39,6 +39,6 @@ py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit_python_utils');
 
 
-DEL = py.mhkit.loads.damage_equivalent_load(var,m,pyargs('bin_num',int32(options.bin_num),'t',int32(options.t)));
+DEL = py.mhkit.loads.damage_equivalent_load(var,m,pyargs('bin_num',int32(options.bin_num),'data_length',int32(options.data_length)));
 
 
