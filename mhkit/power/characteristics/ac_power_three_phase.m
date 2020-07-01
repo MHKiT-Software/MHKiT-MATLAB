@@ -97,9 +97,9 @@ if (isa(current,'py.pandas.core.frame.DataFrame')~=1)
 end
 
 if nargin == 4
-    p_pd=py.mhkit.wave.performance.ac_power_three_phase(voltage,current,power_factor,pyargs('line_to_line',varargin{1}));
+    p_pd=py.mhkit.power.characteristics.ac_power_three_phase(voltage,current,power_factor,pyargs('line_to_line',varargin{1}));
 elseif nargin ==3 
-    p_pd=py.mhkit.wave.performance.ac_power_three_phase(voltage,current,power_factor);
+    p_pd=py.mhkit.power.characteristics.ac_power_three_phase(voltage,current,power_factor);
 else
     ME = MException('MATLAB:ac_power_three_phase','incorrect number of input arguments');
     throw(ME);
