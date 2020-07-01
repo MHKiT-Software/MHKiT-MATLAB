@@ -5,13 +5,14 @@ function frequency=instantaneous_frequency(voltage)
 %    
 % Parameters
 % -----------
-%     voltage: structure with handles- voltage.voltage and voltage.time  
+%     um: structure with handles- um.voltage and um.time  
 %         measured voltage source (V) index by time 
 % 
 % Returns
 % -------
-%     THCD: double
-%         the total harmonic current distortion
+%     frequency: structure
+%         frequency of the measured voltage with handles frequency.time and
+%         frequency.frequency
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
