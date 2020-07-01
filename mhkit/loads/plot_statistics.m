@@ -1,41 +1,41 @@
-function figure=plot_statistics(x,vmean,vmin,vmax,options)
+function figure=plot_statistics(x,y_mean,y_min,y_max,options)
 
 %%%%%%%%%%%%%%%%%%%%
-%     plot showing standard raw statistics of variable 
+%     Plot showing standard raw statistics of variable 
 %     
 % Parameters
 % ------------
 %     x: vector  
 %         vector of x-axis values
 %
-%     vmean: vector
-%         vector of mean values
+%     y_mean: vector
+%         Vector of mean values
 %
-%     vmax: vector
-%         vector of max values
+%     y_max: vector
+%         Vector of max values
 %
-%     vmin: vector
-%         vector of min values
+%     y_min: vector
+%         Vector of min values
 %
-%     vstdev: vector (optional)
-%         vector of stand drviations 
-%         to call: statplotter(x,vmean,vmax,vmin,"vstdev",vstdev)
+%     y_stdev: vector (optional)
+%         Vector of stand drviations 
+%         to call: statplotter(x,y_mean,y_max,y_min,"y_stdev",vstdev)
 %
 %     xlabel: string (optional)
 %         x-axis lable for the plot
-%         to call: statplotter(x,vmean,vmax,vmin,"xlable",xlable)
+%         to call: statplotter(x,y_mean,y_max,y_min,"xlable",xlable)
 %
 %     ylabel: string (optional)
 %         y-axis lable for the plot
-%         to call: statplotter(x,vmean,vmax,vmin,"ylable",ylable)
+%         to call: statplotter(x,y_mean,y_max,y_min,"ylable",ylable)
 %
 %     title: string (optional)
 %         title for the plot
-%         to call: statplotter(x,vmean,vmax,vmin,"title",title)
+%         to call: statplotter(x,y_mean,y_max,y_min,"title",title)
 %
 %     savepath: string (optional)
 %         path and filename to save figure.
-%         to call: statplotter(x,vmean,vmax,vmin,"savepath",savepath)
+%         to call: statplotter(x,y_mean,y_max,y_min,"savepath",savepath)
 %
 % Returns
 % ---------
@@ -47,23 +47,23 @@ function figure=plot_statistics(x,vmean,vmin,vmax,options)
 
 arguments
     x 
-    vmean
-    vmin
-    vmax
-    options.vstdev = [];
+    y_mean
+    y_min
+    y_max
+    options.y_stdev = [];
     options.xlabel = "";
     options.ylabel = "";
     options.title = "";
     options.savepath = "";
 end
 
-figure = scatter(x,vmean);
+figure = scatter(x,y_mean);
 hold on
 grid on
-scatter(x,vmax)
-scatter(x,vmin)
-if size(options.vstdev) == size(x)
-    scatter(x,options.vstdev)
+scatter(x,y_max)
+scatter(x,y_min)
+if size(options.y_stdev) == size(x)
+    scatter(x,options.y_stdev)
     legend({'mean','max','min','stdev'},'Location','northeast')
 else
     legend({'mean','max','min'},'Location','northeast')

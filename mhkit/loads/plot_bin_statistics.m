@@ -1,30 +1,30 @@
-function figure=plot_bin_statistics(bcenters,bmean,bmax,bmin,bstdmean,bstdmax,bstdmin,options)
+function figure=plot_bin_statistics(bin_centers,bin_mean,bin_max,bin_min,bin_mean_std,bin_max_std,bin_min_std,options)
 
 %%%%%%%%%%%%%%%%%%%%
-%     plot showing standard binned statistics of single variable 
+%     Plot showing standard binned statistics of single variable 
 %     
 % Parameters
 % ------------
-%     bcenters: vector  
+%     bin_centers: vector  
 %         x-axis bin center values
 %
-%     bmean: vector
-%         binned mean statistical values of variable
+%     bin_mean: vector
+%         Binned mean statistical values of variable
 %
-%     bmax: vector
-%         binned max statistical values of variable
+%     bin_max: vector
+%         Binned max statistical values of variable
 %
-%     bmin: vector
-%         binned min statistical values of variable
+%     bin_min: vector
+%         Binned min statistical values of variable
 %
-%     bstdmean: vector 
-%         standard deviations of mean binned statistics
+%     bin_mean_std: vector 
+%         Standard deviations of mean binned statistics
 %
-%     bstdmax: vector 
-%         standard deviations of max binned statistics
+%     bin_max_std: vector 
+%         Standard deviations of max binned statistics
 %
-%     bstdmin: vector 
-%         standard deviations of min binned statistics
+%     bin_min_std: vector 
+%         Standard deviations of min binned statistics
 %
 %     xlabel: string (optional)
 %         x-axis lable for the plot
@@ -45,30 +45,30 @@ function figure=plot_bin_statistics(bcenters,bmean,bmax,bmin,bstdmean,bstdmax,bs
 % Returns
 % ---------
 %     figure: figure 
-%         scatter plot of statistics 
+%          
 %
 %         
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
-    bcenters 
-    bmean
-    bmax
-    bmin
-    bstdmean
-    bstdmax
-    bstdmin
+    bin_centers 
+    bin_mean
+    bin_max
+    bin_min
+    bin_mean_std
+    bin_max_std
+    bin_min_std
     options.xlabel = "";
     options.ylabel = "";
     options.title = "";
     options.savepath = "";
 end
-I = ~isnan(bmax);
-figure = errorbar(bcenters,bmean,bstdmean);
+I = ~isnan(bin_max);
+figure = errorbar(bin_centers,bin_mean,bin_mean_std);
 hold on
 grid on
-errorbar(bcenters(I),bmax(I),bstdmax(I));
-errorbar(bcenters(I),bmin(I),bstdmin(I));
+errorbar(bin_centers(I),bin_max(I),bin_max_std(I));
+errorbar(bin_centers(I),bin_min(I),bin_min_std(I));
 legend({'mean','max','min'},'Location','northeast')
 
 
