@@ -1,23 +1,23 @@
 function harmonics=harmonics(x,freq,grid_freq)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Calculates the harmonics from timeseries of current or voltage
+%   Calculates the harmonics from time series of voltage or current based on IEC 61000-4-7.
 %    
 % Parameters
 % -----------
 %     x: structure with x.time and x.current or x.voltage as values 
-%         timeseries of voltage or current 
+%         Time-series of voltage [V] or current [A] 
 % 
 %     freq: double
-%         frequency of the timeseries data [Hz]
+%         Frequency of the time-series data [Hz]
 %
 %     grid_freq: int
-%         value indicating if the power supply is 50 or 60 Hz. Valid input are 50 and 60
+%         Value indicating if the power supply is 50 or 60 Hz. Options = 50 or 60
 % 
 % Returns
 % -------
 %     harmonics: structure
-%         harmonic amplitude and frequency of the timeseries data
+%         harmonic amplitude and frequency of the time-series data
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
