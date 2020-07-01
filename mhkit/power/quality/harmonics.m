@@ -1,8 +1,8 @@
 function harmonics=harmonics(x,freq,grid_freq)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   calculates the harmonics from timeseries of current or voltage
-
+%   Calculates the harmonics from timeseries of current or voltage
+%    
 % Parameters
 % -----------
 %     x: structure with x.time and x.current or x.voltage as values 
