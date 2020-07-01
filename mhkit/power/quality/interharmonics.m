@@ -1,8 +1,8 @@
 function interharmonics=interharmonics(harmonics,grid_freq)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   calculates the interharmonics from the harmonics of current
-
+%   Calculates the interharmonics from the harmonics of current
+%    
 % Parameters
 % -----------
 %     harmonics: structure with handles- harmonics.amplitude and harmonics.harmonic  

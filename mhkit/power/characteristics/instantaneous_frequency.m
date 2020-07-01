@@ -2,7 +2,7 @@ function frequency=instantaneous_frequency(voltage)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calcultes the instantaneous frequency of a measured voltage
-
+%    
 % Parameters
 % -----------
 %     voltage: structure with handles- voltage.voltage and voltage.time  

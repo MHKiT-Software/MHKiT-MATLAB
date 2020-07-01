@@ -1,9 +1,9 @@
 function THCD=total_harmonic_current_distortion(harmonic_subgroups,rated_current)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   calculates the total harmonic current distortion from harmonic
+%   Calculates the total harmonic current distortion from harmonic
 %   subgroups 
-
+%    
 % Parameters
 % -----------
 %     harmonic_subgroups: structure with handles- harmonic_subgroups.amplitude and harmonic_subgroups.harmonic  

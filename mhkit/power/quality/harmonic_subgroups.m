@@ -1,8 +1,8 @@
 function harmonic_subgroups=harmonic_subgroups(harmonics,grid_freq)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   calculates the harmonic subgroups from the harmonics of current
-
+%   Calculates the harmonic subgroups from the harmonics of current
+%    
 % Parameters
 % -----------
 %     harmonics: structure with handles- harmonics.amplitude and harmonics.harmonic  
