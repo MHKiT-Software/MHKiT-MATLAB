@@ -1,21 +1,20 @@
 function THCD=total_harmonic_current_distortion(harmonic_subgroups,rated_current)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Calculates the total harmonic current distortion from harmonic
-%   subgroups 
+%   Calculates the total harmonic current distortion (THC) based on IEC/TS 62600-30
 %    
 % Parameters
 % -----------
 %     harmonic_subgroups: structure with handles- harmonic_subgroups.amplitude and harmonic_subgroups.harmonic  
-%         the subgrouped RMS current harmonics amplitude indexed by harmonic order 
+%         Subgrouped current harmonics amplitude indexed by harmonic order 
 % 
 %     rated_current: double
-%         the rated current of the energy device in Amps
+%         Rated current of the energy device in Amps
 % 
 % Returns
 % -------
 %     THCD: double
-%         the total harmonic current distortion
+%         Total harmonic current distortion
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

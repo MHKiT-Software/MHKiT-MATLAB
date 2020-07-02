@@ -1,21 +1,20 @@
 function interharmonics=interharmonics(harmonics,grid_freq)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Calculates the interharmonics from the harmonics of current
+%   Calculates the interharmonics from the harmonics of current based on IEC 61000-4-7.
 %    
 % Parameters
 % -----------
 %     harmonics: structure with handles- harmonics.amplitude and harmonics.harmonic  
-%         RMS harmonic amplitude indexed by the harmonic frequency 
+%         Harmonic amplitude indexed by the harmonic frequency 
 % 
 %     grid_freq: int
-%         value indicating if the power supply is 50 or 60 Hz. Valid input are 50 and 60
+%         Value indicating if the power supply is 50 or 60 Hz. Options = 50 or 60
 % 
 % Returns
 % -------
 %     interharmonics: structure with handles interharmonics.amplitude and
 %           interharmonics.harmonic
-%         interharmonics groups
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

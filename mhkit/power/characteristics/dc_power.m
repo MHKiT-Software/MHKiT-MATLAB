@@ -88,7 +88,7 @@ if (isa(current,'py.pandas.core.frame.DataFrame')~=1)
     end
 end
 
-p_pd=py.mhkit.wave.performance.dc_power(voltage,current);
+p_pd=py.mhkit.power.characteristics.dc_power(voltage,current);
 vals=double(py.array.array('d',py.numpy.nditer(p_pd.values)));
 sha=cell(p_pd.values.shape);
 x=int64(sha{1,1});

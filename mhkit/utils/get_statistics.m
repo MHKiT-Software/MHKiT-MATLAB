@@ -1,17 +1,22 @@
 function stats=get_statistics(data,freq,varargin)
 
 %%%%%%%%%%%%%%%%%%%%
-%     function used to obtain statistics from a dataset 
+%     Calculate mean, max, min and stdev statistics of continuous data for a 
+%     given statistical window. Default length of statistical window (period) is
+%     based on IEC TS 62600-3:2020 ED1. Also allows calculation of statistics for multiple statistical
+%     windows of continuous data. 
 %     
 % Parameters
 % ------------
 %     data: strucutre  
-%         vector of excel datenums to be converted 
+%         structure of variables to get statistics for. 
+%     freq: double or int
+%         Sample rate of data [Hz]
 %
 % Returns
 % ---------
-%     time: DateTimeIndex 
-%         vector of corresponding python datetime values
+%     stats: structure 
+%         Structure with mean, max, min, and stdev of each variable
 %
 %         
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

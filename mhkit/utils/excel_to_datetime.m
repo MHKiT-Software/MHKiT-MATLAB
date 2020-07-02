@@ -1,7 +1,7 @@
 function new_time=excel_to_datetime(excel_num)
 
 %%%%%%%%%%%%%%%%%%%%
-%     conversion of excel datenum format to datetime 
+%     Convert excel datenum format to datetime 
 %     
 % Parameters
 % ------------
