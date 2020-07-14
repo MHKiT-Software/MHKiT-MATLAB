@@ -71,13 +71,21 @@ vals=reshape(vals,[x,y]);
 ti=cell(py.list(py.numpy.nditer(datapd.index)));
 siti=size(ti);
 si=size(vals);
- for i=1:si(2)
-    test=string(py.str(vv{i}));
-    unit=string(matstr.(test));
-    
-    datast.(test)=vals(:,i);
-    datast.units.(test)=unit;
- end
+temp = [];
+if ~isempty(fieldnames(matstr))
+    for i=1:si(2)
+        test=string(py.str(vv{i}));
+        datast.(test)=vals(:,i);
+        unit=string(matstr.(test));
+        datast.units.(test)=unit;
+    end
+else
+    datast.spectra = vals;
+    for i=1:si(2)
+        temp = [temp, double(py.array.array('d',py.numpy.nditer(vv{i})))];
+    end
+    datast.frequency = temp;
+end
  for i=1:siti(2)
     datast.time(i)=datetime(string(py.str(ti{i})),'InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSSSSSSS');
  end
