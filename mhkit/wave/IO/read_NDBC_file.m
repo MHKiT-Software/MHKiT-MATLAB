@@ -34,6 +34,14 @@ function datast=read_NDBC_file(file_name,varargin)
 %
 %         data.units: the units for each data entry
 %         
+%         OR if a spectra data NDBC file
+%
+%         data.spectra: spectra data
+%
+%         data.time: given in datetime 
+%
+%         data.frequency: spectral frequency
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 py.importlib.import_module('mhkit');
@@ -55,20 +63,18 @@ datapd=datac{1};
 datamat=datac{2};
 matstr=struct(datamat);
 
-
 xx=cell(datapd.axes);
 v=xx{2};
 
-
 vv=cell(py.list(py.numpy.nditer(v.values,pyargs("flags",{"refs_ok"}))));
 
-vals=double(py.array.array('d',py.numpy.nditer(datapd.values)));
+vals=double(py.array.array('d',py.numpy.nditer(datapd.values,pyargs("flags",{"refs_ok"}))));
 sha=cell(datapd.values.shape);
 x=int64(sha{1,1});
 y=int64(sha{1,2});
 
 vals=reshape(vals,[x,y]);
-ti=cell(py.list(py.numpy.nditer(datapd.index)));
+ti=cell(py.list(py.numpy.nditer(datapd.index,pyargs("flags",{"refs_ok"}))));
 siti=size(ti);
 si=size(vals);
 temp = [];
