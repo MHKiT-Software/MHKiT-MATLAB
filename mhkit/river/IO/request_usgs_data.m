@@ -25,8 +25,8 @@ function datast=request_usgs_data(station, parameter, start_date, end_date,optio
 %         to call: request_usgs_data(station,parameter,start_date.end_date,"data_type",data_type)
 %
 %     proxy : structure or None (optional)
-%          To request data from behind a firewall, define a dictionary of proxy settings, 
-%          for example proxy.http = "localhost:8080"
+%         To request data from behind a firewall, define a dictionary of proxy settings, 
+%         for example proxy.http = "localhost:8080"
 %         to call: request_usgs_data(station,parameter,start_date.end_date,"proxy",proxy)
 %
 %     write_json : str or None (optional)

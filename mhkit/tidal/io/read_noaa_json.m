@@ -3,6 +3,7 @@ function data=read_noaa_json(filename)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Returns site structure from a json saved from the 
 %     request_noaa_data
+%
 % Parameters
 % ----------
 %     filename: string
