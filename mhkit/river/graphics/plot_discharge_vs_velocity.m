@@ -1,4 +1,4 @@
-function figure=plot_discharge_vs_velocity(Q,V,varargin)
+function figure=plot_discharge_vs_velocity(Q,V,options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Plots discharge vs velocity 
 %     
@@ -12,64 +12,91 @@ function figure=plot_discharge_vs_velocity(Q,V,varargin)
 %
 %     title: string (optional)
 %         title for the plot
+%         to call: plot_discharge_vs_velocity(Q,V,"title",title)
 %
-%   polynomial_coeff: array (optional)
-%       polynomial coefficients which can be computed from 
-%       polynomial_fit.m. Expects poly.coef
+%     savepath: string (optional)
+%         path and filename to save figure.
+%         to call: plot_discharge_vs_velocity(Q,V,"savepath",savepath)
+%
+%     polynomial_coeff: array (optional)
+%         polynomial coefficients which can be computed from 
+%         polynomial_fit.m. Expects poly.coef
+%         to call: plot_discharge_vs_velocity(Q,V,"polynomial_coeff",polynomial_coeff)
 % 
 % Returns
 % ---------
 %   figure: plot of discharge vs. velocity
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+arguments
+    Q
+    V
+    options.title = "";
+    options.savepath = "";
+    options.polynomial_coeff = [];
+end
+
 figure=plot(Q,V,'o');
+hold on
 grid on
 xlabel('Discharge [m^{3}/s]','FontSize',20)
 ylabel('Velocity [m/s]','FontSize',20)
 
-if nargin == 3
-    if isstring(varargin{1})
-        title(varargin{1})
-    elseif isnumeric(varargin{1})
-        mi=min(Q);
-        
-        ma=max(Q);
-        si=size(varargin{1});
-        x=linspace(mi(1),ma(1),100);
-        hold on
-        p2=plot(x,polyval(varargin{1},x),'--');
-        legend(p2,{'Polynomial Fit'},'Location','northwest')
-    else
-        ME = MException('MATLAB:plot_discharge_vs_velocity','Variable argument is of the wrong type');
-        throw(ME);
-    end
-    
-elseif nargin ==4 
-    mi=min(Q);
-    ma=max(Q);
-    if isstring(varargin{1}) & isnumeric(varargin{2})
-        
-        si=size(varargin{2});
-        x=linspace(mi(1),ma(1),100);
-        hold on
-        p2=plot(x,polyval(varargin{2},x),'--');
-        legend(p2,{'Polynomial Fit'},'Location','northwest')
-        title(varargin{1})
-    elseif isstring(varargin{2}) & isnumeric(varargin{1})
-        si=size(varargin{1});
-        x=linspace(mi(1),ma(1),100);
-        hold on
-        p2=plot(x,polyval(varargin{1},x),'--');
-        legend(p2,{'Polynomial Fit'},'Location','northwest')
-        title(varargin{2})
-    else
-        ME = MException('MATLAB:plot_discharge_vs_velocity','Variable argument is of the wrong type');
-        throw(ME);
-    end
-elseif nargin > 4
-    ME = MException('MATLAB:plot_discharge_vs_velocity','Too many arguments given');
-        throw(ME);
+% if nargin == 3
+%     if isstring(varargin{1})
+%         title(varargin{1})
+%     elseif isnumeric(varargin{1})
+%         mi=min(Q);
+%         
+%         ma=max(Q);
+%         si=size(varargin{1});
+%         x=linspace(mi(1),ma(1),100);
+%         hold on
+%         p2=plot(x,polyval(varargin{1},x),'--');
+%         legend(p2,{'Polynomial Fit'},'Location','northwest')
+%     else
+%         ME = MException('MATLAB:plot_discharge_vs_velocity','Variable argument is of the wrong type');
+%         throw(ME);
+%     end
+%     
+% elseif nargin ==4 
+%     mi=min(Q);
+%     ma=max(Q);
+%     if isstring(varargin{1}) & isnumeric(varargin{2})
+%         
+%         si=size(varargin{2});
+%         x=linspace(mi(1),ma(1),100);
+%         hold on
+%         p2=plot(x,polyval(varargin{2},x),'--');
+%         legend(p2,{'Polynomial Fit'},'Location','northwest')
+%         title(varargin{1})
+%     elseif isstring(varargin{2}) & isnumeric(varargin{1})
+%         si=size(varargin{1});
+%         x=linspace(mi(1),ma(1),100);
+%         hold on
+%         p2=plot(x,polyval(varargin{1},x),'--');
+%         legend(p2,{'Polynomial Fit'},'Location','northwest')
+%         title(varargin{2})
+%     else
+%         ME = MException('MATLAB:plot_discharge_vs_velocity','Variable argument is of the wrong type');
+%         throw(ME);
+%     end
+title(options.title)
+mi=min(Q);
+ma=max(Q);
+len = strlength(options.savepath);
+lenp = length(options.polynomial_coeff);
+if lenp > 1
+   x=linspace(mi(1),ma(1),100);
+   p2=plot(x,polyval(options.polynomial_coeff,x),'--');
+   legend(p2,{'Polynomial Fit'},'Location','northwest') 
 end
-        
-hold off        
+
+if len > 1
+    saveas(figure, options.savepath);
+end 
+
+
+
+hold off      
         

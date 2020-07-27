@@ -1,4 +1,4 @@
-function figure=plot_flow_duration_curve(Q,F,varargin)
+function figure=plot_flow_duration_curve(Q,F,options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Plots discharge vs exceedance probability as a Flow Duration Curve (FDC) 
 %     
@@ -12,11 +12,23 @@ function figure=plot_flow_duration_curve(Q,F,varargin)
 %
 %     title: string (optional)
 %          title for the plot
+%          to call: plot_flow_duration_curve(Q,F,"title",title)
+%
+%     savepath: string (optional)
+%          path and filename to save figure.
+%          to call: plot_flow_duration_curve(Q,F,"savepath",savepath)
 % 
 % Returns
 % ---------
 %   figure: plot of discharge vs. exceedance probability 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments
+    Q
+    F
+    options.title = "";
+    options.savepath = "";
+end
 
 temp.Q=Q;
 temp.F=F;
@@ -30,6 +42,11 @@ xlabel('Discharge [m^{3}/s]','FontSize',20)
 ylabel('Exceedance Probability','FontSize',20)
 set(gca,'XScale','log')
 
-if nargin == 3
-    title(varargin{1})
-end
+title(options.title)
+
+len = strlength(options.savepath);
+if len > 1
+    saveas(figure, options.savepath);
+end 
+
+hold off
