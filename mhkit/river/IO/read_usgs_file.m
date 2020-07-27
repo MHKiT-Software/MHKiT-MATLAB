@@ -32,13 +32,13 @@ v=xx{2};
 
 vv=cell(py.list(py.numpy.nditer(v.values,pyargs("flags",{"refs_ok"}))));
 
-vals=double(py.array.array('d',py.numpy.nditer(datapd.values)));
+vals=double(py.array.array('d',py.numpy.nditer(datapd.values,pyargs("flags",{"refs_ok"}))));
 sha=cell(datapd.values.shape);
 x=int64(sha{1,1});
 y=int64(sha{1,2});
 
 vals=reshape(vals,[x,y]);
-ti=cell(py.list(py.numpy.nditer(datapd.index)));
+ti=cell(py.list(py.numpy.nditer(datapd.index,pyargs("flags",{"refs_ok"}))));
 siti=size(ti);
 si=size(vals);
  for i=1:si(2)
@@ -49,7 +49,7 @@ si=size(vals);
     datast.units.(newname(1))=newname(2);
  end
  for i=1:siti(2)
-    datast.time{i}=posixtime(datetime(string(py.str(ti{i})),'InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSSSSSSS'));
+    datast.time{i}=posixtime(datetime(string(py.str(ti{i})),'InputFormat','yyyy-MM-dd HH:mm:ssXXX','TimeZone','UTC'));
  end
  
  datast.time=cell2mat(datast.time);
