@@ -1,5 +1,5 @@
 function figure=plot_rose(data, width_dir, width_vel, ...
-                                        varargin)
+                                        options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %       Creates a polar histogram. Direction angles from binned histogram must 
 %       be specified such that 0  degrees is north.
@@ -25,20 +25,36 @@ function figure=plot_rose(data, width_dir, width_vel, ...
 %
 %    flood_ebb: 2 element vector (optional)
 %        Direction in degrees added to theta ticks
+%        to call: plot_rose(Q, width_dir, width_vel,"flood_ebb",flood_ebb)
 %
 %    title: string (optional)
-%       title for the plot 
+%        title for the plot 
+%        to call: plot_rose(Q, width_dir, width_vel,"title",title)
+%
+%    savepath: string (optional)
+%        path and filename to save figure.
+%        to call: plot_rose(Q, width_dir, width_vel,"savepath",savepath)
+%
 % 
 % Returns
 % ---------
 %   figure handle to water current rose plot
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+arguments
+    data
+    width_dir
+    width_vel
+    options.title = "";
+    options.savepath = "";
+    options.flood_ebb = [];
+end
+
 % checking input variables
-if nargin > 5
-    ME = MException('MATLAB:plot_rose','Incorrect number of input arguments, too many agruments, requires 5 at most, %d arguments passed',nargin);
-    throw(ME);
-end;
+% if nargin > 5
+%     ME = MException('MATLAB:plot_rose','Incorrect number of input arguments, too many agruments, requires 5 at most, %d arguments passed',nargin);
+%     throw(ME);
+% end;
 
 %check to see if the first input argumeent is a structure
 if any(~isstruct(data))
@@ -59,17 +75,17 @@ if any([~isnumeric(width_vel), length(width_vel) ~= 1])
 end;
 
 % Parsing out the variable arguments
-if nargin >= 4
-    for indx = 4:1:nargin
-        if (ischar(varargin{indx-3}) | isstring(varargin{indx-3}))
-            titleText = varargin{indx-3};
-        elseif isnumeric(varargin{indx-3})
-            if length(varargin{indx-3}) ==2
-                flood_ebb = varargin{indx-3};
-            end;
-        end;
-    end;
-end;
+% if nargin >= 4
+%     for indx = 4:1:nargin
+%         if (ischar(varargin{indx-3}) | isstring(varargin{indx-3}))
+%             titleText = varargin{indx-3};
+%         elseif isnumeric(varargin{indx-3})
+%             if length(varargin{indx-3}) ==2
+%                 flood_ebb = varargin{indx-3};
+%             end;
+%         end;
+%     end;
+% end;
     
 % Plot Variables
 radialLabelDir = 30;
@@ -101,9 +117,7 @@ end;
 legend('Show');
 
 % adding title
-if exist('titleText','var')
-    title(titleText);
-end;
+title(options.title)
 
 [N] = histcounts2(data.d,data.s,DirEdges,VelEdges,'Normalization','probability');
 %forming the vector with the total probability for each direction bin
@@ -123,13 +137,20 @@ axinfo.RTickLabel = num2cell(RadRingLoc);
 axinfo.FontSize = 20;
 
 % adding in the flood and ebb directions if they are included
-if exist('flood_ebb','var')
+
+if length(options.flood_ebb) == 2
     % adding in the radial lines for the ebb and flood 
-    polarplot([1,1]*flood_ebb(1)/180*pi,[0,max(RadRingLoc/100)*length(data.s)],'linewidth',2,'color','r','displayname','Flood Direction');
-    text(flood_ebb(1)/180*pi,max(RadRingLoc/100)*length(data.s),'Flood','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
-    polarplot([1,1]*flood_ebb(2)/180*pi,[0,max(RadRingLoc/100)*length(data.s)],'linewidth',2,'color','b','displayname','Ebb Direction');    
-    text( flood_ebb(2)/180*pi,max(RadRingLoc/100)*length(data.s),'Ebb','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
+    polarplot([1,1]*options.flood_ebb(1)/180*pi,[0,max(RadRingLoc/100)*length(data.s)],'linewidth',2,'color','r','displayname','Flood Direction');
+    text(options.flood_ebb(1)/180*pi,max(RadRingLoc/100)*length(data.s),'Flood','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
+    polarplot([1,1]*options.flood_ebb(2)/180*pi,[0,max(RadRingLoc/100)*length(data.s)],'linewidth',2,'color','b','displayname','Ebb Direction');    
+    text( options.flood_ebb(2)/180*pi,max(RadRingLoc/100)*length(data.s),'Ebb','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
 end;
+
+len = strlength(options.savepath);
+if len > 1
+    saveas(figure, options.savepath);
+end
+
 hold off   
 
 

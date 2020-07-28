@@ -18,8 +18,6 @@ function new_time=excel_to_datetime(excel_num)
 py.importlib.import_module('mhkit');
 py.importlib.import_module('numpy');
 
-new_time = double(py.array.array('d',py.numpy.nditer(py.mhkit.utils.excel_to_datetime(py.numpy.array(excel_num)))))/1e9;
-new_time = datetime(new_time,'ConvertFrom','posix');
 
-
+new_time = datetime(excel_num,'ConvertFrom','excel');
 

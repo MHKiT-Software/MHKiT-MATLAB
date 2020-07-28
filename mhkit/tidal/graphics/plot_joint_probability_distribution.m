@@ -1,5 +1,5 @@
 function fig=plot_joint_probability_distribution(Q, width_dir, width_vel, ...
-                                        varargin)
+                                        options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Creates a polar histogram. Direction angles from binned histogram must 
 %   be specified such that 0 is north.
@@ -18,27 +18,43 @@ function fig=plot_joint_probability_distribution(Q, width_dir, width_vel, ...
 %           time-series of speeds [cm/s]
 %
 %    width_dir: float 
-%        Width of directional bins for histogram in degrees
+%       Width of directional bins for histogram in degrees
 %
 %    width_vel: float 
-%        Width of velocity bins for histogram in m/s
+%       Width of velocity bins for histogram in m/s
 %
 %    flood_ebb: 2 element vector (optional)
-%        Direction in degrees added to theta ticks 
+%       Direction in degrees added to theta ticks 
+%       to call: plot_joint_probability_distribution(Q, width_dir, width_vel,"flood_ebb",flood_ebb)
 %
 %    title: string (optional)
 %       title for the plot 
+%       to call: plot_joint_probability_distribution(Q, width_dir, width_vel,"title",title)
+%
+%    savepath: string (optional)
+%       path and filename to save figure.
+%       to call: plot_joint_probability_distribution(Q, width_dir, width_vel,"savepath",savepath)
 % 
 % Returns
 % ---------
 %   figure handle to joint probability distribution plot
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+arguments
+    Q
+    width_dir
+    width_vel
+    options.flood_ebb = [];
+    options.title = "";
+    options.savepath = "";
+
+end
+
 % checking input variables
-if nargin > 5
-    ME = MException('MATLAB:plot_joint_probability_distribution','Incorrect number of input arguments, too many agruments, requires 5 at most, %d arguments passed',nargin);
-    throw(ME);
-end;
+% if nargin > 5
+%     ME = MException('MATLAB:plot_joint_probability_distribution','Incorrect number of input arguments, too many agruments, requires 5 at most, %d arguments passed',nargin);
+%     throw(ME);
+% end;
 
 %check to see if the first input argumeent is a structure
 if any(~isstruct(Q))
@@ -59,17 +75,17 @@ if any([~isnumeric(width_vel), length(width_vel) ~= 1])
 end;
 
 % Parsing out the variable arguments
-if nargin >= 4
-    for indx = 4:1:nargin
-        if (ischar(varargin{indx-3}) | isstring(varargin{indx-3}))
-            titleText = varargin{indx-3};
-        elseif isnumeric(varargin{indx-3})
-            if length(varargin{indx-3}) ==2
-                flood_ebb = varargin{indx-3};
-            end;
-        end;
-    end;
-end;
+% if nargin >= 4
+%     for indx = 4:1:nargin
+%         if (ischar(varargin{indx-3}) | isstring(varargin{indx-3}))
+%             titleText = varargin{indx-3};
+%         elseif isnumeric(varargin{indx-3})
+%             if length(varargin{indx-3}) ==2
+%                 flood_ebb = varargin{indx-3};
+%             end;
+%         end;
+%     end;
+% end;
 
 % matlab does not have the ability to overlay a pcolor on polar axes, so a
 % polar plot must manually be created.
@@ -121,20 +137,18 @@ AxisLabel = {'N','NE','E','SE','S','SW','W','NW'};
 for idx = 1:8
     line([0 Xrad(idx)],[0 Yrad(idx)]);
     text(Xrad(idx)*1.1,Yrad(idx)*1.05,AxisLabel(idx),'fontsize',15,'HorizontalAlignment','Center');
-end;
+end
 
 % adding title
-if exist('titleText','var')
-    title(titleText,'fontsize',20);
-end;
+title(options.title)
 
 % adding in the flood and ebb directions if they are included
-if exist('flood_ebb','var')
-    line([0,MaxR*sin(flood_ebb(1)/180*pi)],[0 MaxR*cos(flood_ebb(1)/180*pi)]);
-    text(MaxR*sin(flood_ebb(1)/180*pi)*1.1,MaxR*cos(flood_ebb(1)/180*pi)*1.1,'Flood','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
-    line([0,MaxR*sin(flood_ebb(2)/180*pi)],[0 MaxR*cos(flood_ebb(2)/180*pi)]);
-    text(MaxR*sin(flood_ebb(2)/180*pi)*1.1,MaxR*cos(flood_ebb(2)/180*pi)*1.1,'Ebb','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
-end;
+if length(options.flood_ebb) == 2 
+    line([0,MaxR*sin(options.flood_ebb(1)/180*pi)],[0 MaxR*cos(options.flood_ebb(1)/180*pi)]);
+    text(MaxR*sin(options.flood_ebb(1)/180*pi)*1.1,MaxR*cos(options.flood_ebb(1)/180*pi)*1.1,'Flood','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
+    line([0,MaxR*sin(options.flood_ebb(2)/180*pi)],[0 MaxR*cos(options.flood_ebb(2)/180*pi)]);
+    text(MaxR*sin(options.flood_ebb(2)/180*pi)*1.1,MaxR*cos(options.flood_ebb(2)/180*pi)*1.1,'Ebb','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
+end
 
 
 % creating direction and velocity matrix as indexes into the probability
@@ -155,6 +169,12 @@ colormap(CMaPType)
 shading interp;
 cbh = colorbar;
 ylabel(cbh,'Joint Probability [%]','fontsize',20);
+
+len = strlength(options.savepath);
+if len > 1
+    saveas(figure, options.savepath);
+end 
+
 hold off
 
 
