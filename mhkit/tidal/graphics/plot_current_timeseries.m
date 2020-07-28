@@ -1,5 +1,5 @@
 function figure=plot_current_timeseries(data, principal_direction, ...
-                                       varargin)
+                                       options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Returns a plot of velocity from an array of direction and speed
 %     data in the direction of the supplied principal_direction. 
@@ -22,11 +22,23 @@ function figure=plot_current_timeseries(data, principal_direction, ...
 %
 %    title: string (optional)
 %       title for the plot 
+%       to call: plot_current_timeseries(data,principal_direction,"title",title)
+%
+%    savepath: string (optional)
+%       path and filename to save figure.
+%       to call: plot_current_timeseries(data,principal_direction,"savepath",savepath)
 % 
 % Returns
 % ---------
 %   figure: timeseries plot of current-speed velocity 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments
+    data
+    principal_direction
+    options.title = "";
+    options.savepath = "";
+end
 
 % Rotate coordinate system by supplied principal_direction
 principal_directions = data.d - principal_direction;
@@ -39,6 +51,7 @@ time = datetime(data.time, 'convertfrom', 'posixtime', 'Format', 'MM/dd/yy HH:mm
 
 % Call on standard xy plotting
 figure = plot(time, velocities);
+hold on
 datetick('x',2,'keeplimits');
 
 grid on;
@@ -46,6 +59,11 @@ grid on;
 xlabel('Time [date]','FontSize',20);
 ylabel('Velocity [\itm/s\rm]','FontSize',20);
 
-if nargin == 3
-    title(varargin{1})
-end
+title(options.title)
+
+len = strlength(options.savepath);
+if len > 1
+    saveas(figure, options.savepath);
+end 
+
+hold off
