@@ -33,9 +33,9 @@ function S1=create_spectra(spectra_type,frequency,Tp,varargin)
 %
 %         S.frequency= frequency (Hz)
 %
-%         S.Te
+%         S.Tp
 %
-%         S.Hm0
+%         S.Hs
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
