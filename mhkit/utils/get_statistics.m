@@ -9,9 +9,12 @@ function stats=get_statistics(data,freq,varargin)
 % Parameters
 % ------------
 %     data: strucutre  
-%         structure of variables to get statistics for. 
+%         structure of variables to get statistics for with field called
+%         time.
 %     freq: double or int
 %         Sample rate of data [Hz]
+%     period: double/int
+%         Statistical window of interest [sec], default = 600
 %
 % Returns
 % ---------
@@ -31,7 +34,7 @@ li2 = py.list();
 
  for k=1:length(fn)
      
-     if ~strcmp(fn{k} , 'time')
+     if ~strcmp(fn{k} , {'time','Timestamp'})
 
             eval(['temp = data.' fn{k} ';' ]);           
             app=py.list(temp);
@@ -47,7 +50,7 @@ li2 = py.list();
  datapd.index=py.pecos.utils.index_to_datetime(datapd.index);
  
  if nargin == 3 
-     stat_py = py.mhkit.utils.get_statistics(datapd,freq,pyargs('period',varargin{1}));
+     stat_py = py.mhkit.utils.get_statistics(datapd,int32(freq),pyargs('period',int32(varargin{1})));
  elseif nargin == 2
       stat_py = py.mhkit.utils.get_statistics(datapd,int32(freq)); 
  else
@@ -59,30 +62,19 @@ li2 = py.list();
  max = double(py.array.array("d",py.numpy.nditer(stat_py{2}.values)));
  min = double(py.array.array("d",py.numpy.nditer(stat_py{3}.values)));
  std = double(py.array.array("d",py.numpy.nditer(stat_py{4}.values)));
- for k=1:length(fn)
-     if ~strcmp(fn{k} , 'time')
-        val = mean(k);
-        eval(['stats.mean.' fn{k} '= val ;' ]);
-     end
- end
- for k=1:length(fn)
-     if ~strcmp(fn{k} , 'time')
-        val = max(k);
-        eval(['stats.max.' fn{k} '= val ;' ]);
-     end
- end
+ 
+ pointer = 0;
  
  for k=1:length(fn)
-     if ~strcmp(fn{k} , 'time')
-        val = min(k);
-        eval(['stats.min.' fn{k} '= val ;' ]);
+     if ~strcmp(fn{k} , {'time','Timestamp'})
+        pointer = pointer + 1;
+        val1 = mean(pointer);
+        val2 = max(pointer);
+        val3 = min(pointer);
+        val4 = std(pointer);
+        eval(['stats.mean.' fn{k} '= val1 ;' ]);
+        eval(['stats.max.' fn{k} '= val2 ;' ]);
+        eval(['stats.min.' fn{k} '= val3 ;' ]);
+        eval(['stats.std.' fn{k} '= val4 ;' ]);
      end
  end
- 
- for k=1:length(fn)
-     if ~strcmp(fn{k} , 'time')
-        val = std(k);
-        eval(['stats.std.' fn{k} '= val ;' ]);
-     end
- end
-
