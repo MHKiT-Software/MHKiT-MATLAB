@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from distutils.core import Extension
 
 DISTNAME = 'mhkit_python_utils'
-VERSION = '0.1.0'
+VERSION = '0.2.0'
 PACKAGES = ['mhkit_python_utils']
 EXTENSIONS = []
 DESCRIPTION = ''
@@ -11,12 +11,12 @@ AUTHOR = 'mhkit developers'
 MAINTAINER_EMAIL = ''
 LICENSE = 'Revised BSD'
 URL = ''
-CLASSIFIERS=['Development Status :: 0 - Alpha',
+CLASSIFIERS=['Development Status :: 3 - Alpha',
              'Programming Language :: Python :: 3',
              'Topic :: Scientific/Engineering',
              'Intended Audience :: Science/Research',
              'Operating System :: OS Independent',
-            ],
+            ]
 DEPENDENCIES = ['pandas']
 
 
