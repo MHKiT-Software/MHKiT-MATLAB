@@ -1,4 +1,4 @@
-function figure=plot_matrix(M,Mtype)
+function figure=plot_matrix(M,Mtype, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %    Plots the matrix with Hm0 and Te on the y and x axis
@@ -19,10 +19,20 @@ function figure=plot_matrix(M,Mtype)
 %         type of matrix (i.e. power, capture length, etc.) to be used
 %         in plot title 
 %
+%     savepath: string (optional)
+%         path and filename to save figure.
+%         to call: plot_matrix(M, Mtype,"savepath",savepath)
+%
 % Returns
 % ---------
 %   figure: plot of the matrix
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments
+    M 
+    Mtype
+    options.savepath = "";
+end
 
 figure=pcolor(M.Te_bins,M.Hm0_bins,M.values);
 colormap(flipud(hot))
@@ -45,3 +55,8 @@ for i=1:cols-1
           end
       end
 end
+
+len = strlength(options.savepath);
+if len > 1
+    saveas(figure, options.savepath);
+end 
