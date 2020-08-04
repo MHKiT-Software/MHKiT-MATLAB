@@ -92,6 +92,7 @@ else
     end
     datast.frequency = temp;
 end
+
  for i=1:siti(2)
     datast.time(i)=datetime(string(py.str(ti{i})),'InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSSSSSSS');
  end
