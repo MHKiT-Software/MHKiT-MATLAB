@@ -6,7 +6,7 @@ function interharmonics=interharmonics(harmonics,grid_freq)
 % Parameters
 % -----------
 %     harmonics: structure with handles- harmonics.amplitude and harmonics.harmonic  
-%         Harmonic amplitude indexed by the harmonic frequency 
+%         Harmonic amplitude with each timeseries in its own column 
 % 
 %     grid_freq: int
 %         Value indicating if the power supply is 50 or 60 Hz. Options = 50 or 60
