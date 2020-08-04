@@ -6,7 +6,7 @@ function frequency=instantaneous_frequency(voltage)
 % Parameters
 % -----------
 %     um: structure with handles- um.voltage and um.time  
-%         measured voltage source (V) index by time 
+%         measured voltage source (V) with each timeseries in its own column 
 % 
 % Returns
 % -------
@@ -32,7 +32,7 @@ if dsize(2)>1
    for i = 1:dsize(2)
       app=py.list(data(:,i));
       li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-            
+      
    end
    data_pd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time(:,1),li,int32(dsize(2)));
 elseif dsize(2)==1
@@ -40,7 +40,6 @@ elseif dsize(2)==1
 end
 
 harmonics_pd = py.mhkit.power.characteristics.instantaneous_frequency(data_pd);
-
 vals=double(py.array.array('d',py.numpy.nditer(harmonics_pd.values)));
 sha=cell(harmonics_pd.values.shape);
 x=int64(sha{1,1});

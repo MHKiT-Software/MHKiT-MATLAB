@@ -67,4 +67,5 @@ else
     ME = MException('MATLAB:frequency_moment','Incorrect number of arguments');
         throw(ME);
 end
+
 m=double(m.values);

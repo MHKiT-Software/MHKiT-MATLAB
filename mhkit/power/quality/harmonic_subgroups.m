@@ -6,7 +6,7 @@ function harmonic_subgroups=harmonic_subgroups(harmonics,grid_freq)
 % Parameters
 % -----------
 %     harmonics: structure with handles- harmonics.amplitude and harmonics.harmonic  
-%         harmonic amplitude indexed by the harmonic frequency 
+%         harmonic amplitude with each timeseries in its own column 
 % 
 %     grid_freq: int
 %         value indicating if the power supply is 50 or 60 Hz. Valid input are 50 and 60

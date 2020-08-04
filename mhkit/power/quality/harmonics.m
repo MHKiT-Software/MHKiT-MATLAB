@@ -50,7 +50,7 @@ if dsize(2)>1
    end
    data_pd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time(:,1),li,int32(dsize(2)));
 elseif dsize(2)==1
-   data_pd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time,py.numpy.array(data),dsize(x(2)));
+   data_pd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time,py.numpy.array(data),dsize(2));
 end
 
 harmonics_pd = py.mhkit.power.quality.harmonics(data_pd,freq,grid_freq);
