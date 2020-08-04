@@ -39,7 +39,6 @@ elseif dsize(2)==1
 end
 
 interharmonics_pd = py.mhkit.power.quality.interharmonics(data_pd,grid_freq);
-
 vals=double(py.array.array('d',py.numpy.nditer(interharmonics_pd.values)));
 sha=cell(interharmonics_pd.values.shape);
 x=int64(sha{1,1});
