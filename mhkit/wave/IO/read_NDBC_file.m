@@ -49,12 +49,12 @@ py.importlib.import_module('numpy');
 
 if nargin == 2
     missing=py.list(varargin{1});
-    datatp=py.mhkit.wave.io.read_NDBC_file(file_name,missing);
+    datatp=py.mhkit.wave.io.ndbc.read_file(file_name,missing);
 elseif nargin > 2
     ME = MException('MATLAB:read_NDBC_file','too many arguments passed');
     throw(ME);
 else
-    datatp=py.mhkit.wave.io.read_NDBC_file(file_name);
+    datatp=py.mhkit.wave.io.ndbc.read_file(file_name);
 end
 
 datac=cell(datatp);
