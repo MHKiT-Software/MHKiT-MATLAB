@@ -55,6 +55,15 @@ df = py.pandas.DataFrame(pyargs("data",li));
 
 datapd = py.mhkit.wave.io.ndbc.request_data(parameter,df);
 key = cell(py.list(datapd));
-%key = cell(py.list(py.numpy.nditer(keys(datapd),pyargs("flags",{"refs_ok"}))));
-disp(string(py.str(key{1})))
-ndbc_data = 2;
+
+for i=1:length(key)
+    df = double(datapd{string(py.str(key{i}))}.values);
+    cols = cell(py.list(py.numpy.nditer(datapd{string(py.str(key{i}))}.columns,pyargs("flags",{"refs_ok"}))));
+    for k = 1:length(cols)
+        a = char(string(py.str(key{i})));
+        b = char(string(py.str(cols{k})));
+        c = df(:,k);
+        eval(['ndbc_data.year_' a '.' b '= c ;']);
+        
+    end
+end    
