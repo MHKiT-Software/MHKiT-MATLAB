@@ -22,8 +22,8 @@ function available_data=NDBC_available_data(parameter,options)
 %     
 % Returns
 % ---------
-%     avaialble_data: Structure 
-%         Structure with station ID, years, and NDBC file names.
+%     avaialble_data: Table 
+%         Structure with station_id, years, and NDBC file names.
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
