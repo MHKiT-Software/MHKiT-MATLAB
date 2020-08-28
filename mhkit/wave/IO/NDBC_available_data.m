@@ -47,34 +47,17 @@ sha=cell(datapd.values.shape);
 x=int64(sha{1,1});
 y=int64(sha{1,2});
 
-%vals=reshape(datali,x,y);
+
 siti=size(datali);
 for i=1:siti(2)
     st{i} = string(py.str(datali{i}));
 
-    
 end
 st2 = reshape(st,x,y);
-%disp(st2{1,3})
-station_id = {};
-file = {};
-year = {};
 
-for i=1:x
-    station_id = [station_id,st2{i,1}];
-    year = [year, st2{i,2}];
-    file = [file , st2{i,3}];
-%     eval(['temp = available_data.' a '.' b]);
-%      disp(temp)
-%     if size(temp) < 1 
-% 
-%         eval(['available_data.' a '.' b '= {} ;']);
-%     end
-%     eval(['available_data.' a '.' b '= [bins.averages.'...
-%         a '.' b ',' c '];' ]);
-end
+station_id = [st2{:,1}];
+year = [st2{:,2}];
+file = [st2{:,3}];
 
-%station_uni = unique(station)
-%year_uni = unique(year)
 varnames = {'Station_id','year','file'};
 available_data = table(station_id',year',file','VariableNames',varnames);
