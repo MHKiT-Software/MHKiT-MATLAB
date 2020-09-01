@@ -1,10 +1,10 @@
 function ndbc_data=NDBC_request_data(parameter,filenames,options)
 
 %%%%%%%%%%%%%%%%%%%%
-%     Requests data by filenames and returns a dictionary of DataFrames 
-%     for each filename passed. If filenames for a sigle buoy are passed 
-%     then the yearly DataFrames in the returned dictionary (ndbc_data) are 
-%     indexed by year (e.g. ndbc_data['2014']). If multiple buoy ids are 
+%     Requests data by filenames and returns a structure of structures 
+%     for each filename passed. If filenames for a single buoy are passed 
+%     then the yearly structures in the returned structure (ndbc_data) are 
+%     indexed by year (e.g. ndbc_data.year_2004). If multiple buoy ids are 
 %     passed then the returned dictionary is indexed by buoy id and year 
 %     (e.g. ndbc_data['46022']['2014']). 
 %     
@@ -16,7 +16,7 @@ function ndbc_data=NDBC_request_data(parameter,filenames,options)
 %         'stdmet':   'Standard Meteorological Current Year Historical Data'
 %
 %     filenames : array of strings
-%         Buoy Number.  5-character alpha-numeric station identifier 
+%         Data filenames on https://www.ndbc.noaa.gov/data/historical/{parameter}/  
 %         
 %
 %     proxy : structure or py.None (optional)
@@ -27,7 +27,7 @@ function ndbc_data=NDBC_request_data(parameter,filenames,options)
 % Returns
 % ---------
 %     ndbc_data: Structure 
-%         Structure with station ID, years, and NDBC file names.
+%         Structure of structures broken down by years of data.
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -55,15 +55,33 @@ df = py.pandas.DataFrame(pyargs("data",li));
 
 datapd = py.mhkit.wave.io.ndbc.request_data(parameter,df);
 key = cell(py.list(datapd));
-
-for i=1:length(key)
-    df = double(datapd{string(py.str(key{i}))}.values);
-    cols = cell(py.list(py.numpy.nditer(datapd{string(py.str(key{i}))}.columns,pyargs("flags",{"refs_ok"}))));
-    for k = 1:length(cols)
-        a = char(string(py.str(key{i})));
-        b = char(string(py.str(cols{k})));
-        c = df(:,k);
-        eval(['ndbc_data.year_' a '.' b '= c ;']);
-        
+disp(class(string(py.str(key{1}))))
+if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
+   for i=1:length(key)
+    a = char(string(py.str(key{i})));
+    dict2 = datapd{string(py.str(key{i}))};
+    key2 = cell(py.list(dict2));
+    for j=1:length(key2)
+       df = double(dict2{string(py.str(key2{j}))}.values);
+       cols = cell(py.list(py.numpy.nditer(dict2{string(py.str(key2{j}))}.columns,pyargs("flags",{"refs_ok"})))); 
+       for k = 1:length(cols)
+        b = char(string(py.str(key2{j})));
+        c = char(string(py.str(cols{k})));
+        d = df(:,k);
+        eval(['ndbc_data.ID_' a '.year_' b '.' c '= d ;']);
+       end
     end
-end    
+   end
+ 
+else
+    for i=1:length(key)
+        df = double(datapd{string(py.str(key{i}))}.values);
+        cols = cell(py.list(py.numpy.nditer(datapd{string(py.str(key{i}))}.columns,pyargs("flags",{"refs_ok"}))));
+        for k = 1:length(cols)
+            a = char(string(py.str(key{i})));
+            b = char(string(py.str(cols{k})));
+            c = df(:,k);
+            eval(['ndbc_data.year_' a '.' b '= c ;']);
+        end
+    end
+end
