@@ -55,7 +55,7 @@ df = py.pandas.DataFrame(pyargs("data",li));
 
 datapd = py.mhkit.wave.io.ndbc.request_data(parameter,df);
 key = cell(py.list(datapd));
-disp(class(string(py.str(key{1}))))
+
 if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
    for i=1:length(key)
     a = char(string(py.str(key{i})));
