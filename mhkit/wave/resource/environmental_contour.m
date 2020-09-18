@@ -54,7 +54,7 @@ function environmental_contour=environmental_contour(x1, x2, dt, period,options)
 % Returns
 % ---------
 %     environmental_contour: Structure 
-%         Structure of structures broken down by years of data.
+%         Structure with fields contour1, contour2
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
