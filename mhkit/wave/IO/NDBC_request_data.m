@@ -55,7 +55,8 @@ df = py.pandas.DataFrame(pyargs("data",li));
 
 datapd = py.mhkit.wave.io.ndbc.request_data(parameter,df);
 key = cell(py.list(datapd));
-
+freq = [];
+spectra = [];
 if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
    for i=1:length(key)
     a = char(string(py.str(key{i})));
@@ -81,7 +82,33 @@ else
             a = char(string(py.str(key{i})));
             b = char(string(py.str(cols{k})));
             c = df(:,k);
-            eval(['ndbc_data.year_' a '.' b '= c ;']);
+            
+            if parameter == "swden"
+                
+                if ~contains(b, ".")
+                    eval(['ndbc_data.year_' a '.' b '= c ;']);
+                else
+                    freq = [freq str2double(b)];
+                    
+                    spectra = [spectra ;c];
+                    
+                end
+            else
+               eval(['ndbc_data.year_' a '.' b '= c ;']);
+            end
+            
         end
+        if parameter == "swden"
+            si = size(c);
+            si2= size(freq);
+            spectra = reshape(spectra, [si(1),si2(2)])';
+            freq = freq';
+            eval(['ndbc_data.year_' a '.frequency = freq ;']);
+            eval(['ndbc_data.year_' a '.spectrum = spectra ;']);
+        end
+        freq = [];
+        spectra = [];
     end
 end
+
+
