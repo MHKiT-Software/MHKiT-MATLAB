@@ -32,7 +32,7 @@ function environmental_contour=environmental_contour(x1, x2, dt, period,options)
 %     dt : double
 %         x1 and x2 sample rate (seconds)
 %
-%     period : double, float, or vector
+%     period : scalar or vector
 %         Desired return period (years) for calculation of environmental
 %         contour, can be a scalar or a vector.
 %
@@ -40,16 +40,20 @@ function environmental_contour=environmental_contour(x1, x2, dt, period,options)
 % 	      principal component analysis dictionary from previous function 
 %         call. When supplied the function will skip the PCA calculation 
 %         for the passe x1, and x2.
+%         to call: environmental_contour(x1,x2,dt,period,"PCA",PCA)
 %
-%     size_bin : double (optional)
+%     bin_size : double (optional)
 %         Data points in each bin 
+%         to call: environmental_contour(x1,x2,dt,period,"bin_size",bin_size)
 %
 %     nb_steps : int (optional)
 %         Discretization of the circle in the normal space used for
 %         IFORM calculation.
+%         to call: environmental_contour(x1,x2,dt,period,"nb_steps",nb_steps)
 %
 % 	  return_PCA: boolean
 % 	      Default False, if True will retun the PCA dictionary
+%         to call: environmental_contour(x1,x2,dt,period,"return_PCA",return_PCA)
 %     
 % Returns
 % ---------
@@ -65,22 +69,36 @@ arguments
     dt
     period
     options.PCA = py.None;
-    options.size_bin = 250;
+    options.bin_size = 250;
     options.nb_steps = 1000;
     options.return_PCA = py.False;
 end
 
 py.importlib.import_module('mhkit');
 
+if options.PCA ~= py.None
+   options.PCA = py.dict(options.PCA);
+end
+
+if isscalar(period)
+    period = int32(period);
+elseif isvector(period)
+    period = py.numpy.array(period); 
+else
+    ME = MException('MATLAB:environmental_contour','period must be a vector or scalar');
+    throw(ME);
+end
+
 data = py.mhkit.wave.resource.environmental_contour(py.numpy.array(x1),py.numpy.array(x2),...
-    dt,int32(period),pyargs('PCA',options.PCA,'size_bin',int32(options.size_bin),...
+    dt,period,pyargs('PCA',options.PCA,'bin_size',int32(options.bin_size),...
     'nb_steps',int32(options.nb_steps),'return_PCA',options.return_PCA));
 
 data_cell = cell(data);
+disp(size(data_cell{1}))
 environmental_contour.contour1 = double(py.array.array('d',py.numpy.nditer(data_cell{1},pyargs("flags",{"refs_ok"}))));
 environmental_contour.contour2 = double(py.array.array('d',py.numpy.nditer(data_cell{2},pyargs("flags",{"refs_ok"}))));
 if options.return_PCA == py.True
-    contour3 = data_cell{3};
+    environmental_contour.PCA = struct(data_cell{3});
 end
 
 
