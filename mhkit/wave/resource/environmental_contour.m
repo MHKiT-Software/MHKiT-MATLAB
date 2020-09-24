@@ -58,7 +58,7 @@ function environmental_contour=environmental_contour(x1, x2, dt, period,options)
 % Returns
 % ---------
 %     environmental_contour: Structure 
-%         Structure with fields contour1, contour2
+%         Structure with fields contour1, contour2, and optionally PCA
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -81,22 +81,32 @@ if options.PCA ~= py.None
 end
 
 if isscalar(period)
-    period = int32(period);
+    period_py = int32(period);
 elseif isvector(period)
-    period = py.numpy.array(period); 
+    period_py = py.numpy.array(period); 
 else
     ME = MException('MATLAB:environmental_contour','period must be a vector or scalar');
     throw(ME);
 end
 
 data = py.mhkit.wave.resource.environmental_contour(py.numpy.array(x1),py.numpy.array(x2),...
-    dt,period,pyargs('PCA',options.PCA,'bin_size',int32(options.bin_size),...
+    dt,period_py,pyargs('PCA',options.PCA,'bin_size',int32(options.bin_size),...
     'nb_steps',int32(options.nb_steps),'return_PCA',options.return_PCA));
 
 data_cell = cell(data);
-disp(size(data_cell{1}))
-environmental_contour.contour1 = double(py.array.array('d',py.numpy.nditer(data_cell{1},pyargs("flags",{"refs_ok"}))));
-environmental_contour.contour2 = double(py.array.array('d',py.numpy.nditer(data_cell{2},pyargs("flags",{"refs_ok"}))));
+sha = cell(py.numpy.shape(data_cell{1}));
+x=int64(sha{1,1});
+if isscalar(period)
+    y = 1;
+else
+    y=int64(sha{1,2});
+end
+environmental_contour.contour1 = array2table(reshape(double(py.array.array('d',py.numpy.nditer(data_cell{1},...
+    pyargs("flags",{"refs_ok"})))),[x,y]),'VariableNames',string(period));
+
+environmental_contour.contour2 = array2table(reshape(double(py.array.array('d',py.numpy.nditer(data_cell{2},...
+    pyargs("flags",{"refs_ok"})))),[x,y]),'VariableNames',string(period));
+
 if options.return_PCA == py.True
     environmental_contour.PCA = struct(data_cell{3});
 end
