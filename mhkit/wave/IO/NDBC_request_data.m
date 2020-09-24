@@ -69,8 +69,30 @@ if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
         b = char(string(py.str(key2{j})));
         c = char(string(py.str(cols{k})));
         d = df(:,k);
-        eval(['ndbc_data.ID_' a '.year_' b '.' c '= d ;']);
+        if parameter == "swden"
+                
+                if ~contains(c, ".")
+                    eval(['ndbc_data.ID_' a '.year_' b '.' c '= d ;']);
+                else
+                    freq = [freq str2double(c)];
+                    
+                    spectra = [spectra ;d];
+                    
+                end
+        else
+            eval(['ndbc_data.ID_' a '.year_' b '.' c '= d ;']);
+        end
        end
+       if parameter == "swden"
+            si = size(d);
+            si2= size(freq);
+            spectra = reshape(spectra, [si(1),si2(2)])';
+            freq = freq';
+            eval(['ndbc_data.ID_' a '.year_' b '.frequency = freq ;']);
+            eval(['ndbc_data.ID_' a '.year_' b '.spectrum = spectra ;']);
+        end
+        freq = [];
+        spectra = [];
     end
    end
  
