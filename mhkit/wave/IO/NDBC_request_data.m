@@ -27,7 +27,7 @@ function ndbc_data=NDBC_request_data(parameter,filenames,options)
 % Returns
 % ---------
 %     ndbc_data: Structure 
-%         Structure of structures broken down by years of data.
+%         Structure of structures broken down by buoy and years of data.
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
