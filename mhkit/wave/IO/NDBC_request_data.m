@@ -72,6 +72,7 @@ if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
         if parameter == "swden"
                 
                 if ~contains(c, ".")
+                    c = erase(c,'#');
                     eval(['ndbc_data.ID_' a '.year_' b '.' c '= d ;']);
                 else
                     freq = [freq str2double(c)];
@@ -80,6 +81,7 @@ if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
                     
                 end
         else
+            c = erase(c,'#');
             eval(['ndbc_data.ID_' a '.year_' b '.' c '= d ;']);
         end
        end
@@ -100,6 +102,7 @@ else
     for i=1:length(key)
         df = double(datapd{string(py.str(key{i}))}.values);
         cols = cell(py.list(py.numpy.nditer(datapd{string(py.str(key{i}))}.columns,pyargs("flags",{"refs_ok"}))));
+        
         for k = 1:length(cols)
             a = char(string(py.str(key{i})));
             b = char(string(py.str(cols{k})));
@@ -108,7 +111,9 @@ else
             if parameter == "swden"
                 
                 if ~contains(b, ".")
+                    b = erase(b,'#');
                     eval(['ndbc_data.year_' a '.' b '= c ;']);
+                    
                 else
                     freq = [freq str2double(b)];
                     
@@ -116,6 +121,7 @@ else
                     
                 end
             else
+               b = erase(b,'#');
                eval(['ndbc_data.year_' a '.' b '= c ;']);
             end
             
