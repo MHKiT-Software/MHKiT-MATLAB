@@ -72,7 +72,9 @@ if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
         if parameter == "swden"
                 
                 if ~contains(c, ".")
-                    c = erase(c,'#');
+                    if contains(c, "YY")
+                        c = char("YYYY");
+                    end
                     eval(['ndbc_data.ID_' a '.year_' b '.' c '= d ;']);
                 else
                     freq = [freq str2double(c)];
@@ -81,7 +83,9 @@ if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
                     
                 end
         else
-            c = erase(c,'#');
+            if contains(c, "YY")
+               c = char("YYYY");
+            end
             eval(['ndbc_data.ID_' a '.year_' b '.' c '= d ;']);
         end
        end
@@ -95,6 +99,10 @@ if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
         end
         freq = [];
         spectra = [];
+
+        eval(['ndbc_data.ID_' a '.year_' b '.time = datetime(ndbc_data.ID_' a '.year_' b...
+            '.YYYY,ndbc_data.ID_' a '.year_' b ...
+            '.MM,ndbc_data.ID_' a '.year_' b '.DD, ndbc_data.ID_' a '.year_' b '.hh, 0,0);']);
     end
    end
  
@@ -111,7 +119,11 @@ else
             if parameter == "swden"
                 
                 if ~contains(b, ".")
-                    b = erase(b,'#');
+                    if contains(b, "YY")
+                        
+                        b = char("YYYY");
+                        
+                    end
                     eval(['ndbc_data.year_' a '.' b '= c ;']);
                     
                 else
@@ -121,7 +133,10 @@ else
                     
                 end
             else
-               b = erase(b,'#');
+               if contains(b, "YY")
+                   
+                   b = char("YYYY");
+               end
                eval(['ndbc_data.year_' a '.' b '= c ;']);
             end
             
@@ -136,6 +151,9 @@ else
         end
         freq = [];
         spectra = [];
+        
+        eval(['ndbc_data.year_' a '.time = datetime(ndbc_data.year_' a '.YYYY,ndbc_data.year_' a ...
+            '.MM,ndbc_data.year_' a '.DD, ndbc_data.year_' a '.hh,0,0);']);
     end
 end
 
