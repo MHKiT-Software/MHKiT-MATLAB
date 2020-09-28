@@ -76,7 +76,11 @@ xlabel(options.x_label)
 ylabel(options.y_label) 
 
 title(options.title)
-
+len = strlength(options.data_label);
+len2 = strlength(options.contour_label);
+if len > 1 || len2 > 1
+    legend(options.data_label,options.contour_label)
+end
 len = strlength(options.savepath);
 if len > 1
     saveas(figure, options.savepath);
