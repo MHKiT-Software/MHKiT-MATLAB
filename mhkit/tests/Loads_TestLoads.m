@@ -52,6 +52,7 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
         end
         
         function test_blade_moments(testCase)
+            format long
             blade_data = readmatrix('../../examples/data/loads/blade_cal.csv');
             flap_offset = 9.19906E-05;
             edge_offset = -0.000310854;
@@ -63,8 +64,8 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
             
             [M_flap, M_edge] = blade_moments(blade_matrix,flap_offset,flap_raw,edge_offset,edge_raw);
 
-            assertEqual(testCase,M_flap',blade_data(:,3),'RelTol',0.001)
-            assertEqual(testCase,M_edge',blade_data(:,4),'RelTol',0.001)
+            assertEqual(testCase,M_flap',blade_data(:,3),'RelTol',0.01);
+            assertEqual(testCase,M_edge',blade_data(:,4),'RelTol',0.01);
         end
 
         function test_plot_statistics(testCase)

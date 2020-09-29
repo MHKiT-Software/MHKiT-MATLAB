@@ -37,7 +37,7 @@ py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit_python_utils');
 
 data = py.mhkit.loads.general.blade_moments(py.numpy.array(blade_coefficients),...
-    int32(flap_offset),py.numpy.array(flap_raw),int32(edge_offset),py.numpy.array(edge_raw));
+    flap_offset,py.numpy.array(flap_raw),edge_offset,py.numpy.array(edge_raw));
 
 data_cell = cell(data);
 
