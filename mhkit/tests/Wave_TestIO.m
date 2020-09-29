@@ -7,7 +7,7 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             Obj.expected_columns_metRT = struct('WDIR',{},'units',{},'WSPD',{},'GST',{},'WVHT',{},'DPD',{},'APD',{},'MWD',{},'PRES',{},'ATMP',{},'WTMP',{},'DEWP',{},'VIS',{},'PTDY',{},'TIDE',{},'time',{});
             Obj.expected_units_metRT = struct('WDIR',{"degT"},'WSPD',{"m/s"},'GST',{"m/s"},'WVHT',{"m"},'DPD',{"sec"},'APD',{"sec"},'MWD',{"degT"},'PRES',{"hPa"},'ATMP',{"degC"},'WTMP',{"degC"},'DEWP',{"degC"},'VIS',{"nmi"},'PTDY',{"hPa"},'TIDE',{"ft"});
 
-            data = read_NDBC_file("data/46097.txt");
+            data = read_NDBC_file("../../examples/data/wave/46097.txt");
             datarm1 = rmfield(data,'units');
             datarm2 = rmfield(datarm1,'time');
             expected_index0 = datestr(datenum(2019,4,2,13,50,0));
@@ -24,7 +24,7 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             Obj.expected_columns_metH = struct('WDIR',{},'units',{},'WSPD',{},'GST',{},'WVHT',{},'DPD',{},'APD',{},'MWD',{},'PRES',{},'ATMP',{},'WTMP',{},'DEWP',{},'VIS',{},'TIDE',{},'time',{});
             Obj.expected_units_metH = struct('WDIR',{"degT"},'WSPD',{"m/s"},'GST',{"m/s"},'WVHT',{"m"},'DPD',{"sec"},'APD',{"sec"},'MWD',{"deg"},'PRES',{"hPa"},'ATMP',{"degC"},'WTMP',{"degC"},'DEWP',{"degC"},'VIS',{"nmi"},'TIDE',{"ft"});
             
-            data = read_NDBC_file('data/46097h201908qc.txt');
+            data = read_NDBC_file('../../examples/data/wave/46097h201908qc.txt');
             datarm1 = rmfield(data,'units');
             datarm2 = rmfield(datarm1,'time');
             expected_index0 = datestr(datenum(2019,8,1,0,0,0));
@@ -38,7 +38,7 @@ classdef Wave_TestIO < matlab.unittest.TestCase
 
         % Spectral data
         function test_read_NDBC_spectral(testCase)
-            data = read_NDBC_file("data/data.txt");
+            data = read_NDBC_file("../../examples/data/wave/data.txt");
             assertEqual(testCase,size(data.spectra),[743 47]);
         end
     end

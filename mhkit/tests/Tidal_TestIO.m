@@ -3,7 +3,7 @@ classdef Tidal_TestIO < matlab.unittest.TestCase
     methods (Test) 
         
         function test_load_noaa_data(testCase)
-            file_name = 'data/s08010.json';
+            file_name = '../../examples/data/tidal/s08010.json';
             data = read_noaa_json(file_name);
             
             assertTrue(testCase, isfield(data,'s'));

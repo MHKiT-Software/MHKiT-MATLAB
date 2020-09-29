@@ -3,7 +3,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
     methods (Test)
    
         function test_kfromw(testCase)
-            fileName = 'data/ValData1.json'; % filename in JSON extension
+            fileName = '../../examples/data/wave/ValData1.json'; % filename in JSON extension
             fid = fopen(fileName); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
@@ -33,7 +33,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
         function test_moments(testCase)
             format long
-            data = load('data/ValData2.mat');
+            data = load('../../examples/data/wave/ValData2.mat');
             Valdata = data.CalcSpecCheckData;
             
             H5SP = Valdata.H5sP;
@@ -74,7 +74,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
         end
 
        function test_metrics_HsP(testCase)
-            data = load('data/ValData2.mat');
+            data = load('../../examples/data/wave/ValData2.mat');
             Valdata = data.CalcSpecCheckData;
             H5SP = Valdata.H5sP;            
             S1 = struct('spectrum',H5SP.PowSpecHanWin','type','TimeSeries','frequency',H5SP.freq);
@@ -129,7 +129,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
        end
        
        function test_metrics_AH(testCase)
-            data = load('data/ValData2.mat');
+            data = load('../../examples/data/wave/ValData2.mat');
             Valdata = data.CalcSpecCheckData;
             AH1 = Valdata.AH1;
             S1 = struct('spectrum',AH1.PowSpecHanWin,'type','TimeSeries','frequency',AH1.freq);
@@ -184,7 +184,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
        end
        
        function test_metrics_CDIP1(testCase)
-            data = load('data/ValData2.mat');
+            data = load('../../examples/data/wave/ValData2.mat');
             Valdata = data.CalcSpecCheckData;
             CDIP1 = Valdata.CDiP1;
             S1 = struct('spectrum',CDIP1.PowSpec,'type','TimeSeries','frequency',CDIP1.freq);
@@ -239,7 +239,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
        end
                 
         function test_plot_elevation_timeseries(testCase)
-            data = load('data/ValData2.mat');
+            data = load('../../examples/data/wave/ValData2.mat');
             Valdata = data.CalcSpecCheckData;
             H5sP = Valdata.H5sP;
             

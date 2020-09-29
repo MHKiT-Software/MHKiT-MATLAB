@@ -3,7 +3,7 @@ classdef River_TestIO < matlab.unittest.TestCase
     methods (Test) 
 
         function test_load_usgs_data_instantaneous(testCase)            
-            file_name = 'data/USGS_08313000_Jan2019_instantaneous.json';
+            file_name = '../../examples/data/river/USGS_08313000_Jan2019_instantaneous.json';
             data = read_usgs_file(file_name);
 
             assertEqual(testCase,data.units, struct('Discharge', " cubic feet per second"));
@@ -11,7 +11,7 @@ classdef River_TestIO < matlab.unittest.TestCase
         end
 
         function test_load_usgs_data_daily(testCase)
-            file_name = 'data/USGS_08313000_Jan2019_daily.json';
+            file_name = '../../examples/data/river/USGS_08313000_Jan2019_daily.json';
             data = read_usgs_file(file_name);
             
             expected_index = datestr(datetime(2019,01,01):datetime(2019,01,31));

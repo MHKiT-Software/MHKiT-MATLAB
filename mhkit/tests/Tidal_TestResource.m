@@ -10,7 +10,7 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
         end
 
         function test_principal_flow_directions(testCase)
-            file_name = 'data/s08010.json';
+            file_name = '../../examples/data/tidal/s08010.json';
             data = read_noaa_json(file_name);
             data.s = data.s/100;
         
@@ -26,7 +26,7 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
                 delete(filename);
             end
 
-            file_name = 'data/s08010.json';
+            file_name = '../../examples/data/tidal/s08010.json';
             data = read_noaa_json(file_name);
             data.s = data.s/100;
             width_direction = 10;
@@ -44,7 +44,7 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
                 delete(filename)
             end
             
-            file_name = 'data/s08010.json';
+            file_name = '../../examples/data/tidal/s08010.json';
             data = read_noaa_json(file_name);
             data.s = data.s/100;
             width_direction = 10;
@@ -67,7 +67,7 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
                 delete(filename);
             end
             
-            file_name = 'data/s08010.json';
+            file_name = '../../examples/data/tidal/s08010.json';
             data = read_noaa_json(file_name);
             data.s = data.s/100;
             width_direction = 10;
