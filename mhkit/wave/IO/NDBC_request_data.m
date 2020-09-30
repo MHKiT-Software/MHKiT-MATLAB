@@ -54,6 +54,7 @@ li=py.list();
 df = py.pandas.DataFrame(pyargs("data",li));
 
 datapd = py.mhkit.wave.io.ndbc.request_data(parameter,df);
+
 key = cell(py.list(datapd));
 freq = [];
 spectra = [];
@@ -63,9 +64,14 @@ if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
     dict2 = datapd{string(py.str(key{i}))};
     key2 = cell(py.list(dict2));
     for j=1:length(key2)
-       df = double(dict2{string(py.str(key2{j}))}.values);
+        sha=cell(dict2{string(py.str(key2{j}))}.values.shape);
+        x=int64(sha{1,1});
+        y=int64(sha{1,2});
+       df = reshape(double(py.array.array('d',py.numpy.nditer(dict2{string(py.str(key2{j}))}.values,...
+            pyargs("flags",{"refs_ok"})))),[x,y]);
        cols = cell(py.list(py.numpy.nditer(dict2{string(py.str(key2{j}))}.columns,pyargs("flags",{"refs_ok"})))); 
        for k = 1:length(cols)
+        
         b = char(string(py.str(key2{j})));
         c = char(string(py.str(cols{k})));
         d = df(:,k);
@@ -108,10 +114,15 @@ if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
  
 else
     for i=1:length(key)
-        df = double(datapd{string(py.str(key{i}))}.values);
+        sha=cell(datapd{string(py.str(key{i}))}.values.shape);
+        x=int64(sha{1,1});
+        y=int64(sha{1,2});
+        df = reshape(double(py.array.array('d',py.numpy.nditer(datapd{string(py.str(key{i}))}.values,...
+    pyargs("flags",{"refs_ok"})))),[x,y]);
         cols = cell(py.list(py.numpy.nditer(datapd{string(py.str(key{i}))}.columns,pyargs("flags",{"refs_ok"}))));
         
         for k = 1:length(cols)
+            
             a = char(string(py.str(key{i})));
             b = char(string(py.str(cols{k})));
             c = df(:,k);
