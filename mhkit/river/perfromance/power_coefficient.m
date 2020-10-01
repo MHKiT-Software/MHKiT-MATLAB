@@ -26,6 +26,7 @@ function Cp=power_coefficient(power, inflow_speed, capture_area, rho)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py_tsr = py.mhkit.river.performance.tip_speed_ratio(py.numpy.array(rotor_speed),double(rotor_diameter),py.numpy.array(inflow_speed));
+py_cp = py.mhkit.river.performance.power_coefficient(py.numpy.array(power),...
+    py.numpy.array(inflow_speed),capture_area,rho);
 
-TSR = double(py.array.array('d',py.numpy.nditer(py_tsr,pyargs("flags",{"refs_ok"}))));
+Cp = double(py.array.array('d',py.numpy.nditer(py_cp,pyargs("flags",{"refs_ok"}))));
