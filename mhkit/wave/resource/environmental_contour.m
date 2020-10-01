@@ -81,7 +81,7 @@ if options.PCA ~= py.None
 end
 
 if isscalar(period)
-    period_py = int32(period);
+    period_py = period;
 elseif isvector(period)
     period_py = py.numpy.array(period); 
 else
@@ -90,7 +90,7 @@ else
 end
 
 data = py.mhkit.wave.resource.environmental_contour(py.numpy.array(x1),py.numpy.array(x2),...
-    dt,period_py,pyargs('PCA',options.PCA,'bin_size',int32(options.bin_size),...
+    int32(dt),period_py,pyargs('PCA',options.PCA,'bin_size',int32(options.bin_size),...
     'nb_steps',int32(options.nb_steps),'return_PCA',options.return_PCA));
 
 data_cell = cell(data);

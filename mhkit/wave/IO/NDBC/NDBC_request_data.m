@@ -98,14 +98,13 @@ if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
        if parameter == "swden"
             si = size(d);
             si2= size(freq);
-            spectra = reshape(spectra, [si(1),si2(2)])';
+            spectra = reshape(spectra, [si(1),si2(2)]);
             freq = freq';
             eval(['ndbc_data.ID_' a '.year_' b '.frequency = freq ;']);
             eval(['ndbc_data.ID_' a '.year_' b '.spectrum = spectra ;']);
         end
         freq = [];
         spectra = [];
-
         eval(['ndbc_data.ID_' a '.year_' b '.time = datetime(ndbc_data.ID_' a '.year_' b...
             '.YYYY,ndbc_data.ID_' a '.year_' b ...
             '.MM,ndbc_data.ID_' a '.year_' b '.DD, ndbc_data.ID_' a '.year_' b '.hh, 0,0);']);
@@ -155,7 +154,7 @@ else
         if parameter == "swden"
             si = size(c);
             si2= size(freq);
-            spectra = reshape(spectra, [si(1),si2(2)])';
+            spectra = reshape(spectra, [si(1),si2(2)]);
             freq = freq';
             eval(['ndbc_data.year_' a '.frequency = freq ;']);
             eval(['ndbc_data.year_' a '.spectrum = spectra ;']);
