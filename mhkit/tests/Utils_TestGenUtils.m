@@ -3,7 +3,7 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
     methods (Test) 
 
         function test_get_statistics(testCase)
-            fileName = 'data/loads_data_dict.json'; % filename in JSON extension
+            fileName = '../../examples/data/loads/loads_data_dict.json'; % filename in JSON extension
             fid = fopen(fileName); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation

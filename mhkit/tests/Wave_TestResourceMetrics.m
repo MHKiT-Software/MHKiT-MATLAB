@@ -3,7 +3,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
     methods (Test)
    
         function test_kfromw(testCase)
-            fileName = 'data/ValData1.json'; % filename in JSON extension
+            fileName = '../../examples/data/wave/ValData1.json'; % filename in JSON extension
             fid = fopen(fileName); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
@@ -33,7 +33,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
         function test_moments(testCase)
             format long
-            data = load('data/ValData2.mat');
+            data = load('../../examples/data/wave/ValData2.mat');
             Valdata = data.CalcSpecCheckData;
             
             H5SP = Valdata.H5sP;
@@ -74,7 +74,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
         end
 
        function test_metrics_HsP(testCase)
-            data = load('data/ValData2.mat');
+            data = load('../../examples/data/wave/ValData2.mat');
             Valdata = data.CalcSpecCheckData;
             H5SP = Valdata.H5sP;            
             S1 = struct('spectrum',H5SP.PowSpecHanWin','type','TimeSeries','frequency',H5SP.freq);
@@ -129,7 +129,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
        end
        
        function test_metrics_AH(testCase)
-            data = load('data/ValData2.mat');
+            data = load('../../examples/data/wave/ValData2.mat');
             Valdata = data.CalcSpecCheckData;
             AH1 = Valdata.AH1;
             S1 = struct('spectrum',AH1.PowSpecHanWin,'type','TimeSeries','frequency',AH1.freq);
@@ -184,7 +184,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
        end
        
        function test_metrics_CDIP1(testCase)
-            data = load('data/ValData2.mat');
+            data = load('../../examples/data/wave/ValData2.mat');
             Valdata = data.CalcSpecCheckData;
             CDIP1 = Valdata.CDiP1;
             S1 = struct('spectrum',CDIP1.PowSpec,'type','TimeSeries','frequency',CDIP1.freq);
@@ -239,7 +239,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
        end
                 
         function test_plot_elevation_timeseries(testCase)
-            data = load('data/ValData2.mat');
+            data = load('../../examples/data/wave/ValData2.mat');
             Valdata = data.CalcSpecCheckData;
             H5sP = Valdata.H5sP;
             
@@ -265,6 +265,144 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             wave_elevation.time = time';
 
             plot_elevation_timeseries(wave_elevation,"savepath",filename); 
+            assertTrue(testCase,isfile(filename));
+            delete(filename);
+        end
+        
+        function test_environmental_contour(testCase)
+            fileName= '../../examples/data/wave/Hm0_Te_46022.json';
+            
+            fid = fopen(fileName); % Opening the file
+            raw = fread(fid,inf); % Reading the contents
+            str = char(raw'); % Transformation
+            fclose(fid); % Closing the file
+            valdata1 = jsondecode(str); % Using the jsondecode function to parse JSON from string
+            Te_table = struct2table(valdata1.Te,'AsArray',true);
+            Te = table2array(Te_table);
+            Hm0_table = struct2table(valdata1.Hm0,'AsArray',true);
+            Hm0 = table2array(Hm0_table);
+            
+            filter = Hm0 < 20;
+            Hm0 = Hm0(filter);
+            Te = Te(filter);
+            [row, col] = find(~isnan(Te));
+            Hm0 = Hm0(col);
+            Te = Te(col);
+            [row, col] = find(~isnan(Hm0));
+            Hm0 = Hm0(col);
+            Te = Te(col); 
+            
+            time_str = Hm0_table.Properties.VariableNames;
+            
+            time1 = str2num(erase(time_str{1},'x'));
+            time2 = str2num(erase(time_str{2},'x'));
+            
+            dt = (time2-time1)/1000.;
+            time_R = 100;
+
+            contour = environmental_contour(Hm0, Te, dt, time_R);
+            
+            expected_contours = readmatrix('../../examples/data/wave/Hm0_Te_contours_46022.csv');
+            
+            Hm0_expected = expected_contours(:,2);
+            Te_expected = expected_contours(:,1);
+ 
+            assertEqual(testCase,table2array(contour.contour2),Hm0_expected,'RelTol',0.01);
+            assertEqual(testCase,table2array(contour.contour1),Te_expected,'RelTol',0.01);
+            
+
+        end
+        
+        function test_plot_environmental_contour(testCase)
+            fileName= '../../examples/data/wave/Hm0_Te_46022.json';
+            
+            fid = fopen(fileName); % Opening the file
+            raw = fread(fid,inf); % Reading the contents
+            str = char(raw'); % Transformation
+            fclose(fid); % Closing the file
+            valdata1 = jsondecode(str); % Using the jsondecode function to parse JSON from string
+            Te_table = struct2table(valdata1.Te,'AsArray',true);
+            Te = table2array(Te_table);
+            Hm0_table = struct2table(valdata1.Hm0,'AsArray',true);
+            Hm0 = table2array(Hm0_table);
+            
+            filter = Hm0 < 20;
+            Hm0 = Hm0(filter);
+            Te = Te(filter);
+            [row, col] = find(~isnan(Te));
+            Hm0 = Hm0(col);
+            Te = Te(col);
+            [row, col] = find(~isnan(Hm0));
+            Hm0 = Hm0(col);
+            Te = Te(col); 
+            
+            time_str = Hm0_table.Properties.VariableNames;
+            
+            time1 = str2num(erase(time_str{1},'x'));
+            time2 = str2num(erase(time_str{2},'x'));
+            
+            dt = (time2-time1)/1000.;
+            time_R = 100;
+
+            contour = environmental_contour(Hm0, Te, dt, time_R);
+            
+            filename = 'wave_plot_env_contour.png';
+            if isfile(filename)
+                delete(filename);
+            end
+
+          
+            plot_environmental_contours(Te, Hm0,contour.contour2,contour.contour1,"savepath",filename...
+                ,"x_label",...
+                'Energy Period (s)', "y_label",'Significant Wave Height (m)',"data_label",'NDBC 46022',...
+                "contour_label",'100 Year Contour'); 
+            assertTrue(testCase,isfile(filename));
+            delete(filename);
+        end
+        
+        function test_plot_environmental_contour_multiyear(testCase)
+            fileName= '../../examples/data/wave/Hm0_Te_46022.json';
+            
+            fid = fopen(fileName); % Opening the file
+            raw = fread(fid,inf); % Reading the contents
+            str = char(raw'); % Transformation
+            fclose(fid); % Closing the file
+            valdata1 = jsondecode(str); % Using the jsondecode function to parse JSON from string
+            Te_table = struct2table(valdata1.Te,'AsArray',true);
+            Te = table2array(Te_table);
+            Hm0_table = struct2table(valdata1.Hm0,'AsArray',true);
+            Hm0 = table2array(Hm0_table);
+            
+            filter = Hm0 < 20;
+            Hm0 = Hm0(filter);
+            Te = Te(filter);
+            [row, col] = find(~isnan(Te));
+            Hm0 = Hm0(col);
+            Te = Te(col);
+            [row, col] = find(~isnan(Hm0));
+            Hm0 = Hm0(col);
+            Te = Te(col); 
+            
+            time_str = Hm0_table.Properties.VariableNames;
+            
+            time1 = str2num(erase(time_str{1},'x'));
+            time2 = str2num(erase(time_str{2},'x'));
+            
+            dt = (time2-time1)/1000.;
+            time_R = [100, 120, 130];
+
+            contour = environmental_contour(Hm0, Te, dt, time_R);
+            
+            filename = 'wave_plot_env_contour_multiyear.png';
+            if isfile(filename)
+                delete(filename);
+            end
+
+          
+            plot_environmental_contours(Te, Hm0,contour.contour2,contour.contour1,"savepath",filename...
+                ,"x_label",...
+                'Energy Period (s)', "y_label",'Significant Wave Height (m)',"data_label",'NDBC 46022',...
+                "contour_label",{'100 Year Contour','120 Year Contour','130 Year Contour'}); 
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end

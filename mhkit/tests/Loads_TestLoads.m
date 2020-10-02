@@ -6,7 +6,7 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
             
             % create array containg wind speeds to use as bin edges
             bin_edges = 3:1:25;
-            fileName = 'data/loads_data_dict.json'; % filename in JSON extension
+            fileName = '../../examples/data/loads/loads_data_dict.json'; % filename in JSON extension
             fid = fopen(fileName); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
@@ -27,7 +27,7 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
         end
 
         function test_damage_equivalent_loads(testCase)
-            fileName = 'data/loads_data_dict.json'; % filename in JSON extension
+            fileName = '../../examples/data/loads/loads_data_dict.json'; % filename in JSON extension
             fid = fopen(fileName); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
@@ -50,9 +50,26 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
              assertLessThan(testCase,err_tower,0.05)
              assertLessThan(testCase,err_blade,0.05)
         end
+        
+        function test_blade_moments(testCase)
+            format long
+            blade_data = readmatrix('../../examples/data/loads/blade_cal.csv');
+            flap_offset = 9.19906E-05;
+            edge_offset = -0.000310854;
+            blade_matrix = [1034671.4,-126487.28,82507.959,1154090.7];
+            
+            flap_raw = blade_data(:,1);
+            
+            edge_raw = blade_data(:,2);
+            
+            [M_flap, M_edge] = blade_moments(blade_matrix,flap_offset,flap_raw,edge_offset,edge_raw);
+
+            assertEqual(testCase,M_flap',blade_data(:,3),'RelTol',0.01);
+            assertEqual(testCase,M_edge',blade_data(:,4),'RelTol',0.01);
+        end
 
         function test_plot_statistics(testCase)
-            fileName = 'data/loads_data_dict.json'; % filename in JSON extension
+            fileName = '../../examples/data/loads/loads_data_dict.json'; % filename in JSON extension
             fid = fopen(fileName); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
@@ -78,7 +95,7 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
         end
 
         function test_plot_bin_statistics(testCase)
-            fileName = 'data/loads_data_dict.json'; % filename in JSON extension
+            fileName = '../../examples/data/loads/loads_data_dict.json'; % filename in JSON extension
             fid = fopen(fileName); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
