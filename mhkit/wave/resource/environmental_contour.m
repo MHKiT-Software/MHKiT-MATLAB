@@ -1,24 +1,23 @@
 function environmental_contour=environmental_contour(x1, x2, dt, period,options)
 
-%%%%%%%%%%%%%%%%%%%%
-%     Calculates environmental contours of extreme sea 
-%     states using the improved joint probability distributions 
-% 	  with the inverse first-order reliability method (IFORM) 
-%     probability for the desired return period (period). Given the 
-%     period of interest a circle of iso-probability is created in the
-%     in the PCA joint probability (x1, x2) reference frame.  
-%     Using the joint probability value the CDF of the marginal 
-%     distribution is used to find the quantile of each component. 
-%     Finally, using the improved PCA methodology
-%     the component 2 contour lines are calculated from component 1 using 
-%     the relationships defined in Exkert-Gallup et. al. 2016.	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calculates environmental contours of extreme sea 
+% states using the improved joint probability distributions 
+% with the inverse first-order reliability method (IFORM) 
+% probability for the desired return period (period). Given the 
+% period of interest a circle of iso-probability is created in the
+% in the PCA joint probability (x1, x2) reference frame.  
+% Using the joint probability value the CDF of the marginal 
+% distribution is used to find the quantile of each component. 
+% Finally, using the improved PCA methodology
+% the component 2 contour lines are calculated from component 1 using 
+% the relationships defined in Exkert-Gallup et. al. 2016.	
 % 
-%     Eckert-Gallup, A. C., Sallaberry, C. J., Dallman, A. R., & 
-%     Neary, V. S. (2016). Application of principal component 
-%     analysis (PCA) and improved joint probability distributions to 
-%     the inverse first-order reliability method (I-FORM) for predicting 
-%     extreme sea states. Ocean Engineering, 112, 307-319. 
-%     
+% Eckert-Gallup, A. C., Sallaberry, C. J., Dallman, A. R., & 
+% Neary, V. S. (2016). Application of principal component 
+% analysis (PCA) and improved joint probability distributions to 
+% the inverse first-order reliability method (I-FORM) for predicting 
+% extreme sea states. Ocean Engineering, 112, 307-319. 
 %     
 % Parameters
 % ------------
@@ -27,34 +26,34 @@ function environmental_contour=environmental_contour(x1, x2, dt, period,options)
 %
 %     x2 : vector
 %         component 2 data  
-%         
 %
 %     dt : double
 %         x1 and x2 sample rate (seconds)
-%
+%     
 %     period : scalar or vector
 %         Desired return period (years) for calculation of environmental
 %         contour, can be a scalar or a vector.
-%
+%     
 %     PCA: Structure (optional)
 % 	      principal component analysis dictionary from previous function 
 %         call. When supplied the function will skip the PCA calculation 
-%         for the passe x1, and x2.
+%         for the passe x1, and x2. 
 %         to call: environmental_contour(x1,x2,dt,period,"PCA",PCA)
-%
+%     
 %     bin_size : double (optional)
 %         Data points in each bin 
 %         to call: environmental_contour(x1,x2,dt,period,"bin_size",bin_size)
-%
+%       
 %     nb_steps : int (optional)
 %         Discretization of the circle in the normal space used for
 %         IFORM calculation.
 %         to call: environmental_contour(x1,x2,dt,period,"nb_steps",nb_steps)
 %
-% 	  return_PCA: boolean
+%     return_PCA: boolean
 % 	      Default False, if True will retun the PCA dictionary
 %         to call: environmental_contour(x1,x2,dt,period,"return_PCA",return_PCA)
 %     
+% 
 % Returns
 % ---------
 %     environmental_contour: Structure 
