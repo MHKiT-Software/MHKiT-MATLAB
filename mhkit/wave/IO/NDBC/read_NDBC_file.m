@@ -86,14 +86,14 @@ if ~isempty(fieldnames(matstr))
         datast.units.(test)=unit;
     end
 else
-    datast.spectra = vals;
+    datast.spectrum = vals';
     for i=1:si(2)
         temp = [temp, double(py.array.array('d',py.numpy.nditer(vv{i})))];
     end
-    datast.frequency = temp;
+    datast.frequency = temp';
 end
 
  for i=1:siti(2)
-    datast.time(i)=datetime(string(py.str(ti{i})),'InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSSSSSSS');
+    datast.time(i)=datetime(string(py.str(ti{i})),'InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSSSSSSS')';
  end
 

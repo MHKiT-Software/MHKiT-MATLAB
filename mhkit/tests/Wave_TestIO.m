@@ -39,7 +39,7 @@ classdef Wave_TestIO < matlab.unittest.TestCase
         % Spectral data
         function test_read_NDBC_spectral(testCase)
             data = read_NDBC_file("../../examples/data/wave/data.txt");
-            assertEqual(testCase,size(data.spectra),[743 47]);
+            assertEqual(testCase,size(data.spectrum),[743 47]);
         end
         
         function test_ndbc_available_data(testCase)
