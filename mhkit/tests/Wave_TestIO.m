@@ -39,7 +39,8 @@ classdef Wave_TestIO < matlab.unittest.TestCase
         % Spectral data
         function test_read_NDBC_spectral(testCase)
             data = read_NDBC_file("../../examples/data/wave/data.txt");
-            assertEqual(testCase,size(data.spectrum),[743 47]);
+            
+            assertEqual(testCase,size(data.spectrum),[47 743]);
         end
         
         function test_ndbc_available_data(testCase)
@@ -66,9 +67,10 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             ndbc_data = struct2table(ndbc_data.ID_46042.year_1996,'AsArray',true);
             file = gunzip('../../examples/data/wave/46042w1996.txt.gz');
             expected_data = readmatrix(file{1});
-            
-            data_array = table2array(ndbc_data(:,[1,2,3,4,6]));
-            cat_data = cat(2,data_array{:});
+            temp = table2array(ndbc_data(:,6));
+            data_array = table2array(ndbc_data(:,[1,2,3,4]));
+            temp = cellfun(@transpose,temp,'UniformOutput',false);
+            cat_data = cat(2,data_array{:},temp{:});
             
             assertEqual(testCase,cat_data,expected_data(2:end,:));
             
