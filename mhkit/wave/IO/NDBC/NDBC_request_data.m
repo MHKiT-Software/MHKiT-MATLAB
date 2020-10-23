@@ -100,6 +100,7 @@ if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
             si2= size(freq);
             spectra = reshape(spectra, [si(1),si2(2)]);
             freq = freq';
+            spectra = spectra';
             eval(['ndbc_data.ID_' a '.year_' b '.frequency = freq ;']);
             eval(['ndbc_data.ID_' a '.year_' b '.spectrum = spectra ;']);
         end
@@ -156,6 +157,7 @@ else
             si2= size(freq);
             spectra = reshape(spectra, [si(1),si2(2)]);
             freq = freq';
+            spectra = spectra';
             eval(['ndbc_data.year_' a '.frequency = freq ;']);
             eval(['ndbc_data.year_' a '.spectrum = spectra ;']);
         end
