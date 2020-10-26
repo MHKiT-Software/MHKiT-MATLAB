@@ -1,4 +1,4 @@
-function results = check_increment(data,bound,varargin)
+function results = check_increment(data,bound,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Check data increments using the difference between values
@@ -25,19 +25,21 @@ function results = check_increment(data,bound,varargin)
 %     key: string (optional)
 %         Data column name or translation dictionary key.  If not specified
 %         or set to py.None, all columns are used for test.
+%         to call: check_increment(data,bound,"key",key)
 %
 %     increment: int (optional)
 %         Time step shift used to compute difference, default = 1
+%         to call: check_increment(data,bound,"increment",increment)
 %
 %     absolute_value: logical (optional)
-%         Use the absolute value of increment data, default = 1 (True)
+%         Use the absolute value of increment data, default = py.True
+%         to call: check_increment(data,bound,"absolute_value",absolute_value)
 %
 %     min_failures: int (optional)
 %         Minimum number of consecutive failures required for reporting
 %         default = 1
+%         to call: check_increment(data,bound,"min_failures",min_failures)
 %
-%     Must set previous arguments to use later optional arguments
-%     (i.e. must set key to use min_failures).
 %     
 % Returns
 % ---------
@@ -55,6 +57,16 @@ function results = check_increment(data,bound,varargin)
 %            Same as input times 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments 
+    data
+    bound
+    options.key = py.None;
+    options.increment = 1;
+    options.absolute_value = py.True;
+    options.min_failures = 1;
+end
+
   py.importlib.import_module('pecos');
 
   % check to see if a pandas dataframe or not
@@ -62,26 +74,10 @@ function results = check_increment(data,bound,varargin)
     data=qc_data_to_dataframe(data);
   end
   bound=py.list(bound);
-  if nargin == 2
-    
-    r = struct(py.pecos.monitoring.check_increment(data,bound));
-  elseif nargin == 3
-    r = struct(py.pecos.monitoring.check_increment(data,bound,...
-	      varargin{1}));
-  elseif nargin == 4
-    r = struct(py.pecos.monitoring.check_increment(data,bound,...
-	      varargin{1},varargin{2}));
-  elseif nargin == 5
-    r = struct(py.pecos.monitoring.check_increment(data,bound,...
-	      varargin{1},varargin{2},varargin{3}));
-  elseif nargin == 6
-    r = struct(py.pecos.monitoring.check_increment(data,bound,...
-	      varargin{1},varargin{2},varargin{3},varargin{4}));
-  else
-    ME = MException('MATLAB:qc_increment','incorrect number of arguments (2 to 6)');
-        throw(ME);
-  end
 
+r = struct(py.pecos.monitoring.check_increment(data,bound,...
+ 	      pyargs("key",options.key,"increment",int32(options.increment),...
+          "absolute_value",options.absolute_value,"min_failures",int32(options.min_failures))));
   % Convert to qcdata structure
   results.values=double(r.cleaned_data.values);
   results.mask=int64(r.mask.values);

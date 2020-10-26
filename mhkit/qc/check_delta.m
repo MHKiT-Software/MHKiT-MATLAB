@@ -1,4 +1,4 @@
-function results = check_delta(data,bound,varargin)
+function results = check_delta(data,bound,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Check for stagnant data and/or abrupt changes in the data using
@@ -26,10 +26,7 @@ function results = check_delta(data,bound,varargin)
 %     key: string (optional)
 %         Data column name or translation dictionary key.  If not specified
 %         or set to py.None, all columns are used for test.
-%
-%     window: int (optional)
-%         Size of rolling window (in seconds) used to compute delta
-%         default = 3600
+%         to call: check_delta(data,bound,"key",key)
 %
 %     direction: string (optional)
 %         Options: 'positive', 'negative', or py.None (default)
@@ -37,14 +34,13 @@ function results = check_delta(data,bound,varargin)
 %           (the min occurs before the max)
 %           If direction is negative, then only identify negative deltas (the max occurs before the min)
 %           If direction is py.None, then identify both positive and negative deltas
+%         to call: check_delta(data,bound,"direction",direction)
 %
 %     min_failures: int (optional)
-%
 %         Minimum number of consecutive failures required for reporting,
 %         default = 1
+%         to call: check_delta(data,bound,"min_failures",min_failures)
 %
-%     Must set previous arguments to use later optional arguments
-%     (i.e. must set key to use min_failures).
 %     
 % Returns
 % ---------
@@ -63,40 +59,27 @@ function results = check_delta(data,bound,varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+arguments 
+    data
+    bound
+    options.key = py.None;
+    options.direction = py.None;
+    options.min_failures = 1;
+end
+
  py.importlib.import_module('pecos');
+
 
   % check to see if a pandas dataframe or not
   if (isa(data,'py.pandas.core.frame.DataFrame')~=1)
     data=qc_data_to_dataframe(data);
   end
   bound = py.list(bound);
-  if nargin == 2
-    
-    r = struct(py.pecos.monitoring.check_delta(data,bound));
-  elseif nargin == 3
-      
-    r = struct(py.pecos.monitoring.check_delta(data,bound,...
-	      varargin{1}));
-  elseif nargin == 4
-      
-    r = struct(py.pecos.monitoring.check_delta(data,bound,...
-	      varargin{1},varargin{2}));
-  elseif nargin == 5
-      
-    r = struct(py.pecos.monitoring.check_delta(data,bound,...
-	      varargin{1},varargin{2},varargin{3}));
-  elseif nargin == 6
-      
-    r = struct(py.pecos.monitoring.check_delta(data,bound,...
-	      varargin{1},varargin{2},varargin{3},varargin{4}));
-  elseif nargin == 7
-      
-    r = struct(py.pecos.monitoring.check_delta(data,bound,...
-	      varargin{1},varargin{2},varargin{3},varargin{4},varargin{5}));
-  else
-    ME = MException('MATLAB:qc_delta','incorrect number of arguments (2 to 7)');
-        throw(ME);
-  end
+
+
+r = struct(py.pecos.monitoring.check_delta(data,bound,...
+ 	      pyargs("key",options.key,"direction",options.direction,...
+          "min_failures",int32(options.min_failures))));
 
   % Convert to qcdata structure
   results.values=double(r.cleaned_data.values);

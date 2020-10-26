@@ -1,4 +1,4 @@
-function results = check_timestamp(data, freq, varargin)
+function results = check_timestamp(data, freq, options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %    Check time series for missing, non-monotonic, and duplicate timestamps
 %    
@@ -21,23 +21,24 @@ function results = check_timestamp(data, freq, varargin)
 %         Expected time series frequency, in seconds
 %
 %     expected_start_time: Timestamp (optional)
-%         Expected start time.  Default: min(data.time)
+%         Expected start time in datetime format.  Default: None
+%         to call: check_timestamp(data,freq,"expected_start_time",expected_start_time)
 %
 %     expected_end_time: Timestamp (optional)
-%         Expected end time.  Default: max(data.time)
+%         Expected end time in datetime format.  Default: None
+%         to call: check_timestamp(data,freq,"expected_end_time",expected_end_time)
 %
 %     min_failures: int (optional)
 %         Minimum number of consecutive failures required for reporting,
 %         default = 1
+%         to call: check_timestamp(data,freq,"min_failures",min_failures)
 %
 %     exact_times: logical (optional)
-%         If 1 (True), times are expected to occur at regular intervals
+%         If py.True, times are expected to occur at regular intervals
 %         (specified by freq) and data is reindexed to match expected frequency 
-%         If 0 (False), times only need to occur once or more within each interval
+%         If py.False, times only need to occur once or more within each interval
 %         (specified by freq) and data is not reindexed
-%
-%     Must set previous arguments to use later optional arguments
-%     (i.e. must set expected_start_time and expected_end_time to use min_failures).
+%         to call: check_timestamp(data,freq,"exact_times",exact_times)
 %     
 % Returns
 % ---------
@@ -55,34 +56,35 @@ function results = check_timestamp(data, freq, varargin)
 %            Same as input times (possibly reindexed by exact_times)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+arguments 
+    data
+    freq
+    options.expected_start_time = py.None;
+    options.expected_end_time = py.None;
+    options.min_failures = 1;
+    options.exact_times = py.True;
+end
  py.importlib.import_module('pecos');
+ py.importlib.import_module('pandas');
 
   % check to see if a pandas dataframe or not
   if (isa(data,'py.pandas.core.frame.DataFrame')~=1)
     data=qc_data_to_dataframe(data);
   end
-
-  if nargin == 2
-    r = struct(py.pecos.monitoring.check_timestamp(data,freq));
-  elseif nargin == 3
-    % Unlike the others, this might need a little work to convert 
-    % start and end times into something python can use
-    r = struct(py.pecos.monitoring.check_timestamp(data,freq,...
-	      varargin{1}));
-  elseif nargin == 4
-    r = struct(py.pecos.monitoring.check_timestamp(data,freq,...
-	      varargin{1},varargin{2}));
-  elseif nargin == 5
-    r = struct(py.pecos.monitoring.check_timestamp(data,freq,...
-	      varargin{1},varargin{2},varargin{3}));
-  elseif nargin == 6
-    r = struct(py.pecos.monitoring.check_timestamp(data,freq,...
-	      varargin{1},varargin{2},varargin{3},varargin{4}));
-  else
-    ME = MException('MATLAB:qc_timestamp','incorrect number of arguments (2 to 6)');
-        throw(ME);
+  
+  if options.expected_start_time ~= py.None
+      options.expected_start_time = py.pandas.to_datetime(options.expected_start_time);
   end
+  
+  if options.expected_end_time ~= py.None
+      options.expected_end_time = py.pandas.to_datetime(options.expected_end_time);
+  end
+
+
+r = struct(py.pecos.monitoring.check_timestamp(data,freq,...
+ 	      pyargs("expected_start_time",options.expected_start_time,...
+          "expected_end_time",options.expected_end_time,"min_failures",...
+          int32(options.min_failures),"exact_times",options.exact_times)));
 
   % Convert to qcdata structure
   results.values=double(r.cleaned_data.values);
