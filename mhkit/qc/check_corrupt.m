@@ -1,4 +1,4 @@
-function results = check_corrupt(data,vals,varargin)
+function results = check_corrupt(data,vals,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Check for data that is outside expected range
@@ -27,13 +27,13 @@ function results = check_corrupt(data,vals,varargin)
 %     key: string (optional)
 %         Data column name or translation dictionary key.  If not specified
 %         or set to py.None, all columns are used for test.
+%         to call: check_corrupt(data,vals,"key",key)
 %
 %     min_failures: int (optional)
 %         Minimum number of consecutive failures required for reporting
 %         default = 1
+%         to call: check_corrupt(data,vals,"min_failures",min_failures)
 %
-%     Must set previous arguments to use later optional arguments
-%     (i.e. must set key to use min_failures).
 %     
 % Returns
 % ---------
@@ -51,6 +51,14 @@ function results = check_corrupt(data,vals,varargin)
 %            Same as input times 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments 
+    data
+    vals
+    options.key = py.None;
+    options.min_failures = 1;
+end
+
   py.importlib.import_module('pecos');
 
   % check to see if a pandas dataframe or not
@@ -58,19 +66,9 @@ function results = check_corrupt(data,vals,varargin)
     data=qc_data_to_dataframe(data);
   end
    vals = py.list(vals);
-  % Must use optional qc arguments in order, for now.
-  if nargin == 2
-     
-    r = struct(py.pecos.monitoring.check_corrupt(data,vals));
-  elseif nargin == 3
-    r = struct(py.pecos.monitoring.check_corrupt(data,vals,varargin{1}));
-  elseif nargin == 4
-    r = struct(py.pecos.monitoring.check_corrupt(data,vals,varargin{1},varargin{2}));
-  else
-    ME = MException('MATLAB:qc_corrupt','incorrect number of arguments (2 to 4)');
-        throw(ME);
-  end
 
+r = struct(py.pecos.monitoring.check_corrupt(data,vals,pyargs("key",options.key,...
+    "min_failures",int32(options.min_failures))));
   % Convert to qcdata structure
   results.values=double(r.cleaned_data.values);
   results.mask=int64(r.mask.values);

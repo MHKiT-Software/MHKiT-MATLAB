@@ -1,4 +1,4 @@
-function results = check_missing(data)
+function results = check_missing(data,options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Check for missing data
 %    
@@ -20,13 +20,13 @@ function results = check_missing(data)
 %     key: string (optional)
 %         Data column name or translation dictionary key.  If not specified
 %         or set to py.None, all columns are used for test.
+%         to call: check_missing(data,"key",key)
 %
 %     min_failures: int (optional)
 %         Minimum number of consecutive failures required for reporting,
 %         default = 1
+%         to call: check_missing(data,"min_failures",min_failures)
 %
-%     Must set previous arguments to use later optional arguments
-%     (i.e. must set key to use min_failures).
 %     
 % Returns
 % ---------
@@ -45,6 +45,12 @@ function results = check_missing(data)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+arguments 
+    data
+    options.key = py.None;
+    options.min_failures = 1;
+end
+
  py.importlib.import_module('pecos');
 
   % check to see if a pandas dataframe or not
@@ -52,18 +58,8 @@ function results = check_missing(data)
     data=qc_data_to_dataframe(data);
   end
 
-  if nargin == 1
-    r = struct(py.pecos.monitoring.check_missing(data));
-  elseif nargin == 2
-    r = struct(py.pecos.monitoring.check_missing(data,...
-	      varargin{1}));
-  elseif nargin == 3
-    r = struct(py.pecos.monitoring.check_missing(data,...
-	      varargin{1},varargin{2}));
-  else
-    ME = MException('MATLAB:qc_missing','incorrect number of arguments (1 to 3)');
-        throw(ME);
-  end
+r = struct(py.pecos.monitoring.check_missing(data,...
+ 	      pyargs("key",options.key,"min_failures",int32(options.min_failures))));
 
   % Convert to qcdata structure
   results.values=double(r.cleaned_data.values);
