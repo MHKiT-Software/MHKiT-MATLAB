@@ -12,7 +12,7 @@ jobs:
       install: 
         - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
         - cd mhkit-python
-        - sudo pip install -e .
+        - sudo -H pip install -e .
       script: 
         - matlab -batch "import mhkit.*; matlab.addons.install('mhkit.mltbx'); runMatlabTests(); results = runTests('reportHTML', false, 'reportPDF', false), assertSuccess(results);"
       if: branch = master
