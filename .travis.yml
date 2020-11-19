@@ -10,7 +10,7 @@ jobs:
       before_install:
         - sudo apt update
         - sudo apt install software-properties-common
-        - sudo apt-get install python3.7
+        - sudo apt install python3.7
         - python3.7 --version
       install: 
         - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
