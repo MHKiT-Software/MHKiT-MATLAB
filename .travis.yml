@@ -8,11 +8,11 @@ jobs:
     - stage: test
       language: matlab
       before_install:
-        - sudo apt-get -y install python
+        - sudo apt-get install python
       install: 
         - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
         - cd mhkit-python
-        - pip install -e .
+        - sudo pip install -e .
       script: 
         - matlab -batch "import mhkit.*; matlab.addons.install('mhkit.mltbx'); runMatlabTests(); results = runTests('reportHTML', false, 'reportPDF', false), assertSuccess(results);"
       if: branch = master
