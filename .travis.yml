@@ -18,6 +18,7 @@ jobs:
         - sudo apt-get update
         - sudo apt install python3.8
         - python3.8 --version
+        - sudo apt install python3-pip3.8
       install: 
         - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
         - cd mhkit-python
