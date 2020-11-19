@@ -26,6 +26,8 @@ jobs:
         - cd mhkit-python
         - python3.8 -m pip install pip install -e .
       script: 
+        - cd ..
+        - git clone --depth 1 https://github.com/mfaltas-sandia/MHKiT-MATLAB.git mhkit-matlab
         - matlab -batch "ls"
         - matlab -batch "matlab.addons.toolbox.installToolbox('mhkit.mltbx')"
         - matlab -batch "import mhkit.*; matlab.addons.install('mhkit.mltbx'); runMatlabTests();" 
