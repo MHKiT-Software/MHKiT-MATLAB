@@ -12,5 +12,5 @@ jobs:
         - cd mhkit-python
         - pip install -e .
       script: 
-        - matlab -batch "results = runTests('reportHTML', false, 'reportPDF', false), assertSuccess(results);"
+        - matlab -batch "import mhkit.*; matlab.addons.install('mhkit.mltbx'); runMatlabTests(); results = runTests('reportHTML', false, 'reportPDF', false), assertSuccess(results);"
       if: branch = master
