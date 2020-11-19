@@ -1,0 +1,12 @@
+language: minimal
+
+stages:
+  - test
+  
+jobs:
+  include:
+    - stage: test
+      language: matlab
+      script: 
+        - matlab -batch "results = runTests('reportHTML', false, 'reportPDF', false), assertSuccess(results);"
+      if: branch = master
