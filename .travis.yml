@@ -28,6 +28,6 @@ jobs:
       script: 
         - cd ..
         - matlab -batch "ls"
-        - matlab -batch "matlab.addons.toolbox.installToolbox('mhkit.mltbx')"
-        - matlab - batch "results = runTests('reportHTML', false, 'reportPDF', false), assertSuccess(results);"
+        - matlab -batch "import mhkit.*; matlab.addons.toolbox.installToolbox('mhkit.mltbx');"
+        - matlab -batch "results = runTests('reportHTML', false, 'reportPDF', false), assertSuccess(results);"
       if: branch = master
