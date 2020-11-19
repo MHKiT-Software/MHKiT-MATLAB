@@ -7,6 +7,10 @@ jobs:
   include:
     - stage: test
       language: matlab
+      install: 
+        - git clone https://github.com/MHKiT-Software/MHKiT-Python
+        - cd mhkit-python
+        - pip install -e .
       script: 
         - matlab -batch "results = runTests('reportHTML', false, 'reportPDF', false), assertSuccess(results);"
       if: branch = master
