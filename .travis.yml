@@ -8,7 +8,8 @@ jobs:
     - stage: test
       language: matlab
       install: 
-        - git clone https://github.com/MHKiT-Software/MHKiT-Python
+        - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python MHKIT
+        - cd MHKIT
         - cd mhkit-python
         - pip install -e .
       script: 
