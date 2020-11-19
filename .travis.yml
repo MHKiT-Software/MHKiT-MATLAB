@@ -16,8 +16,8 @@ jobs:
         - sudo add-apt-repository multiverse  
         - sudo add-apt-repository ppa:deadsnakes/ppa -y
         - sudo apt-get update
-        - sudo apt install python3.7
-        - python3.7 --version
+        - sudo apt install python3.9
+        - python3.9 --version
       install: 
         - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
         - cd mhkit-python
