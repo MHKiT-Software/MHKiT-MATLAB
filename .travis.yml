@@ -8,7 +8,10 @@ jobs:
     - stage: test
       language: matlab
       before_install:
-        - sudo apt-get install python
+        - sudo apt update
+        - sudo apt install software-properties-common
+        - sudo apt-get install python3.7
+        - python3.7 --version
       install: 
         - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
         - cd mhkit-python
