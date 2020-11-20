@@ -26,8 +26,9 @@ jobs:
         - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
         - cd mhkit-python
         - pip install -e .
-      script:
         - cd ..
         - matlab -batch "ls"
         - matlab -batch "import mhkit.*, matlab.addons.toolbox.installToolbox('mhkit.mltbx'), cd mhkit/tests, results = runTests(), assertSuccess(results);"
+      script:
+        
       if: branch = master
