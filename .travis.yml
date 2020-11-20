@@ -33,6 +33,7 @@ jobs:
       script:
         - cd ..
         - matlab -batch "ls"
+        - matlab -batch "[ED, AP] = mhkit.river.performance.circular(30), print(ED), print(AP)"
         - matlab -batch "import mhkit.*, matlab.addons.toolbox.installToolbox('mhkit.mltbx'), cd mhkit/tests, results = runTests(), assertSuccess(results);"
         
       if: branch = master
