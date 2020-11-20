@@ -25,6 +25,7 @@ jobs:
         - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
         - cd mhkit-python
         - python3.8 -m pip install pip install -e .
+        - matlab -batch "python3.8 -m pip install pip install -e ."
       script: 
         - cd ..
         - matlab -batch "ls"
