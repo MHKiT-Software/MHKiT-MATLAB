@@ -37,6 +37,7 @@ jobs:
         - cd ..
         - matlab -batch "ls"
         - python3.8 -m pip install -e .
+        - python3.8 -c "import mhkit; print('hello world')"
         - matlab -batch "import mhkit.*, matlab.addons.toolbox.installToolbox('mhkit.mltbx'), [x,y]=circular(30)"
         - matlab -batch "import mhkit.*, matlab.addons.toolbox.installToolbox('mhkit.mltbx'), [ED, AP] = mhkit.river.performance.circular(30), print(ED), print(AP)"
         - matlab -batch "import mhkit.*, matlab.addons.toolbox.installToolbox('mhkit.mltbx'), import mhkit.*, cd mhkit/tests, results = runTests(), assertSuccess(results);"
