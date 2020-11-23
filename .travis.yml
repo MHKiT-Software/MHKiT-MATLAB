@@ -33,7 +33,7 @@ jobs:
 
       script:
         - python3.8 -m pip install -e .
-        - python3.8 -r "print("Hello World")
+        - python3.8 -r "print("Hello World")"
         - cd ..
         - matlab -batch "ls"
         - python3.8 -m pip install -e .
