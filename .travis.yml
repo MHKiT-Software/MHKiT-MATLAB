@@ -39,7 +39,7 @@ jobs:
         - python3.7 -m pip install -e .
         - python3.7 -c "import mhkit; print('hello world')"
         - python3.7 -c "import sys; print(sys.executable)"
-        - matlab -batch "pyversion('/usr/bin/python3.7')"
+        - matlab -batch "pyversion('/usr/bin/python3.7'), py.int(1), pyversion('/usr/bin/python3.7')"
         - matlab -batch "version"
         - matlab -batch "pyversion('/usr/bin/python3.7'), pyversion, import mhkit.*, matlab.addons.toolbox.installToolbox('mhkit.mltbx'), [x,y]=circular(30)"
         - matlab -batch "pyversion('/usr/bin/python3.7'), import mhkit.*, matlab.addons.toolbox.installToolbox('mhkit.mltbx'), [ED, AP] = mhkit.river.performance.circular(30), print(ED), print(AP)"
