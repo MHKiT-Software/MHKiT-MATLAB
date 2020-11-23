@@ -33,7 +33,7 @@ jobs:
 
       script:
         - python3.8 -m pip install -e .
-        - python3.8 -c "print('HelloWorld'), import mhkit"
+        - python3.8 -c "import mhkit"
         - cd ..
         - matlab -batch "ls"
         - python3.8 -m pip install -e .
