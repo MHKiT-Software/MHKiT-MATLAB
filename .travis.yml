@@ -42,6 +42,6 @@ jobs:
         - matlab -batch "version, pyversion"
         - matlab -batch "[x,y]=circular(30)"
         - matlab -r "[x,y]=circular(30)"
-        - matlab -batch "pyversion('/usr/bin/python3.7'), pyversion, import mhkit.*, matlab.addons.toolbox.installToolbox('mhkit.mltbx'), [x,y]=circular(30)"
+        - matlab -batch "pyversion('/usr/bin/python3.7'), pyversion, import mhkit.*"
         
       if: branch = master
