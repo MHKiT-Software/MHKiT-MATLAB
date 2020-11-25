@@ -38,7 +38,8 @@ jobs:
         - sudo matlab -batch "ls"
         - realpath mhkit.mltbx
         - sudo python3.7 -m pip install -e .
-        - sudo python3.7 -c "matlabroot, import mhkit; print('hello world')"
+        - sudo matlab -batch "matlabroot"
+        - sudo python3.7 -c "import mhkit; print('hello world')"
         - sudo python3.7 -c "import sys; print(sys.executable)"
         - sudo matlab -batch "version, pyversion"
         - sudo matlab -batch "[x,y]=circular(30)"
