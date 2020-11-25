@@ -35,6 +35,7 @@ jobs:
         - sudo python3.7 -m pip install -e .
         - sudo python3.7 -c "import mhkit; print('hello world')"
         - cd ..
+        - sudo chown -R mfaltas: /usr/local/MATLAB/R2017b
         - sudo matlab -batch "ls"
         - realpath mhkit.mltbx
         - sudo python3.7 -m pip install -e .
