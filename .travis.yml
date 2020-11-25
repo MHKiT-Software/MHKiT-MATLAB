@@ -27,6 +27,18 @@ jobs:
         - cd requests
         - sudo python3.7 -m pip install -e .
         - cd ..
+        
+        - python3.7 -m pip install pandas
+        - python3.7 -m pip install numpy
+        - python3.7 -m pip install scipy
+        - python3.7 -m pip install matplotlib
+        
+        - git clone --depth 1 https://github.com/sandialabs/pecos pecos
+        - cd pecos
+        - sudo python3.7 setup.py install
+        - cd ..   
+          
+        
         - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
         - cd mhkit-python
         - sudo python3.7 -m pip install -e .
