@@ -28,10 +28,14 @@ jobs:
         - sudo python3.7 -m pip install -e .
         - cd ..
         
+        - apt-get purge -y python3-pip
+        - apt-get install python3-pip
+        
         - sudo -H python3.7 -m pip install pandas
         - sudo -H python3.7 -m pip install numpy
         - sudo -H python3.7 -m pip install scipy
         - sudo -H python3.7 -m pip install matplotlib
+        
         
         - git clone --depth 1 https://github.com/sandialabs/pecos pecos
         - cd pecos
