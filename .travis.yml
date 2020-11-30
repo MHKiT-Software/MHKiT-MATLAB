@@ -28,9 +28,6 @@ jobs:
         - sudo python3.7 -m pip install -e .
         - cd ..
         
-        - apt-get purge -y python3-pip
-        - apt-get install python3-pip
-        
         - python3.7 -m pip install pandas
         - python3.7 -m pip install numpy
         - python3.7 -m pip install scipy
