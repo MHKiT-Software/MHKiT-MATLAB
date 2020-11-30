@@ -21,7 +21,7 @@ jobs:
         - sudo apt install python3.7-distutils
         - curl https://bootstrap.pypa.io/get-pip.py -o get-pip3.py
         - python3.7 get-pip3.py
-        - apt install -y python3-pip.
+
         - python3.7 -m pip install --upgrade pip
       install:  
         - sudo python3.7 -m pip install -e .
