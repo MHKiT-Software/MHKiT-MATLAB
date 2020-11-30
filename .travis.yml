@@ -16,47 +16,47 @@ jobs:
         - sudo add-apt-repository multiverse  
         - sudo add-apt-repository ppa:deadsnakes/ppa -y
         - sudo apt-get update
-        - sudo apt install python3.7
-        - python3.7 --version
-        - sudo apt install python3.7-distutils
+        - sudo apt install python3.6
+        - python3.6 --version
+        - sudo apt install python3.6-distutils
         - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-        - python3.7 get-pip.py
+        - python3.6 get-pip.py
       install:  
-        - sudo python3.7 -m pip install -e .
+        - sudo python3.6 -m pip install -e .
         - git clone --depth 1 https://github.com/psf/requests.git requests
         - cd requests
-        - sudo python3.7 -m pip install -e .
+        - sudo python3.6 -m pip install -e .
         - cd ..
         
-        - python3.7 -m pip install pandas
-        - python3.7 -m pip install numpy
-        - python3.7 -m pip install scipy
-        - python3.7 -m pip install matplotlib
+        - python3.6 -m pip install pandas
+        - python3.6 -m pip install numpy
+        - python3.6 -m pip install scipy
+        - python3.6 -m pip install matplotlib
         
         - git clone --depth 1 https://github.com/sandialabs/pecos pecos
         - cd pecos
-        - sudo python3.7 setup.py install
+        - sudo python3.6 setup.py install
         - cd ..   
           
         
         - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
         - cd mhkit-python
-        - sudo python3.7 -m pip install -e .
+        - sudo python3.6 -m pip install -e .
 
       script:
-        - sudo python3.7 -m pip install -e .
-        - sudo python3.7 -c "import mhkit; print('hello world')"
+        - sudo python3.6 -m pip install -e .
+        - sudo python3.6 -c "import mhkit; print('hello world')"
         - cd ..
         - sudo matlab -batch "ls"
         
         - realpath mhkit.mltbx
         - sudo mhkit.mltbx
-        - sudo python3.7 -m pip install -e .
+        - sudo python3.6 -m pip install -e .
         - sudo matlab -batch "matlabroot"
-        - sudo python3.7 -c "import mhkit; print('hello world')"
-        - sudo python3.7 -c "import sys; print(sys.executable)"
+        - sudo python3.6 -c "import mhkit; print('hello world')"
+        - sudo python3.6 -c "import sys; print(sys.executable)"
         - sudo matlab -batch "version, pyversion"
-        - sudo matlab -batch "pyversion('/usr/bin/python3.7'), pyversion, import mhkit.*, matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'),addons = matlab.addons.installedAddons, [x,y]=circular(30)"
+        - sudo matlab -batch "pyversion('/usr/bin/python3.6'), pyversion, import mhkit.*, matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'),addons = matlab.addons.installedAddons, [x,y]=circular(30)"
        
         
       if: branch = master
