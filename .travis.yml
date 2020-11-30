@@ -18,7 +18,7 @@ jobs:
         - sudo apt-get update
         - sudo apt install python3.6
         - python3.6 --version
-        - sudo apt install python3.6-distutils
+        
         - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
         - python3.6 get-pip.py
       install:  
