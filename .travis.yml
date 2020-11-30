@@ -34,6 +34,9 @@ jobs:
         - python3.7 -m pip install numpy
         - python3.7 -m pip install scipy
         - python3.7 -m pip install matplotlib
+        - pip install numpy
+        - pip2 install numpy
+        - pip3 install numpy
         
         
         - git clone --depth 1 https://github.com/sandialabs/pecos pecos
@@ -48,7 +51,7 @@ jobs:
 
       script:
         - sudo python3.7 -m pip install -e .
-        - sudo python3.7 -c "import mhkit; import numpy; import scipy; import pandas; import matplotlib; print('hello world')"
+        - sudo python3.7 -c "import mhkit; import numpy; import scipy; import pandas; import matplotlib; import pecos; import requests; print('hello world')"
         - cd ..
         - sudo matlab -batch "ls"
         
