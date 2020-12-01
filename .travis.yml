@@ -62,6 +62,7 @@ jobs:
         - sudo matlab -batch "matlabroot"
         - sudo python3.7 -c "import mhkit; print('hello world')"
         - sudo python3.7 -c "import sys; print(sys.executable)"
+        - PATH=$PATH: /usr/bin/python3.7
        
        script:
         - sudo matlab -batch "version, pyversion, pyversion('/usr/bin/python3.7'), pyenv('Version','executable'), pyversion"
