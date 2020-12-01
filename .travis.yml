@@ -55,7 +55,7 @@ jobs:
         - sudo matlab -batch "ls"
         
         - realpath mhkit.mltbx
-        - sudo matlab mhkit.mltbx
+
         - sudo python3.7 -m pip install -e .
         - sudo matlab -batch "matlabroot"
         - sudo python3.7 -c "import mhkit; print('hello world')"
