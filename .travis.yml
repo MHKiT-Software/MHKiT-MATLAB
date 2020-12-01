@@ -42,7 +42,7 @@ jobs:
         
         - git clone --depth 1 https://github.com/sandialabs/pecos pecos
         - cd pecos
-        - sudo python3.7 setup.py install
+        - sudo python3.7 -m pip install -e .
         - cd ..   
           
         
