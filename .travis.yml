@@ -20,15 +20,20 @@ install:
   # Replace dep1 dep2 ... with your dependencies
   - conda create -q -n test-environment python=3.7 pandas numpy scipy matplotlib requests
   - conda install pip
-  - python -m pip install pecos
   - conda activate test-environment
   - python setup.py install
+  
+  # get python path
   - which python
+
+  # install pecos
+  - python -m pip install pecos
+
   
   # Install mhkit-python
   - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
   - cd mhkit-python
-  - python3.7 -m pip install -e .
+  - python -m pip install -e .
   - cd ..
 
 script:
