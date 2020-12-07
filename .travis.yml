@@ -27,7 +27,7 @@ install:
   # Install mhkit-python
   - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
   - cd mhkit-python
-  - python -m pip install -e .
+  - python3 -m pip install -e .
   - cd ..
 
 script:
