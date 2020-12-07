@@ -21,7 +21,7 @@ install:
   # Add Conda Forge
   - conda config --append channels conda-forge
   # Replace dep1 dep2 ... with your dependencies
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION dep1 dep2 ...
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pandas numpy scipy matplotlib requests pecos
   - conda activate test-environment
   - python setup.py install
 
