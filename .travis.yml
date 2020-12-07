@@ -33,6 +33,7 @@ install:
   - sudo apt-get install libpng-dev
   
   #install zlib
+  - apt-cache search zlib
   - sudo apt-get install zlib1g=1:1.2.8.dfsg-2ubuntu4 -y --allow-downgrades
 
   # Install mhkit-python
