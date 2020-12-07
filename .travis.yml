@@ -33,12 +33,7 @@ install:
   - sudo apt-get install libpng-dev
   
   #install zlib
-  - wget http://www.zlib.net/zlib1g.tar.gz
-  - tar -xvzf zlib1g.tar.gz
-  - cd zlib1g
-  - ./configure --prefix=/usr/local/zlib
-  - sudo make install
-  - cd ..
+  - sudo apt-get install zlib1g-dev
 
   
   # Install mhkit-python
