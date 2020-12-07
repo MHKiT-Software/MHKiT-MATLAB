@@ -34,7 +34,9 @@ install:
   
   #install zlib
   - apt-cache search zlib1g
-  - apt list -a zlib1g
+  - apt list madison zlib1g
+  - apt list madison zlib1g-dbg
+  - apt list madison zlib1g-dev
   - sudo apt-get install zlib1g=1.2.9 -y --allow-downgrades
 
   # Install mhkit-python
