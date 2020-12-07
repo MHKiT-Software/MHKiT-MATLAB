@@ -35,6 +35,6 @@ install:
   - python$TRAVIS_PYTHON_VERSION -m pip install -e .
   - cd ..
 
-- language: matlab
+script:
   # Your test script goes here
   - matlab -batch "pyversion, matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'), [x,y]=circular(30)"
