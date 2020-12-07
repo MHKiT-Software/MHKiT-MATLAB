@@ -31,7 +31,9 @@ install:
   - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
   - cd mhkit-python
   - python$TRAVIS_PYTHON_VERSION -m pip install -e .
+  - cd ..
 
 
 script:
   # Your test script goes here
+  - matlab -batch "pyversion, matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'), [x,y]=circular(30)"
