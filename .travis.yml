@@ -1,7 +1,9 @@
 matrix:
   include:
     - language: python
-      python: 
-      # We don't actually use the Travis Python, but this keeps it organized.
-      - "2.7"
-      - "3.6"
+      python: 3.6
+      install:
+        - cd backend/tests
+
+    - language: matlab
+      script:
