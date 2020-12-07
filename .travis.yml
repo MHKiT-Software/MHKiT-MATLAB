@@ -28,6 +28,10 @@ install:
 
   # install pecos
   - python -m pip install pecos
+  
+  # install libpng and zlib
+  - apt-get install libpng16-dev
+  - apt-get install zlib
 
   
   # Install mhkit-python
