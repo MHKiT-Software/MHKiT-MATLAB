@@ -20,14 +20,14 @@ install:
   # Replace dep1 dep2 ... with your dependencies
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pandas numpy scipy matplotlib requests
   - conda install pip
-  - python$TRAVIS_PYTHON_VERSION -m pip install pecos
+  - python -m pip install pecos
   - conda activate test-environment
   - python setup.py install
   
   # Install mhkit-python
   - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
   - cd mhkit-python
-  - python$TRAVIS_PYTHON_VERSION -m pip install -e .
+  - python -m pip install -e .
   - cd ..
 
 script:
