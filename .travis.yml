@@ -35,6 +35,7 @@ install:
   - cd mhkit-python
   - python -m pip install -e .
   - cd ..
+  - python -m pip install -e .
 
 script:
   # Your test script goes here
