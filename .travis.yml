@@ -1,101 +1,29 @@
-language: minimal
-
-stages:
-  - test
-  
-jobs:
-  include:
-    - stage: test
-    language: python
-    python:
-    # We don't actually use the Travis Python, but this keeps it organized.
-    - "2.7"
-    - "3.5"
-    - "3.6"
-    install:
-    # We do this conditionally because it saves us some downloading if the
-    # version is the same.
-    - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+language: python
+python:
+  # We don't actually use the Travis Python, but this keeps it organized.
+  - "2.7"
+  - "3.5"
+  - "3.6"
+install:
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
     else
-    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     fi
-    - bash miniconda.sh -b -p $HOME/miniconda
-    - source "$HOME/miniconda/etc/profile.d/conda.sh"
-    - hash -r
-    - conda config --set always_yes yes --set changeps1 no
-    - conda update -q conda
-    # Useful for debugging any issues with conda
-    - conda info -a
-    # Replace dep1 dep2 ... with your dependencies
-    - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION dep1 dep2 ...
-    - conda activate test-environment
-    - python setup.py install
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - source "$HOME/miniconda/etc/profile.d/conda.sh"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  # Replace dep1 dep2 ... with your dependencies
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION dep1 dep2 ...
+  - conda activate test-environment
+  - python setup.py install
 
 script:
   # Your test script goes here
-      language: matlab
-      before_install:
-        - sudo apt update
-        - sudo apt install software-properties-common
-        - sudo add-apt-repository main
-        - sudo add-apt-repository universe
-        - sudo add-apt-repository restricted
-        - sudo add-apt-repository multiverse  
-        - sudo add-apt-repository ppa:deadsnakes/ppa -y
-        - sudo apt-get update
-        - sudo apt install python3.7
-        - python3.7 --version
-        - sudo apt install python3.7-distutils
-        - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-        - python3.7 get-pip.py
-
-        - python3.7 -m pip install --upgrade pip
-      install:  
-        - sudo python3.7 -m pip install -e .
-        - git clone --depth 1 https://github.com/psf/requests.git requests
-        - cd requests
-        - sudo python3.7 -m pip install -e .
-        - cd ..
-        
-        - python3.7 -m pip install pandas
-        - python3.7 -m pip install numpy
-        - python3.7 -m pip install scipy
-        - python3.7 -m pip install matplotlib
-        - python3.7 -m pip install cPython
-        - pip install numpy
-        - pip2 install numpy
-        - pip3 install numpy
-        
-        
-        - git clone --depth 1 https://github.com/sandialabs/pecos pecos
-        - cd pecos
-        - sudo python3.7 -m pip install -e .
-        - cd ..   
-          
-        
-        - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
-        - cd mhkit-python
-        - sudo python3.7 -m pip install -e .
-        - sudo python3.7 -m pip install -e .
-        - sudo python3.7 -c "import mhkit; import numpy; import scipy; import pandas; import matplotlib; import pecos; import requests; numpy.version.version; scipy.version.version; print('hello world')"
-        - cd ..
-        - sudo matlab -batch "ls"
-        
-        - realpath mhkit.mltbx
-
-        - sudo python3.7 -m pip install -e .
-        - sudo matlab -batch "matlabroot"
-        - sudo python3.7 -c "import mhkit; print('hello world')"
-        - sudo python3.7 -c "import sys; print(sys.executable)"
-
-
-      script:
-        - PATH=$PATH: /usr/bin/python3.7
-        - sudo matlab -batch "version, pyversion, pyversion('/usr/bin/python3.7'), pyenv('Version','executable'), pyversion"
-        - sudo matlab -batch "pyversion('/usr/bin/python3.7'), pyversion, py.importlib.import_module('numpy')"
-        - sudo matlab -batch "pyversion('/usr/bin/python3.7'), pyversion, import mhkit.*, matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'),addons = matlab.addons.installedAddons, [x,y]=circular(30)"
-        - sudo matlab -batch "pyversion, py.importlib.import_module('numpy')"
-       
-        
-      if: branch = master
