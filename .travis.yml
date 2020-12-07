@@ -30,7 +30,7 @@ install:
   # Install mhkit-python
   - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
   - cd mhkit-python
-  - sudo python$TRAVIS_PYTHON_VERSION -m pip install -e .
+  - python$TRAVIS_PYTHON_VERSION -m pip install -e .
 
 
 script:
