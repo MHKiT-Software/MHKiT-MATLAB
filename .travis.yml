@@ -34,7 +34,7 @@ install:
   
   # update matplotlib
   - python -m pip install --upgrade matplotlib
-  - python -m pip install --upgrade libpng
+  # python -m pip install --upgrade libpng
   
   #install zlib
   - apt-cache search zlib1g
