@@ -1,4 +1,4 @@
-language: matlab
+language: python
 python:
   # We don't actually use the Travis Python, but this keeps it organized.
   - "2.7"
@@ -33,5 +33,7 @@ install:
   - python$TRAVIS_PYTHON_VERSION -m pip install -e .
   - cd ..
 
+language: matlab
   # Your test script goes here
   - matlab -batch "pyversion, matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'), [x,y]=circular(30)"
+  
