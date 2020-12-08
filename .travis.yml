@@ -53,4 +53,4 @@ install:
 script:
   # Your test script goes here
   - matlab -batch "pyversion, matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'), [x,y]=circular(30)"
-  - matlab -batch "results = runTests(), assertSuccess(results)"
+  - matlab -batch "ls, cd ./tests/ , results = runTests(), assertSuccess(results)"
