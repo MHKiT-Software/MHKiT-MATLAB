@@ -15,33 +15,24 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
   
-  # Add Conda Forge
+  # Add Conda Forge to conda environment
   - conda config --append channels conda-forge
-  # Replace dep1 dep2 ... with your dependencies
+  # Add dependencies to conda environment and specify python 3.7
   - conda create -q -n test-environment python=3.7 pandas numpy scipy matplotlib requests
+  # install pip
   - conda install pip
+  # activate the conda environement
   - conda activate test-environment
   - python setup.py install
-  
-  # get python path
-  - which python
 
   # install pecos
   - python -m pip install pecos
   
-  # install libpng and zlib
+  # install libpng. If it is outdated, it could cause error with the updated matplotlib package
   - sudo apt-get install libpng-dev
   
-  # update matplotlib
+  # update matplotlib to get rid of errors with libpng and zlib
   - python -m pip install --upgrade matplotlib
-  # python -m pip install --upgrade libpng
-  
-  #install zlib
-  - apt-cache search zlib1g
-  - apt list policy zlib1g
-  - apt list policy zlib1g-dbg
-  - apt list policy zlib1g-dev
-  # sudo apt-get install zlib1g=1.2.9 -y --allow-downgrades
 
   # Install mhkit-python
   - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
@@ -51,6 +42,5 @@ install:
   - python -m pip install -e .
 
 script:
-  # Your test script goes here
-  - matlab -batch "pyversion, matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'), [x,y]=circular(30)"
+  # installs mhkit toolbox in matlab, goes to test folder to the script that runs all the tests, imports mhkit, then runs the test script
   - matlab -batch "matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'), cd mhkit/tests/ , import mhkit.*, results = runTests(), assertSuccess(results)"
