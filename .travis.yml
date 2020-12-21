@@ -18,7 +18,7 @@ install:
   # Add Conda Forge to conda environment
   - conda config --append channels conda-forge
   # Add dependencies to conda environment and specify python 3.7
-  - conda create -q -n test-environment python=3.7 pandas numpy scipy matplotlib requests
+  - conda create -q -n test-environment python=3.7 pandas numpy=1.19.4 scipy=1.5.4 matplotlib=3.3.3 requests sklearn=1.5.2
   # install pip
   - conda install pip
   # activate the conda environement
@@ -32,11 +32,11 @@ install:
   - sudo apt-get install libpng-dev
   
   # update matplotlib to get rid of errors with libpng and zlib
-  - python -m pip install --upgrade matplotlib
-  - python -m pip install --upgrade sklearn
-  - python -m pip install --upgrade pandas
-  - python -m pip install --upgrade scipy
-  - python -m pip install --upgrade numpy
+  # python -m pip install --upgrade matplotlib
+  # python -m pip install --upgrade sklearn
+  # python -m pip install --upgrade pandas
+  # python -m pip install --upgrade scipy
+  # python -m pip install --upgrade numpy
 
   # Install mhkit-python
   - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
