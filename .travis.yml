@@ -33,6 +33,7 @@ install:
   
   # update matplotlib to get rid of errors with libpng and zlib
   - python -m pip install --upgrade matplotlib
+  - python -m pip install --upgrade sklearn
 
   # Install mhkit-python
   - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
