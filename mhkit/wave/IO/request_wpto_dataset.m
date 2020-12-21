@@ -89,7 +89,7 @@ end
 
 py.importlib.import_module('mhkit');
 py.importlib.import_module('numpy');
-disp(size(lat_lon))
+
 datap = py.mhkit.wave.io.hindcast.request_wpto_dataset(data_type,py.list(parameter),...
     lat_lon,py.list(years),pyargs("tree",options.tree,"unscale",options.unscale,...
     "str_decode",options.str_decode,"hsds",options.hsds));
@@ -98,7 +98,8 @@ datac=cell(datap);
 datapd=datac{1};
 
 datamat=datac{2};
-matstr=struct(datamat);
+matstr=struct(datamat)
+disp(cell(py.list(py.numpy.nditer(datamat.columns.values,pyargs("flags",{"refs_ok"})))))
 
 xx=cell(datapd.axes);
 v=xx{2};
@@ -115,14 +116,21 @@ ti=cell(py.list(py.numpy.nditer(datapd.index,pyargs("flags",{"refs_ok"}))));
 siti=size(ti);
 si=size(vals);
 temp = [];
-datast = vals;
+%datast = vals;
 % if ~isempty(fieldnames(matstr))
-%     for i=1:si(2)
-%         test=string(py.str(vv{i}));
-%         datast.(test)=vals(:,i);
-%         unit=string(matstr.(test));
-%         datast.units.(test)=unit;
-%     end
+for k = 1:max(size(parameter))
+for j = 1:max(size(lat_lon))
+    
+    for i=1:si(2)
+        dat = parameter(k);
+        test='location'+string(j);
+        datast.dat.(test)=vals(:,i);
+        %unit=string(matstr.(test));
+        %datast.units.(test)=unit;
+end
+end
+end
+disp(datast)
 % else
 %     datast.spectrum = vals';
 %     for i=1:si(2)
