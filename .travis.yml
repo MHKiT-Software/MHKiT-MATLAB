@@ -18,7 +18,7 @@ install:
   # Add Conda Forge to conda environment
   - conda config --append channels conda-forge
   # Add dependencies to conda environment and specify python 3.7
-  - conda create -q -n test-environment python=3.7 pandas numpy scipy matplotlib requests sklearn
+  - conda create -q -n test-environment python=3.7 pandas numpy scipy matplotlib requests
   # install pip
   - conda install pip
   # activate the conda environement
