@@ -48,5 +48,6 @@ install:
 script:
   # shows matlab version for the build
   - matlab -batch "version"
+  - matlab -batch "pyversion"
   # installs mhkit toolbox in matlab, goes to test folder to the script that runs all the tests, imports mhkit, then runs the test script
   - matlab -batch "matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'), cd mhkit/tests/ , import mhkit.*, results = runTests(), assertSuccess(results)"
