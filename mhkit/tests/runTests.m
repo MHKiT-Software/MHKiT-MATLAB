@@ -3,7 +3,7 @@ function results = runTests()
     import matlab.unittest.TestRunner;
     import matlab.unittest.TestSuite;
     import matlab.unittest.plugins.TestReportPlugin;
-
+    set(0,'DefaultFigureWindowStyle','docked')  % 'normal' to un-dock
     % Define test suite
     suite = TestSuite.fromFolder('../tests');
     
