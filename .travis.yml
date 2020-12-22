@@ -32,7 +32,7 @@ install:
   - sudo apt-get install libpng-dev
   
   # update matplotlib to get rid of errors with libpng and zlib
-  - python -m pip install --upgrade matplotlib sklearn pandas scipy numpy requests
+  - python -m pip install --upgrade matplotlib sklearn pandas scipy nomkl numpy requests
   # python -m pip install --upgrade sklearn
   # python -m pip install --upgrade pandas
   # python -m pip install --upgrade scipy
