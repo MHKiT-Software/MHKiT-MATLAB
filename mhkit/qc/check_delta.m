@@ -1,4 +1,4 @@
-function results = check_delta(data,bound,options)
+function results = check_delta(data,bound,window,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Check for stagnant data and/or abrupt changes in the data using
@@ -22,6 +22,9 @@ function results = check_delta(data,bound,options)
 %     bound: cell array of floats
 %         [lower bound, upper bound] for min/max delta checking
 %         NaN or py.None can be used for either bound 
+%
+%     window : int or double
+%         Size of the rolling window (in seconds) used to compute delta
 %
 %     key: string (optional)
 %         Data column name or translation dictionary key.  If not specified
@@ -62,6 +65,7 @@ function results = check_delta(data,bound,options)
 arguments 
     data
     bound
+    window
     options.key = py.None;
     options.direction = py.None;
     options.min_failures = 1;
@@ -77,7 +81,7 @@ end
   bound = py.list(bound);
 
 
-r = struct(py.pecos.monitoring.check_delta(data,bound,...
+r = struct(py.pecos.monitoring.check_delta(data,bound,window,...
  	      pyargs("key",options.key,"direction",options.direction,...
           "min_failures",int32(options.min_failures))));
 
