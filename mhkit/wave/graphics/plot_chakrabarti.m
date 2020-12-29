@@ -7,13 +7,18 @@ function figure=plot_chakrabarti(H, lambda_w, D, options)
 %     Chakrabarti, Subrata. Handbook of Offshore Engineering (2-volume set).
 %     Elsevier, 2005.
 % 
-%     Parameters
-%     ------------
-%     H: Wave height [m]
-%     lambda_w: Wave length [m]
-%     D: Characteristic length [m]
+% Parameters
+% ------------
+%   H: integer, double or vector
+%         Wave height [m]
 %
-%     savepath: string (optional)
+%   lambda_w: integer, double or vector
+%         Wave length [m]
+%
+%    D: integer, double or vector of 
+%         Characteristic length [m]
+%
+%    savepath: string (optional)
 %         path and filename to save figure.
 %         to call: plot_chakrabarti(H,lambda_w,D,"savepath",savepath)
 %         
@@ -25,13 +30,13 @@ function figure=plot_chakrabarti(H, lambda_w, D, options)
 %
 % Examples
 %     --------
-%     **Using floats**
+%     **Using Integers**
 %     >> D = 5
 %     >> H = 8
 %     >> lambda_w = 200
 %     >> plot_chakrabarti(H,lambda_w,D)
 % 
-%     **Using array**
+%     **Using vector**
 %     >> D = linspace(5,15,5)
 %     >> H = 8*ones(size(D))
 %     >> lambda_w = 200*ones(size(D))
