@@ -1,4 +1,4 @@
-function results = check_outlier(data,bound,varargin)
+function results = check_outlier(data,bound,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Check or outliers using normalized data within a rolling window
@@ -27,22 +27,26 @@ function results = check_outlier(data,bound,varargin)
 %     key: string (optional)
 %         Data column name or translation dictionary key.  If not specified
 %         or set to py.None, all columns are used for test.
+%         to call: check_outlier(data,bound,"key",key)
 %
 %     window: int (optional)
 %         Size of rolling window (in seconds) used to normalize data
 %         default = 3600.  If window is set to py.None, data is normalized 
 %         using mean and stddev of entire data set (column by column)
+%         to call: check_outlier(data,bound,"window",window)
 %
 %     absolute_value: logical (optional)
-%         Use the absolute value of the normalized data, default = 1 (True)
+%         Use the absolute value of the normalized data, default = py.True
+%         to call: check_outlier(data,bound,"absolute_value",absolute_value)
 %
 %     min_failures: int (optional)
-%
 %         Minimum number of consecutive failures required for reporting,
 %         default = 1
+%         to call: check_outlier(data,bound,"min_failures",min_failures)
 %
-%     Must set previous arguments to use later optional arguments
-%     (i.e. must set key to use min_failures).
+%     streaming: logical (optional)
+%         Indicates if streaming analysis should be used, default = py.False
+%         to call: check_outlier(data,bound,"streaming",streaming)
 %     
 % Returns
 % ---------
@@ -60,6 +64,15 @@ function results = check_outlier(data,bound,varargin)
 %            Same as input times 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+arguments 
+    data
+    bound
+    options.key = py.None;
+    options.window = 3600;
+    options.absolute_value = py.True;
+    options.min_failures = 1;
+    options.streaming = py.False;
+end
 
  py.importlib.import_module('pecos');
 
@@ -68,25 +81,11 @@ function results = check_outlier(data,bound,varargin)
     data=qc_data_to_dataframe(data);
   end
   bound = py.list(bound);
-  if nargin == 2
-    r = struct(py.pecos.monitoring.check_outlier(data,bound));
-  elseif nargin == 3
-    r = struct(py.pecos.monitoring.check_outlier(data,bound,...
-	      varargin{1}));
-  elseif nargin == 4
-    r = struct(py.pecos.monitoring.check_outlier(data,bound,...
-	      varargin{1},varargin{2}));
-  elseif nargin == 5
-    r = struct(py.pecos.monitoring.check_outlier(data,bound,...
-	      varargin{1},varargin{2},varargin{3}));
-  elseif nargin == 6
-    r = struct(py.pecos.monitoring.check_outlier(data,bound,...
-	      varargin{1},varargin{2},varargin{3},varargin{4}));
-  else
-    ME = MException('MATLAB:qc_outlier','incorrect number of arguments (2 to 7)');
-        throw(ME);
-  end
 
+r = struct(py.pecos.monitoring.check_outlier(data,bound,...
+ 	      pyargs("key",options.key,"window",options.window,...
+          "absolute_value",options.absolute_value,"min_failures",int32(options.min_failures),...
+          "streaming",options.streaming)));
   % Convert to qcdata structure
   results.values=double(r.cleaned_data.values);
   results.mask=int64(r.mask.values);
