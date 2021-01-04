@@ -406,5 +406,18 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
+        
+        function test_chakrabarti(testCase)
+            D = 5;
+            H = 8;
+            lambda_w = 200;
+            filename = 'chakrabarti.png';
+            if isfile(filename)
+                delete(filename);
+            end
+            plot_chakrabarti(H,lambda_w,D,'savepath',filename)
+            assertTrue(testCase,isfile(filename));
+            delete(filename);
+        end
     end
 end
