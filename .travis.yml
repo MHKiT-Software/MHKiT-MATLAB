@@ -18,7 +18,7 @@ install:
   # Add Conda Forge to conda environment
   - conda config --append channels conda-forge
   # Add dependencies to conda environment and specify python 3.8
-  - conda create -q -n test-environment python=3.8 pandas numpy scipy matplotlib requests
+  - conda create -q -n test-environment python=3.8 pandas scipy matplotlib requests
   # install pip
   - conda install pip
   # - python -m pip install --upgrade pip wheel
@@ -33,7 +33,7 @@ install:
   - sudo apt-get install libpng-dev
   
   # update matplotlib to get rid of errors with libpng and zlib
-  - python -m pip install --upgrade matplotlib sklearn pandas scipy requests
+  - python -m pip install --upgrade matplotlib sklearn pandas scipy requests numpy
   # python -m pip install --upgrade sklearn
   # python -m pip install --upgrade pandas
   # python -m pip install --upgrade scipy
@@ -51,4 +51,4 @@ script:
   - matlab -batch "version"
   - matlab -batch "pyversion"
   # installs mhkit toolbox in matlab, goes to test folder to the script that runs all the tests, imports mhkit, then runs the test script
-  - matlab -batch -noFigureWindows "matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'), cd mhkit/tests/ , import mhkit.*, results = runTests(), assertSuccess(results)"
+  - matlab -batch  "matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'), cd mhkit/tests/ , import mhkit.*, results = runTests(), assertSuccess(results)"
