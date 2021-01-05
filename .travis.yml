@@ -16,7 +16,8 @@ install:
   - conda info -a
   
   # Add Conda Forge to conda environment
-  - conda config --append channels conda-forge intel
+  - conda config --append channels conda-forge 
+  - conda config --add channels intel
   # Add dependencies to conda environment and specify python 3.8
   - conda create -q -n test-environment python=3.8 pandas scipy matplotlib requests intelpython3_full
   # install pip
