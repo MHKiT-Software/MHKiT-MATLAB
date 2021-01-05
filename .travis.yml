@@ -17,9 +17,9 @@ install:
   
   # Add Conda Forge to conda environment
   - conda config --append channels conda-forge 
-  - conda config --add channels intel
+  # - conda config --add channels intel
   # Add dependencies to conda environment and specify python 3.8
-  - conda create -q -n test-environment python=3.8 pandas scipy matplotlib requests intelpython3_full
+  - conda create -q -n test-environment python=3.8 pandas scipy matplotlib requests 
   # install pip
   - conda install pip
   # - python -m pip install --upgrade pip wheel
@@ -51,5 +51,6 @@ script:
   # shows matlab version for the build
   - matlab -batch "version"
   - matlab -batch "pyversion"
+  - matlab -batch "py.sys.setdlopenflags(int32(10))"
   # installs mhkit toolbox in matlab, goes to test folder to the script that runs all the tests, imports mhkit, then runs the test script
   - matlab -batch  "matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'), cd mhkit/tests/ , import mhkit.*, results = runTests(), assertSuccess(results)"
