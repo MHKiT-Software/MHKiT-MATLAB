@@ -1,11 +1,28 @@
-dist: xenial
-env:
-  global:
-    - PATH=/opt/python/3.7.1/bin:$PATH
 language: matlab
+
+matlab:
+  - R2020a
+  - latest  # Default MATLAB release on Travis CI
+
+env:
+  jobs:
+    - PYTHON_VERSION=3.6.12
+    - PYTHON_VERSION=3.7.9
+    - PYTHON_VERSION=3.8.6
+  global:
+    - PYENV_RELEASE=1.2.21
+
+before_install:
+  # Update pyenv
+  - pushd $(pyenv root)
+  - git fetch
+  - git checkout v${PYENV_RELEASE}
+  - popd
+
 install:  
-  # Check the python version and update pip
-  - python -V
+  # Install the python version and update pip
+  - pyenv install -v ${PYTHON_VERSION}
+  - pyenv global ${PYTHON_VERSION}
   - python -m pip install --upgrade pip
   
   # Install MHKiT-Python
@@ -15,13 +32,6 @@ install:
   - python -m pip install -e .
 
 script:
-  # Look for linalg
-  - ls /opt/python/3.7.1/lib/python3.7/site-packages/numpy/linalg/
-  
-  # Try and preload numpy lapack
-  #- export LD_LIBRARY_PATH=/opt/python/3.7.1/lib
-  #- export LD_PRELOAD=/opt/python/3.7.1/lib/python3.7/site-packages/numpy/linalg/lapack_lite.cpython-37m-x86_64-linux-gnu.so
-
   # Show matlab and python version for the build
   - matlab -batch "py.sys.setdlopenflags(int32(10)), version, pyversion, version('-blas')"
   
