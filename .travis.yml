@@ -12,6 +12,11 @@ env:
   global:
     - PYENV_RELEASE=1.2.21
 
+jobs:
+  exclude:
+    - matlab: R2020a
+      env: PYTHON_VERSION=3.8.6
+
 before_install:
   # Update pyenv
   - pushd $(pyenv root)
