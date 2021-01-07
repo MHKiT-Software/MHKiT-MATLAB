@@ -1,56 +1,52 @@
-
 language: matlab
-install:
-  # We do this conditionally because it saves us some downloading if the version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - source "$HOME/miniconda/etc/profile.d/conda.sh"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  # Useful for debugging any issues with conda
-  - conda info -a
-  
-  # Add Conda Forge to conda environment
-  - conda config --append channels conda-forge 
-  # - conda config --add channels intel
-  # Add dependencies to conda environment and specify python 3.8
-  - conda create -q -n test-environment python=3.8 pandas scipy matplotlib requests 
-  # install pip
-  - conda install pip
-  # - python -m pip install --upgrade pip wheel
-  # activate the conda environement
-  - conda activate test-environment
-  - python setup.py install
 
-  # install pecos
-  - python -m pip install pecos
-  
-  # install libpng. If it is outdated, it could cause error with the updated matplotlib package
-  - sudo apt-get install libpng-dev
-  
-  # update matplotlib to get rid of errors with libpng and zlib
-  - python -m pip install --upgrade matplotlib sklearn pandas scipy requests numpy
-  # python -m pip install --upgrade sklearn
-  # python -m pip install --upgrade pandas
-  # python -m pip install --upgrade scipy
-  # - python -m pip install numpy==1.17.2
+matlab:
+  - R2020a
+  - latest  # Default MATLAB release on Travis CI
 
-  # Install mhkit-python
-  - git clone --depth 1 https://github.com/MHKiT-Software/MHKiT-Python mhkit-python
-  - cd mhkit-python
-  - python -m pip install -e .
-  - cd ..
+env:
+  jobs:
+    - PYTHON_VERSION=3.6.12
+    - PYTHON_VERSION=3.7.9
+    - PYTHON_VERSION=3.8.6
+  global:
+    - PYENV_RELEASE=1.2.21
+
+jobs:
+  exclude:
+    - matlab: R2020a
+      env: PYTHON_VERSION=3.8.6
+
+before_install:
+  # Update pyenv
+  - pushd $(pyenv root)
+  - git fetch
+  - git checkout v${PYENV_RELEASE}
+  - popd
+
+install:  
+  # Install the python version and update pip
+  - pyenv install -v ${PYTHON_VERSION}
+  - pyenv global ${PYTHON_VERSION}
+  - python -m pip install --upgrade pip
+  
+  # Install MHKiT-Python
+  - python -m pip install mhkit
+  
+  # Install MHKiT-MATLAB
   - python -m pip install -e .
 
 script:
-  # shows matlab version for the build
-  - matlab -batch "version"
-  - matlab -batch "pyversion"
-  - matlab -batch "py.sys.setdlopenflags(int32(10))"
-  # installs mhkit toolbox in matlab, goes to test folder to the script that runs all the tests, imports mhkit, then runs the test script
-  - matlab -nodisplay -batch  "matlab.addons.toolbox.installToolbox('/home/travis/build/mfaltas-sandia/MHKiT-MATLAB/mhkit.mltbx'), cd mhkit/tests/ , import mhkit.*, results = runTests(), assertSuccess(results)"
+  # Show matlab and python version for the build
+  - matlab -batch "py.sys.setdlopenflags(int32(10)), version, pyversion, version('-blas')"
+  
+  # Installs mhkit toolbox in matlab, goes to the test folder, imports mhkit, 
+  # then runs the test script
+  - >
+    matlab -batch 
+    "py.sys.setdlopenflags(int32(10)),
+    matlab.addons.toolbox.installToolbox('mhkit.mltbx'),
+    cd mhkit/tests/,
+    import mhkit.*,
+    results = runTests(),
+    assertSuccess(results)"
