@@ -8,7 +8,7 @@ env:
   jobs:
     - PYTHON_VERSION=3.7.9
     - PYTHON_VERSION=3.8.6
-    - PYTHON_VERSION=3.9.1
+    - PYTHON_VERSION=3.9.0
   global:
     - PYENV_RELEASE=1.2.21
 
