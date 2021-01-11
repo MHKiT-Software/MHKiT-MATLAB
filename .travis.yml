@@ -6,7 +6,6 @@ matlab:
 
 env:
   jobs:
-    - PYTHON_VERSION=3.6.12
     - PYTHON_VERSION=3.7.9
     - PYTHON_VERSION=3.8.6
   global:
