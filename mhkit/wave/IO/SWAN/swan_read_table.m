@@ -44,7 +44,14 @@ data = table2struct(array2table(mystructure.data,'VariableNames',vars),'ToScalar
 for i = 1:max(size(units))
     data.units.(string(vars(i))) = units(i);
 end
+meta = string(strsplit(strip(meta,'left','%'),' '));
+meta = meta(2:end);
+for j=1:max(size(meta))
+    if j ~= 3
+      m = string(strsplit(meta(j),':'));
+      data.meatdata.(m(1)) = m(2);
+    end
+end
 
-data.metadata = strip(meta,'left','%');
 
 
