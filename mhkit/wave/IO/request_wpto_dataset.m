@@ -1,20 +1,14 @@
 function datast=request_wpto_dataset(data_type,parameter,lat_lon, years,options)
 
 %%%%%%%%%%%%%%%%%%%%
-%     Reads data from the WPTO wave hindcast data hosted on AWS. 
+%     Returns data from the WPTO wave hindcast hosted on AWS at the specified 
+%       latitude and longitude points. Visit https://registry.opendata.aws/wpto-pds-us-wave/
+%       for more information about the dataset and available 
+%       locations and years. 
 % 
-%         Note: To access the WPTO hindcast data, you will need to configure h5pyd for data access on HSDS. 
-%         To get your own API key, visit https://developer.nrel.gov/signup/. 
-% 
-%         To configure h5phd type 
-%         hsconfigure
-%         and enter at the prompt:
-%         hs_endpoint = https://developer.nrel.gov/api/hsds
-%         hs_username = None
-%         hs_password = None
-%         hs_api_key = {your key}
-%         Parameters
-%
+%         Note: To access the WPTO hindcast data, you will need to configure 
+%           h5pyd for data access on HSDS. 
+%           See the WPTO_hindcast example notebook for more details.  
 %     
 % Parameters
 % ------------
@@ -95,11 +89,16 @@ datap = py.mhkit.wave.io.hindcast.request_wpto_dataset(data_type,py.list(paramet
     "str_decode",options.str_decode,"hsds",options.hsds));
 
 datac=cell(datap);
-datapd=datac{1};
+datapd=datac{1}
 
 datamat=datac{2};
-matstr=struct(datamat)
-disp(cell(py.list(py.numpy.nditer(datamat.columns.values,pyargs("flags",{"refs_ok"})))))
+matstr=datamat;
+meta_ind = cell(py.list(py.numpy.nditer(matstr.index,pyargs("flags",{"refs_ok"}))));
+meta_col = cell(py.list(py.numpy.nditer(matstr.columns,pyargs("flags",{"refs_ok"}))));
+data_col = cell(py.list(py.numpy.nditer(datapd.columns,pyargs("flags",{"refs_ok"}))));
+meta_val = cell(py.list(py.numpy.nditer(matstr.values,pyargs("flags",{"refs_ok"}))));
+disp(data_col{1})
+%disp(cell(py.list(py.numpy.nditer(datamat.columns.values,pyargs("flags",{"refs_ok"})))))
 
 xx=cell(datapd.axes);
 v=xx{2};
@@ -118,19 +117,28 @@ si=size(vals);
 temp = [];
 %datast = vals;
 % if ~isempty(fieldnames(matstr))
-for k = 1:max(size(parameter))
-for j = 1:max(size(lat_lon))
+for k = 1:max(size(data_col))
+for j = 1:max(size(meta_ind))
     
     for i=1:si(2)
-        dat = parameter(k);
-        test='location'+string(j);
-        datast.dat.(test)=vals(:,i);
+        dat = string(py.str(data_col{k}))
+        disp(class(dat))
+        num = dat(end)
+        num2 = num+1
+        dat = dat(1:end-2)
+        
+        numst = string(num)
+        dat = string(strrep(dat,'-','_')) 
+        test='location'+string(numst)
+        disp(test)
+        disp(dat)
+        datast.(test).(dat)=vals(:,i);
         %unit=string(matstr.(test));
         %datast.units.(test)=unit;
 end
 end
 end
-disp(datast)
+%disp(datast)
 % else
 %     datast.spectrum = vals';
 %     for i=1:si(2)
