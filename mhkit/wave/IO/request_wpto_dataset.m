@@ -121,7 +121,7 @@ for k = 1:max(size(data_col))
 for j = 1:max(size(meta_ind))
     
     for i=1:si(2)
-        dat = string(py.str(data_col{k}))
+        dat = char(py.str(data_col{k}))
         disp(class(dat))
         num = dat(end)
         num2 = num+1
