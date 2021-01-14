@@ -1,7 +1,7 @@
 function data=swan_read_table(swan_file)
 
 %%%%%%%%%%%%%%%%%%%%
-%     Reads in SWAN table format output
+%     Reads in SWAN ASCII table format output
 %     
 % Parameters
 % ------------
