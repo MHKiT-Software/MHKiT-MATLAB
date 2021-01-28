@@ -1,4 +1,4 @@
-function datast=request_wpto_dataset(data_type,parameter,lat_lon, years,options)
+function datast=request_wpto_point_data(data_type,parameter,lat_lon, years,options)
 
 %%%%%%%%%%%%%%%%%%%%
 %     Returns data from the WPTO wave hindcast hosted on AWS at the specified 
@@ -14,7 +14,7 @@ function datast=request_wpto_dataset(data_type,parameter,lat_lon, years,options)
 % ------------
 %     data_type : string
 %         data set type of interst
-%         Options: 'spatial'
+%         Options: '3-hour', '1-hour'
 %
 %     parameter : string or cell array of strings
 %         dataset parameter to be downloaded
@@ -84,12 +84,12 @@ end
 py.importlib.import_module('mhkit');
 py.importlib.import_module('numpy');
 
-datap = py.mhkit.wave.io.hindcast.request_wpto_dataset(data_type,py.list(parameter),...
+datap = py.mhkit.wave.io.hindcast.request_wpto_point_data(data_type,py.list(parameter),...
     lat_lon,py.list(years),pyargs("tree",options.tree,"unscale",options.unscale,...
     "str_decode",options.str_decode,"hsds",options.hsds));
 
 datac=cell(datap);
-datapd=datac{1}
+datapd=datac{1};
 
 datamat=datac{2};
 matstr=datamat;
@@ -97,7 +97,8 @@ meta_ind = cell(py.list(py.numpy.nditer(matstr.index,pyargs("flags",{"refs_ok"})
 meta_col = cell(py.list(py.numpy.nditer(matstr.columns,pyargs("flags",{"refs_ok"}))));
 data_col = cell(py.list(py.numpy.nditer(datapd.columns,pyargs("flags",{"refs_ok"}))));
 meta_val = cell(py.list(py.numpy.nditer(matstr.values,pyargs("flags",{"refs_ok"}))));
-disp(data_col{1})
+%disp(meta_ind{1})
+%disp(class(meta_val{1}))
 %disp(cell(py.list(py.numpy.nditer(datamat.columns.values,pyargs("flags",{"refs_ok"})))))
 
 xx=cell(datapd.axes);
@@ -115,29 +116,45 @@ ti=cell(py.list(py.numpy.nditer(datapd.index,pyargs("flags",{"refs_ok"}))));
 siti=size(ti);
 si=size(vals);
 temp = [];
-%datast = vals;
-% if ~isempty(fieldnames(matstr))
+
 for k = 1:max(size(data_col))
-for j = 1:max(size(meta_ind))
-    
-    for i=1:si(2)
-        dat = char(py.str(data_col{k}))
-        disp(class(dat))
-        num = dat(end)
-        num2 = num+1
-        dat = dat(1:end-2)
+    dat = char(py.str(data_col{k}));
+    num = dat(end);
+    num2 = num+1;
+    dat = dat(1:end-2);
         
-        numst = string(num)
-        dat = string(strrep(dat,'-','_')) 
-        test='location'+string(numst)
-        disp(test)
-        disp(dat)
-        datast.(test).(dat)=vals(:,i);
+    numst = string(num);
+    dat = string(strrep(dat,'-','_')); 
+    test='location'+string(numst);
+    num = str2num(num);
+        
+    datast.(test).(dat)=vals(:,k);
+    
+    for j = 1:max(size(meta_ind))            
+       if int64(meta_ind{j}) == num
+          m = num+1; 
+          c = 1;
+          while m <= max(size(meta_val))
+              met = string(py.str(meta_col{c}));
+              
+              if met == 'jurisdiction'
+                 datast.(test).(met)=string(py.str(meta_val{m}));
+              else
+                 datast.(test).(met)=double(py.array.array...
+                        ('d',py.numpy.nditer(meta_val{m},pyargs("flags",{"refs_ok"}))));
+              end
+              m = m+max(size(meta_ind));
+            
+              c = c + 1;
+           end
+       end
+            
+    end
         %unit=string(matstr.(test));
         %datast.units.(test)=unit;
 end
 end
-end
+
 %disp(datast)
 % else
 %     datast.spectrum = vals';
