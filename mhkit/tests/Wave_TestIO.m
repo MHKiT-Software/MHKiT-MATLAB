@@ -77,14 +77,39 @@ classdef Wave_TestIO < matlab.unittest.TestCase
          
         end
         
-        function test_WPTO_point_multiyear(testCase)
+%         function test_WPTO_point_multiyear(testCase)
+% 
+%             hindcast_data = request_wpto_point_data('3-hour',...
+%                 {'significant_wave_height'},{44.624076,-124.280097},...
+%                 {1990,1991});
+%             %ndbc_data = struct2table(ndbc_data.ID_46042.year_1996,'AsArray',true);
+%             file = '../../examples/data/wave/hindcast/multi_year_hindcast.csv';
+%             meta = '../../examples/data/wave/hindcast/multi_year_meta.csv';
+%             expected_data = readtable(file,'delimiter',',');
+%             expected_meta = readtable(meta);
+%             expected_data.time_index = datetime(expected_data.time_index,'InputFormat','yyyy-MM-dd HH:mm:ssXXX',...
+%                 'TimeZone','UTC');
+% 
+% %             
+%              assertEqual(testCase,expected_data.time_index,hindcast_data.time.');
+%              assertEqual(testCase,expected_data.significant_wave_height_0,hindcast_data.location0.significant_wave_height,'RelTol',0.000001);
+%              assertEqual(testCase,expected_meta.latitude,hindcast_data.location0.latitude,'RelTol',0.000001);
+%              assertEqual(testCase,expected_meta.longitude,hindcast_data.location0.longitude,'RelTol',0.000001);
+%              assertEqual(testCase,expected_meta.water_depth,hindcast_data.location0.water_depth,'RelTol',0.000001);
+%              assertEqual(testCase,expected_meta.timezone,hindcast_data.location0.timezone);
+%              assertEqual(testCase,string(expected_meta.jurisdiction),hindcast_data.location0.jurisdiction);
+%              assertEqual(testCase,expected_meta.distance_to_shore,hindcast_data.location0.distance_to_shore,'RelTol',0.000001);
+%          
+%         end
+        
+        function test_WPTO_point_multiloc(testCase)
 
             hindcast_data = request_wpto_point_data('3-hour',...
-                {'significant_wave_height'},{44.624076,-124.280097},...
-                {1990,1991});
+                {'mean_absolute_period'},{{44.624076,-124.280097},{43.489171,-125.152137}},...
+                {1995});
             %ndbc_data = struct2table(ndbc_data.ID_46042.year_1996,'AsArray',true);
-            file = '../../examples/data/wave/hindcast/multi_year_hindcast.csv';
-            meta = '../../examples/data/wave/hindcast/multi_year_meta.csv';
+            file = '../../examples/data/wave/hindcast/single_year_hindcast_multiloc.csv';
+            meta = '../../examples/data/wave/hindcast/multiloc_meta.csv';
             expected_data = readtable(file,'delimiter',',');
             expected_meta = readtable(meta);
             expected_data.time_index = datetime(expected_data.time_index,'InputFormat','yyyy-MM-dd HH:mm:ssXXX',...
@@ -92,13 +117,21 @@ classdef Wave_TestIO < matlab.unittest.TestCase
 
 %             
              assertEqual(testCase,expected_data.time_index,hindcast_data.time.');
-             assertEqual(testCase,expected_data.significant_wave_height_0,hindcast_data.location0.significant_wave_height,'RelTol',0.000001);
-             assertEqual(testCase,expected_meta.latitude,hindcast_data.location0.latitude,'RelTol',0.000001);
-             assertEqual(testCase,expected_meta.longitude,hindcast_data.location0.longitude,'RelTol',0.000001);
-             assertEqual(testCase,expected_meta.water_depth,hindcast_data.location0.water_depth,'RelTol',0.000001);
-             assertEqual(testCase,expected_meta.timezone,hindcast_data.location0.timezone);
-             assertEqual(testCase,string(expected_meta.jurisdiction),hindcast_data.location0.jurisdiction);
-             assertEqual(testCase,expected_meta.distance_to_shore,hindcast_data.location0.distance_to_shore,'RelTol',0.000001);
+             assertEqual(testCase,expected_data.mean_absolute_period_0,hindcast_data.location0.mean_absolute_period,'RelTol',0.000001);
+             assertEqual(testCase,expected_meta.latitude(1),hindcast_data.location0.latitude,'RelTol',0.000001);
+             assertEqual(testCase,expected_meta.longitude(1),hindcast_data.location0.longitude,'RelTol',0.000001);
+             assertEqual(testCase,expected_meta.water_depth(1),hindcast_data.location0.water_depth,'RelTol',0.000001);
+             assertEqual(testCase,expected_meta.timezone(1),hindcast_data.location0.timezone);
+             assertEqual(testCase,string(expected_meta.jurisdiction(1)),hindcast_data.location0.jurisdiction);
+             assertEqual(testCase,expected_meta.distance_to_shore(1),hindcast_data.location0.distance_to_shore,'RelTol',0.000001);
+             
+             assertEqual(testCase,expected_data.mean_absolute_period_1,hindcast_data.location1.mean_absolute_period,'RelTol',0.000001);
+             assertEqual(testCase,expected_meta.latitude(2),hindcast_data.location1.latitude,'RelTol',0.000001);
+             assertEqual(testCase,expected_meta.longitude(2),hindcast_data.location1.longitude,'RelTol',0.000001);
+             assertEqual(testCase,expected_meta.water_depth(2),hindcast_data.location1.water_depth,'RelTol',0.000001);
+             assertEqual(testCase,expected_meta.timezone(2),hindcast_data.location1.timezone);
+             assertEqual(testCase,string(expected_meta.jurisdiction(2)),hindcast_data.location1.jurisdiction);
+             assertEqual(testCase,expected_meta.distance_to_shore(2),hindcast_data.location1.distance_to_shore,'RelTol',0.000001);
          
         end
     end
