@@ -18,11 +18,13 @@ function datast=request_wpto_point_data(data_type,parameter,lat_lon, years,optio
 %
 %     parameter : string or cell array of strings
 %         dataset parameter to be downloaded
-%         spatial dataset options: 'directionality_coefficient', 'energy_period',
-%                 'maximum_energy_direction,'mean_absolute_period',
-%                 'mean_zero-crossing_period', 'omni-directional_wave_power',
-%                 'peak_period', 'significant_wave_height',
-%                 'spectral_width', 'water_depth'  
+%         3-hour dataset options: 'directionality_coefficient', 'energy_period', 'maximum_energy_direction'
+%                 'mean_absolute_period', 'mean_zero-crossing_period', 'omni-directional_wave_power', 'peak_period'
+%                 'significant_wave_height', 'spectral_width', 'water_depth' 
+%         1-hour dataset options: 'directionality_coefficient', 'energy_period', 'maximum_energy_direction'
+%                 'mean_absolute_period', 'mean_zero-crossing_period', 'omni-directional_wave_power', 'peak_period'
+%                 'significant_wave_height', 'spectral_width', 'water_depth', 'maximim_energy_direction',
+%                 'mean_wave_direction', 'frequency_bin_edges' 
 %
 %     lat_lon: cell array or cell array of cell arrays
 %         latitude longitude pairs at which to extract data
@@ -96,6 +98,7 @@ matstr=datamat;
 meta_ind = cell(py.list(py.numpy.nditer(matstr.index,pyargs("flags",{"refs_ok"}))));
 meta_col = cell(py.list(py.numpy.nditer(matstr.columns,pyargs("flags",{"refs_ok"}))));
 data_col = cell(py.list(py.numpy.nditer(datapd.columns,pyargs("flags",{"refs_ok"}))));
+data_ind = cell(py.list(py.numpy.nditer(datapd.index,pyargs("flags",{"refs_ok"}))));
 meta_val = cell(py.list(py.numpy.nditer(matstr.values,pyargs("flags",{"refs_ok"}))));
 %disp(meta_ind{1})
 %disp(class(meta_val{1}))
@@ -129,6 +132,7 @@ for k = 1:max(size(data_col))
     num = str2num(num);
         
     datast.(test).(dat)=vals(:,k);
+    %datast.(test).time = data_ind;
     
     for j = 1:max(size(meta_ind))            
        if int64(meta_ind{j}) == num
@@ -153,8 +157,13 @@ for k = 1:max(size(data_col))
         %unit=string(matstr.(test));
         %datast.units.(test)=unit;
 end
-end
 
+si = size(data_ind);
+for i=1:si(2)
+    datast.time(i)=datetime(string(py.str(data_ind{i})),'InputFormat','yyyy-MM-dd HH:mm:ssXXX',...
+        'TimeZone','UTC')';
+end
+end
 %disp(datast)
 % else
 %     datast.spectrum = vals';
