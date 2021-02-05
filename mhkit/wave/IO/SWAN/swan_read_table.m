@@ -1,7 +1,8 @@
 function data=swan_read_table(swan_file)
 
 %%%%%%%%%%%%%%%%%%%%
-%     Reads in SWAN ASCII table format output
+%     Reads in SWAN ASCII table format output and returns a Matlab
+%     structure with modeled data and assocaited metadata. 
 %     
 % Parameters
 % ------------
@@ -12,12 +13,6 @@ function data=swan_read_table(swan_file)
 % ---------
 %     data: Structure 
 %
-%
-%         data.Data: named according to header row 
-%
-%         data.units: units for each data field 
-%
-%         data.metadata: metadata for the SWAN run
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 fid = fopen(swan_file);
