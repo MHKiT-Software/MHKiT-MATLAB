@@ -44,7 +44,7 @@ meta = meta(2:end);
 for j=1:max(size(meta))
     if j ~= 3
       m = string(strsplit(meta(j),':'));
-      data.meatdata.(m(1)) = m(2);
+      data.metadata.(m(1)) = m(2);
     end
 end
 
