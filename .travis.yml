@@ -31,9 +31,9 @@ install:
   
   # Install MHKiT-Python
   - git clone https://github.com/MHKiT-Software/MHKiT-Python
-  - ls
   - cd MHKiT-Python
   - python -m pip install -e .
+  - cd ..
   
   # Install MHKiT-MATLAB
   - python -m pip install -e .
