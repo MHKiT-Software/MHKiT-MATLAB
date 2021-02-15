@@ -30,7 +30,10 @@ install:
   - python -m pip install --upgrade pip
   
   # Install MHKiT-Python
-  - python -m pip install mhkit
+  - git clone https://github.com/MHKiT-Software/MHKiT-Python
+  - cd MHKiT-Python
+  - python -m pip install -e .
+  - cd ..
   
   # Install MHKiT-MATLAB
   - python -m pip install -e .
