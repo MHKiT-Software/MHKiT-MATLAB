@@ -37,6 +37,9 @@ install:
   
   # Install MHKiT-MATLAB
   - python -m pip install -e .
+  
+  #install coveralls
+  - pip install coveralls
 
 script:
   # Show matlab and python version for the build
@@ -52,3 +55,6 @@ script:
     import mhkit.*,
     results = runTests(),
     assertSuccess(results)"
+    
+after_success:
+  - coveralls
