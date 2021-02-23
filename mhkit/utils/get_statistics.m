@@ -1,4 +1,4 @@
-function stats=get_statistics(data,freq,varargin)
+function stats=get_statistics(data,freq,options)
 
 %%%%%%%%%%%%%%%%%%%%
 %     Calculate mean, max, min and stdev statistics of continuous data for a 
@@ -13,8 +13,12 @@ function stats=get_statistics(data,freq,varargin)
 %         time.
 %     freq: double or int
 %         Sample rate of data [Hz]
-%     period: double/int
+%     period: double/int (optional)
 %         Statistical window of interest [sec], default = 600
+%         to call: get_statistics(data,freq,"period",period)
+%     vector_channels: cell array of strings (optional)
+%         List of channel names that are to be vector averaged
+%         to call: get_statistics(data,freq,"vector_channels",vector_channels)
 %
 % Returns
 % ---------
@@ -23,6 +27,14 @@ function stats=get_statistics(data,freq,varargin)
 %
 %         
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+arguments
+    data 
+    freq
+    options.period = 600;
+    options.vector_channels = {};
+    
+end
+
 py.importlib.import_module('mhkit');
 py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit_python_utils');
@@ -48,24 +60,17 @@ li2 = py.list();
  end
  datapd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(data.time,li,si(1),pyargs('cols',li2));
  datapd.index=py.pecos.utils.index_to_datetime(datapd.index);
+
+stat_py = py.mhkit.utils.get_statistics(datapd,int32(freq),pyargs('period',int32(options.period),'vector_channels',py.list(options.vector_channels)));
+
+mean = double(py.array.array("d",py.numpy.nditer(stat_py{1}.values)));
+max = double(py.array.array("d",py.numpy.nditer(stat_py{2}.values)));
+min = double(py.array.array("d",py.numpy.nditer(stat_py{3}.values)));
+std = double(py.array.array("d",py.numpy.nditer(stat_py{4}.values)));
  
- if nargin == 3 
-     stat_py = py.mhkit.utils.get_statistics(datapd,int32(freq),pyargs('period',int32(varargin{1})));
- elseif nargin == 2
-      stat_py = py.mhkit.utils.get_statistics(datapd,int32(freq)); 
- else
-     ME = MException('MATLAB:get_stats','Incorrect number of input arguments');
-        throw(ME);
- end
- %names = cell(py.array.tolist(py.numpy.nditer(stat_py{1}.columns.values,pyargs('flags',{'refs_ok'}))))
- mean = double(py.array.array("d",py.numpy.nditer(stat_py{1}.values)));
- max = double(py.array.array("d",py.numpy.nditer(stat_py{2}.values)));
- min = double(py.array.array("d",py.numpy.nditer(stat_py{3}.values)));
- std = double(py.array.array("d",py.numpy.nditer(stat_py{4}.values)));
+pointer = 0;
  
- pointer = 0;
- 
- for k=1:length(fn)
+for k=1:length(fn)
      if ~strcmp(fn{k} , {'time','Timestamp'})
         pointer = pointer + 1;
         val1 = mean(pointer);
@@ -77,4 +82,4 @@ li2 = py.list();
         eval(['stats.min.' fn{k} '= val3 ;' ]);
         eval(['stats.std.' fn{k} '= val4 ;' ]);
      end
- end
+end
