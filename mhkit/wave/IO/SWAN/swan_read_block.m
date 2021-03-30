@@ -17,7 +17,6 @@ function data=swan_read_block(swan_file)
 datatp = py.mhkit.wave.io.swan.read_block(swan_file);
 datac=cell(datatp);
 datapd=datac{1};
-
 datamat=datac{2};
 
 for raw_key = py.list(keys(datapd))
