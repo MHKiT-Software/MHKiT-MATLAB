@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,IE=9,chrome=1"><meta name="generator" content="MATLAB R2019b"><title>MHKiT WPTO Hindcast Example </title><style type="text/css">.rtcContent { padding: 30px; } .S0 { margin: 3px 10px 5px 4px; padding: 0px; line-height: 28.8px; min-height: 0px; white-space: pre-wrap; color: rgb(213, 80, 0); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 24px; font-weight: 400; text-align: left;  }
+.S1 { margin: 2px 10px 9px 4px; padding: 0px; line-height: 21px; min-height: 0px; white-space: pre-wrap; color: rgb(0, 0, 0); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 14px; font-weight: 400; text-align: left;  }
+.S2 { margin: 20px 10px 5px 4px; padding: 0px; line-height: 20px; min-height: 0px; white-space: pre-wrap; color: rgb(60, 60, 60); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 20px; font-weight: 700; text-align: left;  }
+.S3 { margin: 15px 10px 5px 4px; padding: 0px; line-height: 18px; min-height: 0px; white-space: pre-wrap; color: rgb(60, 60, 60); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 17px; font-weight: 700; text-align: left;  }
+.S4 { border-left: 0px none rgb(0, 0, 0); border-right: 0px none rgb(0, 0, 0); border-top: 0px none rgb(0, 0, 0); border-bottom: 0px none rgb(0, 0, 0); border-radius: 0px; padding: 0px; line-height: 16px; min-height: 16px; white-space: pre; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 12px;  }
+.CodeBlock { background-color: #F7F7F7; margin: 10px 0 10px 0;}
+.S5 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 1px solid rgb(233, 233, 233); border-bottom: 0px none rgb(0, 0, 0); border-radius: 4px 4px 0px 0px; padding: 6px 45px 0px 13px; line-height: 16.996px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S6 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 0px none rgb(0, 0, 0); border-bottom: 0px none rgb(0, 0, 0); border-radius: 0px; padding: 0px 45px 0px 13px; line-height: 16.996px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S7 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 0px none rgb(0, 0, 0); border-bottom: 1px solid rgb(233, 233, 233); border-radius: 0px; padding: 0px 45px 4px 13px; line-height: 16.996px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S8 { color: rgb(64, 64, 64); padding: 10px 0px 6px 17px; background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box; font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px; overflow-x: hidden; line-height: 16.996px;  }
+.embeddedOutputsErrorElement {min-height: 18px; max-height: 250px; overflow: auto;}
+.embeddedOutputsErrorElement.inlineElement {}
+.embeddedOutputsErrorElement.rightPaneElement {}
+.embeddedOutputsWarningElement{min-height: 18px; max-height: 250px; overflow: auto;}
+.embeddedOutputsWarningElement.inlineElement {}
+.embeddedOutputsWarningElement.rightPaneElement {}
+.diagnosticMessage-wrapper {font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 12px;}
+.diagnosticMessage-wrapper.diagnosticMessage-warningType {color: rgb(255,100,0);}
+.diagnosticMessage-wrapper.diagnosticMessage-warningType a {color: rgb(255,100,0); text-decoration: underline;}
+.diagnosticMessage-wrapper.diagnosticMessage-errorType {color: rgb(230,0,0);}
+.diagnosticMessage-wrapper.diagnosticMessage-errorType a {color: rgb(230,0,0); text-decoration: underline;}
+.diagnosticMessage-wrapper .diagnosticMessage-messagePart,.diagnosticMessage-wrapper .diagnosticMessage-causePart {white-space: pre-wrap;}
+.diagnosticMessage-wrapper .diagnosticMessage-stackPart {white-space: pre;}
+.embeddedOutputsTextElement,.embeddedOutputsVariableStringElement {white-space: pre; word-wrap: initial; min-height: 18px; max-height: 250px; overflow: auto;}
+.textElement,.rtcDataTipElement .textElement {padding-top: 3px;}
+.embeddedOutputsTextElement.inlineElement,.embeddedOutputsVariableStringElement.inlineElement {}
+.inlineElement .textElement {}
+.embeddedOutputsTextElement.rightPaneElement,.embeddedOutputsVariableStringElement.rightPaneElement {min-height: 16px;}
+.rightPaneElement .textElement {padding-top: 2px; padding-left: 9px;}
+.S9 { margin: 10px 10px 9px 4px; padding: 0px; line-height: 21px; min-height: 0px; white-space: pre-wrap; color: rgb(0, 0, 0); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 14px; font-weight: 400; text-align: left;  }
+.S10 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 1px solid rgb(233, 233, 233); border-bottom: 1px solid rgb(233, 233, 233); border-radius: 4px 4px 0px 0px; padding: 6px 45px 4px 13px; line-height: 16.996px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.embeddedOutputsMatrixElement,.eoOutputWrapper .matrixElement {min-height: 18px; box-sizing: border-box;}
+.embeddedOutputsMatrixElement .matrixElement,.eoOutputWrapper .matrixElement,.rtcDataTipElement .matrixElement {position: relative;}
+.matrixElement .variableValue,.rtcDataTipElement .matrixElement .variableValue {white-space: pre; display: inline-block; vertical-align: top; overflow: hidden;}
+.embeddedOutputsMatrixElement.inlineElement {}
+.embeddedOutputsMatrixElement.inlineElement .topHeaderWrapper {display: none;}
+.embeddedOutputsMatrixElement.inlineElement .veTable .body {padding-top: 0 !important; max-height: 100px;}
+.inlineElement .matrixElement {max-height: 300px;}
+.embeddedOutputsMatrixElement.rightPaneElement {}
+.rightPaneElement .matrixElement,.rtcDataTipElement .matrixElement {overflow: hidden; padding-left: 9px;}
+.rightPaneElement .matrixElement {margin-bottom: -1px;}
+.embeddedOutputsMatrixElement .matrixElement .valueContainer,.eoOutputWrapper .matrixElement .valueContainer,.rtcDataTipElement .matrixElement .valueContainer {white-space: nowrap; margin-bottom: 3px;}
+.embeddedOutputsMatrixElement .matrixElement .valueContainer .horizontalEllipsis.hide,.embeddedOutputsMatrixElement .matrixElement .verticalEllipsis.hide,.eoOutputWrapper .matrixElement .valueContainer .horizontalEllipsis.hide,.eoOutputWrapper .matrixElement .verticalEllipsis.hide,.rtcDataTipElement .matrixElement .valueContainer .horizontalEllipsis.hide,.rtcDataTipElement .matrixElement .verticalEllipsis.hide {display: none;}
+.embeddedOutputsVariableMatrixElement .matrixElement .valueContainer.hideEllipses .verticalEllipsis, .embeddedOutputsVariableMatrixElement .matrixElement .valueContainer.hideEllipses .horizontalEllipsis {display:none;}
+.embeddedOutputsMatrixElement .matrixElement .valueContainer .horizontalEllipsis,.eoOutputWrapper .matrixElement .valueContainer .horizontalEllipsis {margin-bottom: -3px;}
+.eoOutputWrapper .embeddedOutputsVariableMatrixElement .matrixElement .valueContainer {cursor: default !important;}
+.embeddedOutputsVariableElement {white-space: pre-wrap; word-wrap: break-word; min-height: 18px; max-height: 250px; overflow: auto;}
+.variableElement {}
+.embeddedOutputsVariableElement.inlineElement {}
+.inlineElement .variableElement {}
+.embeddedOutputsVariableElement.rightPaneElement {min-height: 16px;}
+.rightPaneElement .variableElement {padding-top: 2px; padding-left: 9px;}
+.variableNameElement {margin-bottom: 3px; display: inline-block;}
+.matrixElement .horizontalEllipsis,.rtcDataTipElement .matrixElement .horizontalEllipsis {display: inline-block; margin-top: 3px; width: 30px; height: 12px; background-repeat: no-repeat; background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB0AAAAJCAYAAADO1CeCAAAAJUlEQVR42mP4//8/A70xw0i29BUDFPxnAEtTW37wWDqakIa4pQDvOOG89lHX2gAAAABJRU5ErkJggg==");}
+.matrixElement .verticalEllipsis,.textElement .verticalEllipsis,.rtcDataTipElement .matrixElement .verticalEllipsis,.rtcDataTipElement .textElement .verticalEllipsis {margin-left: 35px; width: 12px; height: 30px; background-repeat: no-repeat; background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAZCAYAAAAIcL+IAAAALklEQVR42mP4//8/AzGYgWyFMECMwv8QddRS+P//KyimlmcGUOFoOI6GI/UVAgDnd8Dd4+NCwgAAAABJRU5ErkJggg==");}</style></head><body><div class = rtcContent><h1  class = 'S0'><span>MHKiT WPTO Hindcast Example </span></h1><div  class = 'S1'><span>This example loads data from the [WPTO hindcast data set](https://registry.opendata.aws/wpto-pds-us-wave/), hosted on AWS.  </span></div><h2  class = 'S2'><span>Dataset Description</span></h2><div  class = 'S1'><span>The high-spatial-resolution dataset (hereafter the *'3-hour' dataset*) currently spans the U.S. Exclusive Economic Zone (EEZ) along the West coast and around Hawaii with an unstructured grid that has ~200 m resolution in shallow water. The time step resolution for this spatial data is 3-hours and spans 32 years, 01/01/1979  - 12/31/2010.</span></div><div  class = 'S1'><span>The 'virtual buoy dataset' (hereafter the *'1-hour' dataset*) is also available at specific locations within the large spatial domain. These virtual buoys span the same 32-years of the spatial dataset however the time resolution is 1-hour.</span></div><h3  class = 'S3'><span>Included 3-hour Variables: </span></h3><div  class = 'S1'><span>Dataset variables included are indexed by  latitude and longitude, and time and include: energy_period, </span></div><div  class = 'S1'><span>    maximum_energy_period, mean_absolute_period, mean_zero-crossing_period, </span></div><div  class = 'S1'><span>    omni-directional_wave_power, peak_period, significant_wave_height, water_depth,</span></div><div  class = 'S1'><span>    spectral_width, and directionality_coefficient</span></div><h3  class = 'S3'><span>Included 1-hour Variables:</span></h3><div  class = 'S1'><span>This dataset includes all variables in the spatial dataset as well as:</span></div><div  class = 'S1'><span>  maximum_energy_direction, mean_wave_direction, and frequency_bin_edges</span></div><h3  class = 'S3'><span>Setting up Access to WPTO Hindcast Data</span></h3><div  class = 'S1'><span>To access the WPTO hindcast data, you will need to configure h5pyd for data access on HSDS. </span></div><div  class = 'S1'><span>        To get your own API key, visit https://developer.nrel.gov/signup/. </span></div><div  class = 'S1'><span>To configure h5phd type:</span></div><div class = 'preformatted-plain' style = 'margin: 10px 3px 10px 55px; padding: 10px 10px 10px 5px; '><div  class = 'S4'><span style="white-space: pre;"><span>hsconfigure</span></span></div></div><div  class = 'S1'><span> and enter at the prompt:</span></div><div class = 'preformatted-plain' style = 'margin: 10px 3px 10px 55px; padding: 10px 10px 10px 5px; '><div  class = 'S4'><span style="white-space: pre;"><span>hs_endpoint = https://developer.nrel.gov/api/hsds</span></span></div><div  class = 'S4'><span style="white-space: pre;"><span>hs_username = None</span></span></div><div  class = 'S4'><span style="white-space: pre;"><span>hs_password = None</span></span></div><div  class = 'S4'><span style="white-space: pre;"><span>hs_api_key = {your key}</span></span></div></div><h2  class = 'S2'><span>Using the WPTO Hindcast MHKiT Function</span></h2><div  class = 'S1'><span>In this section we will walk through an example to request hindcast data at a point using MHKiT. </span></div><h3  class = 'S3'><span>1. Download WPTO Hindcast data from a single location </span></h3><div  class = 'S1'><span>In this example we will request 3-hour significant wave height for 1995 at the point (44.624076,-124.280097, near the PacWave site). We will speficy each of these as a variable and pass them to the wave IO hindacast function </span><span style=' font-family: monospace;'>request_wpto_dataset</span><span>. The data type will be a high-spatial-resolution dataset, year(s) will be 1995, latitude/longitude pairs will be for a point near PacWave, and the parameter will be significant wave height.</span></div><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S5'><span style="white-space: pre;"><span>data_type = </span><span style="color: rgb(160, 32, 240);">'3-hour'</span><span>; </span><span style="color: rgb(60, 118, 61);">% setting the data type to the 3-hour dataset</span></span></div></div><div class="inlineWrapper"><div  class = 'S6'><span style="white-space: pre;"><span>years = {1995};</span></span></div></div><div class="inlineWrapper"><div  class = 'S6'><span style="white-space: pre;"><span>lat_lon = {44.624076,-124.280097}; </span></span></div></div><div class="inlineWrapper"><div  class = 'S6'><span style="white-space: pre;"><span>parameter = {</span><span style="color: rgb(160, 32, 240);">'significant_wave_height'</span><span>} ;</span></span></div></div><div class="inlineWrapper"><div  class = 'S6'></div></div><div class="inlineWrapper outputs"><div  class = 'S7'><span style="white-space: pre;"><span>Hs = request_wpto_point_data(data_type,parameter,lat_lon,years)</span></span></div><div  class = 'S8'><div class="inlineElement eoOutputWrapper embeddedOutputsVariableStringElement" uid="5E020C90" data-testid="output_0" data-width="1150" data-height="48" data-hashorizontaloverflow="false" style="width: 1180px; max-height: 261px;"><div class="textElement"><div><span class="variableNameElement">Hs = <span class="headerElement">struct with fields:</span></span></div><div>    location0: [1×1 struct]
+         time: [1×2920 datetime]
+</div></div></div></div></div></div><div  class = 'S9'><span>The resulting structure is broken down into locations. Metadata can be found within each location. Since in this example we are accessing data from only one location, contained in the structure. The significant wave height time series and location metadata are grouped together under the location field. </span></div><div class="CodeBlock"><div class="inlineWrapper outputs"><div  class = 'S10'><span style="white-space: pre;"><span>Hs.location0</span></span></div><div  class = 'S8'><div class="inlineElement eoOutputWrapper embeddedOutputsVariableStringElement" uid="F00F60A7" data-testid="output_1" data-width="1150" data-height="118" data-hashorizontaloverflow="false" style="width: 1180px; max-height: 261px;"><div class="textElement"><div><span class="variableNameElement">ans = <span class="headerElement">struct with fields:</span></span></div><div>    significant_wave_height: [2920×1 double]
+                water_depth: 77.4295
+                   latitude: 44.6243
+                  longitude: -124.2790
+          distance_to_shore: 1.5622e+04
+                   timezone: -8
+               jurisdiction: "Federal"
+</div></div></div></div></div></div><h3  class = 'S3'><span>2. Download WPTO Hindcast data from multiple locations </span></h3><div  class = 'S1'><span>Multiple locations can be requested by passing a cell array of lat/lon pairs. This time we will request the 3-hour energy period at two points. The data type and years requested remanin the same as before. By looking at the fieldnames in the returned structure we can see that two locations are returned. Again, each location field will contain the returned data and metadata cooresponding to the location. </span></div><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S5'><span style="white-space: pre;"><span>parameter = {</span><span style="color: rgb(160, 32, 240);">'energy_period'</span><span>};</span></span></div></div><div class="inlineWrapper"><div  class = 'S6'><span style="white-space: pre;"><span>lat_lon = {{44.624076,-124.280097},{43.489171,-125.152137}} ;</span></span></div></div><div class="inlineWrapper"><div  class = 'S6'></div></div><div class="inlineWrapper outputs"><div  class = 'S7'><span style="white-space: pre;"><span>Te = request_wpto_point_data(data_type, parameter, lat_lon, years)</span></span></div><div  class = 'S8'><div class="inlineElement eoOutputWrapper embeddedOutputsVariableStringElement" uid="61579A41" data-testid="output_2" data-width="1150" data-height="62" data-hashorizontaloverflow="false" style="width: 1180px; max-height: 261px;"><div class="textElement"><div><span class="variableNameElement">Te = <span class="headerElement">struct with fields:</span></span></div><div>    location0: [1×1 struct]
+    location1: [1×1 struct]
+         time: [1×2920 datetime]
+</div></div></div></div></div></div><h3  class = 'S3'><span>3. Download WPTO Hindcast data from multiple years</span></h3><div  class = 'S1'><span>Multiple years can be requested simply by adding years to the passed cell array. Recall the hindcast data spans 01/01/1979 - 12/31/2010. A demonstration of requesting multiple years of 3-hour data for a single point is shown below. By looking at the the returned data we can see that the data is returned in the order of the years passed to the function.</span></div><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S5'><span style="white-space: pre;"><span>years = {1995, 1996}; </span></span></div></div><div class="inlineWrapper"><div  class = 'S6'><span style="white-space: pre;"><span>parameter = {</span><span style="color: rgb(160, 32, 240);">'omni-directional_wave_power'</span><span>};</span></span></div></div><div class="inlineWrapper"><div  class = 'S6'><span style="white-space: pre;"><span>lat_lon = {44.624076,-124.280097}; </span></span></div></div><div class="inlineWrapper"><div  class = 'S6'></div></div><div class="inlineWrapper"><div  class = 'S6'><span style="white-space: pre;"><span>J = request_wpto_point_data(data_type,parameter,lat_lon,years) ;</span></span></div></div><div class="inlineWrapper outputs"><div  class = 'S7'><span style="white-space: pre;"><span>J.time</span></span></div><div  class = 'S8'><div class="inlineElement eoOutputWrapper embeddedOutputsTextMatrixElement embeddedOutputsVariableMatrixElement" uid="B8DC735B" data-testid="output_3" data-width="1150" style="width: 1180px; white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="matrixElement veSpecifier" style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="veVariableName variableNameElement" style="width: 1150px; white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="headerElementClickToInteract" style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><span style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">ans = </span><span class="veVariableValueSummary headerElement" style="white-space: normal; font-style: normal; color: rgb(179, 179, 179); font-size: 12px;">1×5848 datetime array</span></div></div><div class="valueContainer" data-layout="{&quot;totalRows&quot;:1,&quot;totalColumns&quot;:5848}" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="variableValue" style="width: 1095px; white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">01-Jan-1995 00:00:00    01-Jan-1995 03:00:00    01-Jan-1995 06:00:00    01-Jan-1995 09:00:00    01-Jan-1995 12:00:00    01-Jan-1995 15:00:00    01-Jan-1995 18:00:00    01-Jan-1995 21:00:00    02-Jan-1995 00:00:00    02-Jan-1995 03:00:00    02-Jan-1995 06:00:00    02-Jan-1995 09:00:00    02-Jan-1995 12:00:00    02-Jan-1995 15:00:00    02-Jan-1995 18:00:00    02-Jan-1995 21:00:00    03-Jan-1995 00:00:00    03-Jan-1995 03:00:00    03-Jan-1995 06:00:00    03-Jan-1995 09:00:00    03-Jan-1995 12:00:00    03-Jan-1995 15:00:00    03-Jan-1995 18:00:00    03-Jan-1995 21:00:00    04-Jan-1995 00:00:00    04-Jan-1995 03:00:00    04-Jan-1995 06:00:00    04-Jan-1995 09:00:00    04-Jan-1995 12:00:00    04-Jan-1995 15:00:00    <br></div><div class="horizontalEllipsis" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"></div><div class="verticalEllipsis hide" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"></div></div></div></div></div></div></div><h3  class = 'S3'><span>4. Download WPTO Hindcast 1-hour data</span></h3><div  class = 'S1'><span>1-hour temporal resolutions data can be requested by passing '1-hour' as the data_type. An example for requesting this higer temporal data is below.</span></div><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S5'><span style="white-space: pre;"><span>data_type = </span><span style="color: rgb(160, 32, 240);">'1-hour'</span><span>; </span><span style="color: rgb(60, 118, 61);">% Setting the data_type to 1 hour data</span></span></div></div><div class="inlineWrapper"><div  class = 'S6'><span style="white-space: pre;"><span>years = {1995} ;</span></span></div></div><div class="inlineWrapper"><div  class = 'S6'><span style="white-space: pre;"><span>parameter = {</span><span style="color: rgb(160, 32, 240);">'omni-directional_wave_power'</span><span>};</span></span></div></div><div class="inlineWrapper"><div  class = 'S6'><span style="white-space: pre;"><span>lat_lon = {44.624076,-124.280097}; </span></span></div></div><div class="inlineWrapper"><div  class = 'S6'></div></div><div class="inlineWrapper"><div  class = 'S6'><span style="white-space: pre;"><span>J = request_wpto_point_data(data_type,parameter,lat_lon,years);</span></span></div></div><div class="inlineWrapper outputs"><div  class = 'S7'><span style="white-space: pre;"><span>J.time</span></span></div><div  class = 'S8'><div class="inlineElement eoOutputWrapper embeddedOutputsTextMatrixElement embeddedOutputsVariableMatrixElement" uid="700A1B9C" data-testid="output_4" data-width="1150" style="width: 1180px; white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="matrixElement veSpecifier" style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="veVariableName variableNameElement" style="width: 1150px; white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="headerElementClickToInteract" style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><span style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">ans = </span><span class="veVariableValueSummary headerElement" style="white-space: normal; font-style: normal; color: rgb(179, 179, 179); font-size: 12px;">1×8760 datetime array</span></div></div><div class="valueContainer" data-layout="{&quot;totalRows&quot;:1,&quot;totalColumns&quot;:8760}" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="variableValue" style="width: 1095px; white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">01-Jan-1995 00:00:00    01-Jan-1995 01:00:00    01-Jan-1995 02:00:00    01-Jan-1995 03:00:00    01-Jan-1995 04:00:00    01-Jan-1995 05:00:00    01-Jan-1995 06:00:00    01-Jan-1995 07:00:00    01-Jan-1995 08:00:00    01-Jan-1995 09:00:00    01-Jan-1995 10:00:00    01-Jan-1995 11:00:00    01-Jan-1995 12:00:00    01-Jan-1995 13:00:00    01-Jan-1995 14:00:00    01-Jan-1995 15:00:00    01-Jan-1995 16:00:00    01-Jan-1995 17:00:00    01-Jan-1995 18:00:00    01-Jan-1995 19:00:00    01-Jan-1995 20:00:00    01-Jan-1995 21:00:00    01-Jan-1995 22:00:00    01-Jan-1995 23:00:00    02-Jan-1995 00:00:00    02-Jan-1995 01:00:00    02-Jan-1995 02:00:00    02-Jan-1995 03:00:00    02-Jan-1995 04:00:00    02-Jan-1995 05:00:00    <br></div><div class="horizontalEllipsis" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"></div><div class="verticalEllipsis hide" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"></div></div></div></div></div></div></div></div>
+<br>
+<!-- 
+##### SOURCE BEGIN #####
+%% MHKiT WPTO Hindcast Example 
+% This example loads data from the [WPTO hindcast data set](https://registry.opendata.aws/wpto-pds-us-wave/), 
+% hosted on AWS.  
+%% Dataset Description
+% The high-spatial-resolution dataset (hereafter the *'3-hour' dataset*) currently 
+% spans the U.S. Exclusive Economic Zone (EEZ) along the West coast and around 
+% Hawaii with an unstructured grid that has ~200 m resolution in shallow water. 
+% The time step resolution for this spatial data is 3-hours and spans 32 years, 
+% 01/01/1979  - 12/31/2010.
+% 
+% The 'virtual buoy dataset' (hereafter the *'1-hour' dataset*) is also available 
+% at specific locations within the large spatial domain. These virtual buoys span 
+% the same 32-years of the spatial dataset however the time resolution is 1-hour.
+% Included 3-hour Variables: 
+% Dataset variables included are indexed by  latitude and longitude, and time 
+% and include: energy_period, 
+% 
+% maximum_energy_period, mean_absolute_period, mean_zero-crossing_period, 
+% 
+% omni-directional_wave_power, peak_period, significant_wave_height, water_depth,
+% 
+% spectral_width, and directionality_coefficient
+% Included 1-hour Variables:
+% This dataset includes all variables in the spatial dataset as well as:
+% 
+% maximum_energy_direction, mean_wave_direction, and frequency_bin_edges
+% Setting up Access to WPTO Hindcast Data
+% To access the WPTO hindcast data, you will need to configure h5pyd for data 
+% access on HSDS. 
+% 
+% To get your own API key, visit https://developer.nrel.gov/signup/. 
+% 
+% To configure h5phd type:
+%%
+% 
+%  hsconfigure
+%
+%% 
+% and enter at the prompt:
+%%
+% 
+%  hs_endpoint = https://developer.nrel.gov/api/hsds
+%  hs_username = None
+%  hs_password = None
+%  hs_api_key = {your key}
+%
+%% Using the WPTO Hindcast MHKiT Function
+% In this section we will walk through an example to request hindcast data at 
+% a point using MHKiT. 
+% 1. Download WPTO Hindcast data from a single location 
+% In this example we will request 3-hour significant wave height for 1995 at 
+% the point (44.624076,-124.280097, near the PacWave site). We will speficy each 
+% of these as a variable and pass them to the wave IO hindacast function |request_wpto_dataset|. 
+% The data type will be a high-spatial-resolution dataset, year(s) will be 1995, 
+% latitude/longitude pairs will be for a point near PacWave, and the parameter 
+% will be significant wave height.
+
+data_type = '3-hour'; % setting the data type to the 3-hour dataset
+years = {1995};
+lat_lon = {44.624076,-124.280097}; 
+parameter = {'significant_wave_height'} ;
+
+Hs = request_wpto_point_data(data_type,parameter,lat_lon,years)
+%% 
+% The resulting structure is broken down into locations. Metadata can be found 
+% within each location. Since in this example we are accessing data from only 
+% one location, contained in the structure. The significant wave height time series 
+% and location metadata are grouped together under the location field. 
+
+Hs.location0
+% 2. Download WPTO Hindcast data from multiple locations 
+% Multiple locations can be requested by passing a cell array of lat/lon pairs. 
+% This time we will request the 3-hour energy period at two points. The data type 
+% and years requested remanin the same as before. By looking at the fieldnames 
+% in the returned structure we can see that two locations are returned. Again, 
+% each location field will contain the returned data and metadata cooresponding 
+% to the location. 
+
+parameter = {'energy_period'};
+lat_lon = {{44.624076,-124.280097},{43.489171,-125.152137}} ;
+
+Te = request_wpto_point_data(data_type, parameter, lat_lon, years)
+% 3. Download WPTO Hindcast data from multiple years
+% Multiple years can be requested simply by adding years to the passed cell 
+% array. Recall the hindcast data spans 01/01/1979 - 12/31/2010. A demonstration 
+% of requesting multiple years of 3-hour data for a single point is shown below. 
+% By looking at the the returned data we can see that the data is returned in 
+% the order of the years passed to the function.
+
+years = {1995, 1996}; 
+parameter = {'omni-directional_wave_power'};
+lat_lon = {44.624076,-124.280097}; 
+
+J = request_wpto_point_data(data_type,parameter,lat_lon,years) ;
+J.time
+% 4. Download WPTO Hindcast 1-hour data
+% 1-hour temporal resolutions data can be requested by passing '1-hour' as the 
+% data_type. An example for requesting this higer temporal data is below.
+
+data_type = '1-hour'; % Setting the data_type to 1 hour data
+years = {1995} ;
+parameter = {'omni-directional_wave_power'};
+lat_lon = {44.624076,-124.280097}; 
+
+J = request_wpto_point_data(data_type,parameter,lat_lon,years);
+J.time
+##### SOURCE END #####
+--></body></html>
