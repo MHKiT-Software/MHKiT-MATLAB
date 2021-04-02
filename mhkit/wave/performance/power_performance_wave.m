@@ -1,4 +1,4 @@
-function [clmat,maep_matrix] =  power_performance_wave(S, h, P, statistic, options)
+function [clmat,maep_matrix,figures] =  power_performance_wave(S, h, P, statistic, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     High-level function to compute the capture length matrix and Mean
@@ -23,6 +23,10 @@ function [clmat,maep_matrix] =  power_performance_wave(S, h, P, statistic, optio
 %        uses a degree of freedom of 1 in accordance with IEC/TS 62600-100.
 %        To output capture length matrices for multiple binning parameters,
 %        define as a string array example: statistic = ["sum", "min", "max"];
+%
+%    savepath: string, 
+%         path and filename to save figure.
+%
 %        
 %   rho: float (optional)
 %        water density [kg/m^3]
@@ -35,9 +39,6 @@ function [clmat,maep_matrix] =  power_performance_wave(S, h, P, statistic, optio
 %   frequency_bins: vector (optional) 
 %      Bin widths for frequency of S. Required for unevenly sized bins
 %
-%    savepath: string (optional)
-%         path and filename to save figure.
-%         to call: power_performance_wave(S,h,P,statistic,"savepath",savepath)
 %        
 % Returns
 % ---------
@@ -111,10 +112,12 @@ jmat = wave_energy_flux_matrix(Hm0,Te,J,"mean",Hm0_bins,Te_bins);
 % Calcaulte MAEP from matrix
 maep_matrix = mean_annual_energy_production_matrix(clmat.mean,jmat,clmat.freq);
 stats_cell = {'mean', 'std', 'median','count', 'sum', 'min', 'max','frequency'};
+
+%figures = [];
 for i = 1:length(statistic)
     if any(strcmp(stats_cell,statistic(i))) 
-        cl_matrix(i) = plot_matrix(clmat.(statistic(i)),"Capture Length");
-        disp(cl_matrix(i))
+        figures(i) = plot_matrix(clmat.(statistic(i)),"Capture Length");
+
     else
          ME = MException('MATLAB:power_performance_wave','statistic must be a string or string array defined by one or multiple of the following: "mean", "std", "median","count", "sum", "min", "max", "frequency"');
          throw(ME);
@@ -172,10 +175,10 @@ end
 %     disp(cl_matrix)
 % end
 % 
-% len = strlength(options.savepath);
-% if len > 1
-%     saveas(figure, options.savepath);
-% end 
+len = strlength(options.savepath);
+if len > 1
+     saveas(cl_matrix, options.savepath);
+ end 
 % 
 end
 
