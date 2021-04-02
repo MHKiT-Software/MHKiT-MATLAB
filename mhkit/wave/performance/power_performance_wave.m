@@ -1,4 +1,4 @@
-function power_performance_wave(S, h, P, statistic, options)
+function [clmat,maep_matrix] =  power_performance_wave(S, h, P, statistic, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     High-level function to compute the capture length matrix and Mean
@@ -6,20 +6,10 @@ function power_performance_wave(S, h, P, statistic, options)
 % 
 % Parameters
 % ------------
-%   S: Spectral Density (m^2/Hz)
-%       Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,spectra)
+%   S: structure of form:
+%           S.spectrum: Spectral Density [m^2/Hz]
 %
-%       OR
-%
-%       structure of form:
-%           S.spectrum: Spectral Density (m^2/Hz)
-%
-%           S.type: String of the spectra type, i.e. Bretschneider, 
-%           time series, date stamp etc.
-%
-%           S.frequency: frequency (Hz)
+%           S.frequency: frequency [Hz]
 %
 %   h: integer
 %        Water depth [m]
@@ -32,14 +22,14 @@ function power_performance_wave(S, h, P, statistic, options)
 %        "count", "sum", "min", "max", and "frequency".  Note that "std"
 %        uses a degree of freedom of 1 in accordance with IEC/TS 62600-100.
 %        To output capture length matrices for multiple binning parameters,
-%        define as a string array: statistic = ["", "", ""];
+%        define as a string array example: statistic = ["sum", "min", "max"];
 %        
 %   rho: float (optional)
-%        water density (kg/m^3)
+%        water density [kg/m^3]
 %        to call: power_performance_wave(S,h,P,statistic,"rho",rho)
 %
 %   g: float (optional)
-%        gravitational acceleration (m/s^2)
+%        gravitational acceleration [m/s^2]
 %        to call: power_performance_wave(S,h,P,statistic,"g",g)
 %
 %   frequency_bins: vector (optional) 
@@ -116,67 +106,76 @@ clmat.min = capture_length_matrix(Hm0,Te,L,"min",Hm0_bins,Te_bins);
 clmat.max = capture_length_matrix(Hm0,Te,L,"max",Hm0_bins,Te_bins);
 clmat.freq = capture_length_matrix(Hm0,Te,L,"frequency",Hm0_bins,Te_bins);
 
-% Capture Length Matrix using statistic
-if length(statistic) > 1
-    for i = 1:length(statistic)
-        % Create wave energy flux matrix using statistic
-        jmat(i) = wave_energy_flux_matrix(Hm0,Te,J,statistic(i),Hm0_bins,Te_bins);
-        % Calcaulte MAEP from matrix
-        maep_matrix(i) = mean_annual_energy_production_matrix(clmat.mean,jmat(i),clmat.freq);
-        % Plot Capture Length Matrix
-        if statistic(i) == "mean"
-            clmat_out(i) = clmat.mean;
-        elseif statistic(i) == "std"
-            clmat_out(i) = clmat.std;
-        elseif statistic(i) == "median"
-            clmat_out(i) = clmat.median;
-        elseif statistic(i) == "count"
-            clmat_out(i) = clmat.count;
-        elseif statistic(i) == "sum"
-            clmat_out(i) = clmat.sum;
-        elseif statistic(i) == "min"
-            clmat_out(i) = clmat.min;
-        elseif statistic(i) == "max"
-            clmat_out(i) = clmat.max;
-        elseif statistic(i) == "frequency"
-            clmat_out(i) = clmat.freq;    
-        else
-            ME = MException('MATLAB:power_performance_wave','statistic must be a string or string array defined by one or multiple of the following: "mean", "std", "median","count", "sum", "min", "max", "frequency"');
-            throw(ME);
-        end
-        figure(i)
-        cl_matrix(i) = plot_matrix(clmat_out(i),"Capture Length");
+% Create wave energy flux matrix using statistic
+jmat = wave_energy_flux_matrix(Hm0,Te,J,"mean",Hm0_bins,Te_bins);
+% Calcaulte MAEP from matrix
+maep_matrix = mean_annual_energy_production_matrix(clmat.mean,jmat,clmat.freq);
+stats_cell = {'mean', 'std', 'median','count', 'sum', 'min', 'max','frequency'};
+for i = 1:length(statistic)
+    if any(strcmp(stats_cell,statistic(i))) 
+        cl_matrix(i) = plot_matrix(clmat.(statistic(i)),"Capture Length");
         disp(cl_matrix(i))
-    end
-elseif length(statistic) == 1 
-    if statistic == "mean"
-        clmat = clmat.mean;
-    elseif statistic == "std"
-        clmat = clmat.std;
-    elseif statistic == "median"
-        clmat = clmat.median;
-    elseif statistic == "count"
-        clmat = clmat.count;
-    elseif statistic == "sum"
-        clmat = clmat.sum;
-    elseif statistic == "min"
-        clmat = clmat.min;
-    elseif statistic == "max"
-        clmat = clmat.max;
-    elseif statistic == "frequency"
-        clmat = clmat.frequency;
     else
-        ME = MException('MATLAB:power_performance_wave','statistic must be a string or string array defined by one or multiple of the following: "mean", "std", "median","count", "sum", "min", "max", "frequency"');
-        throw(ME);
+         ME = MException('MATLAB:power_performance_wave','statistic must be a string or string array defined by one or multiple of the following: "mean", "std", "median","count", "sum", "min", "max", "frequency"');
+         throw(ME);
     end
-    cl_matrix = plot_matrix(clmat,"Capture Length");
-    disp(cl_matrix)
-end
-
-len = strlength(options.savepath);
-if len > 1
-    saveas(figure, options.savepath);
-end 
-
+end        
+% Capture Length Matrix using statistic
+% if length(statistic) > 1
+%     for i = 1:length(statistic)
+%         
+%         
+%         % Plot Capture Length Matrix
+%         if statistic(i) == "mean"
+%             clmat_out(i) = clmat.mean;
+%         elseif statistic(i) == "std"
+%             clmat_out(i) = clmat.std;
+%         elseif statistic(i) == "median"
+%             clmat_out(i) = clmat.median;
+%         elseif statistic(i) == "count"
+%             clmat_out(i) = clmat.count;
+%         elseif statistic(i) == "sum"
+%             clmat_out(i) = clmat.sum;
+%         elseif statistic(i) == "min"
+%             clmat_out(i) = clmat.min;
+%         elseif statistic(i) == "max"
+%             clmat_out(i) = clmat.max;
+%         elseif statistic(i) == "frequency"
+%             clmat_out(i) = clmat.freq;    
+%         
+%         figure(i)
+%         cl_matrix(i) = plot_matrix(clmat_out(i),"Capture Length");
+%         disp(cl_matrix(i))
+%     end
+% elseif length(statistic) == 1 
+%     if statistic == "mean"
+%         clmat = clmat.mean;
+%     elseif statistic == "std"
+%         clmat = clmat.std;
+%     elseif statistic == "median"
+%         clmat = clmat.median;
+%     elseif statistic == "count"
+%         clmat = clmat.count;
+%     elseif statistic == "sum"
+%         clmat = clmat.sum;
+%     elseif statistic == "min"
+%         clmat = clmat.min;
+%     elseif statistic == "max"
+%         clmat = clmat.max;
+%     elseif statistic == "frequency"
+%         clmat = clmat.frequency;
+%     else
+%         ME = MException('MATLAB:power_performance_wave','statistic must be a string or string array defined by one or multiple of the following: "mean", "std", "median","count", "sum", "min", "max", "frequency"');
+%         throw(ME);
+%     end
+%     cl_matrix = plot_matrix(clmat,"Capture Length");
+%     disp(cl_matrix)
+% end
+% 
+% len = strlength(options.savepath);
+% if len > 1
+%     saveas(figure, options.savepath);
+% end 
+% 
 end
 
