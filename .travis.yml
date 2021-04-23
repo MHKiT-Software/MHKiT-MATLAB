@@ -30,7 +30,10 @@ install:
   - python -m pip install --upgrade pip
   
   # Install MHKiT-Python
-  - python -m pip install mhkit
+  - git clone https://github.com/MHKiT-Software/MHKiT-Python
+  - cd MHKiT-Python
+  - python -m pip install -e .
+  - cd ..
   
   # Install MHKiT-MATLAB
   - python -m pip install -e .
@@ -47,5 +50,16 @@ script:
     matlab.addons.toolbox.installToolbox('mhkit.mltbx'),
     cd mhkit/tests/,
     import mhkit.*,
-    results = runTests(),
+    import matlab.unittest.TestSuite,
+    import matlab.unittest.TestRunner,
+    import matlab.unittest.plugins.CodeCoveragePlugin,
+    import matlab.unittest.plugins.codecoverage.CoberturaFormat,
+    suite = testsuite,
+    runner = TestRunner.withTextOutput,
+    reportFile = 'CoverageResults.xml',
+    reportFormat = CoberturaFormat(reportFile),
+    plugin = CodeCoveragePlugin.forFolder(pwd,'Producing',reportFormat),
+    runner.addPlugin(plugin),
+    results = runner.run(suite),
+    disp(fileread(reportFile)),
     assertSuccess(results)"
