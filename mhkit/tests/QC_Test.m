@@ -108,7 +108,11 @@ classdef QC_Test < matlab.unittest.TestCase
 %             end
             expectA.values = zeros(size(dataA.values));
             for i = 1:96
-                if i >= 48 && i <= 58
+                if i >= 68 && i <= 69
+                    expectA.values(i) = NaN;
+                    expectA.mask(i) = 0;
+                elseif i >= 49 && i <= 58
+                    
                     expectA.values(i) = NaN;
                     expectA.mask(i) = 0;
                 else
@@ -118,10 +122,17 @@ classdef QC_Test < matlab.unittest.TestCase
             end
             expectC.values = zeros(size(dataC.values));
             for ii = 1:96
-                if i >= 52 && i <= 65
+                if ii >= 68 && ii <= 69
+                    expectC.values(ii) = NaN;
+                    expectC.mask(ii) = 0;
+                elseif ii >= 30 && ii <= 39
+                    expectC.values(ii) = NaN;
+                    expectC.mask(ii) = 0;
+                elseif ii == 52
                     expectC.values(ii) = NaN;
                     expectC.mask(ii) = 0;
                 else
+                    
                     expectC.values(ii) = dataC.values(ii);
                     expectC.mask(ii) = 1;
                 end   
