@@ -24,8 +24,7 @@ function stats=get_statistics(data,freq,options)
 % ---------
 %     stats: structure 
 %         Structure with mean, max, min, and stdev of each variable
-%
-%         
+%        
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 arguments
     data 
