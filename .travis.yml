@@ -1,0 +1,65 @@
+language: matlab
+
+matlab:
+  - R2020a
+  - latest  # Default MATLAB release on Travis CI
+
+env:
+  jobs:
+    - PYTHON_VERSION=3.7.9
+    - PYTHON_VERSION=3.8.6
+  global:
+    - PYENV_RELEASE=1.2.21
+
+jobs:
+  exclude:
+    - matlab: R2020a
+      env: PYTHON_VERSION=3.8.6
+
+before_install:
+  # Update pyenv
+  - pushd $(pyenv root)
+  - git fetch
+  - git checkout v${PYENV_RELEASE}
+  - popd
+
+install:  
+  # Install the python version and update pip
+  - pyenv install -v ${PYTHON_VERSION}
+  - pyenv global ${PYTHON_VERSION}
+  - python -m pip install --upgrade pip
+  
+  # Install MHKiT-Python
+  - git clone https://github.com/MHKiT-Software/MHKiT-Python
+  - cd MHKiT-Python
+  - python -m pip install -e .
+  - cd ..
+  
+  # Install MHKiT-MATLAB
+  - python -m pip install -e .
+
+script:
+  # Show matlab and python version for the build
+  - matlab -batch "py.sys.setdlopenflags(int32(10)), version, pyversion, version('-blas')"
+  
+  # Installs mhkit toolbox in matlab, goes to the test folder, imports mhkit, 
+  # then runs the test script
+  - >
+    matlab -batch 
+    "py.sys.setdlopenflags(int32(10)),
+    matlab.addons.toolbox.installToolbox('mhkit.mltbx'),
+    cd mhkit/tests/,
+    import mhkit.*,
+    import matlab.unittest.TestSuite,
+    import matlab.unittest.TestRunner,
+    import matlab.unittest.plugins.CodeCoveragePlugin,
+    import matlab.unittest.plugins.codecoverage.CoberturaFormat,
+    suite = testsuite,
+    runner = TestRunner.withTextOutput,
+    reportFile = 'CoverageResults.xml',
+    reportFormat = CoberturaFormat(reportFile),
+    plugin = CodeCoveragePlugin.forFolder(pwd,'Producing',reportFormat),
+    runner.addPlugin(plugin),
+    results = runner.run(suite),
+    disp(fileread(reportFile)),
+    assertSuccess(results)"
