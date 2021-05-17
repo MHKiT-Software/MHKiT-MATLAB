@@ -1,6 +1,6 @@
 MHKiT-MATLAB
 ===================================
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3928405.svg)](https://doi.org/10.5281/zenodo.3928405)
+[![Build Status](https://travis-ci.org/MHKiT-Software/MHKiT-MATLAB.svg?branch=master)](https://travis-ci.org/MHKiT-Software/MHKiT-MATLAB) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3928405.svg)](https://doi.org/10.5281/zenodo.3928405)
 
 MHKiT-MATLAB is a MATLAB package designed for marine renewable energy applications to assist in
 data processing and visualization.  The software package include functionality for:
