@@ -1,15 +1,15 @@
-function [clmat,maep_matrix,cl_matrix] = power_performance_wave(S, h, P, statistic, options)
+function [clmat,maep_matrix] = power_performance_workflow(S, h, P, statistic, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     High-level function to compute the capture length matrix and Mean
-%     Annual Energy Production (MAEP) for given wave spectra.
+%     High-level function to compute power performance quantities of 
+%     interest following IEC TS 62600-100 for given wave spectra.
 % 
 % Parameters
 % ------------
-%   S: structure of form:
+%   S: structure with fields:
 %           S.spectrum: Spectral Density [m^2/Hz]
-%
 %           S.frequency: frequency [Hz]
+%           S.time : time [datetime]
 %
 %   h: integer
 %        Water depth [m]
@@ -17,23 +17,25 @@ function [clmat,maep_matrix,cl_matrix] = power_performance_wave(S, h, P, statist
 %   P: array or vector
 %        Power [W]
 %
-%   statistic: string or string array
-%        Statistic for each bin, options include: "mean", "std", "median",
-%        "count", "sum", "min", "max", and "frequency".  Note that "std"
+%   statistic: string or array of strings
+%        Capture length statistics for plotting
+%        options include: "mean", "std", "median",
+%        "count", "sum", "min", "max", and "frequency". 
+%        Note that "std"
 %        uses a degree of freedom of 1 in accordance with IEC/TS 62600-100.
 %        To output capture length matrices for multiple binning parameters,
 %        define as a string array: statistic = ["", "", ""];
 %        
 %   savepath: string (optional)
-%        path and filename to save figure.
+%        Path to save figure.
 %        to call: power_performance_wave(S,h,P,statistic,"savepath",savepath)
 %
 %   rho: float (optional)
-%        water density [kg/m^3]
+%        Water density [kg/m^3]
 %        to call: power_performance_wave(S,h,P,statistic,"rho",rho)
 %
 %   g: float (optional)
-%        gravitational acceleration [m/s^2]
+%        Gravitational acceleration [m/s^2]
 %        to call: power_performance_wave(S,h,P,statistic,"g",g)
 %
 %   frequency_bins: vector (optional) 
@@ -68,7 +70,7 @@ arguments
 end
 
 if ~isstruct(S)
-    ME = MException('MATLAB:power_performance_wave','S must be a structure. See comments for formatting');
+    ME = MException('MATLAB:power_performance_wave','S must be a structure. See API header for formatting');
     throw(ME);
 end
 
@@ -112,11 +114,6 @@ jmat = wave_energy_flux_matrix(Hm0,Te,J,"mean",Hm0_bins,Te_bins);
 maep_matrix = mean_annual_energy_production_matrix(clmat.mean,jmat,clmat.freq);
 stats_cell = {'mean', 'std', 'median','count', 'sum', 'min', 'max','frequency'};
 
-% %figures = [];
-% for i = 1:length(statistic)
-%     if any(strcmp(stats_cell,statistic(i))) 
-%         figures(i) = plot_matrix(clmat.(statistic(i)),"Capture Length");
-
 % Capture Length Matrix using statistic
 cl_matrix = [];
 len = strlength(options.savepath);
@@ -124,13 +121,15 @@ for i = 1:length(statistic)
     if any(strcmp(stats_cell,statistic(i))) 
         figure('Name',sprintf('Capture Length Matrix %s', statistic(i)),'NumberTitle','off')
         cl_matrix(i) = plot_matrix(clmat.(statistic(i)),"Capture Length");
-        name = options.savepath + filesep + sprintf('Capture Length Matrix %s', statistic(i)) + '.png';
-        disp(name)
+        name = [options.savepath, filesep, sprintf('Capture Length Matrix %s', statistic(i)), '.png'];
+
         if len > 1
             saveas(cl_matrix(i), name);
         end 
     else
-         ME = MException('MATLAB:power_performance_wave','statistic must be a string or string array defined by one or multiple of the following: "mean", "std", "median","count", "sum", "min", "max", "frequency"');
+         ME = MException('MATLAB:power_performance_wave',...
+             'statistic must be a string or string array defined', ...
+             'by one or multiple of the following: "mean", "std", "median","count", "sum", "min", "max", "frequency"');
          throw(ME);
     end
 end        
