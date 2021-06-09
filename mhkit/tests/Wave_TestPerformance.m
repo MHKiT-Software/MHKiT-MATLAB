@@ -144,5 +144,35 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
+        
+        function test_power_performance_workflow(testCase)
+            filename = 'Capture Length Matrix mean.png';
+            if isfile(filename)
+                delete(filename);
+            end
+                       
+            S1 = read_NDBC_file('./../../examples/data/wave/data.txt');
+            h = 60;
+            seednum = 123;
+            rng(seednum);
+            a = 40;
+            b = 200;
+            Obj.P = (b-a).*randn(1,743) + a;
+
+            [x, y] = power_performance_workflow(S1,h,Obj.P,"mean","savepath",'./');
+
+            assertTrue(testCase,isfile(filename));
+            delete(filename);
+            assertTrue(testCase,isfield(x,"mean"));
+            assertTrue(testCase,isfield(x,"min"));
+            assertTrue(testCase,isfield(x,"max"));
+            assertTrue(testCase,isfield(x,"std"));
+            assertTrue(testCase,isfield(x,"median"));
+            assertTrue(testCase,isfield(x,"count"));
+            assertTrue(testCase,isfield(x,"sum"));
+            assertTrue(testCase,isfield(x,"freq"));
+            assertEqual(testCase,y,401239.4822345051);
+            
+        end
     end
 end

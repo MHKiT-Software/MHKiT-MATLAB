@@ -48,14 +48,6 @@ function [clmat,maep_matrix] = power_performance_workflow(S, h, P, statistic, op
 %
 %   maep_matrix: float
 %       Mean annual energy production
-%
-% Example
-%     --------
-%     >> S = read_NDBC_file('./data/wave/data.txt')
-%     >> h = 60
-%     >> P = randi([40,200], 743,1)
-%     >> statistic = "mean"
-%     >> power_performance_wave(S, h, P, statistic)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
@@ -83,7 +75,7 @@ end
 Te = energy_period(S);
 
 % Compute the significant wave height from spectra data 
-Hm0 = significant_wave_height(S);                                                
+Hm0 = significant_wave_height(S) ;                                               
 
 % Compute the energy flux from spectra data and water depth
 J = energy_flux(S,h);
