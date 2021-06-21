@@ -171,7 +171,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             assertTrue(testCase,isfield(x,"count"));
             assertTrue(testCase,isfield(x,"sum"));
             assertTrue(testCase,isfield(x,"freq"));
-            assertEqual(testCase,y,401239.4822345051);
+            assertEqual(testCase,y,401239.4822345051, 'RelTol',0.00001);
             
         end
     end

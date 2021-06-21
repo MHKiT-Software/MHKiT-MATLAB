@@ -12,6 +12,7 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             
             freq = 50; % Hz
             period = 600; % seconds
+            vector_channels = {"WD_Nacelle","WD_NacelleMod"};
             
             % load in file
             loads_data_table = struct2table(data.loads);
@@ -20,12 +21,14 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             df.Timestamp = datetime(df.Timestamp);
             df.time = df.Timestamp;
             % run function
-            stats = get_statistics(df,freq,period);
+            stats = get_statistics(df,freq,"period",period,"vector_channels",vector_channels);
             % check statistics
             assertEqual(testCase,stats.mean.uWind_80m,7.773,'AbsTol',0.01); % mean
             assertEqual(testCase,stats.max.uWind_80m,13.271,'AbsTol',0.01); % max
             assertEqual(testCase,stats.min.uWind_80m,3.221,'AbsTol',0.01); % min
             assertEqual(testCase,stats.std.uWind_80m,1.551,'AbsTol',0.01); % standard deviation3
+            assertEqual(testCase,stats.std.WD_Nacelle,36.093,'AbsTol',0.01); % std vector averaging
+            assertEqual(testCase,stats.mean.WD_Nacelle,178.1796,'AbsTol',0.01);% mean vector averaging
         end      
 
         function test_excel_to_datetime(testCase)
