@@ -76,5 +76,30 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             
          
         end
+        
+        function test_swan_read_table(testCase)
+            file = '../../examples/data/wave/SWAN/SWANOUT.DAT';
+            delimiterIn = ' ';
+            mystructure = importdata(file,delimiterIn);
+            vars = string(strsplit(mystructure.textdata{5},' '));
+            vars = vars(2:end-1);
+            expected = table2struct(array2table(mystructure.data,'VariableNames',vars),'ToScalar',true);
+            data = swan_read_table(file);
+            
+            assertEqual(testCase,data.Hsig,expected.Hsig);      
+        end
+        
+        function test_swan_read_block(testCase)
+            file = '../../examples/data/wave/SWAN/SWANOUT.DAT';
+            file2 = '../../examples/data/wave/SWAN/SWANOUTBlock.DAT';
+            delimiterIn = ' ';
+            mystructure = importdata(file,delimiterIn);
+            vars = string(strsplit(mystructure.textdata{5},' '));
+            vars = vars(2:end-1);
+            expected = table2struct(array2table(mystructure.data,'VariableNames',vars),'ToScalar',true);
+            data = swan_read_block(file2);
+            
+            assertEqual(testCase,sum(sum(data.Significant_wave_height.values)),sum(expected.Hsig),'RelTol',0.001);      
+        end
     end
 end
