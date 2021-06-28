@@ -25,54 +25,29 @@ classdef QC_Test < matlab.unittest.TestCase
         end
               
         function test_check_delta(testCase)
-%             % Column A has the same value (0.5) from 12:00 until 14:30
+            % Column A has the same value (0.5) from 12:00 until 14:30
             % Column C does not follow the expected sine function from 13:00 until 16:15. 
-%             % The change is abrupt and gradually corrected.
+            % The change is abrupt and gradually corrected.
             simple = readtable('../../examples/data/qc/simple_expected.xlsx');
+            simple_expected = readtable('../../examples/data/qc/simple_expected.xlsx');
+            
             dataA.values = simple.A;
             dataC.values = simple.C;
             dataA.time = simple.Var1;
             dataC.time = simple.Var1;
-%             disp(dataA.time)
             format long
             datenumA = datenum(dataA.time);
             datenumC = datenum(dataC.time);
-%             disp(datenumA)
-%             disp(dataC.time)
-%             disp(datenumC)
-%             bound = [0.0001, 0.6];
             bound = [-1.0, 1.0];
             window = 2*3600; % seconds
             resultsA = check_delta(dataA,bound,window);
             resultsC = check_delta(dataC,bound,window);            
-            for i = 1:length(datenumA)
-                if datenumA(i) >= 7.359654999999999 && datenumA(i) <= 7.359656041666665
-                    expectA.values(i) = NaN;
-                    expectA.mask(i) = 0;
-                else
-                    expectA.values(i) = dataA.values(i);
-                    expectA.mask(i) = 1;
-                end
-            end
-            for ii = 1:length(datenumC)
-                if datenumC(ii) >= 7.359655416666667 && datenumC(ii) <= 7.359656770833332
-                    expectC.values(ii) = NaN;
-                    expectC.mask(ii) = 0;
-                else
-                    expectC.values(ii) = dataC.values(ii);
-                    expectC.mask(ii) = 1;
-                end
-            end
-            expectedA.values = expectA.values.';
-            expectedA.mask = int64(expectA.mask.');
-            expectedC.values = expectC.values.';
-            expectedC.mask = int64(expectC.mask.');
-            resultsA = check_delta(dataA,bound,window);
-            resultsC = check_delta(dataC,bound,window);
-            assertEqual(testCase, resultsA.values, expectedA.values);
-            assertEqual(testCase, resultsA.mask, expectedA.mask);
-            assertEqual(testCase, resultsC.values, expectedC.values);
-            assertEqual(testCase, resultsC.mask, expectedC.mask);
+            
+            expectedA.values = simple_expected.A;
+            expectedC.values = simple_expected.C;
+            ABSTOL = 0.00000001;
+            assertEqual(testCase, resultsA.values, expectedA.values, 'AbsTol', ABSTOL);
+            assertEqual(testCase, resultsC.values, expectedC.values, 'AbsTol', ABSTOL);
         end
 
         function test_check_increment(testCase)
@@ -196,8 +171,6 @@ classdef QC_Test < matlab.unittest.TestCase
             data.values = simple.A;
             data.time = simple.Var1;
             freq = 900; % seconds
-%             expected.values = simple_expected.A.';
-%             expected.time = (simple_expected.Var1.');
             expected.values = simple_expected.A;
             expected.time = (simple_expected.Var1);
             results = check_timestamp(data,freq);
