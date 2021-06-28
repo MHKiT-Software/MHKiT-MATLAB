@@ -28,7 +28,7 @@ classdef QC_Test < matlab.unittest.TestCase
 %             % Column A has the same value (0.5) from 12:00 until 14:30
             % Column C does not follow the expected sine function from 13:00 until 16:15. 
 %             % The change is abrupt and gradually corrected.
-            simple = readtable('../../examples/data/qc/simple.xlsx');
+            simple = readtable('../../examples/data/qc/simple_expected.xlsx');
             dataA.values = simple.A;
             dataC.values = simple.C;
             dataA.time = simple.Var1;
@@ -43,6 +43,8 @@ classdef QC_Test < matlab.unittest.TestCase
 %             bound = [0.0001, 0.6];
             bound = [-1.0, 1.0];
             window = 2*3600; % seconds
+            resultsA = check_delta(dataA,bound,window);
+            resultsC = check_delta(dataC,bound,window);            
             for i = 1:length(datenumA)
                 if datenumA(i) >= 7.359654999999999 && datenumA(i) <= 7.359656041666665
                     expectA.values(i) = NaN;
@@ -190,30 +192,20 @@ classdef QC_Test < matlab.unittest.TestCase
 %             % Duplicate timestamp 17:00
 %             % Non-monotonic timestamp 19:30
             simple = readtable('../../examples/data/qc/simple.xlsx');
+            simple_expected = readtable('../../examples/data/qc/simple_expected.xlsx');
             data.values = simple.A;
             data.time = simple.Var1;
-            unq = unique(data.time);
-            miss = ismissing(data.time);
-            format long
-            dn = datenum(data.time);
-            disp(dn)
             freq = 900; % seconds
+%             expected.values = simple_expected.A.';
+%             expected.time = (simple_expected.Var1.');
+            expected.values = simple_expected.A;
+            expected.time = (simple_expected.Var1);
             results = check_timestamp(data,freq);
-            disp(results.values)
-            for i = 1:length(data.time)
-                if data.time(i)~= unq(i) || dn(i) == 7.359656041666665 || dn(i) == 7.359656041666665
-                    expect.values(i) = NaN;
-                    expect.mask(i) = 0;
-                else
-                    expect.values(i) = data.time(i);
-                    expect.mask(i) = 1;
-                end
-            end
-            expected.values = expect.values.';
-            expected.mask = int64(expect.mask.');
-            results = check_timestamp(data,freq);
-            assertEqual(testCase, results.values, expected.values);
-            assertEqual(testCase, results.mask, expected.mask);
+            a = results.time.';
+            datetime_bool = expected.time - minutes(1);
+            ABSTOL = 0.0000001;
+            assertEqual(testCase, results.values, expected.values, 'AbsTol', ABSTOL);
+            assertEqual(testCase, results.time, expected.time, 'AbsTol', ABSTOL);
         end
     end
 end  
