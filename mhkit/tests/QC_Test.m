@@ -201,11 +201,11 @@ classdef QC_Test < matlab.unittest.TestCase
             expected.values = simple_expected.A;
             expected.time = (simple_expected.Var1);
             results = check_timestamp(data,freq);
-            a = results.time.';
-            datetime_bool = expected.time - minutes(1);
-            ABSTOL = 0.0000001;
+            datenum_time = datenum(expected.time) - datenum(results.time.');
+            expected_datenum_time = zeros(length(datenum_time),1);
+            ABSTOL = 0.00000001;
             assertEqual(testCase, results.values, expected.values, 'AbsTol', ABSTOL);
-            assertEqual(testCase, results.time, expected.time, 'AbsTol', ABSTOL);
+            assertEqual(testCase, datenum_time, expected_datenum_time, 'AbsTol', ABSTOL);
         end
     end
 end  
