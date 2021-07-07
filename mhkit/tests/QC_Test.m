@@ -59,30 +59,13 @@ classdef QC_Test < matlab.unittest.TestCase
             dataC.values = simple.C;
             dataA.time = simple.Var1;
             dataC.time = simple.Var1;
-%             disp(dataC.time)
+
             format long
             datenumA = datenum(dataA.time);
             datenumC = datenum(dataC.time);
-%             disp(datenumC)
+
             bound = [0.0001, 0.6];
-%             for i = 1:length(datenumA)
-%                 if datenumA(i) >= 7.359654999999999 && datenumA(i) <= 7.359656041666665
-%                     expectA.values(i) = NaN;
-%                     expectA.mask(i) = 0;
-%                 else
-%                     expectA.values(i) = dataA.values(i);
-%                     expectA.mask(i) = 1;
-%                 end
-%             end
-%             for ii = 1:length(datenumC)
-%                 if datenumC(ii) >= 7.359655416666667 && datenumC(ii) <= 7.359656770833332
-%                     expectC.values(ii) = NaN;
-%                     expectC.mask(ii) = 0;
-%                 else
-%                     expectC.values(ii) = dataC.values(ii);
-%                     expectC.mask(ii) = 1;
-%                 end
-%             end
+%             
             expectA.values = zeros(size(dataA.values));
             for i = 1:96
                 if i >= 68 && i <= 69
@@ -118,8 +101,7 @@ classdef QC_Test < matlab.unittest.TestCase
             expectedA.mask = int64(expectA.mask.');
             expectedC.values = expectC.values;
             expectedC.mask = int64(expectC.mask.');
-%             disp(expectedA.values)
-%             disp(expectedC.values)
+
             resultsA = check_increment(dataA,bound);
             resultsC = check_increment(dataC,bound);
             assertEqual(testCase, resultsA.values, expectedA.values);
