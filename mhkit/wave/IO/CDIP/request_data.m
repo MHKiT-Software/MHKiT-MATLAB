@@ -49,8 +49,10 @@ waveDp = netcdf.getVar(ncid,waveDp_varID,0,waveDp_dimlength);
 
 % plotting:
 tiledlayout(3,1)
-data_title = ncreadatt(filename, '/', 'title');
-sgtitle(data_title)
+% data_title = ncreadatt(filename, '/', 'title');
+title_varID = netcdf.inqVarID(ncid,'metaStationName');
+plot_title = convertCharsToStrings(netcdf.getVar(ncid, title_varID));
+sgtitle(plot_title)
 
 nexttile
 plot(sstTime, waveHs)
