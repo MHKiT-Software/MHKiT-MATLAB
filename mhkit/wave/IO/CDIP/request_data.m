@@ -1,8 +1,74 @@
 url = 'http://thredds.cdip.ucsd.edu/thredds/fileServer/cdip/archive/433p1/433p1_historic.nc';
 filename = 'ncdata.nc';
+path = '/Users/pbhaskar/Desktop/Projects/FY21/MHKit/mhkit_model/MHKiT-MATLAB/mhkit/wave/';
+
+% CDIP_request_data(filename, url); % uncomment this when you are done with
+                                    % developing this script
+
+% Open netcdf4 file: 
+ncid = netcdf.open(append(path, filename), 'NC_NOWRITE');
+
+% sstTime: 
+sstTime_varID = netcdf.inqVarID(ncid, 'sstTime');
+sstTime_dimID = netcdf.inqDimID(ncid, 'sstTime');
+[sstTime_dimname, sstTime_dimlength] = netcdf.inqDim(ncid, sstTime_dimID);
+
+% Read the content of the variable:
+sstTime_datenum = netcdf.getVar(ncid,sstTime_varID,0,sstTime_dimlength);
+
+% Convert to inverse of POSIX time: 
+sstTime = datetime(sstTime_datenum, 'ConvertFrom', 'posixtime');
+% only for the data I have currently, which has different lengths of time
+% and waveHs: 
+sstTime(31501) = [];
+
+% waveHs
+waveHs_varID = netcdf.inqVarID(ncid, 'waveHs');
+waveHs_dimID = netcdf.inqDimID(ncid, 'waveTime');
+[waveHs_dimname, waveHs_dimlength] = netcdf.inqDim(ncid, waveHs_dimID);
+
+% Read the content of the variable:
+waveHs = netcdf.getVar(ncid,waveHs_varID,0,waveHs_dimlength);
+
+% waveTp
+waveTp_varID = netcdf.inqVarID(ncid, 'waveTp');
+waveTp_dimID = netcdf.inqDimID(ncid, 'waveTime');
+[waveTp_dimname, waveTp_dimlength] = netcdf.inqDim(ncid, waveTp_dimID);
+
+% Read the content of the variable:
+waveTp = netcdf.getVar(ncid,waveTp_varID,0,waveTp_dimlength);
 
 
-function cdip_data=CDIP_request_data(url,filename)
+% waveDp
+waveDp_varID = netcdf.inqVarID(ncid, 'waveDp');
+waveDp_dimID = netcdf.inqDimID(ncid, 'waveTime');
+[waveDp_dimname, waveDp_dimlength] = netcdf.inqDim(ncid, waveDp_dimID);
+
+% Read the content of the variable:
+waveDp = netcdf.getVar(ncid,waveDp_varID,0,waveDp_dimlength);
+
+% plotting:
+tiledlayout(3,1)
+data_title = ncreadatt(filename, '/', 'title');
+sgtitle(data_title)
+
+nexttile
+plot(sstTime, waveHs)
+ylabel('Hs, m')
+title('WaveHs vs. sstTime')
+
+nexttile
+plot(sstTime, waveTp)
+ylabel('Tp, s')
+title('WaveTp vs. sstTime')
+
+nexttile
+plot(sstTime, waveDp)
+ylabel('Dp, deg')
+title('WaveDp vs. sstTime')
+
+
+function [cdip_data, cdip_data_path]=CDIP_request_data(filename, url)
 
 %%%%%%%%%%%%%%%%%%%%
 %     Requests data by url
@@ -25,6 +91,7 @@ function cdip_data=CDIP_request_data(url,filename)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-cdip_data = websave(filename, url);
+cdip_data_path = websave(filename, url);
+cdip_data = filename;
 
 end
