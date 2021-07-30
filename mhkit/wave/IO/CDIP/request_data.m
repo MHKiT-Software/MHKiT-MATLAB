@@ -79,9 +79,9 @@ T.year=floor(Hs(:,1)/10000);
 T.mm=floor((Hs(:,1)-T.year*10000)/100);
 T.dd=Hs(:,1)-T.year*10000-T.mm*100;
 T.value=Hs(:,2);
-boxplot(T.value, T.mm)
-
-
+boxplot(T.value, T.mm, 'Labels',{'Jan','Feb','Mar','Apr','May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'})
+ylabel('Significant Wave Height, Hs (m)')
+title('Significant Wave Height by month')
 
 function [cdip_data, cdip_data_path]=CDIP_request_data(filename, url)
 
