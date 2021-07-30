@@ -69,6 +69,19 @@ plot(sstTime, waveDp)
 ylabel('Dp, deg')
 title('WaveDp vs. sstTime')
 
+figure; 
+
+% Box plots: 
+time = yyyymmdd(sstTime);
+Hs = [time waveHs];
+T = table();
+T.year=floor(Hs(:,1)/10000);
+T.mm=floor((Hs(:,1)-T.year*10000)/100);
+T.dd=Hs(:,1)-T.year*10000-T.mm*100;
+T.value=Hs(:,2);
+boxplot(T.value, T.mm)
+
+
 
 function [cdip_data, cdip_data_path]=CDIP_request_data(filename, url)
 
