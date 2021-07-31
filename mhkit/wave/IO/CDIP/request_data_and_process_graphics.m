@@ -1,9 +1,16 @@
-% url = 'http://thredds.cdip.ucsd.edu/thredds/fileServer/cdip/archive/430p1/430p1_d04.nc';
-% url = 'http://thredds.cdip.ucsd.edu/thredds/fileServer/cdip/archive/430p1/430p1_d05.nc';
+% URL of the nc file:
 url = 'http://thredds.cdip.ucsd.edu/thredds/fileServer/cdip/archive/430p1/430p1_d02.nc';
+
+% save file in local drive with the name 'ncdata.nc':
 filename = 'ncdata.nc';
+
+% absolute path of target location in your machine for netcdf you want to 
+% save the downloaded nc file:
 path = strcat(pwd , '/IO/CDIP/');
 
+% Function to download netcdf data from the HTTPServer.
+% Function accepts (1) absolute path of target location in your machine for
+% netcdf you want to save the downloaded nc file; (2) URL of the nc file
 CDIP_request_data(strcat(path,filename), url); 
 
 % Open netcdf4 file: 
@@ -48,9 +55,8 @@ waveDp_dimID = netcdf.inqDimID(ncid, 'waveTime');
 % Read the content of the variable:
 waveDp = netcdf.getVar(ncid,waveDp_varID,0,waveDp_dimlength);
 
-% plotting:
+% compendium plot:
 tiledlayout(3,1)
-% data_title = ncreadatt(filename, '/', 'title');
 title_varID = netcdf.inqVarID(ncid,'metaStationName');
 plot_title = convertCharsToStrings(netcdf.getVar(ncid, title_varID));
 sgtitle(plot_title)
@@ -72,7 +78,7 @@ title('WaveDp vs. sstTime')
 
 figure; 
 
-% Box plots: 
+% Box plot: 
 time = yyyymmdd(sstTime);
 Hs = [time waveHs];
 T = table();
@@ -81,15 +87,20 @@ T.mm=floor((Hs(:,1)-T.year*10000)/100);
 T.dd=Hs(:,1)-T.year*10000-T.mm*100;
 T.value=Hs(:,2);
 boxplot(T.value, T.mm)
+% Provision for labeling exact months down the line
 % boxplot(T.value, T.mm, 'Labels',{'Jan','Feb','Mar','Apr','May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'})
 ylabel('Significant Wave Height, Hs (m)')
 xlabel('Month #')
 title('Significant Wave Height by month')
 
+% Delete netcdf file from system once the simulation is complete
 if exist(strcat(path, 'ncdata.nc'), 'file')==2
   delete(strcat(path, 'ncdata.nc'));
 end
 
+% Function to download netcdf data from the HTTPServer.
+% Function accepts (1) absolute path of target location in your machine for
+% netcdf you want to save the downloaded nc file; (2) URL of the nc file
 function [cdip_data, cdip_data_path]=CDIP_request_data(filename, url)
 
 %%%%%%%%%%%%%%%%%%%%
