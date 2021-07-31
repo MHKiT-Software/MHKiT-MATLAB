@@ -1,9 +1,10 @@
-url = 'http://thredds.cdip.ucsd.edu/thredds/fileServer/cdip/archive/433p1/433p1_historic.nc';
+% url = 'http://thredds.cdip.ucsd.edu/thredds/fileServer/cdip/archive/430p1/430p1_d04.nc';
+% url = 'http://thredds.cdip.ucsd.edu/thredds/fileServer/cdip/archive/430p1/430p1_d05.nc';
+url = 'http://thredds.cdip.ucsd.edu/thredds/fileServer/cdip/archive/430p1/430p1_d02.nc';
 filename = 'ncdata.nc';
-path = '/Users/pbhaskar/Desktop/Projects/FY21/MHKit/mhkit_model/MHKiT-MATLAB/mhkit/wave/';
+path = strcat(pwd , '/IO/CDIP/');
 
-% CDIP_request_data(filename, url); % uncomment this when you are done with
-                                    % developing this script
+CDIP_request_data(strcat(path,filename), url); 
 
 % Open netcdf4 file: 
 ncid = netcdf.open(append(path, filename), 'NC_NOWRITE');
@@ -20,7 +21,7 @@ sstTime_datenum = netcdf.getVar(ncid,sstTime_varID,0,sstTime_dimlength);
 sstTime = datetime(sstTime_datenum, 'ConvertFrom', 'posixtime');
 % only for the data I have currently, which has different lengths of time
 % and waveHs: 
-sstTime(31501) = [];
+% sstTime(31501) = [];
 
 % waveHs
 waveHs_varID = netcdf.inqVarID(ncid, 'waveHs');
@@ -79,9 +80,15 @@ T.year=floor(Hs(:,1)/10000);
 T.mm=floor((Hs(:,1)-T.year*10000)/100);
 T.dd=Hs(:,1)-T.year*10000-T.mm*100;
 T.value=Hs(:,2);
-boxplot(T.value, T.mm, 'Labels',{'Jan','Feb','Mar','Apr','May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'})
+boxplot(T.value, T.mm)
+% boxplot(T.value, T.mm, 'Labels',{'Jan','Feb','Mar','Apr','May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'})
 ylabel('Significant Wave Height, Hs (m)')
+xlabel('Month #')
 title('Significant Wave Height by month')
+
+if exist(strcat(path, 'ncdata.nc'), 'file')==2
+  delete(strcat(path, 'ncdata.nc'));
+end
 
 function [cdip_data, cdip_data_path]=CDIP_request_data(filename, url)
 
