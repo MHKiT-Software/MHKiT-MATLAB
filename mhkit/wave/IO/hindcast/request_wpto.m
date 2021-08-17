@@ -137,7 +137,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
     % create final output struct for data
     for i=1:length(idx)
         data(i).time = standard_params.time_index;
-        if contains(parameter,'directional_wave_spectrum')
+        if contains('directional_wave_spectrum',parameter)
             data(i).frequency = standard_params.frequency;
             data(i).direction = standard_params.direction;
         end
