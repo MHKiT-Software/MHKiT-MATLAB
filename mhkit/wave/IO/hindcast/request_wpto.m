@@ -84,7 +84,12 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
         ID = groups.id(find(strcmpi(vars(i),groups.title)));
         URL = ['https://developer.nrel.gov/api/hsds/datasets/' ID{:} '/value?api_key=' api_key dom];
         temp = webread(URL,options);
-        standard_params.(vars(i)) = temp.value;
+        if isequal(vars{i},"time_index")
+            standard_params.(vars(i)) = datetime(temp.value,'InputFormat','yyyy-MM-dd HH:mm:ssXXX',...
+                'TimeZone','UTC');
+        else
+            standard_params.(vars(i)) = temp.value;
+        end
     end
 
     % find index for each location
