@@ -58,7 +58,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
     options = weboptions('Timeout',30);
 
     % determine region of lat_lon
-    region = region_selection(lat_lon);
+    region = region_selection(lat_lon,data_type);
 
     % set domain
     if isequal(data_type,'1-hour')
