@@ -109,8 +109,8 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             hindcast_data = request_wpto('1-hour',...
                 ["energy_period"],[44.624076,-124.280097;43.489171,-125.152137],...
                 2010,api_key);
-            file = '../../examples/data/wave/hindcast_1hr_data.csv';
-            meta = '../../examples/data/wave/hindcast_1hr_meta.csv';
+            file = '../../examples/data/wave/hindcast/hindcast_1hr_data.csv';
+            meta = '../../examples/data/wave/hindcast/hindcast_1hr_meta.csv';
             expected_data = readtable(file,'delimiter',',');
             expected_meta = readtable(meta);
             expected_data.time_index = datetime(expected_data.time_index,'InputFormat','yyyy-MM-dd HH:mm:ssXXX',...
@@ -143,8 +143,8 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             hindcast_data = request_wpto('3-hour',...
                 ["mean_absolute_period","significant_wave_height"],[44.624076,-124.280097],...
                 1996,api_key);
-            file = '../../examples/data/wave/hindcast_3hr_data.csv';
-            meta = '../../examples/data/wave/hindcast_3hr_meta.csv';
+            file = '../../examples/data/wave/hindcast/hindcast_3hr_data.csv';
+            meta = '../../examples/data/wave/hindcast/hindcast_3hr_meta.csv';
             expected_data = readtable(file,'delimiter',',');
             expected_meta = readtable(meta);
             expected_data.time_index = datetime(expected_data.time_index,'InputFormat','yyyy-MM-dd HH:mm:ssXXX',...
