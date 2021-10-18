@@ -8,12 +8,10 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ${{ matrix.os }}
+    name: Run MATLAB Tests on GitHub-Hosted Runner
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        os: "ubuntu-latest"
-    
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
