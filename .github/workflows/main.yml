@@ -7,19 +7,19 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  build-linux:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        os: "ubuntu-latest"
     
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
       
       - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v0
+        uses: matlab-actions/setup-matlab@v1
 
       # - name: Run tests and generate artifacts
       #   uses: matlab-actions/run-tests@v1
