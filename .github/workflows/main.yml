@@ -1,0 +1,28 @@
+name: MATLAB | Windows Mac Linux
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+    
+    steps:
+      - name: Checkout out repository
+        uses: actions/checkout@v2
+      
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v1
+
+      - name: Run tests and generate artifacts
+        uses: matlab-actions/run-tests@v1
+        with:
+          test-results-junit: mhkit/tests/results.xml
+          code-coverage-cobertura: mhkit/tests/results.xml
