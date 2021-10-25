@@ -7,10 +7,7 @@ function l=wave_length(k)
 % Parameters
 % ------------
 %    k: wave number (1/m)
-%        structure of form:
-%           k.values= wave number
-%
-%           k.frequency= frequency (Hz)
+%       intiger, double, or vector
 %
 % Returns
 % -------
