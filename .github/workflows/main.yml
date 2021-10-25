@@ -22,6 +22,6 @@ jobs:
       - name: Run tests and generate artifacts
         uses: matlab-actions/run-tests@v1
         with:
-          select-by-tag: test_bin_statistics
+          select-by-tag: DebuggingActions
           test-results-junit: mhkit/tests/results.xml
           code-coverage-cobertura: mhkit/tests/results.xml

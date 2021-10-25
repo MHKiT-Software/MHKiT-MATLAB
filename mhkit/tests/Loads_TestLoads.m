@@ -1,6 +1,6 @@
 classdef Loads_TestLoads < matlab.unittest.TestCase
 
-    methods (Test) 
+    methods (Test, TestTags = {'DebuggingActions'})
         
         function test_bin_statistics(testCase)
             
