@@ -30,7 +30,7 @@ jobs:
       - name: Update and install Python packages
         run: |
             python -m pip install --upgrade pip wheel
-            conda install -c anaconda hdf5=1.12.1
+            conda install -c conda-forge hdf5=1.12.1
             python -m pip install mhkit
       
       - name: Set up MATLAB
