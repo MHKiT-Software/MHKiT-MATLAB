@@ -30,9 +30,10 @@ jobs:
       - name: Update and install Python packages
         run: |
             python -m pip install --upgrade pip wheel
-            python -m pip uninstall h5py
+            python -m pip install mhkit --upgrade
+            conda remove h5py
+            python -m pip install mhkit --upgrade
             conda install -c conda-forge hdf5=1.12.1
-            python -m pip install mhkit
       
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
