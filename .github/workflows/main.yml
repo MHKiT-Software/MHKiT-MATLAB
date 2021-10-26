@@ -31,8 +31,7 @@ jobs:
         run: |
             python -m pip install --upgrade pip wheel
             python -m pip install mhkit --upgrade
-            python -m pip install mhkit --upgrade
-            python -m pip install h5py==3.5
+            conda install -c conda-forge hdf5=1.8.11
       
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
