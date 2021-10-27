@@ -1,13 +1,14 @@
 classdef Loads_TestLoads < matlab.unittest.TestCase
 
-    methods (Test) 
+    methods (Test, TestTags = {'DebuggingActions'})
         
         function test_bin_statistics(testCase)
             
             % create array containg wind speeds to use as bin edges
             bin_edges = 3:1:25;
-            fileName = '../../examples/data/loads/loads_data_dict.json'; % filename in JSON extension
-            fid = fopen(fileName); % Opening the file
+            relative_file_name = '../../examples/data/loads/loads_data_dict.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            fid = fopen(full_file_name); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
@@ -27,8 +28,9 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
         end
 
         function test_damage_equivalent_loads(testCase)
-            fileName = '../../examples/data/loads/loads_data_dict.json'; % filename in JSON extension
-            fid = fopen(fileName); % Opening the file
+            relative_file_name = '../../examples/data/loads/loads_data_dict.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            fid = fopen(full_file_name); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
@@ -53,7 +55,9 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
         
         function test_blade_moments(testCase)
             format long
-            blade_data = readmatrix('../../examples/data/loads/blade_cal.csv');
+            relative_file_name = '../../examples/data/loads/blade_cal.csv';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            blade_data = readmatrix(full_file_name);
             flap_offset = 9.19906E-05;
             edge_offset = -0.000310854;
             blade_matrix = [1034671.4,-126487.28,82507.959,1154090.7];
@@ -69,8 +73,9 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
         end
 
         function test_plot_statistics(testCase)
-            fileName = '../../examples/data/loads/loads_data_dict.json'; % filename in JSON extension
-            fid = fopen(fileName); % Opening the file
+            relative_file_name = '../../examples/data/loads/loads_data_dict.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            fid = fopen(full_file_name); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
@@ -95,8 +100,9 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
         end
 
         function test_plot_bin_statistics(testCase)
-            fileName = '../../examples/data/loads/loads_data_dict.json'; % filename in JSON extension
-            fid = fopen(fileName); % Opening the file
+            relative_file_name = '../../examples/data/loads/loads_data_dict.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            fid = fopen(full_file_name); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
