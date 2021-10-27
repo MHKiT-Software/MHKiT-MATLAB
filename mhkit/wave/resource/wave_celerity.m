@@ -18,9 +18,9 @@ function Cg=wave_celerity(k,h,options)
 %         gravitational acceleration (m/s^2)
 %         to call: energy_flux(k,h,"g",g)
 %
-%    deep_check: bool (optional)
+%    depth_check: bool (optional)
 %         If True check depth regime. Default False.
-%         to call: energy_flux(k,h,"deep_check",py.True)
+%         to call: energy_flux(k,h,"depth_check",py.True)
 % 
 %    ratio: double or int (optional)
 %         Only applied if depth_check=True. If h/l > ratio,
@@ -45,7 +45,7 @@ arguments
     k
     h
     options.g = 9.80665;
-    options.deep_check = py.False;
+    options.depth_check = py.False;
     options.ratio = 2;
     
 end
@@ -66,16 +66,9 @@ if (isa(k,'py.pandas.core.frame.DataFrame')~=1)
     end
 end
 
-% if nargin == 3 
-%     Cgdf=py.mhkit.wave.resource.wave_celerity(k,h,pyargs('g',varargin{1}));
-% elseif nargin == 2
-%     Cgdf=py.mhkit.wave.resource.wave_celerity(k,h);
-% else
-%     ME = MException('MATLAB:wave_celerity','incorrect number of arguments');
-%         throw(ME);
-% end
+
 Cgdf=py.mhkit.wave.resource.wave_celerity(k,h,pyargs('g',options.g,...
-    'deep_check',options.deep_check,'ratio',options.ratio));
+    'depth_check',options.depth_check,'ratio',options.ratio));
 
 Cg.values=double(py.array.array('d',py.numpy.nditer(Cgdf.values)));
 Cg.frequency=double(py.array.array('d',py.numpy.nditer(Cgdf.index)));

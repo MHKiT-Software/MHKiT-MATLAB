@@ -236,7 +236,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             calculated = spectral_width(S1,CDIP1.freqBinWidth);
             error = abs(expected-calculated)/expected;
             assertLessThan(testCase,error, 0.01);
-       end
+        end
                 
         function test_plot_elevation_timeseries(testCase)
             data = load('../../examples/data/wave/ValData2.mat');
@@ -443,43 +443,44 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
          end
          
          function test_wave_celerity(testCase)
-         % Depth regime ratio
-         dr_ratio=2;
-
          % small change in f will give similar value cg
-         f=np.linspace(20.0001,20.0005,5);
+         f=linspace(20.0001,20.0005,5);
 
          % Choose index to spike at. cg spike is inversly proportional to k
-         k_idx=2;
          k_tmp=[1, 1, 0.5, 1, 1];
-         %k = pd.DataFrame(k_tmp, index=f)
+         k.values = k_tmp;
+         k.frequency=f;
 
          % all shallow
-         cg_shallow1 = wave.resource.wave_celerity(k, h=0.0001,depth_check=True);
-         cg_shallow2 = wave.resource.wave_celerity(k, h=0.0001,depth_check=False);
-         assertTrue(all(cg_shallow1.squeeze().values == ... 
-                             cg_shallow2.squeeze().values));
+         cg_shallow1 = wave_celerity(k,0.0001,"depth_check",py.True);
+         cg_shallow2 = wave_celerity(k, 0.0001,"depth_check",py.False);
+         assertEqual(testCase,cg_shallow1, cg_shallow2);
 
-
+         x = (3.14.*f)./k.values;
          % all deep 
-         cg = wave.resource.wave_celerity(k, h=1000,depth_check=True);
-         assertTrue(all(np.pi*f/k.squeeze().values == cg.squeeze().values));
+         cg = wave_celerity(k, 1000,"depth_check",py.True);
+         assertEqual(testCase,x,cg.values,'RelTol',0.01);
          end
          
-%          function test_energy_flux_deep(self)
-%          % Dependent on mhkit.resource.BS spectrum
-%          S = wave.resource.bretschneider_spectrum(self.f,self.Tp,self.Hs)
-%          Te = wave.resource.energy_period(S)
-%          Hm0 = wave.resource.significant_wave_height(S)
-%          rho=1025
-%          g=9.80665
-%          coeff = rho*(g**2)/(64*np.pi)
-%          J = coeff*(Hm0.squeeze()**2)*Te.squeeze()
-% 
-%          h=-1 % not used when deep=True
-%          J_calc = wave.resource.energy_flux(S, h, deep=True)
-% 
-%          self.assertTrue(J_calc.squeeze() == J)
-%          end
+         function test_energy_flux_deep(testCase)
+             
+         omega = [0.1:0.01:3.5];
+         f = omega./(2*pi);
+         Hs = 2.5;
+         Tp = 8 ;   
+         % Dependent on mhkit.resource.BS spectrum
+         S = bretschneider_spectrum(f,Tp,Hs);
+         Te = energy_period(S);
+         Hm0 = significant_wave_height(S);
+         rho=1025;
+         g=9.80665;
+         coeff = rho*(g^2)/(64*pi);
+         J = coeff*(Hm0^2)*Te;
+
+         h=-1; % not used when deep=True
+         J_calc = energy_flux(S, h, "deep",py.True);
+
+         assertEqual(testCase,J_calc,J,'RelTol',0.01);
+         end
     end
 end
