@@ -419,5 +419,67 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
+        
+        function test_wave_length(testCase)
+         k=[1,2,10,3];
+         l_expected = (2.*3.14)./k;
+
+         
+         l_calculated = wave_length(k);            
+         assertEqual(testCase,l_expected,l_calculated,'RelTol',0.01);
+        
+         end
+        
+
+         function test_depth_regime(testCase)
+         expected = [1,1,0,1];
+         l_vector=[1,2,10,3];
+
+         h = 10;
+
+         calculated = depth_regime(l_vector,h);            
+         assertEqual(testCase,expected,calculated);
+
+         end
+         
+         function test_wave_celerity(testCase)
+         % Depth regime ratio
+         dr_ratio=2;
+
+         % small change in f will give similar value cg
+         f=np.linspace(20.0001,20.0005,5);
+
+         % Choose index to spike at. cg spike is inversly proportional to k
+         k_idx=2;
+         k_tmp=[1, 1, 0.5, 1, 1];
+         %k = pd.DataFrame(k_tmp, index=f)
+
+         % all shallow
+         cg_shallow1 = wave.resource.wave_celerity(k, h=0.0001,depth_check=True);
+         cg_shallow2 = wave.resource.wave_celerity(k, h=0.0001,depth_check=False);
+         assertTrue(all(cg_shallow1.squeeze().values == ... 
+                             cg_shallow2.squeeze().values));
+
+
+         % all deep 
+         cg = wave.resource.wave_celerity(k, h=1000,depth_check=True);
+         assertTrue(all(np.pi*f/k.squeeze().values == cg.squeeze().values));
+         end
+         
+%          function test_energy_flux_deep(self)
+%          % Dependent on mhkit.resource.BS spectrum
+%          S = wave.resource.bretschneider_spectrum(self.f,self.Tp,self.Hs)
+%          Te = wave.resource.energy_period(S)
+%          Hm0 = wave.resource.significant_wave_height(S)
+%          rho=1025
+%          g=9.80665
+%          coeff = rho*(g**2)/(64*np.pi)
+%          J = coeff*(Hm0.squeeze()**2)*Te.squeeze()
+% 
+%          h=-1 % not used when deep=True
+%          J_calc = wave.resource.energy_flux(S, h, deep=True)
+% 
+%          self.assertTrue(J_calc.squeeze() == J)
+%          end
     end
 end

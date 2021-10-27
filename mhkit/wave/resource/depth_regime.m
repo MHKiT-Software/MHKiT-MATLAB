@@ -44,4 +44,5 @@ end
 py.importlib.import_module('mhkit');
 py.importlib.import_module('mhkit_python_utils');
 
-depth_reg=py.mhkit.wave.resource.depth_regime(l,h,pyargs('ratio',options.ratio));
+depth_reg=double(py.array.array('d',py.numpy.nditer...
+    (py.mhkit.wave.resource.depth_regime(py.numpy.array(l),h,pyargs('ratio',options.ratio)))));
