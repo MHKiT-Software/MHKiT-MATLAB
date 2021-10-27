@@ -51,10 +51,10 @@ jobs:
 #        with:
 #            command: pyenv("ExecutionMode","OutOfProcess")
 
-#      - name: Run tests and generate artifacts
-#        uses: matlab-actions/run-tests@v1
-#        with:
-#          source-folder: mhkit; mhkit_python_utils; examples/data
-#          select-by-tag: DebuggingActions
-#          test-results-junit: mhkit/tests/results.xml
-#          code-coverage-cobertura: mhkit/tests/results.xml
+      - name: Run tests and generate artifacts
+        uses: matlab-actions/run-tests@v1
+        with:
+          source-folder: mhkit; mhkit_python_utils; examples/data
+          select-by-tag: DebuggingActions
+          test-results-junit: mhkit/tests/results.xml
+          code-coverage-cobertura: mhkit/tests/results.xml
