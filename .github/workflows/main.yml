@@ -48,7 +48,7 @@ jobs:
 
       - name: Uninstall MHKiT, for fixing HDF5 issue
         run: |
-            python -m pip uninstall mhkit
+            python -m pip uninstall mhkit -y
       
       - name: Re-install MHKiT, for fixing HDF5 issue
         run: |
