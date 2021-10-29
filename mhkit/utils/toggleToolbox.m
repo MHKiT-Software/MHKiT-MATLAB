@@ -188,8 +188,16 @@ function varargout = toggleToolbox(varargin)
             toolbox_states = struct('path', {paths});
 
             % ...and mark all toolboxes as "enabled"
+            rows2delete = [];
             for ii = 1:size(tb_name_map,1)
-                toolbox_states.(tb_name_map{ii,1}) = true; end
+                if ~isvarname(tb_name_map{ii,1})
+                    rows2delete = [rows2delete, ii];
+                    continue;
+                    % tb_name_map{ii,1} = strcat('validName_', tb_name_map{ii,1});
+                end
+                toolbox_states.(tb_name_map{ii,1}) = true;
+            end
+            tb_name_map(rows2delete,:) = [];
         end
     end
 
