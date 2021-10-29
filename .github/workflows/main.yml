@@ -46,9 +46,9 @@ jobs:
         with:
             command: matlab.addons.toolbox.installToolbox('mhkit.mltbx')
 
-      - name: Uninstall h5py from Anaconda, for fixing HDF5 issue
+      - name: Uninstall h5py, for fixing HDF5 issue
         run: |
-            conda remove h5py
+            python -m pip uninstall h5py
             
       - name: Re-install MHKiT, for fixing HDF5 issue
         run: |
