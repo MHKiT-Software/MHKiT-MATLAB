@@ -39,7 +39,7 @@ jobs:
       - name: Uninstall all pre-installed toolboxes, for fixing HDF5 issue
         uses: matlab-actions/run-command@v1
         with:
-            command: matlab.addons.toolbox.uninstallToolbox(matlab.addons.toolbox.installedToolboxes)
+            command: addpath('mhkit/utils'), uninstall_all_toolboxes
       
       - name: List installed MATLAB toolboxes
         uses: matlab-actions/run-command@v1
