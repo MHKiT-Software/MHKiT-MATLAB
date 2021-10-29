@@ -24,7 +24,8 @@ else
     result = 0;
     for i = 1:height(toolboxes)
         try
-            output = matlab.addons.toolbox.uninstallToolbox(toolboxes(i));
+            % output = matlab.addons.toolbox.uninstallToolbox(toolboxes(i));
+            output = matlab.addons.disableAddon(toolboxes(i));
         catch
             result = 1;
             return;
