@@ -29,9 +29,8 @@ jobs:
             
       - name: Update and install Python packages
         run: |
-            conda install pip
+            python -m pip install --upgrade pip wheel
             python -m pip install mhkit --upgrade
-#            python -m pip install --upgrade pip wheel
 # TODO: install mhkit from source instead
       
       - name: Set up MATLAB
@@ -46,6 +45,16 @@ jobs:
         uses: matlab-actions/run-command@v1
         with:
             command: matlab.addons.toolbox.installToolbox('mhkit.mltbx')
+            
+      - name: List installed MATLAB addons
+        uses: matlab-actions/run-command@v1
+        with:
+            command: matlab.addons.installedAddons
+            
+      - name: List installed MATLAB toolboxes
+        uses: matlab-actions/run-command@v1
+        with:
+            command: ver
 
 #      - name: Uninstall h5py, for fixing HDF5 issue
 #        run: |
