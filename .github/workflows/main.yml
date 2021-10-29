@@ -41,20 +41,20 @@ jobs:
 #        with:
 #            command: addpath('mhkit/utils'), uninstall_all_toolboxes
       
-      - name: Toggle off all pre-installed toolboxes, for fixing HDF5 issue
-        uses: matlab-actions/run-command@v1
-        with:
-            command: addpath('mhkit/utils'), toggleToolbox('all', 'off')
+#      - name: Toggle off all pre-installed toolboxes, for fixing HDF5 issue
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: addpath('mhkit/utils'), toggleToolbox('all', 'off')
       
-      - name: List installed MATLAB toolboxes
-        uses: matlab-actions/run-command@v1
-        with:
-            command: ver
+#      - name: List installed MATLAB toolboxes
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: ver
       
-      - name: Query Python version used by MATLAB
-        uses: matlab-actions/run-command@v1
-        with:
-            command: pyversion()
+#      - name: Query Python version used by MATLAB
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: pyversion()
         
       - name: Install MHKiT toolbox in MATLAB
         uses: matlab-actions/run-command@v1
@@ -97,10 +97,10 @@ jobs:
 #        with:
 #            command: pyenv("ExecutionMode","OutOfProcess")
 
-      - name: Run tests and generate artifacts
-        uses: matlab-actions/run-tests@v1
-        with:
-          source-folder: mhkit; mhkit_python_utils; examples/data
-          select-by-tag: DebuggingActions
-          test-results-junit: mhkit/tests/results.xml
-          code-coverage-cobertura: mhkit/tests/results.xml
+#      - name: Run tests and generate artifacts
+#        uses: matlab-actions/run-tests@v1
+#        with:
+#          source-folder: mhkit; mhkit_python_utils; examples/data
+#          select-by-tag: DebuggingActions
+#          test-results-junit: mhkit/tests/results.xml
+#          code-coverage-cobertura: mhkit/tests/results.xml
