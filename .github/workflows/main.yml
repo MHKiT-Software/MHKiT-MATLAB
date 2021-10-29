@@ -46,10 +46,10 @@ jobs:
         with:
             command: addpath('mhkit/utils'), toggleToolbox('all', 'off')
 
-      - name: Uninstall 5G toolbox in MATLAB
-        uses: matlab-actions/run-command@v1
-        with:
-            command: matlab.addons.toolbox.uninstallToolbox('5G')
+#      - name: Uninstall 5G toolbox in MATLAB
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: matlab.addons.toolbox.uninstallToolbox('5G')
       
       - name: List installed MATLAB addons
         uses: matlab-actions/run-command@v1
