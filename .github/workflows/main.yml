@@ -41,10 +41,20 @@ jobs:
 #        with:
 #            command: addpath('mhkit/utils'), uninstall_all_toolboxes
       
-#      - name: Toggle off all pre-installed toolboxes, for fixing HDF5 issue
-#        uses: matlab-actions/run-command@v1
-#        with:
-#            command: addpath('mhkit/utils'), toggleToolbox('all', 'off')
+      - name: Toggle off all pre-installed toolboxes, for fixing HDF5 issue
+        uses: matlab-actions/run-command@v1
+        with:
+            command: addpath('mhkit/utils'), toggleToolbox('all', 'off')
+
+      - name: Uninstall 5G toolbox in MATLAB
+        uses: matlab-actions/run-command@v1
+        with:
+            command: matlab.addons.toolbox.uninstallToolbox('5G')
+      
+      - name: List installed MATLAB addons
+        uses: matlab-actions/run-command@v1
+        with:
+            command: matlab.addons.installedAddons
       
 #      - name: List installed MATLAB toolboxes
 #        uses: matlab-actions/run-command@v1
