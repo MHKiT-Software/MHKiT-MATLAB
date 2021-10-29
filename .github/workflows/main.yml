@@ -29,7 +29,8 @@ jobs:
             
       - name: Update and install Python packages
         run: |
-            python -m pip install --upgrade pip wheel
+#            python -m pip install --upgrade pip wheel
+            conda install pip
             python -m pip install mhkit --upgrade
 # TODO: install mhkit from source instead
       
@@ -46,13 +47,13 @@ jobs:
         with:
             command: matlab.addons.toolbox.installToolbox('mhkit.mltbx')
 
-      - name: Uninstall h5py, for fixing HDF5 issue
-        run: |
-            python -m pip uninstall h5py -y
-            
-      - name: Re-install MHKiT, for fixing HDF5 issue
-        run: |
-            python -m pip install mhkit --upgrade
+#      - name: Uninstall h5py, for fixing HDF5 issue
+#        run: |
+#            python -m pip uninstall h5py -y
+#            
+#      - name: Re-install MHKiT, for fixing HDF5 issue
+#        run: |
+#            python -m pip install mhkit --upgrade
 
 #      - name: Uninstall MHKiT, for fixing HDF5 issue
 #        run: |
