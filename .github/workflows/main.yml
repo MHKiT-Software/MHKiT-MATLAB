@@ -44,7 +44,7 @@ jobs:
       - name: Toggle off all pre-installed toolboxes, for fixing HDF5 issue
         uses: matlab-actions/run-command@v1
         with:
-            command: addpath('mhkit/utils'), TOGGLETOOLBOX('all', 'off')
+            command: addpath('mhkit/utils'), toggleToolbox('all', 'off')
       
       - name: List installed MATLAB toolboxes
         uses: matlab-actions/run-command@v1
