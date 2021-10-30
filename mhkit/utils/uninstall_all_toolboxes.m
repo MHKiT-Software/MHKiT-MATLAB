@@ -15,26 +15,22 @@ function result=uninstall_all_toolboxes()
 %         
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-toolboxes = matlab.addons.toolbox.installedToolboxes;
+% toolboxes = matlab.addons.toolbox.installedToolboxes;
+addons = matlab.addons.installedAddons;
 
-if height(toolboxes) < 1
+if height(addons) < 1
     result = 0;
 else
     % Note: this cannot be vectorized
     result = 0;
-    for i = 1:height(toolboxes)
-        try
-            % output = matlab.addons.toolbox.uninstallToolbox(toolboxes(i));
-            output = matlab.addons.disableAddon(toolboxes(i));
-        catch
-            result = 1;
-            return;
-        end
-
-        if isempty(output)
-            result = 0 | result;
+    for i = 1:height(addons)
+        % output = matlab.addons.toolbox.uninstallToolbox(toolboxes(i));
+        if strcmpi('matlab', addons{i,1})
+            continue;
         else
-            result = 1;
+            matlab.addons.disableAddon(addons{i,1});
+            result = matlab.addons.isAddonEnabled(addons{i,1});
+            result = 0 | result;
         end
     end
 end
