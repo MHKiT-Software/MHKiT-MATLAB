@@ -51,15 +51,15 @@ jobs:
 #        with:
 #            command: matlab.addons.toolbox.uninstallToolbox('5G')
       
-#      - name: List installed MATLAB addons
-#        uses: matlab-actions/run-command@v1
-#        with:
-#            command: matlab.addons.installedAddons
-      
 #      - name: Query Python version used by MATLAB
 #        uses: matlab-actions/run-command@v1
 #        with:
 #            command: pyversion()
+      
+      - name: List installed MATLAB addons
+        uses: matlab-actions/run-command@v1
+        with:
+            command: matlab.addons.installedAddons
 
       - name: List installed MATLAB toolboxes
         uses: matlab-actions/run-command@v1
@@ -75,7 +75,17 @@ jobs:
         uses: matlab-actions/run-command@v1
         with:
             command: addpath('mhkit/utils'), toggleToolbox({'Mixed-Signal Blockset'}, 'off')
-             
+            
+      - name: Query Mixed-Signal Blockset
+        uses: matlab-actions/run-command@v1
+        with:
+            command: addpath('mhkit/utils'), toggleToolbox({'Mixed-Signal Blockset'}, 'query')
+      
+      - name: List installed MATLAB addons
+        uses: matlab-actions/run-command@v1
+        with:
+            command: matlab.addons.installedAddons
+      
       - name: List installed MATLAB toolboxes
         uses: matlab-actions/run-command@v1
         with:
