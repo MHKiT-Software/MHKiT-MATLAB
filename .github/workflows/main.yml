@@ -56,10 +56,10 @@ jobs:
 #        with:
 #            command: matlab.addons.installedAddons
       
-#      - name: List installed MATLAB toolboxes
-#        uses: matlab-actions/run-command@v1
-#        with:
-#            command: ver
+      - name: List installed MATLAB toolboxes
+        uses: matlab-actions/run-command@v1
+        with:
+            command: matlab.addons.toolbox.installedToolboxes
       
 #      - name: Query Python version used by MATLAB
 #        uses: matlab-actions/run-command@v1
@@ -71,10 +71,10 @@ jobs:
         with:
             command: matlab.addons.toolbox.installToolbox('mhkit.mltbx')
       
-      - name: Test uninstall AUTOSAR Blockset
+      - name: Test uninstall Mixed-Signal Blockset
         uses: matlab-actions/run-command@v1
         with:
-            command: matlab.addons.toolbox.uninstallToolbox('AUTOSAR Blockset')
+            command: addpath('mhkit/utils'), uninstall_all_toolboxes
             
 #      - name: List installed MATLAB addons
 #        uses: matlab-actions/run-command@v1
