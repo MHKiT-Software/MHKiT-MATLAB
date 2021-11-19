@@ -75,7 +75,7 @@ jobs:
 #        uses: matlab-actions/run-command@v1
 #        with:
 #            command: addpath('mhkit/utils'), uninstall_all_toolboxes
-
+        
        - name: Toggle off Mixed-Signal Blockset
          uses: matlab-actions/run-command@v1
          with:
