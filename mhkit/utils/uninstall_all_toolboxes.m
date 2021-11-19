@@ -21,8 +21,10 @@ function result=uninstall_all_toolboxes()
 % installedToolbox.Version = "2.1";
 % installedToolbox.Guid = "AM";
 % matlab.addons.toolbox.uninstallToolbox(installedToolbox);
-matlab.addons.uninstall("Mixed-Signal Blockset", "2.1");
-result = 0;
+
+% matlab.addons.uninstall("Mixed-Signal Blockset", "2.1");
+% result = 0;
+
 %%
 
 % toolboxes = matlab.addons.toolbox.installedToolboxes;
@@ -44,3 +46,9 @@ result = 0;
 %         end
 %     end
 % end
+
+%%
+toggleToolbox({'Mixed-Signal Blockset'}, 'off');
+result = 0;
+
+%%
