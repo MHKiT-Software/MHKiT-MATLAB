@@ -71,10 +71,15 @@ jobs:
         with:
             command: matlab.addons.toolbox.installToolbox('mhkit.mltbx')
       
-      - name: Test uninstall Mixed-Signal Blockset
-        uses: matlab-actions/run-command@v1
-        with:
-            command: addpath('mhkit/utils'), uninstall_all_toolboxes
+#      - name: Test uninstall Mixed-Signal Blockset
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: addpath('mhkit/utils'), uninstall_all_toolboxes
+
+       - name: Toggle off Mixed-Signal Blockset
+         uses: matlab-actions/run-command@v1
+         with:
+             command: addpath('mhkit/utils'), toggleToolbox({'Mixed-Signal Blockset'}, 'off')
             
 #      - name: List installed MATLAB addons
 #        uses: matlab-actions/run-command@v1
