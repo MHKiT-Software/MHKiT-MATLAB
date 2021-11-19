@@ -56,40 +56,35 @@ jobs:
 #        with:
 #            command: matlab.addons.installedAddons
       
-      - name: List installed MATLAB toolboxes
-        uses: matlab-actions/run-command@v1
-        with:
-            command: matlab.addons.toolbox.installedToolboxes
-      
 #      - name: Query Python version used by MATLAB
 #        uses: matlab-actions/run-command@v1
 #        with:
 #            command: pyversion()
-        
+
+      - name: List installed MATLAB toolboxes
+        uses: matlab-actions/run-command@v1
+        with:
+            command: matlab.addons.toolbox.installedToolboxes
+              
       - name: Install MHKiT toolbox in MATLAB
         uses: matlab-actions/run-command@v1
         with:
             command: matlab.addons.toolbox.installToolbox('mhkit.mltbx')
-      
-#      - name: Test uninstall Mixed-Signal Blockset
-#        uses: matlab-actions/run-command@v1
-#        with:
-#            command: addpath('mhkit/utils'), uninstall_all_toolboxes
-        
-       - name: Toggle off Mixed-Signal Blockset
-         uses: matlab-actions/run-command@v1
-         with:
-             command: addpath('mhkit/utils'), toggleToolbox({'Mixed-Signal Blockset'}, 'off')
-            
-#      - name: List installed MATLAB addons
-#        uses: matlab-actions/run-command@v1
-#        with:
-#            command: matlab.addons.installedAddons
-            
+              
+      - name: Toggle off Mixed-Signal Blockset
+        uses: matlab-actions/run-command@v1
+        with:
+            command: addpath('mhkit/utils'), toggleToolbox({'Mixed-Signal Blockset'}, 'off')
+             
       - name: List installed MATLAB toolboxes
         uses: matlab-actions/run-command@v1
         with:
             command: ver
+
+#      - name: Test uninstall Mixed-Signal Blockset
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: addpath('mhkit/utils'), uninstall_all_toolboxes
 
 #      - name: Uninstall h5py, for fixing HDF5 issue
 #        run: |
