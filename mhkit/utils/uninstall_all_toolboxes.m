@@ -16,11 +16,12 @@ function result=uninstall_all_toolboxes()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%
-installedToolbox = struct;
-installedToolbox.Name = "Mixed-Signal Blockset";
-installedToolbox.Version = "2.1";
-installedToolbox.Guid = "AM";
-matlab.addons.toolbox.uninstallToolbox(installedToolbox);
+% installedToolbox = struct;
+% installedToolbox.Name = "Mixed-Signal Blockset";
+% installedToolbox.Version = "2.1";
+% installedToolbox.Guid = "AM";
+% matlab.addons.toolbox.uninstallToolbox(installedToolbox);
+matlab.addons.uninstall("Mixed-Signal Blockset", "2.1");
 result = 0;
 %%
 
