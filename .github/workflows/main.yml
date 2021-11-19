@@ -51,10 +51,10 @@ jobs:
 #        with:
 #            command: matlab.addons.toolbox.uninstallToolbox('5G')
       
-      - name: List installed MATLAB addons
-        uses: matlab-actions/run-command@v1
-        with:
-            command: matlab.addons.installedAddons
+#      - name: List installed MATLAB addons
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: matlab.addons.installedAddons
       
 #      - name: List installed MATLAB toolboxes
 #        uses: matlab-actions/run-command@v1
@@ -76,10 +76,10 @@ jobs:
         with:
             command: matlab.addons.toolbox.uninstallToolbox('AUTOSAR Blockset')
             
-      - name: List installed MATLAB addons
-        uses: matlab-actions/run-command@v1
-        with:
-            command: matlab.addons.installedAddons
+#      - name: List installed MATLAB addons
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: matlab.addons.installedAddons
             
       - name: List installed MATLAB toolboxes
         uses: matlab-actions/run-command@v1
