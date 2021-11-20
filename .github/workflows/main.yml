@@ -55,16 +55,18 @@ jobs:
 #        uses: matlab-actions/run-command@v1
 #        with:
 #            command: pyversion()
-      
-      - name: List installed MATLAB addons
-        uses: matlab-actions/run-command@v1
-        with:
-            command: matlab.addons.installedAddons
 
-      - name: List installed MATLAB toolboxes
-        uses: matlab-actions/run-command@v1
-        with:
-            command: matlab.addons.toolbox.installedToolboxes
+# This can cause segmentation violations
+#      - name: List installed MATLAB addons
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: matlab.addons.installedAddons
+
+# This can cause segmentation violations
+#      - name: List installed MATLAB toolboxes
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: matlab.addons.toolbox.installedToolboxes
               
       - name: Install MHKiT toolbox in MATLAB
         uses: matlab-actions/run-command@v1
@@ -75,22 +77,23 @@ jobs:
         uses: matlab-actions/run-command@v1
         with:
             command: addpath('mhkit/utils'), uninstall_all_toolboxes
-#            command: addpath('mhkit/utils'), toggleToolbox({'Mixed-Signal Blockset'}, 'off')
             
-      - name: Query Mixed-Signal Blockset
-        uses: matlab-actions/run-command@v1
-        with:
-            command: addpath('mhkit/utils'), toggleToolbox({'Mixed-Signal Blockset' 'Aerospace Blockset'}, 'query')
-      
-      - name: List installed MATLAB addons
-        uses: matlab-actions/run-command@v1
-        with:
-            command: matlab.addons.installedAddons
-      
-      - name: List installed MATLAB toolboxes
-        uses: matlab-actions/run-command@v1
-        with:
-            command: ver
+#      - name: Query Mixed-Signal Blockset
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: addpath('mhkit/utils'), toggleToolbox({'Mixed-Signal Blockset' 'Aerospace Blockset'}, 'query')
+
+# This can cause segmentation violations      
+#      - name: List installed MATLAB addons
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: matlab.addons.installedAddons
+
+# This can cause segmentation violations      
+#      - name: List installed MATLAB toolboxes
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: ver
 
 #      - name: Test uninstall Mixed-Signal Blockset
 #        uses: matlab-actions/run-command@v1
