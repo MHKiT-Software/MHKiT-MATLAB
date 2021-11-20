@@ -68,15 +68,15 @@ jobs:
 #        with:
 #            command: matlab.addons.toolbox.installedToolboxes
               
-      - name: Install MHKiT toolbox in MATLAB
-        uses: matlab-actions/run-command@v1
-        with:
-            command: matlab.addons.toolbox.installToolbox('mhkit.mltbx')
-              
       - name: Toggle off Mixed-Signal Blockset
         uses: matlab-actions/run-command@v1
         with:
             command: addpath('mhkit/utils'), uninstall_all_toolboxes
+              
+      - name: Install MHKiT toolbox in MATLAB
+        uses: matlab-actions/run-command@v1
+        with:
+            command: matlab.addons.toolbox.installToolbox('mhkit.mltbx')
             
 #      - name: Query Mixed-Signal Blockset
 #        uses: matlab-actions/run-command@v1
@@ -116,15 +116,15 @@ jobs:
         run: |
             python -m pip install mhkit
 
-      - name: Uninstall MHKiT toolbox in MATLAB, for fixing HDF5 issue
-        uses: matlab-actions/run-command@v1
-        with:
-            command: matlab.addons.toolbox.uninstallToolbox('mhkit.mltbx')
+#      - name: Uninstall MHKiT toolbox in MATLAB, for fixing HDF5 issue
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: matlab.addons.toolbox.uninstallToolbox('mhkit.mltbx')
         
-      - name: Re-install MHKiT toolbox in MATLAB, for fixing HDF5 issue
-        uses: matlab-actions/run-command@v1
-        with:
-            command: matlab.addons.toolbox.installToolbox('mhkit.mltbx')
+#      - name: Re-install MHKiT toolbox in MATLAB, for fixing HDF5 issue
+#        uses: matlab-actions/run-command@v1
+#        with:
+#            command: matlab.addons.toolbox.installToolbox('mhkit.mltbx')
           
 #      - name: Change execution mode to out-of-process
 #        uses: matlab-actions/run-command@v1
