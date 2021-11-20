@@ -61,7 +61,7 @@ jobs:
               
       - name: Uninstall h5py, for fixing HDF5 issue
         run: |
-            python -m pip uninstall h5py -y
+            python pip uninstall h5py -y
 
       - name: Install MHKiT toolbox in MATLAB
         uses: matlab-actions/run-command@v1
