@@ -48,7 +48,11 @@ function result=uninstall_all_toolboxes()
 % end
 
 %%
-toggleToolbox({'Mixed-Signal Blockset'}, 'off');
+toolboxes = {
+    'Mixed-Signal Blockset', ...
+    'Aerospace Blockset'
+};
+toggleToolbox(toolboxes, 'off');
 result = 0;
 
 %%
