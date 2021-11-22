@@ -23,7 +23,7 @@ function datast=read_usgs_file(file_name)
 
 py.importlib.import_module('mhkit');
 
-datapd=py.mhkit.river.io.read_usgs_file(file_name);
+datapd=py.mhkit.river.io.usgs.read_usgs_file(file_name);
 
 
 xx=cell(datapd.axes);
