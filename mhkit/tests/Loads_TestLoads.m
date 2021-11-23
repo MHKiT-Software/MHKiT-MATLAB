@@ -1,7 +1,15 @@
 classdef Loads_TestLoads < matlab.unittest.TestCase
 
+    methods (Test, TestTags = {'DebuggingActions2'})
+
+        function test_simple(testCase)
+            assertLessThan(testCase, 1, 2)
+        end
+
+    end
+
     methods (Test, TestTags = {'DebuggingActions'})
-        
+
         function test_bin_statistics(testCase)
             
             % create array containg wind speeds to use as bin edges
