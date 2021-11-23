@@ -2,10 +2,7 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
 
     methods (Test, TestTags = {'DebuggingActions2'})
 
-        function test_bin_statistics2(testCase)
-            
-            % create array containg wind speeds to use as bin edges
-            bin_edges = 3:1:25;
+        function test_plot_statistics2(testCase)
             relative_file_name = '../../examples/data/loads/loads_data_dict.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             fid = fopen(full_file_name); % Opening the file
@@ -13,18 +10,23 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
             data = jsondecode(str); % Using the jsondecode function to parse JSON from string
+            
+            means_data_table = struct2table(data.means);
+            means_data = table2struct(means_data_table,'ToScalar',true);
+            maxs_data_table = struct2table(data.maxs);
+            maxs_data = table2struct(maxs_data_table,'ToScalar',true);
+            mins_data_table = struct2table(data.mins);
+            mins_data = table2struct(mins_data_table,'ToScalar',true);
+            std_data_table = struct2table(data.std);
+            std_data = table2struct(std_data_table,'ToScalar',true);
+            
+            % functionine path
+            savepath = 'test_scatplotter.png';
+            % Generate plot
+            plot_statistics(means_data.uWind_80m,means_data.TB_ForeAft,maxs_data.TB_ForeAft,mins_data.TB_ForeAft,"y_stdev",std_data.TB_ForeAft,"xlabel",'Wind Speed [m/s]',"ylabel",'Tower Base Mom [kNm]',"savepath",savepath);
 
-            % Apply function to calculate means
-            load_means_struct = [data.means.uWind_80m];
-            load_means_table = struct2table(data.means);
-            ta = struct2table([data.bin_means]);
-            st = table2struct(ta,'ToScalar',true);
-            ta_std = struct2table([data.bin_means_std]);
-            st_std = table2struct(ta_std,'ToScalar',true);
-            bin_against = load_means_struct;% load_means_table.uWind_80m;
-            datast = bin_statistics(load_means_table,bin_against,bin_edges);
-            assertEqual(testCase,st,datast.averages,'RelTol',0.001)
-            assertEqual(testCase,st_std,datast.std,'RelTol',0.001)
+            assertTrue(testCase,isfile(savepath));
+            delete(savepath);
         end
 
     end
