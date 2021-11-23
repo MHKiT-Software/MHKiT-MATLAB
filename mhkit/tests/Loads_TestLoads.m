@@ -3,6 +3,8 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
     methods (Test, TestTags = {'DebuggingActions2'})
 
         function test_plot_statistics2(testCase)
+            py.importlib.import_module('mhkit');
+            
             relative_file_name = '../../examples/data/loads/loads_data_dict.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             fid = fopen(full_file_name); % Opening the file
