@@ -1,39 +1,15 @@
 classdef Loads_TestLoads < matlab.unittest.TestCase
 
-    methods (Test, TestTags = {'DebuggingActions2'})
+    methods (Test, TestTags = {'DebuggingActions'})
 
-        function test_plot_statistics2(testCase)
+        function test_mhkit_import(testCase)
             py.importlib.import_module('mhkit');
-            
-            relative_file_name = '../../examples/data/loads/loads_data_dict.json';
-            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
-            fid = fopen(full_file_name); % Opening the file
-            raw = fread(fid,inf); % Reading the contents
-            str = char(raw'); % Transformation
-            fclose(fid); % Closing the file
-            data = jsondecode(str); % Using the jsondecode function to parse JSON from string
-            
-            means_data_table = struct2table(data.means);
-            means_data = table2struct(means_data_table,'ToScalar',true);
-            maxs_data_table = struct2table(data.maxs);
-            maxs_data = table2struct(maxs_data_table,'ToScalar',true);
-            mins_data_table = struct2table(data.mins);
-            mins_data = table2struct(mins_data_table,'ToScalar',true);
-            std_data_table = struct2table(data.std);
-            std_data = table2struct(std_data_table,'ToScalar',true);
-            
-            % functionine path
-            savepath = 'test_scatplotter.png';
-            % Generate plot
-            plot_statistics(means_data.uWind_80m,means_data.TB_ForeAft,maxs_data.TB_ForeAft,mins_data.TB_ForeAft,"y_stdev",std_data.TB_ForeAft,"xlabel",'Wind Speed [m/s]',"ylabel",'Tower Base Mom [kNm]',"savepath",savepath);
-
-            assertTrue(testCase,isfile(savepath));
-            delete(savepath);
+            assertTrue(testCase, true);
         end
 
     end
 
-    methods (Test, TestTags = {'DebuggingActions'})
+    methods (Test)
 
         function test_bin_statistics(testCase)
             
