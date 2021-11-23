@@ -2,8 +2,29 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
 
     methods (Test, TestTags = {'DebuggingActions2'})
 
-        function test_simple(testCase)
-            assertLessThan(testCase, 1, 2)
+        function test_bin_statistics2(testCase)
+            
+            % create array containg wind speeds to use as bin edges
+            bin_edges = 3:1:25;
+            relative_file_name = '../../examples/data/loads/loads_data_dict.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            fid = fopen(full_file_name); % Opening the file
+            raw = fread(fid,inf); % Reading the contents
+            str = char(raw'); % Transformation
+            fclose(fid); % Closing the file
+            data = jsondecode(str); % Using the jsondecode function to parse JSON from string
+
+            % Apply function to calculate means
+            load_means_struct = [data.means.uWind_80m];
+            load_means_table = struct2table(data.means);
+            ta = struct2table([data.bin_means]);
+            st = table2struct(ta,'ToScalar',true);
+            ta_std = struct2table([data.bin_means_std]);
+            st_std = table2struct(ta_std,'ToScalar',true);
+            bin_against = load_means_struct;% load_means_table.uWind_80m;
+            datast = bin_statistics(load_means_table,bin_against,bin_edges);
+            assertEqual(testCase,st,datast.averages,'RelTol',0.001)
+            assertEqual(testCase,st_std,datast.std,'RelTol',0.001)
         end
 
     end
