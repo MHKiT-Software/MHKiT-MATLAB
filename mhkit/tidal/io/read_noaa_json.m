@@ -22,7 +22,7 @@ function data=read_noaa_json(filename)
 py.importlib.import_module('mhkit');
 py.importlib.import_module('numpy');
 
-datap = py.mhkit.tidal.io.read_noaa_json(filename);
+datap = py.mhkit.tidal.io.noaa.read_noaa_json(filename);
 
 datac=cell(datap);
 data=struct(datac{2});

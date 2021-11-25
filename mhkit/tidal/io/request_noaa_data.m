@@ -46,9 +46,9 @@ py.importlib.import_module('numpy');
 if nargin == 5
     if isstruct(varargin{1})
         proxy=py.dict(varargin{1});
-        datap=py.mhkit.tidal.io.request_noaa_data(station,parameter,start_date,end_date,pyargs('proxy',proxy));
+        datap=py.mhkit.tidal.io.noaa.request_noaa_data(station,parameter,start_date,end_date,pyargs('proxy',proxy));
     elseif isstring(varargin{1})
-        datap=py.mhkit.tidal.io.request_noaa_data(station,parameter,start_date,end_date,pyargs('write_json',varargin{1}));
+        datap=py.mhkit.tidal.io.noaa.request_noaa_data(station,parameter,start_date,end_date,pyargs('write_json',varargin{1}));
     else
         ME = MException('MATLAB:request_noaa_data','variable argument of wrong data type');
         throw(ME);
@@ -56,16 +56,16 @@ if nargin == 5
 elseif nargin == 6
     if isstruct(varargin{1}) & isstring(varargin{2})
         proxy=py.dict(varargin{1});
-        datap=py.mhkit.tidal.io.request_noaa_data(station,parameter,start_date,end_date,pyargs('proxy',proxy,'write_json',varargin{2}));
+        datap=py.mhkit.tidal.io.noaa.request_noaa_data(station,parameter,start_date,end_date,pyargs('proxy',proxy,'write_json',varargin{2}));
     elseif isstruct(varargin{2}) & isstring(varargin{1})
         proxy=py.dict(varargin{2});
-        datap=py.mhkit.tidal.io.request_noaa_data(station,parameter,start_date,end_date,pyargs('proxy',proxy,'write_json',varargin{1}));
+        datap=py.mhkit.tidal.io.noaa.request_noaa_data(station,parameter,start_date,end_date,pyargs('proxy',proxy,'write_json',varargin{1}));
     else
         ME = MException('MATLAB:request_noaa_data','wrong vaiable type passed');
         throw(ME);
     end
 elseif nargin == 4
-    datap=py.mhkit.tidal.io.request_noaa_data(station,parameter,start_date,end_date);
+    datap=py.mhkit.tidal.io.noaa.request_noaa_data(station,parameter,start_date,end_date);
 else
     ME = MException('MATLAB:request_noaa_data','incorrect number of variables passed');
         throw(ME);
