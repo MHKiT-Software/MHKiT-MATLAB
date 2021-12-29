@@ -1,8 +1,8 @@
 function figure=plot_tidal_phase_exceedance(data, flood, ebb, ...
                                                           options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Returns a stacked area plot of the exceedance probability for the 
-%     flood and ebb tidal phases. 
+%     Returns a plot of velocity from an array of direction and speed
+%     data in the direction of the supplied principal_direction. 
 %     
 % Parameters
 % ------------   
@@ -31,10 +31,6 @@ function figure=plot_tidal_phase_exceedance(data, flood, ebb, ...
 %       title for the plot 
 %       to call: plot_tidal_phase_probability(data, flood, ebb,"title",title)
 %
-%    savepath: string (optional)
-%       path and filename to save figure.
-%       to call: plot_tidal_phase_probability(data, flood, ebb,"savepath",savepath)
-%
 % Returns
 % ---------
 %   figure: stacked bar graph of the probability of exceedance in 
@@ -47,7 +43,6 @@ arguments
 	ebb
     options.bin_size = 0.1; % m/s
     options.title = "";
-    options.savepath = "";
 end
 
 %check to see if the first input argument is a structure
@@ -98,9 +93,9 @@ s_new = s_new(1:end-1); % this accounts for the difference between matlab
 py.importlib.import_module('scipy');
 kwa = pyargs('bounds_error',false);
 
-f_ebb = py.scipy.interpolate.interp1d(s_ebb.Discharge,...
+f_ebb = py.scipy.interpolate.interpolate.interp1d(s_ebb.Discharge,...
     F_ebb, kwa);
-f_flood = py.scipy.interpolate.interp1d(s_flood.Discharge,...
+f_flood = py.scipy.interpolate.interpolate.interp1d(s_flood.Discharge,...
     F_flood, kwa);
 
 F_ebb = double(f_ebb(s_new));
@@ -119,10 +114,5 @@ ylabel('Probability of Exceedance','FontSize',18);
 legend('Ebb','Flood')
 grid on
 title(options.title)
-
-len = strlength(options.savepath);
-if len > 1
-    exportgraphics(gca, options.savepath);
-end 
 
 hold off
