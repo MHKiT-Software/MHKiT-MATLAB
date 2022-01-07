@@ -1,8 +1,8 @@
 function figure=plot_tidal_phase_exceedance(data, flood, ebb, ...
                                                           options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Returns a plot of velocity from an array of direction and speed
-%     data in the direction of the supplied principal_direction. 
+%     Returns a stacked area plot of the exceedance probability for the 
+%     flood and ebb tidal phases. 
 %     
 % Parameters
 % ------------   

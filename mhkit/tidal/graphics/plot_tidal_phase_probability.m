@@ -1,8 +1,8 @@
 function figure=plot_tidal_phase_probability(data, flood, ebb, ...
                                                           options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Returns a plot of velocity from an array of direction and speed
-%     data in the direction of the supplied principal_direction. 
+%     Discretizes the tidal series speed by bin size and returns a plot
+%     of the probability for each bin in the flood or ebb tidal phase. 
 %     
 % Parameters
 % ------------   
