@@ -61,7 +61,7 @@ py.importlib.import_module('mhkit');
 if (isa(options.proxy,'py.NoneType')~=1)
     options.proxy=py.dict(options.proxy);
 end
-datapd=py.mhkit.river.io.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',options.data_type,...
+datapd=py.mhkit.river.io.usgs.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',options.data_type,...
       'write_json',options.write_json, 'proxy',options.proxy));
 
 xx=cell(datapd.axes);

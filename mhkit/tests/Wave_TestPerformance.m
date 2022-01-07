@@ -150,8 +150,10 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             if isfile(filename)
                 delete(filename);
             end
-                       
-            S1 = read_NDBC_file('./../../examples/data/wave/data.txt');
+            
+            relative_file_name = './../../examples/data/wave/data.txt';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            S1 = read_NDBC_file(full_file_name);
             h = 60;
             seednum = 123;
             rng(seednum);
