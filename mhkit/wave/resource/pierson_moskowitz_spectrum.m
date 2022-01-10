@@ -1,4 +1,4 @@
-function S=pierson_moskowitz_spectrum(frequency,Tp)
+function S=pierson_moskowitz_spectrum(frequency,Tp,Hs)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates Pierson-Moskowitz Spectrum from Tucker and Pitt (2001)
@@ -11,6 +11,9 @@ function S=pierson_moskowitz_spectrum(frequency,Tp)
 %
 %     Tp: float
 %         Peak Period (s)
+%
+%     Hs: float
+%         Significant wave height (m)
 %
 %     
 % Returns
@@ -39,7 +42,7 @@ if (isa(frequency,'py.numpy.ndarray') ~= 1)
     frequency = py.numpy.array(frequency);
 end
 
- S_py=py.mhkit.wave.resource.pierson_moskowitz_spectrum(frequency,Tp);
+ S_py=py.mhkit.wave.resource.pierson_moskowitz_spectrum(frequency,Tp,Hs);
  
 S.spectrum=double(py.array.array('d',py.numpy.nditer(S_py.values))).';
 char_arr=char(S_py.index.values);

@@ -7,7 +7,9 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             Obj.expected_columns_metRT = struct('WDIR',{},'units',{},'WSPD',{},'GST',{},'WVHT',{},'DPD',{},'APD',{},'MWD',{},'PRES',{},'ATMP',{},'WTMP',{},'DEWP',{},'VIS',{},'PTDY',{},'TIDE',{},'time',{});
             Obj.expected_units_metRT = struct('WDIR',{"degT"},'WSPD',{"m/s"},'GST',{"m/s"},'WVHT',{"m"},'DPD',{"sec"},'APD',{"sec"},'MWD',{"degT"},'PRES',{"hPa"},'ATMP',{"degC"},'WTMP',{"degC"},'DEWP',{"degC"},'VIS',{"nmi"},'PTDY',{"hPa"},'TIDE',{"ft"});
 
-            data = read_NDBC_file("../../examples/data/wave/46097.txt");
+            relative_file_name = "../../examples/data/wave/46097.txt";
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = read_NDBC_file(full_file_name);
             datarm1 = rmfield(data,'units');
             datarm2 = rmfield(datarm1,'time');
             expected_index0 = datestr(datenum(2019,4,2,13,50,0));
@@ -24,7 +26,9 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             Obj.expected_columns_metH = struct('WDIR',{},'units',{},'WSPD',{},'GST',{},'WVHT',{},'DPD',{},'APD',{},'MWD',{},'PRES',{},'ATMP',{},'WTMP',{},'DEWP',{},'VIS',{},'TIDE',{},'time',{});
             Obj.expected_units_metH = struct('WDIR',{"degT"},'WSPD',{"m/s"},'GST',{"m/s"},'WVHT',{"m"},'DPD',{"sec"},'APD',{"sec"},'MWD',{"deg"},'PRES',{"hPa"},'ATMP',{"degC"},'WTMP',{"degC"},'DEWP',{"degC"},'VIS',{"nmi"},'TIDE',{"ft"});
             
-            data = read_NDBC_file('../../examples/data/wave/46097h201908qc.txt');
+            relative_file_name = '../../examples/data/wave/46097h201908qc.txt';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = read_NDBC_file(full_file_name);
             datarm1 = rmfield(data,'units');
             datarm2 = rmfield(datarm1,'time');
             expected_index0 = datestr(datenum(2019,8,1,0,0,0));
@@ -38,7 +42,9 @@ classdef Wave_TestIO < matlab.unittest.TestCase
 
         % Spectral data
         function test_read_NDBC_spectral(testCase)
-            data = read_NDBC_file("../../examples/data/wave/data.txt");
+            relative_file_name = "../../examples/data/wave/data.txt";
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = read_NDBC_file(full_file_name);
             
             assertEqual(testCase,size(data.spectrum),[47 743]);
         end
@@ -65,7 +71,9 @@ classdef Wave_TestIO < matlab.unittest.TestCase
                         "46029w1998.txt.gz"];
             ndbc_data = NDBC_request_data('swden', filenames);
             ndbc_data = struct2table(ndbc_data.ID_46042.year_1996,'AsArray',true);
-            file = gunzip('../../examples/data/wave/46042w1996.txt.gz');
+            relative_file_name = '../../examples/data/wave/46042w1996.txt.gz';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            file = gunzip(full_file_name);
             expected_data = readmatrix(file{1});
             temp = table2array(ndbc_data(:,6));
             data_array = table2array(ndbc_data(:,[1,2,3,4]));
@@ -78,26 +86,29 @@ classdef Wave_TestIO < matlab.unittest.TestCase
         end
         
         function test_swan_read_table(testCase)
-            file = '../../examples/data/wave/SWAN/SWANOUT.DAT';
+            relative_file_name = '../../examples/data/wave/SWAN/SWANOUT.DAT';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             delimiterIn = ' ';
-            mystructure = importdata(file,delimiterIn);
+            mystructure = importdata(full_file_name,delimiterIn);
             vars = string(strsplit(mystructure.textdata{5},' '));
             vars = vars(2:end-1);
             expected = table2struct(array2table(mystructure.data,'VariableNames',vars),'ToScalar',true);
-            data = swan_read_table(file);
+            data = swan_read_table(full_file_name);
             
             assertEqual(testCase,data.Hsig,expected.Hsig);      
         end
         
         function test_swan_read_block(testCase)
-            file = '../../examples/data/wave/SWAN/SWANOUT.DAT';
-            file2 = '../../examples/data/wave/SWAN/SWANOUTBlock.DAT';
+            relative_file_name = '../../examples/data/wave/SWAN/SWANOUT.DAT';
+            relative_file_name2 = '../../examples/data/wave/SWAN/SWANOUTBlock.DAT';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            full_file_name2 = fullfile(fileparts(mfilename('fullpath')), relative_file_name2);
             delimiterIn = ' ';
-            mystructure = importdata(file,delimiterIn);
+            mystructure = importdata(full_file_name,delimiterIn);
             vars = string(strsplit(mystructure.textdata{5},' '));
             vars = vars(2:end-1);
             expected = table2struct(array2table(mystructure.data,'VariableNames',vars),'ToScalar',true);
-            data = swan_read_block(file2);
+            data = swan_read_block(full_file_name2);
             
             assertEqual(testCase,sum(sum(data.Significant_wave_height.values)),sum(expected.Hsig),'RelTol',0.001);      
         end
