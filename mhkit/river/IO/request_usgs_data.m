@@ -1,4 +1,4 @@
-function datast=request_usgs_data(station, parameter, start_date, end_date,options)
+function datast=request_usgs_data(station, parameter, start_date, end_date, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Loads USGS data directly from https://waterdata.usgs.gov/nwis into a structure using a 
@@ -25,13 +25,13 @@ function datast=request_usgs_data(station, parameter, start_date, end_date,optio
 %         to call: request_usgs_data(station,parameter,start_date.end_date,"data_type",data_type)
 %
 %     proxy : structure or None (optional)
-%         To request data from behind a firewall, define a dictionary of proxy settings, 
-%         for example proxy.http = "localhost:8080"
-%         to call: request_usgs_data(station,parameter,start_date.end_date,"proxy",proxy)
+%         Parameter is now deprecated. Will ignore and print a warning.
+%         To request data from behind a firewall, configure in MATLAB Preferences.
+%         for example "localhost:8080"
 %
 %     write_json : str or None (optional)
 %         Name of json file to write data
-%         to call: request_usgs_data(station,parameter,start_date.end_date,"write_json",write_json)
+%         to call: request_usgs_data(station,parameter,start_date,end_date,"write_json",write_json)
 %         
 % Returns
 % -------
@@ -52,43 +52,68 @@ arguments
     start_date
     end_date
     options.data_type = 'Daily';
-    options.proxy = py.None;
-    options.write_json = py.None; 
+    options.proxy = "";
+    options.write_json = "";
 end
 
-py.importlib.import_module('mhkit');
-
-if (isa(options.proxy,'py.NoneType')~=1)
-    options.proxy=py.dict(options.proxy);
+if (options.proxy ~= "")
+    warning('To use a proxy server, configure in MATLAB Preferences.');
 end
-datapd=py.mhkit.river.io.usgs.request_usgs_data(station, parameter, start_date, end_date,pyargs('data_type',options.data_type,...
-      'write_json',options.write_json, 'proxy',options.proxy));
 
-xx=cell(datapd.axes);
-v=xx{2};
+% Formulate query
+if strcmp(options.data_type, 'Daily')
+    data_url = "https://waterservices.usgs.gov/nwis/dv";
+    api_query = "/?format=json&sites=" + station ...
+                + "&startDT=" + start_date ...
+                + "&endDT=" + end_date ...
+                + "&statCd=00003" ...
+                + "&parameterCd=" + parameter ...
+                + "&siteStatus=all";
+else
+    data_url = "https://waterservices.usgs.gov/nwis/iv";
+    api_query = "/?format=json&sites=" + station ...
+                + "&startDT=" + start_date ...
+                + "&endDT=" + end_date ...
+                + "&parameterCd=" + parameter ...
+                + "&siteStatus=all";
+end
 
+% Display query
+disp("Data request URL: " + data_url + api_query)
 
-vv=cell(py.list(py.numpy.nditer(v.values,pyargs("flags",{"refs_ok"}))));
+% Submit query and get data
+response = webread(data_url + api_query);
 
-vals=double(py.array.array('d',py.numpy.nditer(datapd.values,pyargs("flags",{"refs_ok"}))));
-sha=cell(datapd.values.shape);
-x=int64(sha{1,1});
-y=int64(sha{1,2});
+% Parse data label and units
+v = response.value.timeSeries.variable.variableDescription;
+vv = strsplit(v, ',');
 
-vals=reshape(vals,[x,y]);
-ti=cell(py.list(py.numpy.nditer(datapd.index,pyargs("flags",{"refs_ok"}))));
-siti=size(ti);
-si=size(vals);
- for i=1:si(2)
-    test=string(py.str(vv{i}));
-    newname=split(test,",");
-    
-    datast.(newname(1))=vals(:,i);
-    datast.units.(newname(1))=newname(2);
- end
- for i=1:siti(2)
-    datast.time{i}=posixtime(datetime(string(py.str(ti{i})),'InputFormat','yyyy-MM-dd HH:mm:ssXXX','TimeZone','UTC'));
- end
+% Parse data values
+vals = {response.value.timeSeries.values.value.value}';
+vals = cell2mat(cellfun(@str2num,vals,'uniform',0));
 
-datast.time=cell2mat(datast.time);
+% Parse timestamps corresponding to data
+ti = {response.value.timeSeries.values.value.dateTime};
 
+% Organize a structure containing the data label, units, values and timestamps
+datast.(vv{1}) = vals;
+datast.units.(vv{1}) = string(vv{2});
+if strcmp(options.data_type, 'Daily')
+    input_format = 'yyyy-MM-dd''T''HH:mm:ss.SSS';
+else
+    % Note: the trailing 'X' captures the entire 6 character timezone
+    %  (e.g., '-08:00') and applies it to the time, so the timezone
+    %  should always be 'UTC' for formatting in datetime() or elsewhere
+    input_format = 'yyyy-MM-dd''T''HH:mm:ss.SSSX';
+end
+datast.time = posixtime( ...
+    datetime( ...
+        ti, ...
+        'TimeZone', 'UTC', ...
+        'InputFormat', input_format));
+
+% Write USGS data to a JSON file
+if options.write_json ~= ""
+    fid = fopen(options.write_json, 'w');
+    fprintf(fid, jsonencode(response));
+end
