@@ -1,4 +1,4 @@
-function data=request_noaa_data(station, parameter, start_date, end_date, varargin)
+function data=request_noaa_data(station, parameter, start_date, end_date, options)
 
 %     Loads NOAA current data directly from https://tidesandcurrents.noaa.gov/api/ using a 
 %     GET request into a structure. NOAA sets max of 31 days between start and end date.
@@ -15,11 +15,13 @@ function data=request_noaa_data(station, parameter, start_date, end_date, vararg
 %         Start date in the format yyyyMMdd
 %     end_date : str
 %         End date in the format yyyyMMdd 
-%     proxy : structure (optional)
-%          To request data from behind a firewall, define a structure of proxy settings, 
-%          for example proxy.http = "localhost:8080"
-%     write_json : str (optional)
+%     proxy : structure or None (optional)
+%         Parameter is now deprecated. Will ignore and print a warning.
+%         To request data from behind a firewall, configure in MATLAB Preferences.
+%         for example "localhost:8080"
+%     write_json : str or None (optional)
 %         Name of json file to write data
+%         to call: request_noaa_data(station,parameter,start_date,end_date,"write_json",write_json)
 %         
 %     Returns
 %     -------
@@ -40,75 +42,106 @@ function data=request_noaa_data(station, parameter, start_date, end_date, vararg
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
-
-if nargin == 5
-    if isstruct(varargin{1})
-        proxy=py.dict(varargin{1});
-        datap=py.mhkit.tidal.io.noaa.request_noaa_data(station,parameter,start_date,end_date,pyargs('proxy',proxy));
-    elseif isstring(varargin{1})
-        datap=py.mhkit.tidal.io.noaa.request_noaa_data(station,parameter,start_date,end_date,pyargs('write_json',varargin{1}));
-    else
-        ME = MException('MATLAB:request_noaa_data','variable argument of wrong data type');
-        throw(ME);
-    end
-elseif nargin == 6
-    if isstruct(varargin{1}) & isstring(varargin{2})
-        proxy=py.dict(varargin{1});
-        datap=py.mhkit.tidal.io.noaa.request_noaa_data(station,parameter,start_date,end_date,pyargs('proxy',proxy,'write_json',varargin{2}));
-    elseif isstruct(varargin{2}) & isstring(varargin{1})
-        proxy=py.dict(varargin{2});
-        datap=py.mhkit.tidal.io.noaa.request_noaa_data(station,parameter,start_date,end_date,pyargs('proxy',proxy,'write_json',varargin{1}));
-    else
-        ME = MException('MATLAB:request_noaa_data','wrong vaiable type passed');
-        throw(ME);
-    end
-elseif nargin == 4
-    datap=py.mhkit.tidal.io.noaa.request_noaa_data(station,parameter,start_date,end_date);
-else
-    ME = MException('MATLAB:request_noaa_data','incorrect number of variables passed');
-        throw(ME);
-end
-datac=cell(datap);
-data=struct(datac{2});
-data_df=datac{1};
-
-
-fields=fieldnames(data);
-for idx = 1:length(fields)
-    data.(fields{idx}) = string(data.(fields{idx}));
+arguments
+    station string
+    parameter string
+    start_date string
+    end_date string
+    options.proxy string = "";
+    options.write_json string = "";
 end
 
-xx=cell(data_df.axes);
-v=xx{2};
+if (options.proxy ~= "")
+    warning('To use a proxy server, configure in MATLAB Preferences.');
+end
 
+REQUIRED_FIELDS = {'id', 'name', 'lat', 'lon', 't'};    % 't' is time
 
-vv=cell(py.list(py.numpy.nditer(v.values,pyargs("flags",{"refs_ok"}))));
+% TODO:
+% - split query into 30 day intervals
 
-vals=double(py.array.array('d',py.numpy.nditer(data_df.values,pyargs("flags",{"refs_ok"}))));
-sha=cell(data_df.values.shape);
-x=int64(sha{1,1});
-y=int64(sha{1,2});
+% Formulate query
+start_date = convertCharsToStrings(start_date);
+start_date = convertCharsToStrings(start_date);
+start_date = convertCharsToStrings(start_date);
+end_date = convertCharsToStrings(end_date);
+data_url = "https://tidesandcurrents.noaa.gov/api/datagetter?";
+api_query = "begin_date=" + start_date ...
+            + "&end_date=" + end_date ...
+            + "&station=" + station ...
+            + "&product=" + parameter ...
+            + "&units=metric&" ...
+            + "time_zone=gmt&" ...
+            + "application=web_services&" ...
+            + "format=xml";
 
-vals=reshape(vals,[x,y]);
+% Display query
+disp("Data request URL: " + data_url + api_query)
 
-ti=cell(py.list(py.numpy.nditer(data_df.index,pyargs("flags",{"refs_ok"}))));
-siti=size(ti);
-si=size(vals);
+% Submit query and get data
+response = webread(data_url + api_query);
 
+% Organize a structure containing the metadata and timeseries data
+is_metadata_found = false;
+is_keys_found = false;
+data_lines = strsplit(response, '\n');
+for i = 1:length(data_lines)
+    if startsWith(data_lines{i}, '<metadata')
+        % Parse metadata and initialize output structure using them
+        if ~is_metadata_found
+            % Note: only key names of one or more letters work
+            meta_names = regexp(data_lines{i}, '[a-zA-Z]+(?=\=)', 'match');
+            for j = 1:length(meta_names)
+                regex_pattern = strcat('(?<=', meta_names{j}, '\=")(.*?)(?=")');
+                value = regexp(data_lines{i}, regex_pattern, 'match');
+                if meta_names{j} == "lat" || meta_names{j} == "lon"
+                    data.(meta_names{j}) = str2double(value{1});
+                else
+                    data.(meta_names{j}) = convertCharsToStrings(value{1});
+                end
+            end
+            is_metadata_found = true;
 
- for i=1:si(2)
-    test=string(py.str(vv{i}));
-    newname=split(test,",");
-    
-    data.(newname(1))=vals(:,i);
-    
- end
- for i=1:siti(2)
-    data.time{i}=posixtime(datetime(string(py.str(ti{i})),'InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSSSSSSS'));
- end
+            % Verify all required metadata is present
+            for j = 1:length(REQUIRED_FIELDS)
+                if ~isfield(data, REQUIRED_FIELDS{j})
+                    ME = MException('MATLAB:request_noaa_data', ...
+                        strcat('Queried data from NOAA is missing field', REQUIRED_FIELDS{j}));
+                end
+            end
+        end
+    elseif startsWith(data_lines{i}, '<cu')
+        % Parse data keys and add to output structure
+        if ~is_keys_found
+            % Note: only key names of one or more letters work
+            keys = regexp(data_lines{i}, '[a-zA-Z]+(?=\=)', 'match');
+            for j = 1:length(keys)
+                if keys{j} == 't'
+                    field_names.(keys{j}) = 'time';
+                else
+                    field_names.(keys{j}) = keys{j};
+                end
+                data.(field_names.(keys{j})) = [];
+            end
+            is_keys_found = true;
+        end
 
-data.time=cell2mat(data.time);
+        % Parse data from current line and add to respective arrays in structure
+        for j = 1:length(keys)
+            regex_pattern = strcat('(?<=', keys{j}, '\=")(.*?)(?=")');
+            value = regexp(data_lines{i}, regex_pattern, 'match');
+            if keys{j} == 't'
+                value{1} = posixtime(datetime(value{1}, 'InputFormat', 'yyyy-MM-dd HH:mm', 'TimeZone','UTC'));
+            else
+                value{1} = str2double(value{1});
+            end
+            data.(field_names.(keys{j}))(end+1, :) = value{1};
+        end
+    end
+end
 
-
+% Write NOAA data to a JSON file
+if options.write_json ~= ""
+    fid = fopen(options.write_json, 'w');
+    fprintf(fid, jsonencode(data));
+end
