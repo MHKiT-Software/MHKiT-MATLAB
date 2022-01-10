@@ -6,7 +6,6 @@ test.egg-info/*
 *.spec
 **/build
 **./dist/
-*.csv
 **/cache/
 **/static/
 .DS_Store
