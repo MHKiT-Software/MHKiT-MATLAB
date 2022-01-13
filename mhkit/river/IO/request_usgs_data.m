@@ -47,13 +47,13 @@ function datast=request_usgs_data(station, parameter, start_date, end_date, opti
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
-    station 
-    parameter
-    start_date
-    end_date
+    station string
+    parameter string
+    start_date string
+    end_date string
     options.data_type = 'Daily';
-    options.proxy = "";
-    options.write_json = "";
+    options.proxy string = "";
+    options.write_json string = "";
 end
 
 if (options.proxy ~= "")
