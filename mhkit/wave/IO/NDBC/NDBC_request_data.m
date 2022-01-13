@@ -12,17 +12,16 @@ function ndbc_data=NDBC_request_data(parameter,filenames,options)
 % Parameters
 % ------------
 %     parameter : string
-%         'swden'	:	'Raw Spectral Wave Current Year Historical Data'
-%         'stdmet':   'Standard Meteorological Current Year Historical Data'
+%         'swden'  : 'Raw Spectral Wave Current Year Historical Data'
+%         'stdmet' : 'Standard Meteorological Current Year Historical Data'
 %
 %     filenames : array of strings
 %         Data filenames on https://www.ndbc.noaa.gov/data/historical/{parameter}/  
 %         
-%
-%     proxy : structure or py.None (optional)
-%         To request data from behind a firewall, define a dictionary of proxy settings, 
-%         for example proxy.http = "http:wwwproxy.yourProxy:80/"
-%         to call: NDBC_request_data(parameter,filenames,"proxy",proxy)
+%     proxy : structure or None (optional)
+%         Parameter is now deprecated. Will ignore and print a warning.
+%         To request data from behind a firewall, configure in MATLAB Preferences.
+%         for example "localhost:8080"
 %     
 % Returns
 % ---------
@@ -33,140 +32,75 @@ function ndbc_data=NDBC_request_data(parameter,filenames,options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments 
-    parameter
-    filenames
-    options.proxy = py.None;
+    parameter string {mustBeMember(parameter,{'swden','stdmet'})}
+    filenames (1,:) string
+    options.proxy string = "";
 end
 
-py.importlib.import_module('mhkit');
-
-if (isa(options.proxy,'py.NoneType')~=1)
-    options.proxy=py.dict(options.proxy);
+if (options.proxy ~= "")
+    warning('To use a proxy server, configure in MATLAB Preferences.');
 end
 
-li=py.list();
+for i = 1:length(filenames)
+    % Formulate query
+    data_url = "https://www.ndbc.noaa.gov/data/historical/";
+    api_query = strcat(parameter, '/', filenames(i));
 
- ind = 1:1:length(filenames);
- for k=1:length(filenames)
-     li=py.mhkit_python_utils.pandas_dataframe.lis(li,filenames(k));
- end
+    % Submit query and get data
+    response = webread(data_url + api_query);
 
-df = py.pandas.DataFrame(pyargs("data",li));
+    % Write compressed data to temporary file
+    compressed_filename = fullfile(tempdir, filenames(i));
+    fileID = fopen(compressed_filename, 'w');
+    fwrite(fileID, response);
+    fclose(fileID);
 
-datapd = py.mhkit.wave.io.ndbc.request_data(parameter,df);
+    % Unzip temporary GNU zip (.gz) file
+    uncompressed_filename = gunzip(compressed_filename);
 
-key = cell(py.list(datapd));
-freq = [];
-spectra = [];
-if (isa(datapd{string(py.str(key{1}))}.values,'py.dict_values')==1)
-   for i=1:length(key)
-    a = char(string(py.str(key{i})));
-    dict2 = datapd{string(py.str(key{i}))};
-    key2 = cell(py.list(dict2));
-    for j=1:length(key2)
-        sha=cell(dict2{string(py.str(key2{j}))}.values.shape);
-        x=int64(sha{1,1});
-        y=int64(sha{1,2});
-       df = reshape(double(py.array.array('d',py.numpy.nditer(dict2{string(py.str(key2{j}))}.values,...
-            pyargs("flags",{"refs_ok"})))),[x,y]);
-       cols = cell(py.list(py.numpy.nditer(dict2{string(py.str(key2{j}))}.columns,pyargs("flags",{"refs_ok"})))); 
-       for k = 1:length(cols)
-        
-        b = char(string(py.str(key2{j})));
-        c = char(string(py.str(cols{k})));
-        d = df(:,k);
-        if parameter == "swden"
-                
-                if ~contains(c, ".")
-                    if contains(c, "YY")
-                        c = char("YYYY");
-                    end
-                    eval(['ndbc_data.ID_' a '.year_' b '.' c '= d ;']);
-                else
-                    freq = [freq str2double(c)];
-                    
-                    spectra = [spectra ;d];
-                    
-                end
-        else
-            if contains(c, "YY")
-               c = char("YYYY");
-            end
-            eval(['ndbc_data.ID_' a '.year_' b '.' c '= d ;']);
-        end
-       end
-       if parameter == "swden"
-            si = size(d);
-            si2= size(freq);
-            spectra = reshape(spectra, [si(1),si2(2)]);
-            freq = freq';
-            spectra = spectra';
-            eval(['ndbc_data.ID_' a '.year_' b '.frequency = freq ;']);
-            eval(['ndbc_data.ID_' a '.year_' b '.spectrum = spectra ;']);
-        end
-        freq = [];
-        spectra = [];
-        eval(['ndbc_data.ID_' a '.year_' b '.time = datetime(ndbc_data.ID_' a '.year_' b...
-            '.YYYY,ndbc_data.ID_' a '.year_' b ...
-            '.MM,ndbc_data.ID_' a '.year_' b '.DD, ndbc_data.ID_' a '.year_' b '.hh, 0,0);']);
+    % Read uncompressed delimited data file
+    opts = detectImportOptions(uncompressed_filename{1});
+    file_data = readmatrix(uncompressed_filename{1}, opts);
+
+    % Delete compressed and uncompressed files
+    delete(compressed_filename);
+    delete(uncompressed_filename{1});
+
+    % Parse year and station_id from filename
+    [~, filename_no_extension, ~] = fileparts(uncompressed_filename{1});
+    if contains(filename_no_extension, '_')
+        % Handles filenames like: 42002w2008_old.txt.gz
+        filename_base = extractBefore(filename_no_extension, '_');
+    else
+        filename_base = filename_no_extension;
     end
-   end
- 
-else
-    for i=1:length(key)
-        sha=cell(datapd{string(py.str(key{i}))}.values.shape);
-        x=int64(sha{1,1});
-        y=int64(sha{1,2});
-        df = reshape(double(py.array.array('d',py.numpy.nditer(datapd{string(py.str(key{i}))}.values,...
-    pyargs("flags",{"refs_ok"})))),[x,y]);
-        cols = cell(py.list(py.numpy.nditer(datapd{string(py.str(key{i}))}.columns,pyargs("flags",{"refs_ok"}))));
-        
-        for k = 1:length(cols)
-            
-            a = char(string(py.str(key{i})));
-            b = char(string(py.str(cols{k})));
-            c = df(:,k);
-            
-            if parameter == "swden"
-                
-                if ~contains(b, ".")
-                    if contains(b, "YY")
-                        
-                        b = char("YYYY");
-                        
-                    end
-                    eval(['ndbc_data.year_' a '.' b '= c ;']);
-                    
-                else
-                    freq = [freq str2double(b)];
-                    
-                    spectra = [spectra ;c];
-                    
-                end
-            else
-               if contains(b, "YY")
-                   
-                   b = char("YYYY");
-               end
-               eval(['ndbc_data.year_' a '.' b '= c ;']);
-            end
-            
-        end
-        if parameter == "swden"
-            si = size(c);
-            si2= size(freq);
-            spectra = reshape(spectra, [si(1),si2(2)]);
-            freq = freq';
-            spectra = spectra';
-            eval(['ndbc_data.year_' a '.frequency = freq ;']);
-            eval(['ndbc_data.year_' a '.spectrum = spectra ;']);
-        end
-        freq = [];
-        spectra = [];
-        
-        eval(['ndbc_data.year_' a '.time = datetime(ndbc_data.year_' a '.YYYY,ndbc_data.year_' a ...
-            '.MM,ndbc_data.year_' a '.DD, ndbc_data.year_' a '.hh,0,0);']);
-    end
+    year = str2double(extractAfter( ...
+        filename_base, ...
+        strlength(filename_base) - 4));     % grab last 4 chars
+    station_id = extractBefore( ...
+        filename_base, ...
+        strlength(filename_base) - 5 + 1);  % grab all but last 5 chars
+
+    % Parse data and add to output structure
+    data_struct.YYYY = file_data(2:end, 1);                     % years
+    data_struct.MM = file_data(2:end, 2);                       % months
+    data_struct.DD = file_data(2:end, 3);                       % days
+    data_struct.hh = file_data(2:end, 4);                       % hours
+    data_struct.time = datetime( ...
+        year, ...
+        data_struct.MM, ...
+        data_struct.DD, ...
+        data_struct.hh, ...
+        0, ...
+        0);
+    data_struct.frequency = transpose(file_data(1, 5:end));     % column vector
+    data_struct.spectrum = transpose(file_data(2:end, 5:end));  % [freq, time]
+    ndbc_data.(strcat('ID_', station_id)). ...
+        (strcat('year_', num2str(year))) = data_struct;
 end
 
-
+% Remove top structure level if there's only one buoy
+field_names = fieldnames(ndbc_data);
+if length(field_names) == 1
+    ndbc_data = ndbc_data.(field_names{1});
+end
