@@ -66,6 +66,7 @@ end_datetime = datetime(end_date, ...
         'TimeZone', 'UTC');
 
 % Query data, splitting period as needed to not exceed NOAA's max days limit
+data = struct;      % empty structure
 is_first_query = true;
 start_period_datetime = start_datetime;
 while start_period_datetime <= end_datetime
@@ -78,7 +79,9 @@ while start_period_datetime <= end_datetime
         station, parameter, start_period, end_period, ...
         REQUIRED_FIELDS, MAX_DAYS_PER_QUERY);
     
-    if is_first_query
+    if isempty(fieldnames(data_in_period)) || isempty(timeseries_fields)
+        % do nothing
+    elseif is_first_query
         data = data_in_period;
         is_first_query = false;
     else
@@ -199,6 +202,13 @@ function [data, timeseries_fields] = request_noaa_data_restricted_duration( ...
                 end
                 data.(ts_field_struct.(ts_keys{j}))(end+1, :) = value{1};
             end
+        elseif startsWith(data_lines{i}, '<error')
+            noaa_error_msg = regexp(data_lines{i}, '(?<=.error.).*(?=..error.)', 'match');
+            warning('For station id %s between %s and %s, NOAA returned the error:\n%s', ...
+                station, start_date, end_date, noaa_error_msg{1});
+            data = struct;      % empty structure
+            timeseries_fields = [];
+            break
         end
     end
 end
