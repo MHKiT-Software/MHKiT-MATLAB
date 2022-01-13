@@ -58,9 +58,12 @@ for i = 1:length(filenames)
     % Unzip temporary GNU zip (.gz) file
     uncompressed_filename = gunzip(compressed_filename);
 
-    % Read uncompressed delimited data file
-    opts = detectImportOptions(uncompressed_filename{1});
-    file_data = readmatrix(uncompressed_filename{1}, opts);
+    % Read uncompressed delimited data file to a table
+    % (suppress warning of '.'s being converted to 'x_'s in table header)
+    warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
+    file_table = readtable(uncompressed_filename{1}, 'ReadVariableNames', true);
+    warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
+    file_header = file_table.Properties.VariableDescriptions;   % includes '.'s
 
     % Delete compressed and uncompressed files
     delete(compressed_filename);
@@ -81,20 +84,30 @@ for i = 1:length(filenames)
         filename_base, ...
         strlength(filename_base) - 5 + 1);  % grab all but last 5 chars
 
-    % Parse data and add to output structure
-    data_struct.YYYY = file_data(2:end, 1);                     % years
-    data_struct.MM = file_data(2:end, 2);                       % months
-    data_struct.DD = file_data(2:end, 3);                       % days
-    data_struct.hh = file_data(2:end, 4);                       % hours
-    data_struct.time = datetime( ...
+    % Rename year column and add datetime column to table
+    file_table.Properties.VariableNames{'YY'} = 'YYYY';
+    time = datetime( ...
         year, ...
-        data_struct.MM, ...
-        data_struct.DD, ...
-        data_struct.hh, ...
+        file_table.('MM'), ...
+        file_table.('DD'), ...
+        file_table.('hh'), ...
         0, ...
         0);
-    data_struct.frequency = transpose(file_data(1, 5:end));     % column vector
-    data_struct.spectrum = transpose(file_data(2:end, 5:end));  % [freq, time]
+    file_table = addvars(file_table, time, 'After', 'hh');
+
+    % Create data structure from the table
+    if parameter == "swden"
+        % Carry over time columns and add frequency and spectum
+        data_struct = table2struct(file_table(:,1:5), 'ToScalar', true);
+        data_struct.frequency = transpose(cellfun(@str2num, file_header(5:end)));
+        data_struct.spectrum = transpose(table2array( ...
+            file_table(:, 6:width(file_table))));           % [freq, time]
+    else
+        % Keep all columns as-is
+        data_struct = table2struct(file_table, 'ToScalar', true);
+    end
+
+    % Add data structure to aggregated output structure
     ndbc_data.(strcat('ID_', station_id)). ...
         (strcat('year_', num2str(year))) = data_struct;
 end

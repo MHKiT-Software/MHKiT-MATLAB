@@ -65,10 +65,6 @@ classdef Wave_TestIO < matlab.unittest.TestCase
                         "46029w1997.txt.gz";.... 
                         "46029w1998.txt.gz"];
             ndbc_data = NDBC_request_data('swden', filenames);
-%             filenames=["46042h1996.txt.gz";... 
-%                         "46029h1997.txt.gz";.... 
-%                         "46029h1998.txt.gz"];
-%             ndbc_data = NDBC_request_data('stdmet', filenames);
             ndbc_data = struct2table(ndbc_data.ID_46042.year_1996,'AsArray',true);
             relative_file_name = '../../examples/data/wave/46042w1996.txt.gz';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
