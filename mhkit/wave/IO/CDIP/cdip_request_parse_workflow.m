@@ -74,87 +74,98 @@ if ~isnan(options.nc)
         'Optional parameter "nc" is not implemented.'));
 end
 
-% Create list of start and end datetimes for which to query data
-[start_datetimes, end_datetimes] = start_end_datetimes(options);
-
-% Query info on buoy and available data
-%  NOTE: Unlike Python, MATLAB doesn't return all available data from a
-%  netCDF query; each variable or attribute needs to be queried separately
+% Build URL to query
 url_query = get_url_query(options);
+
+% Query info on buoy and available data (can't return all vars like Python)
 nc_info = ncinfo(url_query);
 
-% Build list of data to query
-if options.parameters ~= ""     % if data to query is specified
-    data_to_query = options.parameters;
-    if options.all_2D_variables == true
-        data_to_query = union(data_to_query, DATA_2D_NAMES);   % add all 2D
-    end
-    % Add 'waveFrequency' if there's any 2D data queried
-    if any(ismember(data_to_query, DATA_2D_NAMES))
-        data_to_query = union(data_to_query, 'waveFrequency');
-    end
-    % Add time data for each data category
-    categories_in_data = data_categories(data_names, DATA_CATEGORIES);
-    categories_in_data = setdiff(categories_in_data, 'meta'); % omit 'meta'
-    data_to_query = union(data_to_query, strcat(categories_in_data, 'Time'));
-else                            % else query all data except maybe 2D data
-    data_to_query = {nc_info.Variables.Name};
-    if options.all_2D_variables == false
-        data_to_query = setdiff(data_to_query, DATA_2D_NAMES);  % remove 2D
-    end
-end
-data_to_query = sort(data_to_query);
+% Build list of data to query and determine categories
+data_to_query = make_data_list(options, nc_info, ...
+                               DATA_2D_NAMES, DATA_CATEGORIES);
+categories_in_data = data_categories(data_to_query, DATA_CATEGORIES);
+
+% Create list of start and end datetimes for which to query data
+datetimes = start_end_datetimes(options);
+indices = data_indices(url_query, datetimes, categories_in_data);
+
 
 % Compile output structure with queried netCDF data
-data.metadata.name = deblank(convertCharsToStrings( ...
-    ncread(url_query, 'metaStationName')));
-for i = 1:length(start_datetimes)                   % for each time period
-    for j = 1:length(data_to_query)                 % for each data metric
-        name = data_to_query{j};
-        category = data_category(name);
-        % TODO: Don't filter each variable as you need to know the
-        % associated time. Build structure for each datetime set first.
-        % Study Python code again first.
-        data_value = get_netcdf_variable( ...
-            url_query, name, start_datetimes(i), end_datetimes(i));
-        if isnan(data_value)
+for i = 1:length(data_to_query)                      % for each data metric
+    name = data_to_query{i};
+    is_2D = any(ismember(DATA_2D_NAMES, name));
+    category = data_category(name, DATA_CATEGORIES);
+    if is_2D
+        category_name = strcat(category, '2D');
+    else
+        category_name = category;
+    end
+    N_time_ranges = length(indices.(category).start);
+    for j = 1:N_time_ranges
+        % Query data
+        index_start = indices.(category).start(j);
+        index_end = indices.(category).end(j);
+        index_count = index_end - index_start + 1;
+        % TODO: what about 'meta'?
+        % TODO: what if category is ''? Grab all as there are no timestamps?
+        try
+            if is_2D
+                value = ncread(url_query, name, ...
+                               [1, index_start], [Inf, index_count]);
+            else
+                value = ncread(url_query, name, ...
+                               index_start, index_count);
+            end
+        catch
             warning("MATLAB:cdip_request_parse_workflow", ...
                     "Data name '%s' not found.", name);
         end
 
-        if endsWith(name, '2D')                      % if 2D data
-            if ~isfield(data.data.wave2D, name)      % if not yet in struct
-                data.data.(strcat(category, '2D')).(name) = data_value;
-            else
-                % append data
-                x=1;
-            end
-        else                                         % 1D data
-            if ~isfield(data.data.wave, name)        % if not yet in struct
-                data.data.(category).(name) = data_value;
-            else
-                % append data
-                x=1;
-            end
+        % Try adding to existing output field, else create new
+        try
+            value_in_output = data.data.(category_name).(name);
+            data.data.(category_name).(name) = ...
+                cat(1, value_in_output, value');     % add rows
+        catch
+            data.data.(category_name).(name) = value';
         end
     end
 end
 
-data.test = nan;
+data.metadata.name = deblank(convertCharsToStrings( ...
+    ncread(url_query, 'metaStationName')));
 
 end
 
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function data = get_netcdf_variable(url_query, data_name, ...
-                                    start_datetime, end_datetime)
-%GET_NETCDF_VARIABLE Returns variable within start and end time
+function indices = data_indices(url_query, datetime_ranges, categories_in_data)
+%DATA_INDICES Returns data indices to query for each category and range
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    data_value = ncread(url_query, data_name);
-    %TODO: return nan if not found
+for i = 1:length(categories_in_data)
+    posixtimes = ncread(url_query, strcat(categories_in_data{i}, 'Time'));
+    datetimes = datetime(posixtimes, ...
+                         'ConvertFrom', 'posixtime', ...
+                         'TimeZone', 'UTC');
+    for j = 1:length(datetime_ranges.start)     % for each range
+        index_start = find(datetimes>=datetime_ranges.start{j}, 1, 'first');
+        index_end = find(datetimes<=datetime_ranges.end{j}, 1, 'last');
+
+        indices.(categories_in_data{i}).start(j) = index_start;
+        indices.(categories_in_data{i}).end(j) = index_end;
+    end
 end
+end
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% function data = get_netcdf_variable(url_query, data_name, ...
+%                                     start_datetime, end_datetime)
+% %GET_NETCDF_VARIABLE Returns variable within start and end time
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     data_value = ncread(url_query, data_name);
+%     %TODO: return nan if not found
+% end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -206,7 +217,8 @@ function categories = data_categories(data_names, all_categories)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Categories are non-duplicate. Definitely not most efficient algorithm.
 wrapper_fun = @(x) data_category(x, all_categories);
-category_of_each = cellfun(wrapper_fun, data_names);
+category_of_each = cellfun(wrapper_fun, data_names, ...
+                           'UniformOutput', false);
 categories = unique(category_of_each);
 categories = setdiff(categories, '');  % remove any unknown categories ('')
 end
@@ -227,17 +239,17 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [start_datetimes, end_datetimes] = start_end_datetimes(options)
-%START_END_DATETIMES Creates list of start and end datetimes to query
+function datetimes = start_end_datetimes(options)
+%START_END_DATETIMES Creates structure of start and end datetimes to query
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-start_datetimes = {};
-end_datetimes = {};
+datetimes.start = {};
+datetimes.end = {};
 if ~isnan(options.years)
     % Formulate start and end dates from years parameter
     for i = 1:length(options.years)
-        start_datetimes{end+1} = datetime(options.years(i), 1, 1, 0, 0, 0, ...
+        datetimes.start{end+1} = datetime(options.years(i), 1, 1, 0, 0, 0, ...
                                           'TimeZone', 'UTC');
-        end_datetimes{end+1} = datetime(options.years(i), 12, 31, 23, 59, 59, ...
+        datetimes.end{end+1} = datetime(options.years(i), 12, 31, 23, 59, 59, ...
                                         'TimeZone', 'UTC');
     end
 else
@@ -247,25 +259,53 @@ else
     end
     % Substitute in netCDF start/end dates as needed
     if options.start_date ~= ""
-        start_datetimes(1) = datetime(options.start_date, ...
+        datetimes.start(1) = datetime(options.start_date, ...
                                       'InputFormat', 'yyyy-MM-dd', ...
                                       'TimeZone', 'UTC');
     else
-        start_datetimes(1) = datetime(waveTime(1), ...
+        datetimes.start(1) = datetime(waveTime(1), ...
                                       'ConvertFrom', 'posixtime', ...
                                       'TimeZone', 'UTC');
     end
     if options.end_date ~= ""
-        end_datetimes(1) = datetime(options.end_date, ...
+        datetimes.end(1) = datetime(options.end_date, ...
                                     'InputFormat', 'yyyy-MM-dd', ...
                                     'TimeZone', 'UTC');
-        end_datetimes(1).Hour = 23;
-        end_datetimes(1).Minute = 59;
-        end_datetimes(1).Second = 59;
+        datetimes.end(1).Hour = 23;
+        datetimes.end(1).Minute = 59;
+        datetimes.end(1).Second = 59;
     else
-        end_datetimes(1) = datetime(waveTime(end), ...
+        datetimes.end(1) = datetime(waveTime(end), ...
                                     'ConvertFrom', 'posixtime', ...
                                     'TimeZone', 'UTC');
     end
 end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function data_to_query = make_data_list(options, nc_info, ...
+                                        DATA_2D_NAMES, DATA_CATEGORIES)
+%MAKE_DATA_LIST Compiles list of data to query
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if options.parameters ~= ""     % if data to query is specified
+    data_to_query = options.parameters;
+    if options.all_2D_variables == true
+        data_to_query = union(data_to_query, DATA_2D_NAMES);   % add all 2D
+    end
+    % Add 'waveFrequency' if there's any 2D data queried
+    if any(ismember(data_to_query, DATA_2D_NAMES))
+        data_to_query = union(data_to_query, 'waveFrequency');
+    end
+    % Add timestamps for each data category
+    categories_in_data = data_categories(data_to_query, DATA_CATEGORIES);
+    categories_in_data = setdiff(categories_in_data, 'meta'); % omit 'meta'
+    data_to_query = union(data_to_query, strcat(categories_in_data, 'Time'));
+else                            % else query all data except maybe 2D data
+    data_to_query = {nc_info.Variables.Name};
+    if options.all_2D_variables == false
+        data_to_query = setdiff(data_to_query, DATA_2D_NAMES);  % remove 2D
+    end
+end
+data_to_query = sort(data_to_query);
 end
