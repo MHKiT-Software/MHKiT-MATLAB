@@ -57,11 +57,6 @@ arguments
 end
 
 DATA_CATEGORIES = {'wave', 'sst', 'gps', 'dwr', 'meta'};
-DATA_2D_NAMES = {'waveEnergyDensity', 'waveMeanDirection', ...
-                 'waveA1Value', 'waveB1Value', ...
-                 'waveA2Value', 'waveB2Value', ...
-                 'waveCheckFactor', 'waveSpread', ...
-                 'waveM2Value', 'waveN2Value'};
 
 if isnan(options.nc) && options.station_number == ""
     throw(MException('MATLAB:cdip_request_parse_workflow', ...
@@ -78,70 +73,96 @@ end
 url_query = get_url_query(options);
 
 % Query info on buoy and available data (can't return all vars like Python)
+% converted to table to query like: nc_info.Variables{'waveTime', 'Size'}{1};
 nc_info = ncinfo(url_query);
+nc_info.Variables = struct2table(nc_info.Variables);
+nc_info.Variables.Properties.RowNames = nc_info.Variables.Name;
 
 % Build list of data to query and determine categories
-data_to_query = make_data_list(options, nc_info, ...
-                               DATA_2D_NAMES, DATA_CATEGORIES);
-categories_in_data = data_categories(data_to_query, DATA_CATEGORIES);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  TODO NEXT:
+%  - have make_data_list() call datum_categories() to get the group
+%  - change all instances of 'category' and 'categories' to 'group(s)' 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+data_to_query = make_data_list(options, nc_info, DATA_CATEGORIES);
 
-% Create list of start and end datetimes for which to query data
+% Create list of start and end datetimes/indices for which to query data
 datetimes = start_end_datetimes(options);
-indices = data_indices(url_query, datetimes, categories_in_data);
-
+indices = data_indices(url_query, datetimes, data_to_query, DATA_CATEGORIES);
 
 % Compile output structure with queried netCDF data
-for i = 1:length(data_to_query)                      % for each data metric
+for i = 1:length(data_to_query)                     % for each data metric
     name = data_to_query{i};
-    is_2D = any(ismember(DATA_2D_NAMES, name));
-    category = data_category(name, DATA_CATEGORIES);
-    if is_2D
+    [type, category, shape] = datum_categories(name, nc_info, DATA_CATEGORIES);
+    if shape == "2D"
         category_name = strcat(category, '2D');
     else
         category_name = category;
     end
-    N_time_ranges = length(indices.(category).start);
-    for j = 1:N_time_ranges
-        % Query data
-        index_start = indices.(category).start(j);
-        index_end = indices.(category).end(j);
-        index_count = index_end - index_start + 1;
-        % TODO: what about 'meta'?
-        % TODO: what if category is ''? Grab all as there are no timestamps?
+    if type ~= "data" || shape == "0D"
         try
-            if is_2D
-                value = ncread(url_query, name, ...
-                               [1, index_start], [Inf, index_count]);
-            else
-                value = ncread(url_query, name, ...
-                               index_start, index_count);
-            end
+            value = ncread(url_query, name);                % grab it all
+            data.(type).(category_name).(name) = value;     % add to output
         catch
             warning("MATLAB:cdip_request_parse_workflow", ...
                     "Data name '%s' not found.", name);
         end
+    elseif type == "data" && (shape == "2D" || shape == "1D")
+        N_time_ranges = length(indices.(category).start);
+        for j = 1:N_time_ranges
+            % Query data
+            index_start = indices.(category).start(j);
+            index_end = indices.(category).end(j);
+            index_count = index_end - index_start + 1;
+            % TODO: what if category is ''? Grab all as there are no timestamps?
+            try
+                if shape == "2D"
+                    value = ncread(url_query, name, ...
+                                   [1, index_start], [Inf, index_count]);
+                    value = value';
+                elseif shape == "1D"
+                    value = ncread(url_query, name, ...
+                                   index_start, index_count);
+                end
+            catch
+                warning("MATLAB:cdip_request_parse_workflow", ...
+                        "Data name '%s' not found.", name);
+            end
+    
+            % Convert any times
+            if endsWith(name, 'Time')
+                value = datetime(value, ...
+                                 'ConvertFrom', 'posixtime', ...
+                                 'TimeZone', 'UTC');
+            end
 
-        % Try adding to existing output field, else create new
-        try
-            value_in_output = data.data.(category_name).(name);
-            data.data.(category_name).(name) = ...
-                cat(1, value_in_output, value');     % add rows
-        catch
-            data.data.(category_name).(name) = value';
+            % Try adding to existing output field, else create new
+            try
+                value_in_output = data.(type).(category_name).(name);
+                data.data.(category_name).(name) = ...
+                    cat(1, value_in_output, value);     % add rows
+            catch
+                data.(type).(category_name).(name) = value;
+            end
         end
     end
 end
 
+% Add buoy name to output
 data.metadata.name = deblank(convertCharsToStrings( ...
     ncread(url_query, 'metaStationName')));
-
 end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function indices = data_indices(url_query, datetime_ranges, categories_in_data)
+function indices = data_indices(url_query, datetime_ranges, ...
+                                data_to_query, DATA_CATEGORIES)
 %DATA_INDICES Returns data indices to query for each category and range
+% e.g.,  indices.wave.start = <index>
+%        indices.wave.end = <index>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+categories_in_data = data_categories(data_to_query, DATA_CATEGORIES);
+
 for i = 1:length(categories_in_data)
     posixtimes = ncread(url_query, strcat(categories_in_data{i}, 'Time'));
     datetimes = datetime(posixtimes, ...
@@ -156,16 +177,6 @@ for i = 1:length(categories_in_data)
     end
 end
 end
-
-
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% function data = get_netcdf_variable(url_query, data_name, ...
-%                                     start_datetime, end_datetime)
-% %GET_NETCDF_VARIABLE Returns variable within start and end time
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     data_value = ncread(url_query, data_name);
-%     %TODO: return nan if not found
-% end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -184,31 +195,6 @@ elseif options.data_type == "realtime"
                         options.station_number);
 end
 end
-
-
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% function data_names = data_2D()
-% %DATA_2D Returns array of the 2D data names
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     data_names = ['waveEnergyDensity', 'waveMeanDirection', ...
-%                   'waveA1Value', 'waveB1Value', ...
-%                   'waveA2Value', 'waveB2Value', ...
-%                   'waveCheckFactor', 'waveSpread', ...
-%                   'waveM2Value', 'waveN2Value'];
-% end
-% 
-% 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% function is_2D = is_data_2D(data_name)
-% %IS_DATA_2D Returns whether data is 2D based on its name
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     two_dimensional_data = {'waveEnergyDensity', 'waveMeanDirection', ...
-%                             'waveA1Value', 'waveB1Value', ...
-%                             'waveA2Value', 'waveB2Value', ...
-%                             'waveCheckFactor', 'waveSpread', ...
-%                             'waveM2Value', 'waveN2Value'};
-%     is_2D = any(ismember(two_dimensional_data, data_name));
-% end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -234,6 +220,45 @@ for i = 1:length(all_categories)
         category = all_categories{i};
         break
     end
+end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [type, group, shape] = datum_categories(datum_name, nc_info, all_groups)
+%DATUM_CATEGORIES Returns the categorizations for the datum
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% type = {'data', 'metadata'}
+% group = {'wave', 'sst', 'gps', 'dwr', 'none'}
+% shape = {'0D', '1D', '2D'}
+
+% Determine group
+group = 'none';
+for i = 1:length(all_groups)
+    if startsWith(datum_name, all_groups{i})     % group is the prefix
+        group = all_groups{i};
+        break
+    end
+end
+
+% Determine shape
+size = nc_info.Variables{datum_name, 'Size'}{1};
+datatype = nc_info.Variables{datum_name, 'Datatype'}{1};
+if length(size) == 2
+    shape = '2D';
+elseif length(size) == 1 && size(1) > 1 && ...
+        datatype ~= "char" && datatype ~= "string"
+    shape = '1D';
+else
+    shape = '0D';
+end
+
+% Determine type
+time_length = nc_info.Variables{strcat(group, 'Time'), 'Size'}{1};
+if group ~= "none" && size(end) == time_length
+    type = 'data';
+else
+    type = 'metadata';
 end
 end
 
@@ -284,17 +309,33 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function data_to_query = make_data_list(options, nc_info, ...
-                                        DATA_2D_NAMES, DATA_CATEGORIES)
+function data_2D_names = find_data_2D_names(nc_info)
+%FIND_DATA_2D_NAMES Finds names of available 2D data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+N_freq = nc_info.Variables{'waveFrequency', 'Size'}{1};
+N_time = nc_info.Variables{'waveTime', 'Size'}{1};
+data_2D_names = {};
+for i = 1:height(nc_info.Variables)
+    if isequal(nc_info.Variables.Size{i}, [N_freq, N_time])
+        data_2D_names{end+1} = nc_info.Variables.Name{i};
+    end
+end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function data_to_query = make_data_list(options, nc_info, DATA_CATEGORIES)
 %MAKE_DATA_LIST Compiles list of data to query
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+data_2D_names = find_data_2D_names(nc_info);
+
 if options.parameters ~= ""     % if data to query is specified
     data_to_query = options.parameters;
     if options.all_2D_variables == true
-        data_to_query = union(data_to_query, DATA_2D_NAMES);   % add all 2D
+        data_to_query = union(data_to_query, data_2D_names);   % add all 2D
     end
     % Add 'waveFrequency' if there's any 2D data queried
-    if any(ismember(data_to_query, DATA_2D_NAMES))
+    if any(ismember(data_to_query, data_2D_names))
         data_to_query = union(data_to_query, 'waveFrequency');
     end
     % Add timestamps for each data category
@@ -304,7 +345,7 @@ if options.parameters ~= ""     % if data to query is specified
 else                            % else query all data except maybe 2D data
     data_to_query = {nc_info.Variables.Name};
     if options.all_2D_variables == false
-        data_to_query = setdiff(data_to_query, DATA_2D_NAMES);  % remove 2D
+        data_to_query = setdiff(data_to_query, data_2D_names);  % remove 2D
     end
 end
 data_to_query = sort(data_to_query);
