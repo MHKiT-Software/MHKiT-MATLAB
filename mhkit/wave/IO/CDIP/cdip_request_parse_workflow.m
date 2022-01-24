@@ -199,7 +199,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function categories = data_categories(data_names, all_categories)
-%DATA_CATEGORIES Returns the category names for the data based on its names
+%DATA_CATEGORIES Returns the category set in data_names based on its names
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Categories are non-duplicate. Definitely not most efficient algorithm.
 wrapper_fun = @(x) data_category(x, all_categories);
@@ -214,7 +214,7 @@ end
 function category = data_category(data_name, all_categories)
 %DATA_CATEGORY Returns the category name for the data based on its name
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-category = '';
+category = 'none';
 for i = 1:length(all_categories)
     if startsWith(data_name, all_categories{i})     % category is the prefix
         category = all_categories{i};
@@ -233,13 +233,7 @@ function [type, group, shape] = datum_categories(datum_name, nc_info, all_groups
 % shape = {'0D', '1D', '2D'}
 
 % Determine group
-group = 'none';
-for i = 1:length(all_groups)
-    if startsWith(datum_name, all_groups{i})     % group is the prefix
-        group = all_groups{i};
-        break
-    end
-end
+group = data_category(datum_name, all_groups);
 
 % Determine shape
 size = nc_info.Variables{datum_name, 'Size'}{1};
