@@ -56,14 +56,16 @@ arguments
     options.all_2D_variables logical = false;
 end
 
-DATA_CATEGORIES = {'wave', 'sst', 'gps', 'dwr', 'meta'};
+DATA_GROUPS = {'wave', 'sst', 'gps', 'dwr', 'meta'};
 
 if isnan(options.nc) && options.station_number == ""
     throw(MException('MATLAB:cdip_request_parse_workflow', ...
         'Must provide either CDIP netCDF data or a station number.'));
 end
 
-% TODO: Should we keep the options.nc parameter? Where would it come from?
+% TODO: Should we keep the options.nc parameter? Functionality is different
+% than the Python implementation which queries the data for all times and
+% then filters.
 if ~isnan(options.nc)
     throw(MException('MATLAB:cdip_request_parse_workflow', ...
         'Optional parameter "nc" is not implemented.'));
@@ -78,43 +80,39 @@ nc_info = ncinfo(url_query);
 nc_info.Variables = struct2table(nc_info.Variables);
 nc_info.Variables.Properties.RowNames = nc_info.Variables.Name;
 
-% Build list of data to query and determine categories
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  TODO NEXT:
-%  - have make_data_list() call datum_categories() to get the group
-%  - change all instances of 'category' and 'categories' to 'group(s)' 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-data_to_query = make_data_list(options, nc_info, DATA_CATEGORIES);
+% Build list of data to query
+data_to_query = make_data_list(options, nc_info, DATA_GROUPS);
 
 % Create list of start and end datetimes/indices for which to query data
 datetimes = start_end_datetimes(options);
-indices = data_indices(url_query, datetimes, data_to_query, DATA_CATEGORIES);
+indices = data_indices(url_query, datetimes, data_to_query, DATA_GROUPS);
 
 % Compile output structure with queried netCDF data
 for i = 1:length(data_to_query)                     % for each data metric
     name = data_to_query{i};
-    [type, category, shape] = datum_categories(name, nc_info, DATA_CATEGORIES);
+    [type, group, shape] = datum_categories(name, nc_info, DATA_GROUPS);
     if shape == "2D"
-        category_name = strcat(category, '2D');
+        group_name = strcat(group, '2D');
     else
-        category_name = category;
+        group_name = group;
     end
+
     if type ~= "data" || shape == "0D"
+        % Query it all and add to output
         try
-            value = ncread(url_query, name);                % grab it all
-            data.(type).(category_name).(name) = value;     % add to output
+            value = ncread(url_query, name);
+            data.(type).(group_name).(name) = value;
         catch
             warning("MATLAB:cdip_request_parse_workflow", ...
                     "Data name '%s' not found.", name);
         end
     elseif type == "data" && (shape == "2D" || shape == "1D")
-        N_time_ranges = length(indices.(category).start);
+        N_time_ranges = length(indices.(group).start);
         for j = 1:N_time_ranges
             % Query data
-            index_start = indices.(category).start(j);
-            index_end = indices.(category).end(j);
+            index_start = indices.(group).start(j);
+            index_end = indices.(group).end(j);
             index_count = index_end - index_start + 1;
-            % TODO: what if category is ''? Grab all as there are no timestamps?
             try
                 if shape == "2D"
                     value = ncread(url_query, name, ...
@@ -138,11 +136,11 @@ for i = 1:length(data_to_query)                     % for each data metric
 
             % Try adding to existing output field, else create new
             try
-                value_in_output = data.(type).(category_name).(name);
-                data.data.(category_name).(name) = ...
+                value_in_output = data.(type).(group_name).(name);
+                data.data.(group_name).(name) = ...
                     cat(1, value_in_output, value);     % add rows
             catch
-                data.(type).(category_name).(name) = value;
+                data.(type).(group_name).(name) = value;
             end
         end
     end
@@ -156,15 +154,15 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function indices = data_indices(url_query, datetime_ranges, ...
-                                data_to_query, DATA_CATEGORIES)
-%DATA_INDICES Returns data indices to query for each category and range
+                                data_to_query, all_groups)
+%DATA_INDICES Returns data indices to query for each group and range
 % e.g.,  indices.wave.start = <index>
 %        indices.wave.end = <index>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-categories_in_data = data_categories(data_to_query, DATA_CATEGORIES);
+groups_in_data = data_groups(data_to_query, all_groups);
 
-for i = 1:length(categories_in_data)
-    posixtimes = ncread(url_query, strcat(categories_in_data{i}, 'Time'));
+for i = 1:length(groups_in_data)
+    posixtimes = ncread(url_query, strcat(groups_in_data{i}, 'Time'));
     datetimes = datetime(posixtimes, ...
                          'ConvertFrom', 'posixtime', ...
                          'TimeZone', 'UTC');
@@ -172,8 +170,8 @@ for i = 1:length(categories_in_data)
         index_start = find(datetimes>=datetime_ranges.start{j}, 1, 'first');
         index_end = find(datetimes<=datetime_ranges.end{j}, 1, 'last');
 
-        indices.(categories_in_data{i}).start(j) = index_start;
-        indices.(categories_in_data{i}).end(j) = index_end;
+        indices.(groups_in_data{i}).start(j) = index_start;
+        indices.(groups_in_data{i}).end(j) = index_end;
     end
 end
 end
@@ -198,26 +196,25 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function categories = data_categories(data_names, all_categories)
-%DATA_CATEGORIES Returns the category set in data_names based on its names
+function groups = data_groups(data_names, all_groups)
+%DATA_GROUPS Returns the group set in data_names based on its names
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Categories are non-duplicate. Definitely not most efficient algorithm.
-wrapper_fun = @(x) data_category(x, all_categories);
-category_of_each = cellfun(wrapper_fun, data_names, ...
+% Groups are non-duplicate. Definitely not most efficient algorithm.
+wrapper_fun = @(x) data_group(x, all_groups);
+group_of_each = cellfun(wrapper_fun, data_names, ...
                            'UniformOutput', false);
-categories = unique(category_of_each);
-categories = setdiff(categories, '');  % remove any unknown categories ('')
+groups = unique(group_of_each);
 end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function category = data_category(data_name, all_categories)
-%DATA_CATEGORY Returns the category name for the data based on its name
+function group = data_group(data_name, all_groups)
+%DATA_GROUP Returns the group name for the data based on its name
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-category = 'none';
-for i = 1:length(all_categories)
-    if startsWith(data_name, all_categories{i})     % category is the prefix
-        category = all_categories{i};
+group = 'other';
+for i = 1:length(all_groups)
+    if startsWith(data_name, all_groups{i})     % group is the prefix
+        group = all_groups{i};
         break
     end
 end
@@ -229,11 +226,11 @@ function [type, group, shape] = datum_categories(datum_name, nc_info, all_groups
 %DATUM_CATEGORIES Returns the categorizations for the datum
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % type = {'data', 'metadata'}
-% group = {'wave', 'sst', 'gps', 'dwr', 'none'}
+% group = {'wave', 'sst', 'gps', 'dwr', 'other'}
 % shape = {'0D', '1D', '2D'}
 
 % Determine group
-group = data_category(datum_name, all_groups);
+group = data_group(datum_name, all_groups);
 
 % Determine shape
 size = nc_info.Variables{datum_name, 'Size'}{1};
@@ -249,7 +246,7 @@ end
 
 % Determine type
 time_length = nc_info.Variables{strcat(group, 'Time'), 'Size'}{1};
-if group ~= "none" && size(end) == time_length
+if group ~= "other" && size(end) == time_length
     type = 'data';
 else
     type = 'metadata';
@@ -318,7 +315,7 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function data_to_query = make_data_list(options, nc_info, DATA_CATEGORIES)
+function data_to_query = make_data_list(options, nc_info, DATA_GROUPS)
 %MAKE_DATA_LIST Compiles list of data to query
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 data_2D_names = find_data_2D_names(nc_info);
@@ -332,10 +329,10 @@ if options.parameters ~= ""     % if data to query is specified
     if any(ismember(data_to_query, data_2D_names))
         data_to_query = union(data_to_query, 'waveFrequency');
     end
-    % Add timestamps for each data category
-    categories_in_data = data_categories(data_to_query, DATA_CATEGORIES);
-    categories_in_data = setdiff(categories_in_data, 'meta'); % omit 'meta'
-    data_to_query = union(data_to_query, strcat(categories_in_data, 'Time'));
+    % Add timestamps for each data group
+    groups_in_data = data_groups(data_to_query, DATA_GROUPS);
+    groups_in_data = setdiff(groups_in_data, 'meta'); % omit 'meta'
+    data_to_query = union(data_to_query, strcat(groups_in_data, 'Time'));
 else                            % else query all data except maybe 2D data
     data_to_query = {nc_info.Variables.Name};
     if options.all_2D_variables == false
