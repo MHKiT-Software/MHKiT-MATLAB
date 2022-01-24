@@ -87,7 +87,7 @@ data_to_query = make_data_list(options, nc_info, DATA_GROUPS);
 datetimes = start_end_datetimes(options);
 indices = data_indices(url_query, datetimes, data_to_query, DATA_GROUPS);
 
-% Compile output structure with queried netCDF data
+% Query data and compile into output structure
 for i = 1:length(data_to_query)                     % for each data metric
     name = data_to_query{i};
     [type, group, shape] = datum_categories(name, nc_info, DATA_GROUPS);
@@ -153,6 +153,32 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function group = data_group(data_name, all_groups)
+%DATA_GROUP Returns the group name for the data based on its name
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+group = 'other';
+for i = 1:length(all_groups)
+    if startsWith(data_name, all_groups{i})     % group is the prefix
+        group = all_groups{i};
+        break
+    end
+end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function groups = data_groups(data_names, all_groups)
+%DATA_GROUPS Returns the group set in data_names based on its names
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Groups are non-duplicate. Definitely not most efficient algorithm.
+wrapper_fun = @(x) data_group(x, all_groups);
+group_of_each = cellfun(wrapper_fun, data_names, ...
+                           'UniformOutput', false);
+groups = unique(group_of_each);
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function indices = data_indices(url_query, datetime_ranges, ...
                                 data_to_query, all_groups)
 %DATA_INDICES Returns data indices to query for each group and range
@@ -172,50 +198,6 @@ for i = 1:length(groups_in_data)
 
         indices.(groups_in_data{i}).start(j) = index_start;
         indices.(groups_in_data{i}).end(j) = index_end;
-    end
-end
-end
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function url_query = get_url_query(options)
-%GET_URL_QUERY Builds the URL for querying the netCDF data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-data_url = "http://thredds.cdip.ucsd.edu/thredds/dodsC/cdip";
-if options.data_type == "historic"
-    url_query = sprintf("%s/archive/%sp1/%sp1_historic.nc", ...
-                        data_url, ...
-                        options.station_number, ...
-                        options.station_number);
-elseif options.data_type == "realtime"
-    url_query = sprintf("%s/realtime/%sp1_rt.nc", ...
-                        data_url, ...
-                        options.station_number);
-end
-end
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function groups = data_groups(data_names, all_groups)
-%DATA_GROUPS Returns the group set in data_names based on its names
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Groups are non-duplicate. Definitely not most efficient algorithm.
-wrapper_fun = @(x) data_group(x, all_groups);
-group_of_each = cellfun(wrapper_fun, data_names, ...
-                           'UniformOutput', false);
-groups = unique(group_of_each);
-end
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function group = data_group(data_name, all_groups)
-%DATA_GROUP Returns the group name for the data based on its name
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-group = 'other';
-for i = 1:length(all_groups)
-    if startsWith(data_name, all_groups{i})     % group is the prefix
-        group = all_groups{i};
-        break
     end
 end
 end
@@ -251,6 +233,68 @@ if group ~= "other" && size(end) == time_length
 else
     type = 'metadata';
 end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function data_2D_names = find_data_2D_names(nc_info)
+%FIND_DATA_2D_NAMES Finds names of available 2D data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+N_freq = nc_info.Variables{'waveFrequency', 'Size'}{1};
+N_time = nc_info.Variables{'waveTime', 'Size'}{1};
+data_2D_names = {};
+for i = 1:height(nc_info.Variables)
+    if isequal(nc_info.Variables.Size{i}, [N_freq, N_time])
+        data_2D_names{end+1} = nc_info.Variables.Name{i};
+    end
+end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function url_query = get_url_query(options)
+%GET_URL_QUERY Builds the URL for querying the netCDF data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+data_url = "http://thredds.cdip.ucsd.edu/thredds/dodsC/cdip";
+if options.data_type == "historic"
+    url_query = sprintf("%s/archive/%sp1/%sp1_historic.nc", ...
+                        data_url, ...
+                        options.station_number, ...
+                        options.station_number);
+elseif options.data_type == "realtime"
+    url_query = sprintf("%s/realtime/%sp1_rt.nc", ...
+                        data_url, ...
+                        options.station_number);
+end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function data_to_query = make_data_list(options, nc_info, DATA_GROUPS)
+%MAKE_DATA_LIST Compiles list of data to query
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+data_2D_names = find_data_2D_names(nc_info);
+
+if options.parameters ~= ""     % if data to query is specified
+    data_to_query = options.parameters;
+    if options.all_2D_variables == true
+        data_to_query = union(data_to_query, data_2D_names);   % add all 2D
+    end
+    % Add 'waveFrequency' if there's any 2D data queried
+    if any(ismember(data_to_query, data_2D_names))
+        data_to_query = union(data_to_query, 'waveFrequency');
+    end
+    % Add timestamps for each data group
+    groups_in_data = data_groups(data_to_query, DATA_GROUPS);
+    groups_in_data = setdiff(groups_in_data, 'meta'); % omit 'meta'
+    data_to_query = union(data_to_query, strcat(groups_in_data, 'Time'));
+else                            % else query all data except maybe 2D data
+    data_to_query = {nc_info.Variables.Name};
+    if options.all_2D_variables == false
+        data_to_query = setdiff(data_to_query, data_2D_names);  % remove 2D
+    end
+end
+data_to_query = sort(data_to_query);
 end
 
 
@@ -296,48 +340,4 @@ else
                                     'TimeZone', 'UTC');
     end
 end
-end
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function data_2D_names = find_data_2D_names(nc_info)
-%FIND_DATA_2D_NAMES Finds names of available 2D data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-N_freq = nc_info.Variables{'waveFrequency', 'Size'}{1};
-N_time = nc_info.Variables{'waveTime', 'Size'}{1};
-data_2D_names = {};
-for i = 1:height(nc_info.Variables)
-    if isequal(nc_info.Variables.Size{i}, [N_freq, N_time])
-        data_2D_names{end+1} = nc_info.Variables.Name{i};
-    end
-end
-end
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function data_to_query = make_data_list(options, nc_info, DATA_GROUPS)
-%MAKE_DATA_LIST Compiles list of data to query
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-data_2D_names = find_data_2D_names(nc_info);
-
-if options.parameters ~= ""     % if data to query is specified
-    data_to_query = options.parameters;
-    if options.all_2D_variables == true
-        data_to_query = union(data_to_query, data_2D_names);   % add all 2D
-    end
-    % Add 'waveFrequency' if there's any 2D data queried
-    if any(ismember(data_to_query, data_2D_names))
-        data_to_query = union(data_to_query, 'waveFrequency');
-    end
-    % Add timestamps for each data group
-    groups_in_data = data_groups(data_to_query, DATA_GROUPS);
-    groups_in_data = setdiff(groups_in_data, 'meta'); % omit 'meta'
-    data_to_query = union(data_to_query, strcat(groups_in_data, 'Time'));
-else                            % else query all data except maybe 2D data
-    data_to_query = {nc_info.Variables.Name};
-    if options.all_2D_variables == false
-        data_to_query = setdiff(data_to_query, data_2D_names);  % remove 2D
-    end
-end
-data_to_query = sort(data_to_query);
 end
