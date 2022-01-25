@@ -21,7 +21,7 @@ function datast=request_usgs_data(station, parameter, start_date, end_date, opti
 %
 %     data_type : str (optional)
 %         Data type, options include 'Daily' (return the mean daily value) and 
-%         'Instantaneous'.
+%         'Instantaneous'. Default = 'Daily'
 %         to call: request_usgs_data(station,parameter,start_date.end_date,"data_type",data_type)
 %
 %     proxy : None
