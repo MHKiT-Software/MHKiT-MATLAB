@@ -9,16 +9,26 @@ function data=request_noaa_data(station, parameter, start_date, end_date, option
 %     ----------
 %     station : str
 %         NOAA current station number (e.g. 's08010')
+%
 %     parameter : str
 %         NOAA paramter (e.g. 'currents')
+%
 %     start_date : str
 %         Start date in the format yyyyMMdd
+%
 %     end_date : str
 %         End date in the format yyyyMMdd 
-%     proxy : structure or None (optional)
-%         Parameter is now deprecated. Will ignore and print a warning.
-%         To request data from behind a firewall, configure in MATLAB Preferences.
-%         for example "localhost:8080"
+%
+%     proxy : None
+%         Parameter is now deprecated.
+%         To request data from behind a firewall, configure in MATLAB
+%         Preferences by navigating to:
+%           Home -> Environment -> Preferences
+%         then:
+%           MATLAB -> Web -> Use a proxy server to connect to the Internet
+%         See the following for details:
+%           https://www.mathworks.com/help/matlab/import_export/proxy.html
+%
 %     write_json : str or None (optional)
 %         Name of json file to write data
 %         to call: request_noaa_data(station,parameter,start_date,end_date,"write_json",write_json)
@@ -47,12 +57,7 @@ arguments
     parameter string
     start_date string
     end_date string
-    options.proxy string = "";
     options.write_json string = "";
-end
-
-if (options.proxy ~= "")
-    warning('To use a proxy server, configure in MATLAB Preferences.');
 end
 
 REQUIRED_FIELDS = {'id', 'name', 'lat', 'lon', 't'};    % 't' is time

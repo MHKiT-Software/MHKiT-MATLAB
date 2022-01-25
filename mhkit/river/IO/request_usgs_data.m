@@ -24,10 +24,15 @@ function datast=request_usgs_data(station, parameter, start_date, end_date, opti
 %         'Instantaneous'.
 %         to call: request_usgs_data(station,parameter,start_date.end_date,"data_type",data_type)
 %
-%     proxy : structure or None (optional)
-%         Parameter is now deprecated. Will ignore and print a warning.
-%         To request data from behind a firewall, configure in MATLAB Preferences.
-%         for example "localhost:8080"
+%     proxy : None
+%         Parameter is now deprecated.
+%         To request data from behind a firewall, configure in MATLAB
+%         Preferences by navigating to:
+%           Home -> Environment -> Preferences
+%         then:
+%           MATLAB -> Web -> Use a proxy server to connect to the Internet
+%         See the following for details:
+%           https://www.mathworks.com/help/matlab/import_export/proxy.html
 %
 %     write_json : str or None (optional)
 %         Name of json file to write data
@@ -52,12 +57,7 @@ arguments
     start_date string
     end_date string
     options.data_type = 'Daily';
-    options.proxy string = "";
     options.write_json string = "";
-end
-
-if (options.proxy ~= "")
-    warning('To use a proxy server, configure in MATLAB Preferences.');
 end
 
 % Formulate query

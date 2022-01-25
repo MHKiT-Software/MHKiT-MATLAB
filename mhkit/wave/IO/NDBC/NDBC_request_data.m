@@ -1,4 +1,4 @@
-function ndbc_data=NDBC_request_data(parameter,filenames,options)
+function ndbc_data=NDBC_request_data(parameter,filenames)
 
 %%%%%%%%%%%%%%%%%%%%
 %     Requests data by filenames and returns a structure of structures 
@@ -18,10 +18,15 @@ function ndbc_data=NDBC_request_data(parameter,filenames,options)
 %     filenames : array of strings
 %         Data filenames on https://www.ndbc.noaa.gov/data/historical/{parameter}/  
 %         
-%     proxy : structure or None (optional)
-%         Parameter is now deprecated. Will ignore and print a warning.
-%         To request data from behind a firewall, configure in MATLAB Preferences.
-%         for example "localhost:8080"
+%     proxy : None
+%         Parameter is now deprecated.
+%         To request data from behind a firewall, configure in MATLAB
+%         Preferences by navigating to:
+%           Home -> Environment -> Preferences
+%         then:
+%           MATLAB -> Web -> Use a proxy server to connect to the Internet
+%         See the following for details:
+%           https://www.mathworks.com/help/matlab/import_export/proxy.html
 %     
 % Returns
 % ---------
@@ -34,11 +39,6 @@ function ndbc_data=NDBC_request_data(parameter,filenames,options)
 arguments 
     parameter string {mustBeMember(parameter,{'swden','stdmet'})}
     filenames (1,:) string
-    options.proxy string = "";
-end
-
-if (options.proxy ~= "")
-    warning('To use a proxy server, configure in MATLAB Preferences.');
 end
 
 for i = 1:length(filenames)

@@ -15,10 +15,15 @@ function available_data=NDBC_available_data(parameter,options)
 %         Buoy Number.  5-character alpha-numeric station identifier 
 %         to call: NDBC_available_data(parameter,"buoy_number",buoy_number)
 %
-%     proxy : structure or None (optional)
-%         Parameter is now deprecated. Will ignore and print a warning.
-%         To request data from behind a firewall, configure in MATLAB Preferences.
-%         for example "localhost:8080"
+%     proxy : None
+%         Parameter is now deprecated.
+%         To request data from behind a firewall, configure in MATLAB
+%         Preferences by navigating to:
+%           Home -> Environment -> Preferences
+%         then:
+%           MATLAB -> Web -> Use a proxy server to connect to the Internet
+%         See the following for details:
+%           https://www.mathworks.com/help/matlab/import_export/proxy.html
 %     
 % Returns
 % ---------
@@ -31,11 +36,6 @@ function available_data=NDBC_available_data(parameter,options)
 arguments 
     parameter string {mustBeMember(parameter,{'swden','stdmet'})}
     options.buoy_number string = "";
-    options.proxy string = "";
-end
-
-if (options.proxy ~= "")
-    warning('To use a proxy server, configure in MATLAB Preferences.');
 end
 
 if strlength(options.buoy_number) ~= 0 && strlength(options.buoy_number) ~= 5
