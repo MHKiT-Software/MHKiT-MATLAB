@@ -61,7 +61,10 @@ for i = 1:length(filenames)
     % Read uncompressed delimited data file to a table
     % (suppress warning of '.'s being converted to 'x_'s in table header)
     warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
-    file_table = readtable(uncompressed_filename{1}, 'ReadVariableNames', true);
+    file_table = readtable(uncompressed_filename{1}, ...
+        'ReadVariableNames', true, ...
+        'VariableNamesLine', 1, ...
+        'ExtraColumnsRule', 'ignore');  % ignore extra columns data w/o headings
     warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
     file_header = file_table.Properties.VariableDescriptions;   % includes '.'s
 
@@ -84,24 +87,44 @@ for i = 1:length(filenames)
         filename_base, ...
         strlength(filename_base) - 5 + 1);  % grab all but last 5 chars
 
-    % Rename year column and add datetime column to table
-    file_table.Properties.VariableNames{'YY'} = 'YYYY';
+    % Check for bad file data
+    if width(file_table) <= 1
+        warning('Bad file data for %s, skipping.', filename_base);
+        continue;
+    end
+
+    % Rename {'YY', '#YY'} columns, handle minutes and add datetime column
+    headings = file_table.Properties.VariableNames;
+    column_year = find(contains(headings, 'YY'), 1, 'first');
+    file_table.Properties.VariableNames{column_year} = 'YYYY';
+    column_minutes = find(contains(headings, 'mm'), 1, 'first');
+    if isempty(column_minutes)
+        minutes = 0;
+    else
+        minutes = file_table{:, column_minutes};
+    end
     time = datetime( ...
         year, ...
         file_table.('MM'), ...
         file_table.('DD'), ...
         file_table.('hh'), ...
-        0, ...
+        minutes, ...
         0);
-    file_table = addvars(file_table, time, 'After', 'hh');
+    column_first_freq = find(contains(file_header, '.'), 1, 'first');
+    file_table = addvars(file_table, time, 'Before', column_first_freq);
+    column_first_freq = column_first_freq + 1;
 
     % Create data structure from the table
     if parameter == "swden"
         % Carry over time columns and add frequency and spectum
-        data_struct = table2struct(file_table(:,1:5), 'ToScalar', true);
-        data_struct.frequency = transpose(cellfun(@str2num, file_header(5:end)));
+        data_struct = table2struct( ...
+            file_table(:, 1:(column_first_freq-1)), ...
+            'ToScalar', true);
+        data_struct.frequency = transpose(cellfun( ...
+            @str2num, ...
+            file_header((column_first_freq - 1):end))); % note no time column
         data_struct.spectrum = transpose(table2array( ...
-            file_table(:, 6:width(file_table))));           % [freq, time]
+            file_table(:, column_first_freq:width(file_table)))); % [freq, time]
     else
         % Keep all columns as-is
         data_struct = table2struct(file_table, 'ToScalar', true);
