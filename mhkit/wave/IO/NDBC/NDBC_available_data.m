@@ -99,32 +99,19 @@ for i = 1:length(data_lines)
     end
 end
 
-
-
-% py.importlib.import_module('mhkit');
-% 
-% if (isa(options.proxy,'py.NoneType')~=1)
-%     options.proxy=py.dict(options.proxy);
-% end
-% 
-% datapd=py.mhkit.wave.io.ndbc.available_data(parameter,pyargs('buoy_number',options.buoy_number,...
-%       'proxy',options.proxy));
-% datali = cell(py.list(py.numpy.nditer(datapd.values,pyargs("flags",{"refs_ok"}))));
-% sha=cell(datapd.values.shape);
-% x=int64(sha{1,1});
-% y=int64(sha{1,2});
-% 
-% 
-% siti=size(datali);
-% for i=1:siti(2)
-%     st{i} = string(py.str(datali{i}));
-% 
-% end
-% st2 = reshape(st,x,y);
-% 
-% station_id = [st2{:,1}];
-% year = [st2{:,2}];
-% file = [st2{:,3}];
-% 
-% varnames = {'Station_id','year','file'};
-% available_data = table(station_id',year',file','VariableNames',varnames);
+% Filter results to a single buoy if a buoy is specified and it exists
+if options.buoy_number ~= ""
+    indices = ismember(available_data.Station_id, options.buoy_number);
+    if any(indices)
+        for field_name = fieldnames(available_data)'
+            if length(available_data.(field_name{1})) == length(indices)
+                available_data.(field_name{1}) = ...
+                    available_data.(field_name{1})(indices);
+            end
+        end
+    else
+        warning('MATLAB:NDBC_available_data', ...
+                'Buoy number "%s" could not be found.', ...
+                options.buoy_number);
+    end
+end
