@@ -31,6 +31,10 @@ function figure=plot_tidal_phase_probability(data, flood, ebb, ...
 %       title for the plot 
 %       to call: plot_tidal_phase_probability(data, flood, ebb,"title",title)
 %
+%    savepath: string (optional)
+%       path and filename to save figure.
+%       to call: plot_tidal_phase_probability(data, flood, ebb,"savepath",savepath)
+%
 % Returns
 % ---------
 %   figure: stacked bar graph of the probability of exceedance in 
@@ -43,6 +47,7 @@ arguments
 	ebb
     options.bin_size = 0.1; % m/s
     options.title = "";
+    options.savepath = "";
 end
 
 %check to see if the first input argument is a structure
@@ -103,5 +108,10 @@ ylabel('Probability','FontSize',20);
 legend('Ebb','Flood')
 grid on
 title(options.title)
+
+len = strlength(options.savepath);
+if len > 1
+    saveas(figure, options.savepath);
+end 
 
 hold off
