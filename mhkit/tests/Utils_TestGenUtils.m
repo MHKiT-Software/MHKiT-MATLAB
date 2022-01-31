@@ -42,6 +42,34 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             % check if answer is correct
             assertEqual(testCase,answer,time);
         end
+
+        function test_magnitude_phase(testCase)
+            % 2-d function
+            magnitude = 9;
+            y = sqrt(1/2*magnitude^2); x=y;
+            phase = atan2(y,x);
+            [mag, theta] = magnitude_phase({x; y});
+            assert(all(magnitude == mag))
+            assert(all(phase == theta))
+            xx = [x,x]; yy = [y,y];
+            [mag, theta] = magnitude_phase({xx; yy});
+            assert(all(magnitude == mag))
+            assert(all(phase == theta))
+            % 3-d function
+            magnitude = 9;
+            y = sqrt(1/3*magnitude^2); x=y; z=y;
+            phase1 = atan2(y,x);
+            phase2 = atan2(sqrt(x.^2 + y.^2),z);
+            [mag, theta, phi] = magnitude_phase({x; y; z});
+            assert(all(magnitude == mag))
+            assert(all(phase1 == theta))
+            assert(all(phase2 == phi))
+            xx = [x,x]; yy = [y,y]; zz = [z,z];
+            [mag, theta, phi] = magnitude_phase({xx; yy; zz});
+            assert(all(magnitude == mag))
+            assert(all(phase1 == theta))
+            assert(all(phase2 == phi))
+        end
     end
 end  
 
