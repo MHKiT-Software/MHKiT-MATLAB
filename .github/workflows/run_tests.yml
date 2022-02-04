@@ -1,0 +1,57 @@
+name: Run MATLAB tests
+
+on:
+  push:
+    branches: [ github_actions ]
+  pull_request:
+    branches: [ github_actions ]
+
+jobs:
+  main:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest] # windows-latest
+        python-version: [3.8]
+    runs-on: ${{ matrix.os }}
+    env:
+      mhkit-python-dir: 'MHKiT-Python'
+    steps:
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v2
+      # - name: Check out MHKiT-Python
+      #   uses: actions/checkout@v2
+      #   with:
+      #     repository: 'MHKiT-Software/MHKiT-Python'
+      #     path: ${{env.mhkit-python-dir}}
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v1
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      # - name: Install mhkit module (from source)
+      #   run: python -m pip install -e . "matplotlib<3.4.2"
+      #   working-directory: ${{env.mhkit-python-dir}}
+      - name: Install mhkit module (from PyPI)
+        run: python -m pip install "mhkit<4" "matplotlib<3.4.2"
+      - name: Install mhkit-python-utils module
+        run: python -m pip install -e .
+      - name: Create MATLAB batch command
+        shell: bash
+        run: echo "COMMAND=pyenv('ExecutionMode', 'OutOfProcess'), 
+                           version, 
+                           matlab.addons.toolbox.installToolbox('mhkit.mltbx'), 
+                           import mhkit.*, 
+                           import matlab.unittest.TestSuite, 
+                           import matlab.unittest.TestRunner, 
+                           import matlab.unittest.selectors.HasName, 
+                           import matlab.unittest.constraints.StartsWithSubstring, 
+                           testFile = ['mhkit' filesep 'tests' filesep 'Tidal_TestIO.m'], 
+                           suite = TestSuite.fromFile(testFile, HasName(StartsWithSubstring('Tidal_TestIO/test_load_noaa_data'))), 
+                           runner = TestRunner.withTextOutput('LoggingLevel', 4, 'OutputDetail', 3),
+                           results = runner.run(suite), 
+                           assertSuccess(results)" >> "$GITHUB_ENV"
+      - name: Install and test MHKiT-MATLAB
+        run: matlab -batch "${{ env.COMMAND }}"
+
