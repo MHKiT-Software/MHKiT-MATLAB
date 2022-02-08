@@ -51,18 +51,13 @@ classdef Wave_TestIO < matlab.unittest.TestCase
         
         function test_ndbc_available_data(testCase)
             data = NDBC_available_data('swden', 'buoy_number','46029');
-            columns = data.Properties.VariableNames;
-            columns_expected = [{'Station_id'},{'year'},{'file'}];
+            columns = fieldnames(data);
+            columns_expected = [{'Station_id'};{'year'};{'file'}];
             assertEqual(testCase,columns,columns_expected);
-            number_years = length(data.year);
+            unique_years = unique(data.year);
+            number_years = length(unique_years);
             expected_years = [1996:1996+(number_years-1)]';
-            assertEqual(testCase,str2num(char(data.year)),expected_years);
-            
-            h = height(data);
-            w = width(data);
-            assertEqual(testCase,[h,w],[number_years,3]);
-            
-         
+            assertEqual(testCase,unique_years,expected_years);
         end
         
         function test_ndbc_request_data(testCase)
@@ -75,10 +70,10 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             file = gunzip(full_file_name);
             expected_data = readmatrix(file{1});
-            temp = table2array(ndbc_data(:,6));
+            temp = table2array(ndbc_data(:,7));
             data_array = table2array(ndbc_data(:,[1,2,3,4]));
             temp = cellfun(@transpose,temp,'UniformOutput',false);
-            cat_data = cat(2,data_array{:},temp{:});
+            cat_data = cat(2,[data_array{:}],temp{:});
             
             assertEqual(testCase,cat_data,expected_data(2:end,:));
             
