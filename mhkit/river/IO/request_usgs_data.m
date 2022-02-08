@@ -60,6 +60,8 @@ arguments
     options.write_json string = "";
 end
 
+MAX_RETRIES = 5;                         % number of query retries if error
+
 % Formulate query
 if strcmp(options.data_type, 'Daily')
     data_url = "https://waterservices.usgs.gov/nwis/dv";
@@ -82,7 +84,19 @@ end
 disp("Data request URL: " + data_url + api_query)
 
 % Submit query and get data
-response = webread(data_url + api_query);
+for i = 0:MAX_RETRIES
+    try
+        response = webread(data_url + api_query);
+        break;
+    catch ME
+        if i == MAX_RETRIES
+            disp(['MATLAB:request_usgs_data: ', ME.identifier]);
+            rethrow(ME)
+        else
+            pause(1);   % pause(seconds) and retry query
+        end
+    end
+end
 
 % Parse data label and units
 v = response.value.timeSeries.variable.variableDescription;

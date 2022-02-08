@@ -60,6 +60,7 @@ arguments
     options.write_json string = "";
 end
 
+MAX_RETRIES = 5;                         % number of query retries if error
 REQUIRED_FIELDS = {'id', 'name', 'lat', 'lon', 't'};    % 't' is time
 MAX_DAYS_PER_QUERY = 31;
 
@@ -82,7 +83,7 @@ while start_period_datetime <= end_datetime
     % Query data in period
     [data_in_period, timeseries_fields] = request_noaa_data_restricted_duration( ...
         station, parameter, start_period, end_period, ...
-        REQUIRED_FIELDS, MAX_DAYS_PER_QUERY);
+        MAX_RETRIES, REQUIRED_FIELDS, MAX_DAYS_PER_QUERY);
     
     if isempty(fieldnames(data_in_period)) || isempty(timeseries_fields)
         % do nothing
@@ -111,7 +112,8 @@ end
 end
 
 function [data, timeseries_fields] = request_noaa_data_restricted_duration( ...
-        station, parameter, start_date, end_date, REQUIRED_FIELDS, MAX_DAYS_PER_QUERY)
+        station, parameter, start_date, end_date, ...
+        MAX_RETRIES, REQUIRED_FIELDS, MAX_DAYS_PER_QUERY)
     % Verify dates are less than MAX_DAYS_PER_QUERY apart
     start_datetime = datetime(start_date, ...
         'InputFormat', 'yyyyMMdd', ...
@@ -142,7 +144,19 @@ function [data, timeseries_fields] = request_noaa_data_restricted_duration( ...
     disp("Data request URL: " + data_url + api_query)
     
     % Submit query and get data
-    response = webread(data_url + api_query);
+    for i = 0:MAX_RETRIES
+        try
+            response = webread(data_url + api_query);
+            break;
+        catch ME
+            if i == MAX_RETRIES
+                disp(['MATLAB:request_noaa_data: ', ME.identifier]);
+                rethrow(ME)
+            else
+                pause(1);   % pause(seconds) and retry query
+            end
+        end
+    end
     
     % Organize a structure containing the metadata and timeseries data
     is_metadata_found = false;
