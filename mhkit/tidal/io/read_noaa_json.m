@@ -48,22 +48,11 @@ y=int64(sha{1,2});
 vals=reshape(vals,[x,y]);
 si=size(vals);
 
- for i=1:si(2)
-    test=string(py.str(vv{i}));
-    newname=split(test,",");
-    
-    data.(newname(1))=vals(:,i);
-    
- end
- 
-vals=reshape(vals,[x,y]);
-si=size(vals);
-
- for i=1:si(2)
+for i=1:si(2)
     test=string(py.str(vv{i}));
     newname=split(test,",");
     data.(newname(1))=vals(:,i);
- end
+end
  
 times = double(    ...
      py.mhkit_python_utils.pandas_dataframe.datetime_index_to_ordinal(data_df));
