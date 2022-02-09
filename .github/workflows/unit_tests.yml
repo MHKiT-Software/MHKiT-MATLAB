@@ -1,4 +1,4 @@
-name: Run MATLAB tests
+name: Unit Tests
 
 on:
   push:
@@ -49,4 +49,3 @@ jobs:
                            assertSuccess(results)" >> "$GITHUB_ENV"
       - name: Install and test MHKiT-MATLAB
         run: matlab -batch "${{ env.COMMAND }}"
-
