@@ -56,6 +56,7 @@ arguments
     options.all_2D_variables logical = false;
 end
 
+MAX_RETRIES = 5;                         % number of query retries if error
 DATA_GROUPS = {'wave', 'sst', 'gps', 'dwr', 'meta'};
 
 if isnan(options.nc) && options.station_number == ""
@@ -76,7 +77,7 @@ url_query = get_url_query(options);
 
 % Query info on buoy and available data (can't return all vars like Python)
 % converted to table to query like: nc_info.Variables{'waveTime', 'Size'}{1};
-nc_info = ncinfo(url_query);
+nc_info = ncinfo_autoretry(MAX_RETRIES, url_query);
 nc_info.Variables = struct2table(nc_info.Variables);
 nc_info.Variables.Properties.RowNames = nc_info.Variables.Name;
 
@@ -84,8 +85,9 @@ nc_info.Variables.Properties.RowNames = nc_info.Variables.Name;
 data_to_query = make_data_list(options, nc_info, DATA_GROUPS);
 
 % Create list of start and end datetimes/indices for which to query data
-datetimes = start_end_datetimes(options);
-indices = data_indices(url_query, datetimes, data_to_query, DATA_GROUPS);
+datetimes = start_end_datetimes(options, MAX_RETRIES);
+indices = data_indices(url_query, datetimes, data_to_query, ...
+    DATA_GROUPS, MAX_RETRIES);
 
 % Query data and compile into output structure
 for i = 1:length(data_to_query)                     % for each data metric
@@ -100,7 +102,7 @@ for i = 1:length(data_to_query)                     % for each data metric
     if type ~= "data" || shape == "0D"
         % Query it all and add to output
         try
-            value = ncread(url_query, name);
+            value = ncread_autoretry(MAX_RETRIES, url_query, name);
             data.(type).(group_name).(name) = value;
         catch
             warning("MATLAB:cdip_request_parse_workflow", ...
@@ -121,11 +123,11 @@ for i = 1:length(data_to_query)                     % for each data metric
             index_count = index_end - index_start + 1;
             try
                 if shape == "2D"
-                    value = ncread(url_query, name, ...
+                    value = ncread_autoretry(MAX_RETRIES, url_query, name, ...
                                    [1, index_start], [Inf, index_count]);
                     value = value';
                 elseif shape == "1D"
-                    value = ncread(url_query, name, ...
+                    value = ncread_autoretry(MAX_RETRIES, url_query, name, ...
                                    index_start, index_count);
                 end
             catch
@@ -154,7 +156,7 @@ end
 
 % Add buoy name to output
 data.metadata.name = deblank(convertCharsToStrings( ...
-    ncread(url_query, 'metaStationName')));
+    ncread_autoretry(MAX_RETRIES, url_query, 'metaStationName')));
 end
 
 
@@ -186,7 +188,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function indices = data_indices(url_query, datetime_ranges, ...
-                                data_to_query, all_groups)
+                                data_to_query, all_groups, max_retries)
 %DATA_INDICES Returns data indices to query for each group and range
 % e.g.,  indices.wave.start = <index>
 %        indices.wave.end = <index>
@@ -195,7 +197,8 @@ groups_in_data = data_groups(data_to_query, all_groups);
 
 for i = 1:length(groups_in_data)
     try
-        posixtimes = ncread(url_query, strcat(groups_in_data{i}, 'Time'));
+        posixtimes = ncread_autoretry( ...
+            max_retries, url_query, strcat(groups_in_data{i}, 'Time'));
     catch
         continue
     end
@@ -319,7 +322,68 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function datetimes = start_end_datetimes(options)
+function info = ncinfo_autoretry(MAX_RETRIES, source, name)
+%NCINFO_AUTORETRY Query info and auto retry until success or max tries met
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Submit query and get info
+for i = 0:MAX_RETRIES
+    try
+        switch nargin
+            case 2
+                info = ncinfo(source);
+            case 3
+                info = ncinfo(source, name);
+            otherwise
+                MException('MATLAB:cdip_request_parse_workflow:ncinfo_autoretry ', ...
+                    'Invalid number of arguments');
+        end
+        break;
+    catch ME
+        if i == MAX_RETRIES
+            rethrow(ME)
+        else
+            pause(0.5);   % pause(seconds) and retry query
+        end
+    end
+end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function data = ncread_autoretry(MAX_RETRIES, source, varname, ...
+                                 start, count, stride)
+%NCREAD_AUTORETRY Query data and auto retry until success or max tries met
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Submit query and get info
+for i = 0:MAX_RETRIES
+    try
+        switch nargin
+            case 3
+                data = ncread(source, varname);
+            case 5
+                data = ncread(source, varname, start, count);
+            case 6
+                data = ncread(source, varname, start, count, stride);
+            otherwise
+                MException('MATLAB:cdip_request_parse_workflow:ncread_autoretry ', ...
+                    'Invalid number of arguments');
+        end
+        break;
+    catch ME
+        if i == MAX_RETRIES
+            rethrow(ME)
+        elseif ME.identifier == "MATLAB:imagesci:netcdf:unknownLocation"
+            break;          % no need to retry
+        else
+            pause(0.5);     % pause(seconds) and retry query
+        end
+    end
+end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function datetimes = start_end_datetimes(options, max_retries)
 %START_END_DATETIMES Creates structure of start and end datetimes to query
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 datetimes.start = {};
@@ -335,7 +399,7 @@ if options.years(1) > 0     % invalid/missing value = -1
 else
     % If start or end date is needed, query times from the netCDF data
     if options.start_date == "" && options.end_date == ""
-        waveTime = ncread(url_query, 'waveTime');
+        waveTime = ncread_autoretry(max_retries, url_query, 'waveTime');
     end
     % Substitute in netCDF start/end dates as needed
     if options.start_date ~= ""
