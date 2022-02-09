@@ -3,14 +3,12 @@ classdef River_TestIO < matlab.unittest.TestCase
     methods (Test)
 
         function test_load_usgs_data_instantaneous(testCase)
-            
             relative_file_name = '../../examples/data/river/USGS_08313000_Jan2019_instantaneous.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             data = read_usgs_file(full_file_name);
 
             assertEqual(testCase,data.units, struct('Discharge', " cubic feet per second"));
             assertEqual(testCase,size(data.Discharge), [2972 1]); % 4 data points are missing
-        
         end
 
         function test_load_usgs_data_daily(testCase)

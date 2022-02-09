@@ -38,7 +38,6 @@ def lis(li,app):
 def datetime_index_to_ordinal(df):
     
     def to_ordinal_fraction(x):
-        
         day = x.toordinal()
         dt = datetime.combine(x.date(), datetime.min.time(), x.tzinfo)
         fraction = (x.to_pydatetime() - dt).total_seconds() / 86400.
