@@ -4,22 +4,57 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
     %   archives and disseminates coastal environment data.
     %   https://cdip.ucsd.edu/
     
-%     properties
-%         Property1
-%     end
-    
     methods (Test)
-%         function obj = Wave_TestIOcdip(inputArg1,inputArg2)
-%             %WAVE_TESTIOCDIP Construct an instance of this class
-%             %   Detailed explanation goes here
-%             obj.Property1 = inputArg1 + inputArg2;
-%         end
-%         
-%         function outputArg = method1(obj,inputArg)
-%             %METHOD1 Summary of this method goes here
-%             %   Detailed explanation goes here
-%             outputArg = obj.Property1 + inputArg;
-%         end
+
+        function test_get_netcdf_variables_all2Dvars(testCase)
+            vars2D = {'waveEnergyDensity', 'waveMeanDirection', ...
+                      'waveA1Value', 'waveB1Value', 'waveA2Value', ...
+                      'waveB2Value', 'waveCheckFactor', 'waveSpread', ...
+                      'waveM2Value', 'waveN2Value'};
+
+            data = cdip_request_parse_workflow( ...
+                'station_number', '067', ...
+                'years', 1996, ...
+                'all_2D_variables', true);
+
+            assertTrue(testCase, all(ismember(vars2D, fieldnames(data.data.wave2D))));
+        end
+
+        function test_get_netcdf_variables_params(testCase)
+            parameters = {'waveHs', 'waveTp', 'notParam', 'waveMeanDirection'};
+
+            data = cdip_request_parse_workflow( ...
+                'station_number', '067', ...
+                'years', 1996, ...
+                'parameters', parameters);
+            
+            assertTrue(testCase, all(ismember({'waveHs', 'waveTp'}, ...
+                fieldnames(data.data.wave))));
+            assertTrue(testCase, all(ismember({'waveMeanDirection'}, ...
+                fieldnames(data.data.wave2D))));
+            assertTrue(testCase, all(ismember({'waveFrequency'}, ...
+                fieldnames(data.metadata.wave))));
+        end
+
+        function test_get_netcdf_variables_time_slice(testCase)
+            start_date = '1996-10-01';
+            end_date = '1996-10-31';
+
+            data = cdip_request_parse_workflow( ...
+                'station_number', '067', ...
+                'start_date', start_date, ...
+                'end_date', end_date, ...
+                'parameters', {'waveHs'});
+            
+            start_dt = datetime(start_date, ...
+                'InputFormat', 'yyyy-MM-dd', ...
+                'TimeZone', 'UTC');
+            end_dt = datetime(end_date, ...
+                'InputFormat', 'yyyy-MM-dd', ...
+                'TimeZone', 'UTC');
+            assertTrue(testCase, data.data.wave.waveTime(end) <= end_dt);
+            assertTrue(testCase, data.data.wave.waveTime(1) >= start_dt);
+        end
 
         function test_request_parse_workflow_multiyear(testCase)
             station_number = '067';
@@ -32,19 +67,15 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
                 'years', years, ...
                 'parameters', parameters);
 
-            assertEqual(testCase,1,1);
+            expected_index0 = datetime(year1, 1, 1, 'TimeZone', 'UTC');
+            expected_index_final = datetime(year2, 12, 31, 'TimeZone', 'UTC');
 
-%             expected_index0 = datetime(year1, 1, 1);
-%             expected_index_final = datetime(year2, 12, 30); % last data on 30th
-%
-%             wave1D = data['data']['wave'];
-%             assertEqual(testCase,wave1D.index[0].floor('d').to_pydatetime(), expected_index0);
-%             assertEqual(testCase,wave1D.index[-1].floor('d').to_pydatetime(), expected_index_final);
-% 
-%             for key,wave2D  in data['data']['wave2D'].items():
-%                 assertEqual(wave2D.index[0].floor('d').to_pydatetime(), expected_index0);
-%                 assertEqual(wave2D.index[-1].floor('d').to_pydatetime(), expected_index_final);
-%             end
+            assertEqual(testCase, dateshift( ...
+                data.data.wave.waveTime(1), 'start', 'day'), ...
+                expected_index0);
+            assertEqual(testCase, dateshift( ...
+                data.data.wave.waveTime(end), 'start', 'day'), ...
+                expected_index_final);
         end
     end
 end
