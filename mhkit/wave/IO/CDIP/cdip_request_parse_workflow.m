@@ -48,7 +48,7 @@ arguments
     options.nc = nan;
     options.station_number string = "";
     options.parameters (1,:) string = "";
-    options.years (1,:) {mustBeInteger} = nan;
+    options.years (1,:) {mustBeInteger} = -1;
     options.start_date string = "";
     options.end_date string = "";
     options.data_type string {mustBeMember( ...
@@ -107,7 +107,13 @@ for i = 1:length(data_to_query)                     % for each data metric
                     "Data name '%s' not found.", name);
         end
     elseif type == "data" && (shape == "2D" || shape == "1D")
-        N_time_ranges = length(indices.(group).start);
+        % number of group time ranges within desired time ranges, if any
+        if isfield(indices, group)
+            N_time_ranges = length(indices.(group).start);
+        else
+            N_time_ranges = 0;
+        end
+
         for j = 1:N_time_ranges
             % Query data
             index_start = indices.(group).start(j);
@@ -188,7 +194,12 @@ function indices = data_indices(url_query, datetime_ranges, ...
 groups_in_data = data_groups(data_to_query, all_groups);
 
 for i = 1:length(groups_in_data)
-    posixtimes = ncread(url_query, strcat(groups_in_data{i}, 'Time'));
+    try
+        posixtimes = ncread(url_query, strcat(groups_in_data{i}, 'Time'));
+    catch
+        continue
+    end
+
     datetimes = datetime(posixtimes, ...
                          'ConvertFrom', 'posixtime', ...
                          'TimeZone', 'UTC');
@@ -196,8 +207,10 @@ for i = 1:length(groups_in_data)
         index_start = find(datetimes>=datetime_ranges.start{j}, 1, 'first');
         index_end = find(datetimes<=datetime_ranges.end{j}, 1, 'last');
 
-        indices.(groups_in_data{i}).start(j) = index_start;
-        indices.(groups_in_data{i}).end(j) = index_end;
+        if ~isempty(index_start) && ~isempty(index_end)
+            indices.(groups_in_data{i}).start(j) = index_start;
+            indices.(groups_in_data{i}).end(j) = index_end;
+        end
     end
 end
 end
@@ -227,11 +240,15 @@ else
 end
 
 % Determine type
-time_length = nc_info.Variables{strcat(group, 'Time'), 'Size'}{1};
-if group ~= "other" && size(end) == time_length
-    type = 'data';
-else
-    type = 'metadata';
+try
+    time_length = nc_info.Variables{strcat(group, 'Time'), 'Size'}{1};
+    if group ~= "other" && size(end) == time_length
+        type = 'data';
+    else
+        type = 'metadata';
+    end
+catch
+    type = 'metadata';      % if there is no '..Time' metric in group
 end
 end
 
@@ -273,10 +290,13 @@ end
 function data_to_query = make_data_list(options, nc_info, DATA_GROUPS)
 %MAKE_DATA_LIST Compiles list of data to query
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 data_2D_names = find_data_2D_names(nc_info);
 
-if options.parameters ~= ""     % if data to query is specified
-    data_to_query = options.parameters;
+if options.parameters ~= ""               % if data to query is specified
+    data_to_query = intersect( ...        % ignore non-existant parameters
+        options.parameters, ...
+        nc_info.Variables.Properties.RowNames);
     if options.all_2D_variables == true
         data_to_query = union(data_to_query, data_2D_names);   % add all 2D
     end
@@ -289,7 +309,7 @@ if options.parameters ~= ""     % if data to query is specified
     groups_in_data = setdiff(groups_in_data, 'meta'); % omit 'meta'
     data_to_query = union(data_to_query, strcat(groups_in_data, 'Time'));
 else                            % else query all data except maybe 2D data
-    data_to_query = {nc_info.Variables.Name};
+    data_to_query = nc_info.Variables.Name';
     if options.all_2D_variables == false
         data_to_query = setdiff(data_to_query, data_2D_names);  % remove 2D
     end
@@ -304,7 +324,7 @@ function datetimes = start_end_datetimes(options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 datetimes.start = {};
 datetimes.end = {};
-if ~isnan(options.years)
+if options.years(1) > 0     % invalid/missing value = -1
     % Formulate start and end dates from years parameter
     for i = 1:length(options.years)
         datetimes.start{end+1} = datetime(options.years(i), 1, 1, 0, 0, 0, ...
@@ -319,23 +339,23 @@ else
     end
     % Substitute in netCDF start/end dates as needed
     if options.start_date ~= ""
-        datetimes.start(1) = datetime(options.start_date, ...
+        datetimes.start{1} = datetime(options.start_date, ...
                                       'InputFormat', 'yyyy-MM-dd', ...
                                       'TimeZone', 'UTC');
     else
-        datetimes.start(1) = datetime(waveTime(1), ...
+        datetimes.start{1} = datetime(waveTime(1), ...
                                       'ConvertFrom', 'posixtime', ...
                                       'TimeZone', 'UTC');
     end
     if options.end_date ~= ""
-        datetimes.end(1) = datetime(options.end_date, ...
+        datetimes.end{1} = datetime(options.end_date, ...
                                     'InputFormat', 'yyyy-MM-dd', ...
                                     'TimeZone', 'UTC');
-        datetimes.end(1).Hour = 23;
-        datetimes.end(1).Minute = 59;
-        datetimes.end(1).Second = 59;
+        datetimes.end{1}.Hour = 23;
+        datetimes.end{1}.Minute = 59;
+        datetimes.end{1}.Second = 59;
     else
-        datetimes.end(1) = datetime(waveTime(end), ...
+        datetimes.end{1} = datetime(waveTime(end), ...
                                     'ConvertFrom', 'posixtime', ...
                                     'TimeZone', 'UTC');
     end
