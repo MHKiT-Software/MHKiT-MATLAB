@@ -29,26 +29,25 @@ arguments
     Dp (1,:) double
     time (1,:) double
     options.buoy_title string = "";
-    options.ax = nan;
 end
 
-timestamp = datetime(time, 'convertfrom','posixtime');
+timestamps = datetime(time, 'convertfrom','posixtime');
 title_text = sprintf("%s to %s", ...
-    datestr(timestamp(1), 'yyyy-mm-dd'), ...
-    datestr(timestamp(end), 'yyyy-mm-dd'));
+    datestr(timestamps(1), 'yyyy-mm-dd'), ...
+    datestr(timestamps(end), 'yyyy-mm-dd'));
 
 % Create figure window
 f = figure( ...
     'Name', 'Compendium', ...
     'visible', 'off');                          % hide before resizing
-f.Position(3:4) = 2 * f.Position(3:4);
+f.Position(3:4) = 2 * f.Position(3:4);          % double default size
 movegui(f, 'center');
 set(f, 'visible', 'on');
 
 % Hs subplot
 ax1 = subplot(3, 1, 1);
 yyaxis left
-plot(timestamp, Hs)
+plot(timestamps, Hs)
 title(title_text, "FontSize", 15)
 grid on
 ylabel('Hs [m]', "FontSize", 14)
@@ -61,14 +60,14 @@ ylabel('Hs [ft]', "FontSize", 14)
 
 % Tp subplot
 ax2 = subplot(3, 1, 2);
-plot(timestamp, Tp)
+plot(timestamps, Tp)
 grid on
 set(ax2, 'xticklabel', [])                      % hide x-axis labels
 ylabel('Tp [s]', "FontSize", 14)
 
 % Dp subplot
 ax3 = subplot(3, 1, 3);
-scatter(timestamp, Dp, 10, "filled")
+scatter(timestamps, Dp, 10, "filled")
 ylim([0 360])
 yticks(0:90:360)
 grid on
