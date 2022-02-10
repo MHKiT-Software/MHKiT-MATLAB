@@ -170,7 +170,9 @@ widthFlag =0;
 
 boxColor = [0.0005    0.3593    0.7380];
 wisColor = [0 0 0]+.3;
-meanColor = [0.9684    0.2799    0.0723];
+% meanColor = [0.9684    0.2799    0.0723];
+meanColor = [0.4660    0.6740    0.1880];
+medianColor = [0.9684    0.2799    0.0723];
 
 percentileNum = 25; % for the main quantiles
 percentileNum2 = 9; % for the whisker ends
@@ -251,7 +253,9 @@ if stdFlag
     stdX = std(x);
     wisEdge = [meanX-stdX meanX+stdX];
 else
-    wisEdge = prctile(x,[percentileNum2  100-percentileNum2]);
+%     wisEdge = prctile(x,[percentileNum2  100-percentileNum2]);
+    wisEdge = [max(boxEdge(1) - 1.5 * IQR, min(x)), ...
+               min(boxEdge(2) + 1.5 * IQR, max(x))];
 end
 
 %% display all the elements for the box plot
@@ -263,9 +267,10 @@ if horizontalFlag
     hReg2(end+1) = rectangle('Position',[boxEdge(1),y-barWidth/2,IQR,barWidth],'linewidth',linewidth,'EdgeColor',boxColor,'facecolor',[1 1 1]);
 
     hold on;
-    hReg2(end+1) = plot([medianX medianX],[y-barWidth/2 y+barWidth/2],'color',meanColor,'linewidth',linewidth);
+    hReg2(end+1) = plot([medianX medianX],[y-barWidth/2 y+barWidth/2],'color',medianColor,'linewidth',linewidth);
     if meanFlag
-        hReg2(end+1) = plot(meanX,y,'+','color',meanColor,'linewidth',linewidth,'markersize',10);
+%         hReg2(end+1) = plot(meanX,y,'+','color',meanColor,'linewidth',linewidth,'markersize',10);
+        hReg2(end+1) = plot([meanX meanX],[y-barWidth/2 y+barWidth/2],'color',meanColor,'linewidth',linewidth*0.7);
     end
     hReg2(end+1) = plot([boxEdge(1) boxEdge(2)],[y-barWidth/2 y-barWidth/2],'linewidth',linewidth,'color',boxColor);
 
@@ -277,9 +282,10 @@ else %
     hReg2(end+1) = rectangle('Position',[y-barWidth/2,boxEdge(1),barWidth,IQR],'linewidth',linewidth,'EdgeColor',boxColor,'facecolor',[1 1 1]);
     hold on;
     
-    hReg2(end+1) = plot([y-barWidth/2 y+barWidth/2],[medianX medianX],'color',meanColor,'linewidth',linewidth);
+    hReg2(end+1) = plot([y-barWidth/2 y+barWidth/2],[medianX medianX],'color',medianColor,'linewidth',linewidth);
     if meanFlag
-        hReg2(end+1) = plot(y,meanX,'+','linewidth',linewidth,'color',meanColor,'markersize',10);
+%         hReg2(end+1) = plot(y,meanX,'+','linewidth',linewidth,'color',meanColor,'markersize',10);
+        hReg2(end+1) = plot([y-barWidth/2 y+barWidth/2],[meanX meanX],'color',meanColor,'linewidth',linewidth*0.7);
     end
     hReg2(end+1) = plot([y-barWidth/2 y-barWidth/2],[boxEdge(1) boxEdge(2)],'linewidth',linewidth,'color',boxColor);
 
@@ -299,10 +305,10 @@ if outlierFlag % but only if you want to
     xx=x(I);
     yy=I*0+y;
     yy=yy(I);
-    yy = jitter(xx,yy,toScale);
+%     yy = jitter(xx,yy,toScale);
 
     if ~isempty(yy)
-        yy = jitter(xx,yy,toScale);
+%         yy = jitter(xx,yy,toScale);
 
         maxPointHeight = 2.5;
         yy = (yy-y)*4+y;
@@ -310,9 +316,9 @@ if outlierFlag % but only if you want to
 
         if ~isempty(xx)
             if horizontalFlag
-                hReg2(6) = plot(xx,yy,'o','linewidth',linewidth,'color',wisColor);
+                hReg2(6) = plot(xx,yy,'+','linewidth',linewidth*0.6,'color',medianColor);
             else
-                 hReg2(6) = plot(yy,xx,'o','linewidth',linewidth,'color',wisColor);
+                 hReg2(6) = plot(yy,xx,'+','linewidth',linewidth*0.6,'color',medianColor);
             end
         end
     end
