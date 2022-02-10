@@ -78,6 +78,22 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
                 expected_index_final);
         end
 
+        function test_plot_boxplot(testCase)
+            data = cdip_request_parse_workflow( ...
+                'station_number', '067', ...
+                'years', 2011, ...
+                'parameters', {'waveHs'}, ...
+                'all_2D_variables', false);
+            fig = plot_boxplot( ...
+                data.data.wave.waveHs, ...
+                posixtime(data.data.wave.waveTime));
+
+            filename = fullfile(tempdir, 'wave_plot_boxplot.png');
+            saveas(fig, filename);
+            assertTrue(testCase, isfile(filename));
+            delete(filename);
+        end
+
         function test_plot_compendium(testCase)
             data = cdip_request_parse_workflow( ...
                 'station_number', '067', ...
@@ -109,7 +125,7 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
                 data.data.wave.waveDp, ...
                 posixtime(data.data.wave.waveTime));
 
-            filename = fullfile(tempdir, 'wave_plot_compendium.png');
+            filename = fullfile(tempdir, 'wave_plot_compendium2.png');
             saveas(fig, filename);
             assertTrue(testCase, isfile(filename));
             delete(filename);
