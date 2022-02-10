@@ -12,10 +12,10 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             data = read_NDBC_file(full_file_name);
             datarm1 = rmfield(data,'units');
             datarm2 = rmfield(datarm1,'time');
-            expected_index0 = datestr(datenum(2019,4,2,13,50,0));
+            expected_index0 = posixtime(datetime(2019,4,2,13,50,0));
             
             assertEqual(testCase,fieldnames(data),fieldnames(Obj.expected_columns_metRT));      
-            assertEqual(testCase,datestr(data.time(1)), expected_index0);
+            assertEqual(testCase,data.time(1),expected_index0);
             assertEqual(testCase,size(getfield(datarm2,'WDIR')), [6490 1]);
             assertEqual(testCase,size(getfield(datarm2,'TIDE')), [6490 1]);
             assertEqual(testCase,data.units,Obj.expected_units_metRT);
@@ -31,10 +31,10 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             data = read_NDBC_file(full_file_name);
             datarm1 = rmfield(data,'units');
             datarm2 = rmfield(datarm1,'time');
-            expected_index0 = datestr(datenum(2019,8,1,0,0,0));
+            expected_index0 = posixtime(datetime(2019,8,1,0,0,0));
             
             assertEqual(testCase,fieldnames(data),fieldnames(Obj.expected_columns_metH));
-            assertEqual(testCase,datestr(data.time(1)), expected_index0);
+            assertEqual(testCase,data.time(1),expected_index0);
             assertEqual(testCase,size(getfield(datarm2,'WDIR')), [4464 1]);
             assertEqual(testCase,size(getfield(datarm2,'TIDE')), [4464 1]);
             assertEqual(testCase,data.units,Obj.expected_units_metH);
