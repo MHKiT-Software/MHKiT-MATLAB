@@ -400,6 +400,7 @@ if options.years(1) > 0     % invalid/missing value = -1
 else
     % If start or end date is needed, query times from the netCDF data
     if options.start_date == "" && options.end_date == ""
+        url_query = get_url_query(options);
         waveTime = ncread_autoretry(url_query, 'waveTime');
     end
     % Substitute in netCDF start/end dates as needed
