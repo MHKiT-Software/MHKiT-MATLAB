@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest] # windows-latest
+        os: [macos-latest, ubuntu-latest, windows-latest]
         python-version: [3.7, 3.8, 3.9]
     runs-on: ${{ matrix.os }}
     env:
@@ -31,21 +31,24 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install mhkit module (from source)
-        run: python -m pip install -e . "matplotlib<3.4.2"
+        run: python -m pip install -e .
         working-directory: ${{env.mhkit-python-dir}}
       - name: Install mhkit-python-utils module
         run: python -m pip install -e .
-      - name: Create MATLAB batch command
+      - name: Set MATLAB OutOfProcess Python execution mode
         shell: bash
-        run: echo "COMMAND=pyenv('ExecutionMode', 'OutOfProcess'), 
-                           version, 
-                           addpath(genpath('mhkit')), 
-                           import matlab.unittest.TestSuite, 
-                           import matlab.unittest.TestRunner, 
-                           testFolder = ['mhkit' filesep 'tests'], 
-                           suite = TestSuite.fromFolder(testFolder), 
-                           runner = TestRunner.withTextOutput,
-                           results = runner.run(suite), 
-                           assertSuccess(results)" >> "$GITHUB_ENV"
+        run: echo "pyenv('ExecutionMode', 'OutOfProcess')" > run.m
+        if: ${{ matrix.os == 'macos-latest' || matrix.os == 'ubuntu-latest' }}
+      - name: Add MATLAB test commands
+        shell: bash
+        run: echo "version, 
+                   addpath(genpath('mhkit')), 
+                   import matlab.unittest.TestSuite, 
+                   import matlab.unittest.TestRunner, 
+                   testFolder = ['mhkit' filesep 'tests'], 
+                   suite = TestSuite.fromFolder(testFolder), 
+                   runner = TestRunner.withTextOutput,
+                   results = runner.run(suite), 
+                   assertSuccess(results)" >> run.m
       - name: Install and test MHKiT-MATLAB
-        run: matlab -batch "${{ env.COMMAND }}"
+        run: matlab -batch "run"
