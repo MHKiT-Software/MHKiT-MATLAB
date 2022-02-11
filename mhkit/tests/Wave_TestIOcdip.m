@@ -78,6 +78,17 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
                 expected_index_final);
         end
 
+        function test_request_parse_workflow_no_times(testCase)
+            station_number = '100';
+            data_type = 'historic';
+            data = cdip_request_parse_workflow( ...
+                'station_number', station_number, ...
+                'data_type', data_type);
+
+            assertEqual(testCase, data.data.wave.waveTime(1), ...
+                datetime('30-Jan-2001 00:17:11', 'TimeZone', 'UTC'));
+        end
+
         function test_plot_boxplot(testCase)
             data = cdip_request_parse_workflow( ...
                 'station_number', '067', ...
