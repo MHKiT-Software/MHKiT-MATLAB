@@ -97,7 +97,7 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
                 'all_2D_variables', false);
             fig = plot_boxplot( ...
                 data.data.wave.waveHs, ...
-                posixtime(data.data.wave.waveTime));
+                data.data.wave.waveTime);
 
             filename = fullfile(tempdir, 'wave_plot_boxplot.png');
             saveas(fig, filename);
@@ -115,7 +115,7 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
                 data.data.wave.waveHs, ...
                 data.data.wave.waveTp, ...
                 data.data.wave.waveDp, ...
-                posixtime(data.data.wave.waveTime));
+                data.data.wave.waveTime);
 
             filename = fullfile(tempdir, 'wave_plot_compendium.png');
             saveas(fig, filename);
@@ -134,7 +134,7 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
                 data.data.wave.waveHs, ...
                 data.data.wave.waveTp, ...
                 data.data.wave.waveDp, ...
-                posixtime(data.data.wave.waveTime));
+                data.data.wave.waveTime);
 
             filename = fullfile(tempdir, 'wave_plot_compendium2.png');
             saveas(fig, filename);
