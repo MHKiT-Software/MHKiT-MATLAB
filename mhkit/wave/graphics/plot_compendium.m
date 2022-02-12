@@ -13,8 +13,8 @@ function f = plot_compendium(Hs, Tp, Dp, time, options)
 %           peak period
 %       Dp: double array
 %           direction
-%       time: double array
-%           timestamps as POSIX
+%       time: datetime array
+%           timestamps
 %       buoy_title: string (optional)
 %           figure suptitle (super title)
 %   
@@ -27,14 +27,13 @@ arguments
     Hs (1,:) double
     Tp (1,:) double
     Dp (1,:) double
-    time (1,:) double
+    time (1,:) datetime
     options.buoy_title string = "";
 end
 
-timestamps = datetime(time, 'convertfrom','posixtime');
 title_text = sprintf("%s to %s", ...
-    datestr(timestamps(1), 'yyyy-mm-dd'), ...
-    datestr(timestamps(end), 'yyyy-mm-dd'));
+    datestr(time(1), 'yyyy-mm-dd'), ...
+    datestr(time(end), 'yyyy-mm-dd'));
 
 % Create figure window
 f = figure('Name', 'Compendium');
@@ -44,7 +43,7 @@ movegui(f, 'center');
 % Hs subplot
 ax1 = subplot(3, 1, 1);
 yyaxis left
-plot(timestamps, Hs);
+plot(time, Hs);
 ylim([0 8])
 title(title_text, "FontSize", 14)
 grid on
@@ -58,7 +57,7 @@ ylabel('Hs [ft]', "FontSize", 14)
 
 % Tp subplot
 ax2 = subplot(3, 1, 2);
-plot(timestamps, Tp);
+plot(time, Tp);
 ylim([0 28])
 grid on
 set(ax2, 'xticklabel', [])                      % hide x-axis labels
@@ -66,7 +65,7 @@ ylabel('Tp [s]', "FontSize", 13)
 
 % Dp subplot
 ax3 = subplot(3, 1, 3);
-scatter(timestamps, Dp, 6, "filled");
+scatter(time, Dp, 6, "filled");
 ylim([0 360])
 yticks(0:90:360)
 grid on

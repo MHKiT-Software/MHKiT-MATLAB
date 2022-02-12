@@ -9,8 +9,8 @@ function f = plot_boxplot(Hs, time, options)
 %   ----------
 %       Hs: double array
 %           significant wave height
-%       time: double array
-%           timestamps as POSIX
+%       time: datetime array
+%           timestamps
 %       buoy_title: string (optional)
 %           figure suptitle (super title)
 %   
@@ -21,17 +21,16 @@ function f = plot_boxplot(Hs, time, options)
 
 arguments
     Hs (1,:) double
-    time (1,:) double
+    time (1,:) datetime
     options.buoy_title string = "";
 end
 
 % Format data into a table
-timestamp = datetime(time, 'convertfrom','posixtime');
-months = categorical(month(timestamp));
-timestamp = timestamp(:);                           % ensure column vector
+months = categorical(month(time));
+time = time(:);                           % ensure column vector
 months = months(:);                                 % ensure column vector
 Hs = Hs(:);                                         % ensure column vector
-data_table = table(timestamp, months, Hs);
+data_table = table(time, months, Hs);
 warning('off', 'MATLAB:table:ModifiedVarnamesUnstack')
 unstacked_table = unstack(data_table, 'Hs', 'months');
 warning('on', 'MATLAB:table:ModifiedVarnamesUnstack')
