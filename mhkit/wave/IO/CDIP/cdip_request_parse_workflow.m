@@ -10,8 +10,6 @@ function [data] = cdip_request_parse_workflow(options)
 %   
 %   Parameters
 %   ----------
-%       nc: netCDF variable data
-%           netCDF data for the given station number and data type.
 %       station_number: string
 %           Station number of CDIP wave buoy
 %       parameters: string or array of strings
@@ -45,8 +43,7 @@ function [data] = cdip_request_parse_workflow(options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
-    options.nc = nan;
-    options.station_number string = "";
+    options.station_number string;
     options.parameters (1,:) string = "";
     options.years (1,:) {mustBeInteger} = -1;
     options.start_date string = "";
@@ -57,19 +54,6 @@ arguments
 end
 
 DATA_GROUPS = {'wave', 'sst', 'gps', 'dwr', 'meta'};
-
-if isnan(options.nc) && options.station_number == ""
-    throw(MException('MATLAB:cdip_request_parse_workflow', ...
-        'Must provide either CDIP netCDF data or a station number.'));
-end
-
-% TODO: Should we keep the options.nc parameter? Functionality is different
-% than the Python implementation which queries the data for all times and
-% then filters.
-if ~isnan(options.nc)
-    throw(MException('MATLAB:cdip_request_parse_workflow', ...
-        'Optional parameter "nc" is not implemented.'));
-end
 
 % Build URL to query
 url_query = get_url_query(options);
