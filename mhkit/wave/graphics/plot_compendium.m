@@ -45,9 +45,10 @@ movegui(f, 'center');
 ax1 = subplot(3, 1, 1);
 yyaxis left
 plot(timestamps, Hs);
-title(title_text, "FontSize", 15)
+ylim([0 8])
+title(title_text, "FontSize", 14)
 grid on
-ylabel('Hs [m]', "FontSize", 14)
+ylabel('Hs [m]', "FontSize", 13)
 set(ax1, 'xticklabel', [], 'Ycolor', 'k')
 ylim_left = ylim;
 yyaxis right                                    % add right y-axis
@@ -58,18 +59,19 @@ ylabel('Hs [ft]', "FontSize", 14)
 % Tp subplot
 ax2 = subplot(3, 1, 2);
 plot(timestamps, Tp);
+ylim([0 28])
 grid on
 set(ax2, 'xticklabel', [])                      % hide x-axis labels
-ylabel('Tp [s]', "FontSize", 14)
+ylabel('Tp [s]', "FontSize", 13)
 
 % Dp subplot
 ax3 = subplot(3, 1, 3);
-scatter(timestamps, Dp, 10, "filled");
+scatter(timestamps, Dp, 6, "filled");
 ylim([0 360])
 yticks(0:90:360)
 grid on
-xlabel('Date', "FontSize", 14)
-ylabel('Dp [deg]', "FontSize", 14)
+xlabel('Date', "FontSize", 13)
+ylabel('Dp [deg]', "FontSize", 13)
 
 % Add super title over all sublots
 if options.buoy_title ~= ""
