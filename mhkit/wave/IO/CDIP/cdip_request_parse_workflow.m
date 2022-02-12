@@ -1,12 +1,10 @@
 function [data] = cdip_request_parse_workflow(options)
-%CDIP_REQUEST_PARSE_WORKFLOW Parses CDIP data from a file or web request
+%CDIP_REQUEST_PARSE_WORKFLOW Parses CDIP data from a web request
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Parses a passed CDIP netCDF file or requests data for a station number
-%   (from http://cdip.ucsd.edu/) and parses. Years may be non-consecutive
-%   e.g. [2001, 2010]. Time may be sliced by dates (start_date or end date
-%   in YYYY-MM-DD). By default 2D variables are not parsed if all 2D
-%   variables are needed. See the MHKiT CDIP example live script for
-%   information on available parameters.
+%   Requests data for a station number (from http://cdip.ucsd.edu/) and
+%   parses. Years may be non-consecutive e.g. [2001, 2010]. Time may be
+%   sliced by dates (start_date or end date in YYYY-MM-DD). By default 2D
+%   variables are not parsed if all 2D variables are needed.
 %   
 %   Parameters
 %   ----------
@@ -27,19 +25,15 @@ function [data] = cdip_request_parse_workflow(options)
 %           Will return all 2D data. Enabling this will add significant
 %           processing time. If all 2D variables are not needed it is
 %           recommended to pass 2D parameters of interest using the
-%           'parameters' keyword and leave this set to False. Default False.
+%           'parameters' keyword and leave this set to the default false.
 %   
 %   Returns
 %   -------
 %       data: structure
-%           'vars1D': structure
-%               1D variables indexed by time
+%           'data': structure
+%               grouped 1D and 2D structures of array data with datetimes
 %           'metadata': structure
-%               Anything not of length time
-%           'vars2D': structure of structures, optional
-%               If 2D-vars are passed in the 'parameters' key or if run
-%               with all_2D_variables=True, then this key will appear
-%               with a structure of structures of 2D variables.
+%               Anything not of length time, including buoy name
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
