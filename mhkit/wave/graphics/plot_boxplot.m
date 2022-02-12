@@ -38,9 +38,7 @@ warning('on', 'MATLAB:table:ModifiedVarnamesUnstack')
 data_array = table2array(unstacked_table(:,2:end));  % exclude timestamps
 
 % Create figure window
-f = figure( ...
-    'Name', 'Boxplot', ...
-    'visible', 'off');                              % hide before resizing
+f = figure('Name', 'Boxplot');
 f.Position(3) = f.Position(4) * 0.833;              % change aspect ratio
 f.Position(3:4) = 2 * f.Position(3:4);              % double overall size
 movegui(f, 'center');                               % center on screen
@@ -121,7 +119,7 @@ if options.buoy_title ~= ""
     sgtitle(options.buoy_title, "FontSize", 20)
 end
 
-set(f, 'visible', 'on');
+hold off
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
