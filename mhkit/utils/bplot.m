@@ -146,7 +146,8 @@ x = x(~isnan(x));
 %% Initialize some things before accepting user parameters
 horizontalFlag=0;
 barFactor=1; % 
-linewidth=2;
+% linewidth=2;
+linewidth=1;
 forceNoLegend=0; % will any legend items be allowed in.
 stdFlag = 0;
 meanFlag = 1;
@@ -168,11 +169,13 @@ else
 end
 widthFlag =0;
 
-boxColor = [0.0005    0.3593    0.7380];
+% boxColor = [0.0005    0.3593    0.7380];
+boxColor = [0 0 0]+.3;
 wisColor = [0 0 0]+.3;
 % meanColor = [0.9684    0.2799    0.0723];
-meanColor = [0.4660    0.6740    0.1880];
-medianColor = [0.9684    0.2799    0.0723];
+meanColor = [0 0.6 0];
+medianColor = [0.6350, 0.0780, 0.1840];
+outlierColor = [0.9684    0.2799    0.0723]; 
 
 percentileNum = 25; % for the main quantiles
 percentileNum2 = 9; % for the whisker ends
@@ -267,7 +270,7 @@ if horizontalFlag
     hReg2(end+1) = rectangle('Position',[boxEdge(1),y-barWidth/2,IQR,barWidth],'linewidth',linewidth,'EdgeColor',boxColor,'facecolor',[1 1 1]);
 
     hold on;
-    hReg2(end+1) = plot([medianX medianX],[y-barWidth/2 y+barWidth/2],'color',medianColor,'linewidth',linewidth);
+    hReg2(end+1) = plot([medianX medianX],[y-barWidth/2 y+barWidth/2],'color',medianColor,'linewidth',linewidth*2);
     if meanFlag
 %         hReg2(end+1) = plot(meanX,y,'+','color',meanColor,'linewidth',linewidth,'markersize',10);
         hReg2(end+1) = plot([meanX meanX],[y-barWidth/2 y+barWidth/2],'color',meanColor,'linewidth',linewidth*0.7);
@@ -282,7 +285,7 @@ else %
     hReg2(end+1) = rectangle('Position',[y-barWidth/2,boxEdge(1),barWidth,IQR],'linewidth',linewidth,'EdgeColor',boxColor,'facecolor',[1 1 1]);
     hold on;
     
-    hReg2(end+1) = plot([y-barWidth/2 y+barWidth/2],[medianX medianX],'color',medianColor,'linewidth',linewidth);
+    hReg2(end+1) = plot([y-barWidth/2 y+barWidth/2],[medianX medianX],'color',medianColor,'linewidth',linewidth*2);
     if meanFlag
 %         hReg2(end+1) = plot(y,meanX,'+','linewidth',linewidth,'color',meanColor,'markersize',10);
         hReg2(end+1) = plot([y-barWidth/2 y+barWidth/2],[meanX meanX],'color',meanColor,'linewidth',linewidth*0.7);
@@ -316,9 +319,9 @@ if outlierFlag % but only if you want to
 
         if ~isempty(xx)
             if horizontalFlag
-                hReg2(6) = plot(xx,yy,'+','linewidth',linewidth*0.6,'color',medianColor);
+                hReg2(6) = plot(xx,yy,'+','linewidth',linewidth*0.6,'color',outlierColor);
             else
-                 hReg2(6) = plot(yy,xx,'+','linewidth',linewidth*0.6,'color',medianColor);
+                 hReg2(6) = plot(yy,xx,'+','linewidth',linewidth*0.6,'color',outlierColor);
             end
         end
     end
