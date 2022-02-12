@@ -37,17 +37,14 @@ title_text = sprintf("%s to %s", ...
     datestr(timestamps(end), 'yyyy-mm-dd'));
 
 % Create figure window
-f = figure( ...
-    'Name', 'Compendium', ...
-    'visible', 'off');                          % hide before resizing
+f = figure('Name', 'Compendium');
 f.Position(3:4) = 2 * f.Position(3:4);          % double default size
 movegui(f, 'center');
-set(f, 'visible', 'on');
 
 % Hs subplot
 ax1 = subplot(3, 1, 1);
 yyaxis left
-plot(timestamps, Hs)
+plot(timestamps, Hs);
 title(title_text, "FontSize", 15)
 grid on
 ylabel('Hs [m]', "FontSize", 14)
@@ -60,14 +57,14 @@ ylabel('Hs [ft]', "FontSize", 14)
 
 % Tp subplot
 ax2 = subplot(3, 1, 2);
-plot(timestamps, Tp)
+plot(timestamps, Tp);
 grid on
 set(ax2, 'xticklabel', [])                      % hide x-axis labels
 ylabel('Tp [s]', "FontSize", 14)
 
 % Dp subplot
 ax3 = subplot(3, 1, 3);
-scatter(timestamps, Dp, 10, "filled")
+scatter(timestamps, Dp, 10, "filled");
 ylim([0 360])
 yticks(0:90:360)
 grid on
@@ -76,5 +73,7 @@ ylabel('Dp [deg]', "FontSize", 14)
 
 % Add super title over all sublots
 if options.buoy_title ~= ""
-    sgtitle('Test Super Title', "FontSize", 20)
+    sgtitle(options.buoy_title, "FontSize", 20)
 end
+
+hold off
