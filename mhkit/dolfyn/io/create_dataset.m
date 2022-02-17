@@ -10,6 +10,13 @@ function ds = create_dataset(data)
     
     fn = fieldnames(data.data_vars);
     for k=1:numel(fn)
+        tmp = split(fn{k},"_");
+        chk_tag = strcat("_",tmp(end));
+        if any(strcmp(tag,chk_tag))                    
+            tg = chk_tag;
+        else
+            tg = '';
+        end
         if (contains(fn{k},'mat')) 
             % beam2inst & inst2head orientation matrices
             if (contains(fn{k},'inst'))
@@ -18,15 +25,7 @@ function ds = create_dataset(data)
                 ds.(fn{k}).coords.beam = beam;
                 ds.(fn{k}).coords.x = beam;
             else 
-            % earth2inst orientation matrix
-                if any(strcmp(tag,fn{k}))
-                    tmp = split(fn{k},"_");
-                    tg = strcat("_",tmp(end));
-                else
-                    tg = '';
-                end
-                % I'm not sure what this part does. Need to come back
-                % to it if its used for the other data types 
+            % earth2inst orientation matrix  
                 ds.(fn{k}).data = data.data_vars.(fn{k});
                 ds.(fn{k}).dims = {'earth', 'inst', strcat('time',tg)};
                 ds.(fn{k}).coords.earth = earth;
@@ -37,14 +36,7 @@ function ds = create_dataset(data)
 
         % quaternion units never change
         elseif (contains(fn{k},'quaternion'))
-            if any(strcmp(tag,fn{k}))
-                tmp = split(fn{k},"_");
-                tg = strcat("_",tmp(end));
-            else
-                tg = '';
-            end
-            % I'm not sure what this part does. Need to come back
-            % to it if its used for the other data types 
+            
             ds.(fn{k}).data = data.data_vars.(fn{k});
             ds.(fn{k}).dims = {'q', strcat('time',tg)};
             ds.(fn{k}).coords.q = {'w', 'x', 'y', 'z'};
@@ -56,14 +48,11 @@ function ds = create_dataset(data)
                 ds.(fn{k}).units = data.units.(fn{k});
             else
                 % make sure ones with tags get units
-               if any(strcmp(tag,fn{k}))
-                    tmp = split(fn{k},"_");
-                    tg = strcat("_",tmp(end));
+                if ~isempty(tg) 
+                    ds.(fn{k}).units = data.units.(tmp{1});
                 else
-                    tg = '';
-                end
-                % I'm not sure what this part does. Need to come back
-                % to it if its used for the other data types 
+                    continue
+                end               
             end
 
             shp = size(data.data_vars.(fn{k}));
@@ -71,9 +60,8 @@ function ds = create_dataset(data)
             l = length(shp);
 
             if l == 2 % 1D variables
-                if any(strcmp(tag,fn{k}))
-                    tmp = split(fn{k},"_");
-                    tg = strcat("_",tmp(end));
+                if any(strcmp(tag,chk_tag))                    
+                    tg = chk_tag;
                 else
                     tg = '';
                 end
@@ -84,7 +72,7 @@ function ds = create_dataset(data)
                     data.coords.(strcat('time',tg));
 
             elseif l == 3 % 2D variables
-                sub_tag = tag{1:2};
+                sub_tag = tag(1:2);
                 if strcmp('echo',fn{k})
                     ds.(fn{k}).dims = {'range_echo' 'time_echo'};
                     ds.(fn{k}).coords.range_echo = ...
@@ -93,7 +81,7 @@ function ds = create_dataset(data)
                         data.coords.time_echo;
 
                 % 3- & 4-beam instrument vector data, bottom tracking                
-                elseif shp(end)==vshp(end) && ~any(strcmp(sub_tag,fn{k}))
+                elseif shp(end)==vshp(end) && ~any(strcmp(sub_tag,chk_tag))
                     % b/c rdi time
                     if (contains(fn{k},'bt')) && ...
                         isfield(data.coords,'time_bt')
@@ -106,22 +94,13 @@ function ds = create_dataset(data)
                     ds.(fn{k}).coords.(strcat("time",tg)) = ...
                         data.coords.(strcat('time',tg));
                 % 4-beam instrument IMU data
-                elseif shp(end) == vshp(end)-1
-                    % this part may not be reproducable will have to come back
-
-                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                    tg = '';
+                elseif shp(end) == vshp(end)-1                    
                     ds.(fn{k}).dims = {'dirIMU', strcat("time",tg)};
                     ds.(fn{k}).coords.dirIMU = 1:3;
                     ds.(fn{k}).coords.(strcat("time",tg)) = ...
                         data.coords.(strcat('time',tg));
 
-                elseif any(strcmp(sub_tag,fn{k}))
-                    % this part may not be reproducable without seeing it
-                    % have to come back
-
-                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                    tg = '';
+                elseif any(strcmp(sub_tag,chk_tag))                    
                     ds.(fn{k}).dims = {strcat("range",tg),...
                         strcat("time",tg)};
                     ds.(fn{k}).coords.(strcat("range",tg)) = ...
