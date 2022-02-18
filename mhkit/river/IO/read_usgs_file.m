@@ -23,7 +23,7 @@ function datast=read_usgs_file(file_name)
 
 py.importlib.import_module('mhkit');
 
-datapd=py.mhkit.river.io.read_usgs_file(file_name);
+datapd=py.mhkit.river.io.usgs.read_usgs_file(file_name);
 
 
 xx=cell(datapd.axes);
@@ -38,21 +38,18 @@ x=int64(sha{1,1});
 y=int64(sha{1,2});
 
 vals=reshape(vals,[x,y]);
-ti=cell(py.list(py.numpy.nditer(datapd.index,pyargs("flags",{"refs_ok"}))));
-siti=size(ti);
 si=size(vals);
- for i=1:si(2)
+
+for i=1:si(2)
     test=string(py.str(vv{i}));
     newname=split(test,",");
-    
     datast.(newname(1))=vals(:,i);
     datast.units.(newname(1))=newname(2);
- end
- for i=1:siti(2)
-    datast.time{i}=posixtime(datetime(string(py.str(ti{i})),'InputFormat','yyyy-MM-dd HH:mm:ssXXX','TimeZone','UTC'));
- end
+end
  
- datast.time=cell2mat(datast.time);
+times = double(    ...
+     py.mhkit_python_utils.pandas_dataframe.datetime_index_to_ordinal(datapd));
 
-
-
+datast.time = posixtime(datetime(times,                        ...
+                                 'ConvertFrom', 'datenum',     ...
+                                 'TimeZone','UTC'));
