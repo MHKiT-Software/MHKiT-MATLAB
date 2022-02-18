@@ -273,11 +273,21 @@ function data_to_query = make_data_list(options, nc_info, DATA_GROUPS)
 data_2D_names = find_data_2D_names(nc_info);
 
 if options.parameters ~= ""               % if data to query is specified
-    data_to_query = intersect( ...        % ignore non-existant parameters
+    % Exclude non-existant parameters
+    data_to_query = intersect( ...
         options.parameters, ...
         nc_info.Variables.Properties.RowNames);
+    % Warn on non-existant parameters
+    data_not_available = setdiff( ...
+        options.parameters, ...
+        nc_info.Variables.Properties.RowNames);
+    for i=1:length(data_not_available)
+        warning("MATLAB:cdip_request_parse_workflow", ...
+                    "Data name '%s' not found.", data_not_available(i));
+    end
+    % Add all 2D variables, if requested
     if options.all_2D_variables == true
-        data_to_query = union(data_to_query, data_2D_names);   % add all 2D
+        data_to_query = union(data_to_query, data_2D_names);
     end
     % Add 'waveFrequency' if there's any 2D data queried
     if any(ismember(data_to_query, data_2D_names))
