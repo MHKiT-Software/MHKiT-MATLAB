@@ -1,4 +1,4 @@
-function S1=create_spectra(spectra_type,frequency,Tp,varargin)
+function S1=create_spectra(spectra_type,frequency,Tp,Hs,varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates wave spectra of user specified type
@@ -15,7 +15,7 @@ function S1=create_spectra(spectra_type,frequency,Tp,varargin)
 %     Tp: float
 %         Peak Period (s)
 %
-%     Hs: float - Required for 'bretschneider_spectrum', and 'jonswap_spectrum'
+%     Hs: float
 %         Significant Wave Height (s)
 %
 %     gamma: float (optional)
@@ -48,8 +48,8 @@ if (isa(frequency,'py.numpy.ndarray') ~= 1)
 end
 
 if strcmp(spectra_type,'pierson_moskowitz_spectrum')
-    if nargin ==3
-        S=py.mhkit.wave.resource.pierson_moskowitz_spectrum(frequency,Tp);
+    if nargin ==4
+        S=py.mhkit.wave.resource.pierson_moskowitz_spectrum(frequency,Tp,Hs);
     else
         ME = MException('MATLAB:create_spectra','incorrect number of arguments');
          throw(ME);
@@ -60,16 +60,16 @@ elseif strcmp(spectra_type,'bretschneider_spectrum')
          ME = MException('MATLAB:create_spectra','Hs is needed for bretschneider_spectrum');
          throw(ME);
     end
-    S=py.mhkit.wave.resource.bretschneider_spectrum(frequency,Tp,varargin{1});
+    S=py.mhkit.wave.resource.bretschneider_spectrum(frequency,Tp,Hs);
 
 elseif strcmp(spectra_type,'jonswap_spectrum')
     if nargin < 4
          ME = MException('MATLAB:create_spectra','Hs is needed for jonswap_spectrum');
          throw(ME);
     elseif nargin == 4
-        S=py.mhkit.wave.resource.jonswap_spectrum(frequency,Tp,varargin{1});
+        S=py.mhkit.wave.resource.jonswap_spectrum(frequency,Tp,Hs);
     elseif nargin == 5 
-        S=py.mhkit.wave.resource.jonswap_spectrum(frequency,Tp,varargin{1},pyargs('gamma',varargin{2}));
+        S=py.mhkit.wave.resource.jonswap_spectrum(frequency,Tp,Hs,pyargs('gamma',varargin{1}));
     else
         ME = MException('MATLAB:create_spectra','to many input arguments');
          throw(ME);
@@ -86,7 +86,7 @@ S1.type=spectra_type;
 S1.frequency=double(py.array.array('d',py.numpy.nditer(S.index))).';
 S1.Tp=Tp;
 if nargin == 4 
-    S1.Hs=varargin{1};
+    S1.Hs=Hs;
 end
 
 
