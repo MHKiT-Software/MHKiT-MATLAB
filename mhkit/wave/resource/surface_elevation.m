@@ -51,7 +51,7 @@ function wave_elevation=surface_elevation(S,time_index,options)
 arguments
     S 
     time_index
-    options.seed = py.None;
+    options.seed {mustBeNumeric} = 123;
     options.frequency_bins = py.None;
     options.phases = py.None;
 end
@@ -120,20 +120,9 @@ if (isa(options.phases,'py.NoneType')~=1)
     
 end
     
-
-if (isa(options.seed,'py.NoneType')~=1)
-    if isnumeric(options.seed)
-        options.seed=py.int(options.seed);
-    else
-        
-       ME = MException('MATLAB:significant_wave_height','seed needs to be of numeric type');
-        throw(ME);
-    end
-    
-end 
-
+ 
 eta=py.mhkit.wave.resource.surface_elevation(S,time_index,pyargs('seed',...
-    options.seed,'frequency_bins',options.frequency_bins,'phases',options.phases));
+    py.int(options.seed),'frequency_bins',options.frequency_bins,'phases',options.phases));
  
 
 vals=double(py.array.array('d',py.numpy.nditer(eta.values)));
