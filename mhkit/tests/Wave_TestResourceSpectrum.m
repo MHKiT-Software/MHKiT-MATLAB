@@ -7,15 +7,12 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             Obj.Tp = 8;
             Obj.Hs = 2.5;
             
-            S = pierson_moskowitz_spectrum(Obj.f,Obj.Tp,Obj.Hs);
-
+            S = create_spectra('pierson_moskowitz_spectrum',Obj.f,Obj.Tp,Obj.Hs);
             Tp0 = peak_period(S);
             error = abs(Obj.Tp - Tp0)/Obj.Tp;
             assertLessThan(testCase,error, 0.01);
         end
-
         
-
 % This test and function no longer in corresponding Python code
 %         function test_bretschneider_spectrum(testCase)
 %             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
@@ -62,7 +59,6 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             eta1 = surface_elevation(S, Obj.t,"phases",phases);
             assertEqual(testCase,eta0, eta1);
         end
-
         
         function test_surface_elevation_moments(testCase)         
             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
@@ -122,7 +118,7 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
-
+            
             filename = 'wave_plot_matrix.png';
             if isfile(filename)
                 delete(filename);
