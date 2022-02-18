@@ -273,11 +273,11 @@ function data_to_query = make_data_list(options, nc_info, DATA_GROUPS)
 data_2D_names = find_data_2D_names(nc_info);
 
 if options.parameters ~= ""               % if data to query is specified
-    % Exclude non-existant parameters
+    % Exclude non-existent parameters
     data_to_query = intersect( ...
         options.parameters, ...
         nc_info.Variables.Properties.RowNames);
-    % Warn on non-existant parameters
+    % Warn on non-existent parameters
     data_not_available = setdiff( ...
         options.parameters, ...
         nc_info.Variables.Properties.RowNames);
