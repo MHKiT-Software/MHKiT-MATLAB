@@ -10,8 +10,9 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
         end
 
         function test_principal_flow_directions(testCase)
-            file_name = '../../examples/data/tidal/s08010.json';
-            data = read_noaa_json(file_name);
+            relative_file_name = '../../examples/data/tidal/s08010.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = read_noaa_json(full_file_name);
             data.s = data.s/100;
         
             width_direction = 10;
@@ -26,8 +27,9 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
                 delete(filename);
             end
 
-            file_name = '../../examples/data/tidal/s08010.json';
-            data = read_noaa_json(file_name);
+            relative_file_name = '../../examples/data/tidal/s08010.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = read_noaa_json(full_file_name);
             data.s = data.s/100;
             width_direction = 10;
             [direction1, direction2] = principal_flow_directions(data.d, width_direction);
@@ -44,8 +46,9 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
                 delete(filename)
             end
             
-            file_name = '../../examples/data/tidal/s08010.json';
-            data = read_noaa_json(file_name);
+            relative_file_name = '../../examples/data/tidal/s08010.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = read_noaa_json(full_file_name);
             data.s = data.s/100;
             width_direction = 10;
             
@@ -67,12 +70,56 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
                 delete(filename);
             end
             
-            file_name = '../../examples/data/tidal/s08010.json';
-            data = read_noaa_json(file_name);
+            relative_file_name = '../../examples/data/tidal/s08010.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = read_noaa_json(full_file_name);
             data.s = data.s/100;
             width_direction = 10;
             
             plot_rose(data,width_direction,1,"savepath",filename);
+
+            assertTrue(testCase,isfile(filename))
+            delete(filename);
+        end  
+
+        function test_plot_phase_probability(testCase)
+            filename = 'tidal_plot_phase_probability.png';
+            if isfile(filename)
+                delete(filename);
+            end
+            
+            file_name = '../../examples/data/tidal/s08010.json';
+            data = read_noaa_json(file_name);
+            data.s = data.s/100;
+            width_direction = 1;
+            [direction1, direction2] = ...
+                principal_flow_directions(data.d,width_direction);
+            flood = direction1 ; 
+            ebb = direction2 ; 
+
+            plot_tidal_phase_probability(data,flood,ebb,"savepath",filename);
+
+            assertTrue(testCase,isfile(filename))
+            delete(filename);
+        end  
+
+        function test_plot_phase_exceedance(testCase)
+            filename = 'tidal_plot_phase_exceedance.png';
+            if isfile(filename)
+                delete(filename);
+            end
+            
+            file_name = '../../examples/data/tidal/s08010.json';
+            data = read_noaa_json(file_name);
+            data.s = data.s/100;
+            data.Discharge = data.s;
+            width_direction = 1;
+            [direction1, direction2] = ...
+                principal_flow_directions(data.d,width_direction);
+            flood = direction1 ; 
+            ebb = direction2 ;
+
+            plot_tidal_phase_exceedance(data,flood,ebb,"savepath",filename);
 
             assertTrue(testCase,isfile(filename))
             delete(filename);

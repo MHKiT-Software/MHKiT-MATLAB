@@ -8,43 +8,61 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             Obj.Hs = 2.5;
             
             S = pierson_moskowitz_spectrum(Obj.f,Obj.Tp,Obj.Hs);
+
             Tp0 = peak_period(S);
             error = abs(Obj.Tp - Tp0)/Obj.Tp;
             assertLessThan(testCase,error, 0.01);
         end
 
         
-%         function test_surface_elevation_seed(testCase)
+
+% This test and function no longer in corresponding Python code
+%         function test_bretschneider_spectrum(testCase)
 %             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
 %             Obj.Tp = 8;
 %             Obj.Hs = 2.5;
-%             df = 0.01/(2*pi);
-%             Trep = 1/df;
-%             Obj.t = 0:0.05:Trep;
 %             
-%             S = jonswap_spectrum(Obj.f,Obj.Tp,Obj.Hs);
-%             seednum = 123;
-%             eta0 = surface_elevation(S, Obj.t);
-%             eta1 = surface_elevation(S, Obj.t,"seed",seednum);               
-%             assertEqual(testCase,eta0, eta1); 
+%             S = create_spectra('bretschneider_spectrum',Obj.f,Obj.Tp,Obj.Hs);
+%             Tp0 = peak_period(S);
+%             Hm0 = significant_wave_height(S);
+%             errorHm0 = abs(Obj.Tp - Tp0)/Obj.Tp;
+%             errorTp0 = abs(Obj.Hs - Hm0)/Obj.Hs;        
+%             assertLessThan(testCase,errorHm0, 0.01);
+%             assertLessThan(testCase,errorTp0, 0.01);
 %         end
-%         
-%         function test_surface_elevation_phasing(testCase)
-%             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
-%             Obj.Tp = 8;
-%             Obj.Hs = 2.5;
-%             df = 0.01/(2*pi);
-%             Trep = 1/df;
-%             Obj.t = 0:0.05:Trep;
-%             
-%             S = jonswap_spectrum(Obj.f,Obj.Tp,Obj.Hs);
-%             eta0 = surface_elevation(S, Obj.t);
-%             seednum = 123;
-%             rng(seednum);
-%             phases = rand(size(S.spectrum))*2*pi;
-%             eta1 = surface_elevation(S, Obj.t,"phases",phases);
-%             assertEqual(testCase,eta0, eta1);
-%         end
+        
+        function test_surface_elevation_seed(testCase)
+            Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
+            Obj.Tp = 8;
+            Obj.Hs = 2.5;
+            df = 0.01/(2*pi);
+            Trep = 1/df;
+            Obj.t = 0:0.05:Trep;
+            
+            S = jonswap_spectrum(Obj.f, Obj.Tp, Obj.Hs);
+            seednum = 123;
+            eta0 = surface_elevation(S, Obj.t);
+            eta1 = surface_elevation(S, Obj.t,"seed",seednum);               
+            assertEqual(testCase,eta0, eta1); 
+        end
+        
+        function test_surface_elevation_phasing(testCase)
+            Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
+            Obj.Tp = 8;
+            Obj.Hs = 2.5;
+            df = 0.01/(2*pi);
+            Trep = 1/df;
+            Obj.t = 0:0.05:Trep;
+            
+            S = jonswap_spectrum(Obj.f, Obj.Tp, Obj.Hs);
+            eta0 = surface_elevation(S, Obj.t);
+            seednum = 123;
+            rng(seednum);
+            phases = rand(size(S.spectrum))*2*pi;
+            eta1 = surface_elevation(S, Obj.t,"phases",phases);
+            assertEqual(testCase,eta0, eta1);
+        end
+
         
         function test_surface_elevation_moments(testCase)         
             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
@@ -53,7 +71,7 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             df = 0.01/(2*pi);   
             Trep = 1/df;
             Obj.t = 0:0.05:Trep;
-            dt = Obj.t(2)-Obj.t(1);  
+            dt = Obj.t(2)-Obj.t(1);
             
             S = create_spectra('jonswap_spectrum',Obj.f, Obj.Tp, Obj.Hs);
             wave_elevation = surface_elevation(S, Obj.t);
@@ -104,6 +122,7 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
+
             filename = 'wave_plot_matrix.png';
             if isfile(filename)
                 delete(filename);

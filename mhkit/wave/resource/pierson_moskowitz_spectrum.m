@@ -12,8 +12,8 @@ function S=pierson_moskowitz_spectrum(frequency,Tp,Hs)
 %     Tp: float
 %         Peak Period (s)
 %
-%     Hs: float 
-%         Significant Wave Height (s)
+%     Hs: float
+%         Significant wave height (m)
 %
 %     
 % Returns
