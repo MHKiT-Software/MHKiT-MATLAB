@@ -171,11 +171,11 @@ function indices = data_indices(url_query, datetime_ranges, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 groups_in_data = data_groups(data_to_query, all_groups);
 
+indices = struct;
 for i = 1:length(groups_in_data)
-    try
-        posixtimes = ncread_autoretry( ...
+    posixtimes = ncread_autoretry( ...
             url_query, strcat(groups_in_data{i}, 'Time'));
-    catch
+    if isscalar(posixtimes) && isnan(posixtimes)
         continue
     end
 
@@ -362,6 +362,7 @@ for i = 0:MAX_RETRIES
         if i == MAX_RETRIES
             rethrow(ME)
         elseif ME.identifier == "MATLAB:imagesci:netcdf:unknownLocation"
+            data = NaN;
             break;          % no need to retry
         else
             pause(0.5);     % pause(seconds) and retry query
