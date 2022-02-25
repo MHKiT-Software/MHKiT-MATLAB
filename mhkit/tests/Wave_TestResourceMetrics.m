@@ -494,7 +494,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
          Hs = 2.5;
          Tp = 8 ;   
          % Dependent on mhkit.resource.BS spectrum
-         S = bretschneider_spectrum(f,Tp,Hs);
+         S = jonswap_spectrum(f,Tp,Hs);
          Te = energy_period(S);
          Hm0 = significant_wave_height(S);
          rho=1025;
