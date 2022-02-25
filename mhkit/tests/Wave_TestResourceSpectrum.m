@@ -13,20 +13,6 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             assertLessThan(testCase,error, 0.01);
         end
         
-% This test and function no longer in corresponding Python code
-%         function test_bretschneider_spectrum(testCase)
-%             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
-%             Obj.Tp = 8;
-%             Obj.Hs = 2.5;
-%             
-%             S = create_spectra('bretschneider_spectrum',Obj.f,Obj.Tp,Obj.Hs);
-%             Tp0 = peak_period(S);
-%             Hm0 = significant_wave_height(S);
-%             errorHm0 = abs(Obj.Tp - Tp0)/Obj.Tp;
-%             errorTp0 = abs(Obj.Hs - Hm0)/Obj.Hs;        
-%             assertLessThan(testCase,errorHm0, 0.01);
-%             assertLessThan(testCase,errorTp0, 0.01);
-%         end
         
         function test_surface_elevation_seed(testCase)
             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
