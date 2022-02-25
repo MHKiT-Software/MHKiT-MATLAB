@@ -90,7 +90,6 @@ while start_period_datetime <= end_datetime
     elseif is_first_query
         data = data_in_period;
         is_first_query = false;
-
     else
         % Append to existing data structure
         for i = 1:length(timeseries_fields)
