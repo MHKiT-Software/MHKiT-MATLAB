@@ -106,9 +106,15 @@ for i = 1:length(data_to_query)                     % for each data metric
                     value = ncread_autoretry(url_query, name, ...
                                    index_start, index_count);
                 end
-            catch
-                warning("MATLAB:cdip_request_parse_workflow", ...
-                        "Data name '%s' not found.", name);
+            catch ME
+                if ME.identifier == "MATLAB:imagessci:netcdf:libraryFailure"
+                    warning("MATLAB:cdip_request_parse_workflow", ...
+                            "Access failure to NetCDF file when querying %s.", name);
+                else
+                    warning("MATLAB:cdip_request_parse_workflow", ...
+                            "Data name '%s' not found.", name);
+                end
+                continue;
             end
     
             % Convert any times
@@ -348,11 +354,14 @@ for i = 0:MAX_RETRIES
     try
         switch nargin
             case 2
-                data = ncread(source, varname);
+%                 data = ncread(source, varname);
+                data = ncread_lowlevel(source, varname);
             case 4
-                data = ncread(source, varname, start, count);
+%                 data = ncread(source, varname, start, count);
+                data = ncread_lowlevel(source, varname, start, count);
             case 5
-                data = ncread(source, varname, start, count, stride);
+%                 data = ncread(source, varname, start, count, stride);
+                data = ncread_lowlevel(source, varname, start, count, stride);
             otherwise
                 MException('MATLAB:cdip_request_parse_workflow:ncread_autoretry ', ...
                     'Invalid number of arguments');
@@ -361,13 +370,55 @@ for i = 0:MAX_RETRIES
     catch ME
         if i == MAX_RETRIES
             rethrow(ME)
-        elseif ME.identifier == "MATLAB:imagesci:netcdf:unknownLocation"
+        elseif ME.identifier == "MATLAB:imagesci:netcdf:unknownLocation" || ...
+                contains(ME.message, "Variable not found")
             data = NaN;
             break;          % no need to retry
         else
             pause(0.5);     % pause(seconds) and retry query
         end
     end
+end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function data = ncread_lowlevel(source, varname, start, count, stride)
+%NCREAD_LOWLEVEL Query data using low-level NetCDF functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ncid = netcdf.open(source);
+
+try
+    varid = netcdf.inqVarID(ncid, varname);
+
+    % Replace any inf's for reading to end with actual counts
+    if nargin > 2 && any(isinf(count))
+        [~, ~, dimids, ~] = netcdf.inqVar(ncid,varid);
+        for i=1:length(count)
+            if isinf(count(i))
+                [~, dimlen] = netcdf.inqDim(ncid, dimids(i));
+                count(i) = dimlen - start(i) + 1;
+            end
+        end
+    end
+
+    % Submit query and get info
+    switch nargin
+        case 2
+            data = netcdf.getVar(ncid, varid);
+        case 4
+            data = ncread(source, varname, start, count);
+        case 5
+            data = ncread(source, varname, start, count, stride);
+        otherwise
+            MException('MATLAB:cdip_request_parse_workflow:ncread_autoretry ', ...
+                'Invalid number of arguments');
+    end
+
+    netcdf.close(ncid);
+catch ME
+    netcdf.close(ncid);
+    rethrow(ME)
 end
 end
 
