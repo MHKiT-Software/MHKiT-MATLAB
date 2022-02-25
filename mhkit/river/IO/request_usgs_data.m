@@ -80,6 +80,7 @@ else
                 + "&siteStatus=all";
 end
 
+
 % Display query
 disp("Data request URL: " + data_url + api_query)
 

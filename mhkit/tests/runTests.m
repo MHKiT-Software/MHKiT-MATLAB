@@ -18,7 +18,7 @@ function results = runTests()
     runner.addPlugin(plugin);
 
     % Add PDF
-    pdfFile = fullfile(testsFolder, 'test_results.pdf');
+    pdfFile = fullfile(htmlFolder, 'test_results.pdf');
     plugin = TestReportPlugin.producingPDF(pdfFile);
     runner.addPlugin(plugin);
 
