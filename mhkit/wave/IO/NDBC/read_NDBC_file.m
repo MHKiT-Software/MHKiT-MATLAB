@@ -74,9 +74,10 @@ x=int64(sha{1,1});
 y=int64(sha{1,2});
 
 vals=reshape(vals,[x,y]);
+ti=cell(py.list(py.numpy.nditer(datapd.index,pyargs("flags",{"refs_ok"}))));
+siti=size(ti);
 si=size(vals);
 temp = [];
-
 if ~isempty(fieldnames(matstr))
     for i=1:si(2)
         test=string(py.str(vv{i}));
@@ -92,7 +93,7 @@ else
     datast.frequency = temp';
 end
 
-times = double(    ...
-     py.mhkit_python_utils.pandas_dataframe.datetime_index_to_ordinal(datapd));
+ for i=1:siti(2)
+    datast.time(i)=datetime(string(py.str(ti{i})),'InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSSSSSSS')';
+ end
 
-datast.time = posixtime(datetime(times, 'ConvertFrom', 'datenum'));
