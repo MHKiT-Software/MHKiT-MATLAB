@@ -29,7 +29,6 @@ data=struct(datac{2});
 data_df=datac{1};
 
 fields=fieldnames(data);
-
 for idx = 1:length(fields)
     data.(fields{idx}) = string(data.(fields{idx}));
 end
@@ -46,15 +45,21 @@ x=int64(sha{1,1});
 y=int64(sha{1,2});
 
 vals=reshape(vals,[x,y]);
+
+ti=cell(py.list(py.numpy.nditer(data_df.index,pyargs("flags",{"refs_ok"}))));
+siti=size(ti);
 si=size(vals);
 
-for i=1:si(2)
+
+ for i=1:si(2)
     test=string(py.str(vv{i}));
     newname=split(test,",");
+    
     data.(newname(1))=vals(:,i);
-end
- 
-times = double(    ...
-     py.mhkit_python_utils.pandas_dataframe.datetime_index_to_ordinal(data_df));
+    
+ end
+ for i=1:siti(2)
+    data.time{i}=posixtime(datetime(string(py.str(ti{i})),'InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSSSSSSS'));
+ end
 
-data.time = posixtime(datetime(times, 'ConvertFrom', 'datenum'));
+data.time=cell2mat(data.time);

@@ -281,9 +281,6 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
         end
         
         function test_environmental_contour(testCase)
-            
-            assumeFail(testCase, "Not compatible with latest MHKIT-Python")
-            
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             
@@ -331,9 +328,6 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
         end
         
         function test_plot_environmental_contour(testCase)
-            
-            assumeFail(testCase, "Not compatible with latest MHKIT-Python")
-            
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             
@@ -382,9 +376,6 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
         end
         
         function test_plot_environmental_contour_multiyear(testCase)
-            
-            assumeFail(testCase, "Not compatible with latest MHKIT-Python")
-            
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             
