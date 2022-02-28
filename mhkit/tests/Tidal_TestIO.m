@@ -21,9 +21,9 @@ classdef Tidal_TestIO < matlab.unittest.TestCase
             assertTrue(testCase, isfield(data,'s'));
             assertTrue(testCase, isfield(data,'d'));
             assertTrue(testCase, isfield(data,'b'));
-            assertEqual(testCase,size(data.s), [92 1]);
-            assertEqual(testCase,size(data.d), [92 1]);
-            assertEqual(testCase,size(data.b), [92 1]);
+            assertEqual(testCase,size(data.s), [184 1]);
+            assertEqual(testCase,size(data.d), [184 1]);
+            assertEqual(testCase,size(data.b), [184 1]);
         end
     end
 end  

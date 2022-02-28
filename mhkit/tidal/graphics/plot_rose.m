@@ -60,19 +60,19 @@ end
 if any(~isstruct(data))
     ME = MException('MATLAB:plot_rose','data must be a structure');
     throw(ME);
-end;
+end
 
 %check to see if the second input argumeent is a number
 if any([~isnumeric(width_dir), length(width_dir) ~= 1])
     ME = MException('MATLAB:plot_rose','width_dir must be a number');
     throw(ME);
-end;
+end
 
 %check to see if the second input argumeent is a number
 if any([~isnumeric(width_vel), length(width_vel) ~= 1])
     ME = MException('MATLAB:plot_rose','width_vel must be a number');
     throw(ME);
-end;
+end
 
 % Parsing out the variable arguments
 % if nargin >= 4
@@ -111,7 +111,7 @@ hold on
 for idx = length(VelEdges)-1:-1:2
     polarhistogram(theta(data.s<VelEdges(idx)),DirEdges/180*pi,'FaceColor',colors(idx,:), ...
             'displayname',[num2str(VelEdges(idx-1)) ' - ' num2str(VelEdges(idx)) '\itm/s']);
-end;
+end
 
 % Adding legend to plot
 legend('Show');
@@ -144,7 +144,7 @@ if length(options.flood_ebb) == 2
     text(options.flood_ebb(1)/180*pi,max(RadRingLoc/100)*length(data.s),'Flood','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
     polarplot([1,1]*options.flood_ebb(2)/180*pi,[0,max(RadRingLoc/100)*length(data.s)],'linewidth',2,'color','b','displayname','Ebb Direction');    
     text( options.flood_ebb(2)/180*pi,max(RadRingLoc/100)*length(data.s),'Ebb','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
-end;
+end
 
 len = strlength(options.savepath);
 if len > 1
