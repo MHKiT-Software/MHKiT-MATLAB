@@ -39,7 +39,7 @@ function ds = set_declination(data_set, declin)
 %      'True' earth coordinate system)
 %  
     if isfield(data_set.attrs, 'declination')
-        angle = declin - ds.attrs.declination;
+        angle = declin - data_set.attrs.declination;
     else
         angle = declin;
     end

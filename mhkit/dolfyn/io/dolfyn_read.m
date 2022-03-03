@@ -1,7 +1,8 @@
 function ds=dolfyn_read(filename,options)
 
 %%%%%%%%%%%%%%%%%%%%
-%     Read a Nortek Signature (.ad2cp) datafile
+%     Read a binary Nortek (e.g., .VEC, .wpr, .ad2cp, etc.) or RDI
+%    (.000, .PD0, .ENX, etc.) data file.
 %     
 % Parameters
 % ------------
