@@ -34,7 +34,8 @@ function ds=read_nortek(filename,options)
     
     % check to see if the filename input is a string
     if ~ischar(filename)
-        ME = MException('MATLAB:read_nortek','filename must be a string');
+        ME = MException('MATLAB:read_nortek',['filename must be a ' ...
+            'character string']);
         throw(ME);
     end
     
@@ -168,7 +169,7 @@ function ds=read_nortek(filename,options)
         init_ADV();
     end
     if ~isnan(npings)
-        n_samp_guess = npings + 1;
+        n_samp_guess = npings;
     end
     % return the file position to pnow
     fseek(fid,pnow,"bof");
@@ -233,9 +234,10 @@ function ds=read_nortek(filename,options)
                          od);
         ds.orientmat.data = omat;
         ds.orientmat.dims = {'earth', 'inst', 'time'};
+        ds.orientmat.coords.time = ds.time;
         ds.orientmat.coords.earth = {'E' 'N' 'U'};
         ds.orientmat.coords.inst = {'X' 'Y' 'Z'};
-        ds.orientmat.coords.time = ds.time;
+        
     end
 
     if ~isnan(rotmat)
@@ -267,13 +269,15 @@ function ds=read_nortek(filename,options)
                     findnext(true);
                     retval = false;
                 end
-                if ~isnan(npings) && c >= nprings
+                if ~isnan(npings) && c > npings
                     if any(strcmp(dtypes,'microstrain'))
                         try
                             readnext();
                         catch
                             continue
                         end
+                    else
+                        fprintf('stopped at %d bytes.\n', ftell(fid));
                     end
                 break
                 end

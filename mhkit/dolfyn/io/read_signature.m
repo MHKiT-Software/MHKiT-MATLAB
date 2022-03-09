@@ -30,7 +30,8 @@ function ds=read_signature(filename,options)
     
     % check to see if the filename input is a string
     if ~ischar(filename)
-        ME = MException('MATLAB:read_signature','filename must be a string');
+        ME = MException('MATLAB:read_signature',['filename must be a' ...
+            ' character string']);
         throw(ME);
     end
     

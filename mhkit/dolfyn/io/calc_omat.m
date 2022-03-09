@@ -50,7 +50,7 @@ function omat = calc_omat(hh, pp, rr, orientation_down)
 
     % Note that I've transposed these values (from what is defined in
     % Nortek matlab script), so that the omat is earth->inst
-    omat = zeros([length(sh),1,3,3], 'single');
+    omat = zeros([length(sh),1,3,3], 'double');
     omat(:,:,1,1) = ch .* cp;
     omat(:,:,1,2) = -ch .* sp .* sr - sh .* cr;
     omat(:,:,1,3) = -ch .* cr .* sp + sh .* sr;

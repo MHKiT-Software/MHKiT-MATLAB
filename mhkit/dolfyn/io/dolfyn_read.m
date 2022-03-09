@@ -66,21 +66,49 @@ function ds=dolfyn_read(filename,options)
                        'signature',{@read_signature},...
                        'rdi',{@read_rdi});
 
-    readers = fieldnames(fun_map);
-    for qq = 1:numel(readers)
-        reader = readers{qq};
+    reader = get_filetype();
+
+    if isnan(reader)
+        ME = MException('MATLAB:dolfyn_read',['File %s is not recognized' ...
+            [' as a file-type that is readable by DOLfYN. If you think' ...
+            ' it should be readable, try using the appropriate read' ...
+            ' function (`read_rdi`, `read_nortek`, or `read_signature`) ' ...
+            'found in dolfyn.io'], filename]);
+        throw(ME);
+    else
         try
             ds = feval(fun_map.(reader),...
                 filename,userdata=options.userdata,nens=options.nens);
-        catch
-            continue
-        end        
-        break;
+        catch e
+            fprintf("\nError in read: %s\n", e.message);
+        end
     end
-    if isempty(ds)
-        ME = MException('MATLAB:dolfyn_read',['Unable to find a' ...
-            ' suitable reader for file %s\n.', filename]);
-        throw(ME);
+
+    function type = get_filetype()
+    % Detects whether the file is a Nortek, Signature (Nortek), or RDI
+    % file by reading the first few bytes of the file.
+    % 
+    % Returns
+    % =======
+    %    NaN - Doesn't match any known pattern
+    %    'signature' - for Nortek signature files
+    %    'nortek' - for Nortek (Vec, AWAC) files
+    %    'RDI' - for RDI files
+
+        fid = fopen(filename,'r', 'n', 'UTF-8');      % open disk file    
+        bytes = fread(fid, 2, "uint8");
+        code = dec2hex(bytes, 2);
+        code = convertCharsToStrings(strcat(code(1,:),code(2,:)));
+        if strcmpi(code,'7f79') || strcmpi(code,'7f7f')
+            type = 'rdi';
+        elseif strcmpi(code, 'a50a')
+            type = 'signature';
+        elseif strcmpi(code, 'a505')
+            type = 'nortek';
+        else
+            type = nan;
+        end
     end
+
 end
 
