@@ -33,10 +33,10 @@ function out = calc_beam_orientmat(theta, convex, degrees)
     b = 1 / (4. * cos(theta));
     d = a / (2.^0.5);
 
-    out = [c*a, -c*a,    0,   0;
-             0,    0, -c*a, c*a;
-             b,    b,    b,   b;
-             d,    d,    d,  -d];
+    out = [ c*a,    0,  b,   d;
+           -c*a,    0,  b,   d;
+              0, -c*a,  b,  -d;
+              0,  c*a,  b,  -d];
     
 end
 

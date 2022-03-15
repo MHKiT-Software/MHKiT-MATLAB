@@ -49,11 +49,7 @@ function write_netcdf(ds, filename)
         fields = fieldnames(ds.coords);
         for qq = 1:numel(fields)
             key = fields{qq};
-            n = numel(ds.coords.(key));
-            if n == 4
-                n = n - 1;  % matlab has an extra dimension when 
-                            % compared to numpy 
-            end
+            n = numel(ds.coords.(key));            
             if iscell(ds.coords.(key))
                 temp = convertCharsToStrings(ds.coords.(key));
                 type = 'string';
@@ -73,22 +69,21 @@ function write_netcdf(ds, filename)
         end        
         
         % List of fields to exclude from the variable write
-        exclude = {'coords', 'coord_sys', 'attrs', 'time'};
+        exclude = {'coords', 'coord_sys', 'attrs', 'time', 'hdwtime_gps'};
         % Loop through the ds fields and create the variable in the netcdf
         % file then write the data.
         fields = fieldnames(ds);
         for qq = 1:numel(fields)
             key = fields{qq};
+            if strcmp(key,'orientmat')
+                debug = 1;
+            end
             if ~any(strcmp(exclude,key))
                 dim_fields = fieldnames(ds.(key).coords);
                 dimensions = cell(1,numel(dim_fields)*2);
                 for kk = 1:numel(dim_fields)
                     dimensions{(kk-1)*2 + 1} = dim_fields{kk};
-                    n = numel(ds.(key).coords.(dim_fields{kk}));
-                    if n == 4
-                        n = n - 1;  % matlab has an extra dimension when 
-                                    % compared to numpy 
-                    end
+                    n = numel(ds.(key).coords.(dim_fields{kk}));                    
                     dimensions{(kk-1)*2 + 2} = n;                        
                 end
                 % dimensions cell can now be used to create the netcdf
@@ -96,8 +91,8 @@ function write_netcdf(ds, filename)
                 nccreate(filename, key,'Dimensions',dimensions,...
                     'Datatype', class(ds.(key).data),...
                     'FillValue', nan, 'Format','netcdf4');
-                % Now that the variable exists we can write the data to it
-                out_data = condition_data(ds.(key).data);
+                % Now that the variable exists we can write the data to it 
+                out_data = squeeze(ds.(key).data);
                 ncwrite(filename, key, out_data);
                 % add the units
                 if isfield(ds.(key), 'units')
@@ -107,20 +102,15 @@ function write_netcdf(ds, filename)
                 end
             end
         end 
-        % Add time and attributes
-        %
-        % Time
-%         nccreate(filename, 'time','Dimensions',{'time', numel(ds.time)},...
-%                     'Datatype', class(ds.time),'Format','netcdf4');
-%         ncwrite(filename, 'time', ds.time);
-        %
+   
         % Attributes
         fields = fieldnames(ds.attrs);
         for qq = 1:numel(fields)
             key = fields{qq};
             if ~isstruct(ds.attrs.(key))
                 if iscell(ds.attrs.(key))
-                    ncwriteatt(filename, '/', key, ds.attrs.(key){:});
+                    ncwriteatt(filename, '/', key, ...
+                        convertCharsToStrings(ds.attrs.(key)));
                 elseif islogical(ds.attrs.(key))
                     ncwriteatt(filename, '/', key, int32(ds.attrs.(key)));
                 else
@@ -132,15 +122,5 @@ function write_netcdf(ds, filename)
         ncwriteatt(filename, '/', 'complex_vars', []);
     end
 
-    function out = condition_data(data)
-        shape = numel(size(data));
-        if shape == 2
-            out = data;
-        elseif shape == 3
-            fprintf('Not sure yet\n');
-        else % shape == 4            
-            out = permute(squeeze(data),[1,3,2]);
-        end
-    end
 end
 

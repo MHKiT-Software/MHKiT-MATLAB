@@ -220,6 +220,7 @@ function ds=read_nortek(filename,options)
 
     handle_nan();
     ds = create_dataset(data);    
+    ds = set_coords(ds,ds.coord_sys);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if ~isfield(ds, 'orientmat')
@@ -782,8 +783,8 @@ function ds=read_nortek(filename,options)
         temp_vel = fread(fid,n * nbins,'int16',endian);
         temp_amp = fread(fid,n * nbins,'uint8',endian);
         for i = 1:n
-            data.data_vars.vel(c,1,i,:) = temp_vel((i-1)*nbins+1:i*nbins);
-            data.data_vars.amp(c,1,i,:) = temp_amp((i-1)*nbins+1:i*nbins);
+            data.data_vars.vel(c,1,:,i) = temp_vel((i-1)*nbins+1:i*nbins);
+            data.data_vars.amp(c,1,:,i) = temp_amp((i-1)*nbins+1:i*nbins);
         end
         do_checksum();
         c = c + 1;
@@ -1185,7 +1186,7 @@ function ds=read_nortek(filename,options)
         else
             shape = [shape_args.("n"), 1, dims{1}];
             if any(strcmp(dims,"nbins")) 
-                shape(4) = shape_args.("nbins");
+                shape = [shape(1:2),shape_args.("nbins"),shape(end)];
             end
         end
         if dtype == "float32" || dtype == "float64"

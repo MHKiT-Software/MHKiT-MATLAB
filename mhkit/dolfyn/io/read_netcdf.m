@@ -61,7 +61,11 @@ function ds = read_netcdf(filename)
                 if dimensions.Length == 3
                     ds.coords.(name) = 1:4;
                 else
-                    ds.coords.(name) = ncread(filename,name);
+                    if strcmpi(dimensions.Name, 'x*')
+                        ds.coords.x_star = ncread(filename,name);
+                    else
+                        ds.coords.(name) = ncread(filename,name);
+                    end
                 end
             end  
             if numel(fieldnames(ds.coords)) == dim_size
@@ -95,13 +99,27 @@ function ds = read_netcdf(filename)
                     end
                 end
             elseif numel(sz) == 2
-                % no modifications needed (the read function does it)
-                ds.(name).data = ncread(filename,name);
+                if contains(name, 'orientmat')
+                    % no modifications needed 
+                    ds.(name).data = ncread(filename,name);
+                else
+                    % Need to reshape the data
+                    temp_dat = ncread(filename,name); 
+                    tmp_shape = size(temp_dat);
+                    tmp_shape = [tmp_shape(1),1,tmp_shape(2)];
+                    temp_dat = reshape(temp_dat,tmp_shape);
+                    ds.(name).data = temp_dat;
+                end
                 ds.(name).dims = cell(numel(dimensions),1);
                 for kk = 1:numel(dimensions)
-                    ds.(name).dims{kk} = dimensions(kk).Name;
-                    ds.(name).coords.(dimensions(kk).Name) = ...
-                        ds.coords.(dimensions(kk).Name);
+                    if strcmpi(dimensions(kk).Name, 'x*')
+                        ds.(name).dims{kk} = 'x_star';
+                        ds.(name).coords.x_star = ds.coords.x_star;
+                    else
+                        ds.(name).dims{kk} = dimensions(kk).Name;
+                        ds.(name).coords.(dimensions(kk).Name) = ...
+                            ds.coords.(dimensions(kk).Name);
+                    end
                 end
                 if ~isempty(attrs)
                     for ii = 1:numel(attrs)
@@ -111,14 +129,11 @@ function ds = read_netcdf(filename)
                     end
                 end
             else
-                % Need to permute and reshape the data
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % Need to reshape the data
                 temp_dat = ncread(filename,name); 
                 tmp_shape = size(temp_dat);
                 tmp_shape = [tmp_shape(1),1,tmp_shape(2:3)];
                 temp_dat = reshape(temp_dat,tmp_shape);
-                temp_dat = permute(temp_dat,[1,2,4,3]);
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 ds.(name).data = temp_dat;
                 ds.(name).dims = cell(numel(dimensions),1);
                 for kk = 1:numel(dimensions)

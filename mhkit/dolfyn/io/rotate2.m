@@ -107,7 +107,7 @@ function ds = rotate2(data_set, out_frame)
         else
             func = join([rc(inow),'2',rc(inow+1)],'');
         end
-        data_set = feval(func{1},data_set, reverse);
+        data_set = feval(func{1}, data_set, reverse, rmod);
     end
     ds = data_set;
 end

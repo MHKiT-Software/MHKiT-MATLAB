@@ -126,21 +126,22 @@ function ds = read_rdi(filename,options)
 
     % Create xarray like dataset from upper level structure
     ds = create_dataset(ds);
+    ds = set_coords(ds,ds.coord_sys);
     
     if ~isfield(ds, 'beam2inst_orientmat')
         ds.beam2inst_orientmat.data = calc_beam_orientmat(...
             ds.attrs.beam_angle,...
             strcmp(ds.attrs.beam_pattern,'convex'), true);
-        ds.beam2inst_orientmat.dims = {'beam', 'x'};
-        ds.beam2inst_orientmat.coords = struct('beam',...
+        ds.beam2inst_orientmat.dims = {'x_star', 'x'};
+        ds.beam2inst_orientmat.coords = struct('x_star',...
             [1,2,3,4], 'x', [1,2,3,4]);
     end
 
     if ~isfield(ds, 'orientmat')
         ds.orientmat.data = calc_orientmat(ds);
-        ds.orientmat.coords = struct('earth', {'E', 'N', 'U'},...
-            'inst', {'X','Y','Z'}, 'time', ds.time);
-        ds.orientmat.dims = {'earth', 'inst', 'time'};
+        ds.orientmat.coords = struct('time', ds.time, ...
+            'inst', {'X','Y','Z'}, 'earth', {'E', 'N', 'U'});
+        ds.orientmat.dims = {'time', 'inst', 'earth'};
     end
 
     % Check magnetic declination if provided via software and/or userdata
@@ -161,7 +162,7 @@ function ds = read_rdi(filename,options)
 
     if ds.attrs.magnetic_var_deg ~= 0 && declin_set
         warning("magnetic_var_deg is set to %.2f degrees in the " + ...
-            "binary file %.2f, AND declination is set in the " + ...
+            "binary file %s, AND declination is set in the " + ...
             "userdata.json file. DOLfYN WILL USE THE VALUE of %.2f" + ...
             " degrees in userdata.json. If you want to use the value " + ...
             "in magnetic_var_deg, delete the value from userdata.json " + ...
@@ -194,7 +195,7 @@ function ds = read_rdi(filename,options)
             ens_range = nstart:npings;
             fseek(fid,(hdr.nbytes + 2 + extrabytes)*nstart, 0);
         else
-            nens_ = npings;
+            nens_ = options.nens;
             ens_range = 1:nens_;
         end
         dat = init_data(nens_);
@@ -423,8 +424,8 @@ function ds = read_rdi(filename,options)
         cfg.use_pitchroll = bitand(coord_sys, 4) == 4;
         cfg.use_3beam = bitand(coord_sys, 2) == 2; 
         cfg.bin_mapping = bitand(coord_sys, 1) == 1;
-        cfg.xducer_misalign_deg = fread(fid,1,'uint16') * .01;
-        cfg.magnetic_var_deg = fread(fid,1,'uint16') * .01;
+        cfg.xducer_misalign_deg = fread(fid,1,'int16') * .01;
+        cfg.magnetic_var_deg = fread(fid,1,'int16') * .01;
         cfg.sensors_src = dec2bin(fread(fid,1,'uint8'),8);
         cfg.sensors_avail = dec2bin(fread(fid,1,'uint8'),8);
         cfg.bin1_dist_m = fread(fid,1,'uint16') * .01;
@@ -555,7 +556,7 @@ function ds = read_rdi(filename,options)
             fseek(fid,14,0);
         end
         ensemble.dist_bt.data(ensemble.k,1,:) = fread(fid,4,'uint16')*0.01;
-        ensemble.vel_bt.data(ensemble.k,1,:) = fread(fid,4,'uint16')*0.001;
+        ensemble.vel_bt.data(ensemble.k,1,:) = fread(fid,4,'int16')*0.001;
         ensemble.corr_bt.data(ensemble.k,1,:) = fread(fid,4,'uint8');
         ensemble.amp_bt.data(ensemble.k,1,:) = fread(fid,4,'uint8');
         ensemble.prcnt_gd_bt.data(ensemble.k,1,:) = fread(fid,4,'uint8');
@@ -597,7 +598,7 @@ function ds = read_rdi(filename,options)
         utim = fread(fid,4,'uint8');        
         milliseconds = int32(fread(fid,1,'uint32') / 10);
         date = datetime(utim(3) + utim(4) * 256, utim(2), utim(1), ...
-            0, 0, milliseconds*1000);
+            0, 0, milliseconds/1000);
         fseek(fid, 4, 0);
         ensemble.time_gps.data(ensemble.k) = ...
             datenum(datestr(date),'dd-mmm-yyyy HH:MM:SS');
@@ -607,20 +608,20 @@ function ds = read_rdi(filename,options)
             * cfac_;
         milliseconds = int32(fread(fid,1,'uint32') * 10);
         date = datetime(utim(3) + utim(4) * 256, utim(2), utim(1), ...
-            0, 0, milliseconds*1000);
+            0, 0, milliseconds/1000);
         ensemble.etime_gps.data(ensemble.k) = ...
             datenum(datestr(date),'dd-mmm-yyyy HH:MM:SS'); 
         ensemble.elatitude_gps.data(ensemble.k) = fread(fid,1,'int32') ... 
-            * cfac_;
+            * cfac_;        
         ensemble.elongitude_gps.data(ensemble.k) = fread(fid,1,'int32') ... 
-            * cfac_;
+            * cfac_;        
         fseek(fid, 12, 0);
         ensemble.flags.data(ensemble.k) = fread(fid,1,'uint16');
         fseek(fid, 6, 0);
         utim = fread(fid,4,'uint8');        
         milliseconds = int32(fread(fid,1,'uint32') / 10);
         date = datetime(utim(1) + utim(2) * 256, utim(4), utim(3),...
-            0, 0, milliseconds*1000);
+            0, 0, milliseconds/1000);
         ensemble.ntime.data(ensemble.k) = ...
             datenum(datestr(date),'dd-mmm-yyyy HH:MM:SS'); 
         fseek(fid, 16, 0);
@@ -734,14 +735,7 @@ function ds = read_rdi(filename,options)
                 fseek(fid,-numbytes-2,0);
                 if cfgid(1) == 127 && (cfgid(2) == 127 || cfgid(2) == 121)
                     if cfgid(2) == 121 && isnan(debug7f79_)
-                        debug7f79_ = true;
-                        warning("This ADCP file has an undocumented " + ...
-                            "sync-code.  If possible, please notify the " + ...
-                            "DOLfYN developers that you are recieving " + ...
-                            "this warning by posting the hardware and " + ...
-                            "software details on how you acquired this " + ...
-                            "file to " + ...
-                            "'http://github.com/lkilcher/dolfyn/issues/7'");
+                        debug7f79_ = true;                        
                     end
                     valid = true;
                 end
@@ -1049,8 +1043,8 @@ function ds = read_rdi(filename,options)
         for qq = 1 : numel(fields)
             out.attrs.(fields{qq}) = cfg.(fields{qq});
         end
-        out.attrs.fs = data.attrs.sec_between_ping_groups * ...
-            data.attrs.pings_per_ensemble ^(-1);
+        out.attrs.fs = (data.attrs.sec_between_ping_groups * ...
+            data.attrs.pings_per_ensemble)^-1;
 
         fields = fieldnames(ensemble);
         for qq = 1 : numel(fields)

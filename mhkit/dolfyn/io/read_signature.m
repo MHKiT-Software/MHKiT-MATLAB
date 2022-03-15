@@ -134,6 +134,7 @@ function ds=read_signature(filename,options)
     end
 
     ds = create_dataset(ds);
+    ds = set_coords(ds,ds.coord_sys);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if ~isfield(ds, 'orientmat')
@@ -147,10 +148,10 @@ function ds=read_signature(filename,options)
                          ds.roll.data,...
                          od);
         ds.orientmat.data = omat;
-        ds.orientmat.dims = {'earth', 'inst', 'time'};
-        ds.orientmat.coords.earth = {'E' 'N' 'U'};
-        ds.orientmat.coords.inst = {'X' 'Y' 'Z'};
+        ds.orientmat.dims = { 'time', 'earth', 'inst'};
         ds.orientmat.coords.time = ds.time;
+        ds.orientmat.coords.earth = {'E' 'N' 'U'};
+        ds.orientmat.coords.inst = {'X' 'Y' 'Z'};        
     end
     
     if ~isnan(declin)
@@ -499,7 +500,7 @@ function ds=read_signature(filename,options)
                 n = n26;
                 ens = zeros([n,1]);
             else
-                ens = ens_start:1:ens_stop;
+                ens = ens_start:1:ens_stop-1;
                 n = nens;
             end
             outdat.(ky) = init_burst_data(n, burst_readers.(ky));
@@ -927,7 +928,7 @@ function ds=read_signature(filename,options)
         dd.batt = struct('format', 'H', 'shape', [], 'sci_func',...
             [0.1, 0], 'units', 'V', 'N', 1);
         dd.mag = struct('format', 'h', 'shape', [1,3], 'sci_func',...
-            nan, 'units', 'uT', 'N', 3);
+            [0.1, 0], 'units', 'uT', 'N', 3);
         dd.accel = struct('format', 'h', 'shape', [1,3], 'sci_func',...
             [1. / 16384 * 9.81, 0], 'units', 'm/s^2', 'N', 3);
         dd.ambig_vel = struct('format', 'h', 'shape', [], 'sci_func',...
