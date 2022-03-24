@@ -75,7 +75,7 @@ function ds=dolfyn_read(filename,options)
             ' function (`read_rdi`, `read_nortek`, or `read_signature`) ' ...
             'found in dolfyn.io'], filename]);
         throw(ME);
-    else
+    else        
         try
             ds = feval(fun_map.(reader),...
                 filename,userdata=options.userdata,nens=options.nens);
@@ -94,7 +94,7 @@ function ds=dolfyn_read(filename,options)
     %    'signature' - for Nortek signature files
     %    'nortek' - for Nortek (Vec, AWAC) files
     %    'RDI' - for RDI files
-
+        
         fid = fopen(filename,'r', 'n', 'UTF-8');      % open disk file    
         bytes = fread(fid, 2, "uint8");
         code = dec2hex(bytes, 2);

@@ -58,8 +58,7 @@ function ds = set_declination(data_set, declin)
     end
 
     data_set.orientmat.data = tensorproduct(data_set.orientmat.data, ...
-        rdec, 'edbc,ab->edac'); %'edcb,ab->edac' works for AWAC_test01.wpr
-                                %'edbc,ab->edac' works for vector_data_imu01.VEC 
+        rdec, 'edbc,ab->edac');  
 
     if isfield(data_set,'heading')
         data_set.heading.data = data_set.heading.data + angle;

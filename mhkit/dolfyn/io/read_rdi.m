@@ -647,7 +647,8 @@ function ds = read_rdi(filename,options)
             gga_time = char(fread(fid,9,"char"));
             time = [str2double(gga_time(1:2)),...
                 str2double(gga_time(3:4)),...
-                str2double(gga_time(5:6))];
+                str2double(gga_time(5:6)) + ...
+                (str2double(gga_time(8:end))*100)*0.001];
             if ensemble.rtc.data(1) < 100
                 ensemble.rtc.data(1) = ensemble.rtc.data(1) + 2000;
             end

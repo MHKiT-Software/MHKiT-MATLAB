@@ -13,7 +13,7 @@ function ds = inst2earth(advo,reverse,make)
 %     make : char
 %       vector, signature, rdi
 
-if strcmpi(make,'vector')
+if strcmpi(make,'awac')
     ds = inst2earth_vector();
 elseif strcmpi(make, 'signature')
     ds = inst2earth_signature();

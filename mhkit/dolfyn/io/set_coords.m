@@ -53,7 +53,8 @@ function out = set_coords(ds, ref_frame)
     tag = {'', '_echo', '_bt'};
     for qq = 1:3
         if isfield(ds.attrs, join(["coord_sys_axes",tag{qq}],''))
-            ds = rmfield(ds.attrs,join(["coord_sys_axes",tag{qq}],''));
+            ds.attrs = rmfield(ds.attrs,...
+                join(["coord_sys_axes",tag{qq}],''));
         end
     end
 

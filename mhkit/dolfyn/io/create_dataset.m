@@ -23,17 +23,17 @@ function ds = create_dataset(data)
             % beam2inst & inst2head orientation matrices
             if (contains(fn{k},'inst'))
                 ds.(fn{k}).data = data.data_vars.(fn{k});
-                ds.(fn{k}).dims = {'x', 'x_star'};
-                ds.(fn{k}).coords.x = beam;
+                ds.(fn{k}).dims = {'x_star', 'x'};
                 ds.(fn{k}).coords.x_star = beam;
+                ds.(fn{k}).coords.x = beam;                
             else 
             % earth2inst orientation matrix  
                 ds.(fn{k}).data = data.data_vars.(fn{k});
-                ds.(fn{k}).dims = {strcat('time',tg), 'earth', 'inst' };
+                ds.(fn{k}).dims = {strcat('time',tg), 'inst', 'earth'};
                 ds.(fn{k}).coords.(strcat('time',tg)) = ...
                     data.coords.(strcat('time',tg));
-                ds.(fn{k}).coords.earth = earth;
-                ds.(fn{k}).coords.inst = inst;                
+                ds.(fn{k}).coords.inst = inst; 
+                ds.(fn{k}).coords.earth = earth;                               
             end
             
         % quaternion units never change
@@ -51,9 +51,8 @@ function ds = create_dataset(data)
             else
                 % make sure ones with tags get units
                 if ~isempty(tg) 
-                    ds.(fn{k}).units = data.units.(tmp{1});
-                else
-                    continue
+                    ds.(fn{k}).units =...
+                        data.units.(strjoin([tmp(1:end-1)],'_'));                
                 end               
             end
 

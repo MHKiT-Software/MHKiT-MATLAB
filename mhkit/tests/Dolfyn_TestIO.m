@@ -2,15 +2,16 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
     
     methods (Test)
 
-        % ADP Test Cases
-        function test_load_usgs_data_instantaneous(testCase)  
-            dat_rdi = read_netcdf('RDI_test01.nc');
-            dat_rdi_7f79 = read_netcdf('RDI_7f79.nc');
-            dat_rdi_bt = read_netcdf('RDI_withBT.nc');
-            dat_rdi_vm = read_netcdf('vmdas01.nc');
-            dat_wr1 = read_netcdf('winriver01.nc');
-            dat_wr2 = read_netcdf('winriver02.nc');
-
+        % ADP Test Cases  
+        function test_io_rdi(testCase)
+            warning('off','all')
+            dat_rdi = read_netcdf('../../examples/data/dolfyn/control/RDI_test01.nc');
+            dat_rdi_7f79 = read_netcdf('../../examples/data/dolfyn/control/RDI_7f79.nc');
+            dat_rdi_bt = read_netcdf('../../examples/data/dolfyn/control/RDI_withBT.nc');
+            dat_rdi_vm = read_netcdf('../../examples/data/dolfyn/control/vmdas01.nc');
+            dat_wr1 = read_netcdf('../../examples/data/dolfyn/control/winriver01.nc');
+            dat_wr2 = read_netcdf('../../examples/data/dolfyn/control/winriver02.nc');
+    
             nens = 100;
             td_rdi = dolfyn_read('../../examples/data/dolfyn/RDI_test01.000');
             td_7f79 = dolfyn_read('../../examples/data/dolfyn/RDI_7f79.000');
@@ -18,6 +19,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
             td_vm = dolfyn_read('../../examples/data/dolfyn/vmdas01.ENX', nens=nens);
             td_wr1 = dolfyn_read('../../examples/data/dolfyn/winriver01.PD0');
             td_wr2 = dolfyn_read('../../examples/data/dolfyn/winriver02.PD0');
+            warning('on','all')
             
             assert(compare_structures(td_rdi, dat_rdi) < 1e-6);
             assert(compare_structures(td_7f79, dat_rdi_7f79) < 1e-6);

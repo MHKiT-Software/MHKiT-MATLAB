@@ -148,10 +148,10 @@ function ds=read_signature(filename,options)
                          ds.roll.data,...
                          od);
         ds.orientmat.data = omat;
-        ds.orientmat.dims = { 'time', 'earth', 'inst'};
+        ds.orientmat.dims = { 'time', 'inst', 'earth'};
         ds.orientmat.coords.time = ds.time;
-        ds.orientmat.coords.earth = {'E' 'N' 'U'};
-        ds.orientmat.coords.inst = {'X' 'Y' 'Z'};        
+        ds.orientmat.coords.inst = {'X' 'Y' 'Z'}; 
+        ds.orientmat.coords.earth = {'E' 'N' 'U'};               
     end
     
     if ~isnan(declin)
@@ -298,7 +298,7 @@ function ds=read_signature(filename,options)
                         dat_array(qq:qq+(burst_readers.(key).N{i}-1));
                 else
                     dim = length(out.(fields{i})(ens,:,:,1));
-                    for j = 1:4                        
+                    for j = 1:size(out.(fields{i}),4)                       
                         out.(fields{i})(ens,:,:,j) = ...
                         dat_array(qq+((j-1)*dim):qq+((j)*dim)-1);
                     end
@@ -500,7 +500,7 @@ function ds=read_signature(filename,options)
                 n = n26;
                 ens = zeros([n,1]);
             else
-                ens = ens_start:1:ens_stop-1;
+                ens = transpose(ens_start:1:ens_stop-1);
                 n = nens;
             end
             outdat.(ky) = init_burst_data(n, burst_readers.(ky));
@@ -740,7 +740,7 @@ function ds=read_signature(filename,options)
         if flags.ahrs
             dd.orientmat = struct('format', 'f', 'shape', [1,3,3],...
                 'sci_func', nan, 'units', '', 'N', 9);
-            dd.quaternion = struct('format', 'f', 'shape', [1,4],...
+            dd.quaternions = struct('format', 'f', 'shape', [1,4],...
                 'sci_func', nan, 'units', '', 'N', 4);
             dd.angrt = struct('format', 'f', 'shape', [1,3],...
                 'sci_func', [pi / 180, 0], 'units', 'rad/s', 'N', 3);
@@ -767,7 +767,7 @@ function ds=read_signature(filename,options)
         if flags.ahrs
             dd.orientmat = struct('format', 'f', 'shape', [1,3,3],...
                 'sci_func', nan, 'units', '', 'N', 9);
-            dd.quaternion = struct('format', 'f', 'shape', [1,4],...
+            dd.quaternions = struct('format', 'f', 'shape', [1,4],...
                 'sci_func', nan, 'units', '', 'N', 4);
             dd.angrt = struct('format', 'f', 'shape', [1,3],...
                 'sci_func', [pi / 180, 0], 'units', 'rad/s', 'N', 3);
@@ -827,7 +827,7 @@ function ds=read_signature(filename,options)
         if flags.ahrs
             dd.orientmat = struct('format', 'f', 'shape', [1,3,3],...
                 'sci_func', nan, 'units', '', 'N', 9);
-            dd.quaternion = struct('format', 'f', 'shape', [1,4],...
+            dd.quaternions = struct('format', 'f', 'shape', [1,4],...
                 'sci_func', nan, 'units', '', 'N', 4);
             dd.angrt = struct('format', 'f', 'shape', [1,3],...
                 'sci_func', [pi / 180, 0], 'units', 'rad/s', 'N', 3);
@@ -921,7 +921,7 @@ function ds=read_signature(filename,options)
             [0.001, 0], 'units', 'm', 'N', 1);
         dd.blank_dist = struct('format', 'H', 'shape', [], 'sci_func',...
             [0.01, 0], 'units', 'm', 'N', 1);
-        dd.nom_corr = struct('format', 'B', 'shape', [], 'sci_func',...
+        dd.nominal_corr = struct('format', 'B', 'shape', [], 'sci_func',...
             nan, 'units', '%', 'N', 1);
         dd.temp_press = struct('format', 'B', 'shape', [], 'sci_func',...
             [0.2,-20], 'units', 'deg C', 'N', 1);
@@ -939,18 +939,18 @@ function ds=read_signature(filename,options)
             nan, 'units', 'dB', 'N', 1);
         dd.vel_scale = struct('format', 'b', 'shape', [], 'sci_func',...
             nan, 'units', '', 'N', 1);
-        dd.power_level = struct('format', 'b', 'shape', [], 'sci_func',...
+        dd.power_level_dB = struct('format', 'b', 'shape', [], 'sci_func',...
             nan, 'units', '', 'N', 1);
         dd.temp_mag = struct('format', 'h', 'shape', [], 'sci_func',...
-            nan, 'units', 'deg C', 'N', 1);
+            nan, 'units', '', 'N', 1);
         dd.temp_clock = struct('format', 'h', 'shape', [], 'sci_func',...
             [0.01, 0], 'units', 'deg C', 'N', 1);
         dd.error = struct('format', 'H', 'shape', [], 'sci_func',...
             nan, 'units', '', 'N', 1);
         dd.status0 = struct('format', 'H', 'shape', [], 'sci_func',...
-            nan, 'units', 'binary', 'N', 1);
+            nan, 'units', '', 'N', 1);
         dd.status = struct('format', 'I', 'shape', [], 'sci_func',...
-            nan, 'units', 'binary', 'N', 1);
+            nan, 'units', '', 'N', 1);
         dd.ensemble_ = struct('format', 'I', 'shape', [], 'sci_func',...
             nan, 'units', '', 'N', 1);
     end
@@ -997,7 +997,7 @@ function ds=read_signature(filename,options)
             [0.001, 0], 'units', 'm', 'N', 1);
         dd.blank_dist = struct('format', 'H', 'shape', [], 'sci_func',...
             [0.01, 0], 'units', 'm', 'N', 1);
-        dd.nom_corr = struct('format', 'B', 'shape', [], 'sci_func',...
+        dd.nominal_corr = struct('format', 'B', 'shape', [], 'sci_func',...
             nan, 'units', '%', 'N', 1);
         dd.unused = struct('format', 'B', 'shape', [], 'sci_func',...
             nan, 'units', '', 'N', 1);
@@ -1015,10 +1015,10 @@ function ds=read_signature(filename,options)
             nan, 'units', 'dB', 'N', 1);
         dd.vel_scale = struct('format', 'b', 'shape', [], 'sci_func',...
             nan, 'units', '', 'N', 1);
-        dd.power_level = struct('format', 'b', 'shape', [], 'sci_func',...
+        dd.power_level_dB = struct('format', 'b', 'shape', [], 'sci_func',...
             nan, 'units', '', 'N', 1);
         dd.temp_mag = struct('format', 'h', 'shape', [], 'sci_func',...
-            nan, 'units', 'deg C', 'N', 1);
+            nan, 'units', '', 'N', 1);
         dd.temp_clock = struct('format', 'h', 'shape', [], 'sci_func',...
             [0.01, 0], 'units', 'deg C', 'N', 1);
         dd.error = struct('format', 'I', 'shape', [], 'sci_func',...
@@ -1159,18 +1159,20 @@ function ds=read_signature(filename,options)
             outdat.attrs.(strjoin({'xmit_energy',tag},'')) = ...
                 median(dat.(key).xmit_energy);
             outdat.attrs.(strjoin({'ambig_vel',tag},'')) = ...
-                median(dat.(key).ambig_vel);
+                collapse(dat.(key).ambig_vel, 'ambig_vel',...
+                collapse_exclude);
+                
             
             iter_keys = {'SerialNum', 'cell_size', 'blank_dist', ...
-                'nom_corr','data_desc', 'vel_scale', 'power_level'};
+                'nominal_corr','power_level_dB'};
             for j = 1:numel(iter_keys)
                 ky = iter_keys{j};
                 outdat.attrs.(strjoin({ky,tag},'')) = collapse(...
-                    dat.(key).(ky), collapse_exclude, ky);
+                    dat.(key).(ky), ky, collapse_exclude);
             end
 
             iter_keys = {'c_sound', 'temp', 'pressure', 'heading',...
-                'pitch', 'roll','mag', 'accel', 'batt', 'temp_mag',...
+                'pitch', 'roll','mag', 'accel', 'batt', ...
                 'temp_clock', 'error','status', 'ensemble'};
             for j = 1:numel(iter_keys)
                 ky = iter_keys{j};
@@ -1183,12 +1185,12 @@ function ds=read_signature(filename,options)
             end
 
             iter_keys = {'vel', 'amp', 'corr', 'prcnt_gd', 'echo',...
-                'dist', 'orientmat', 'angrt', 'quaternion', ...
+                'dist', 'orientmat', 'angrt', 'quaternions', ...
                 'ast_pressure', 'alt_dist', 'alt_quality', 'alt_status',...
                 'ast_dist', 'ast_quality', 'ast_offset_time',...
                 'altraw_nsamp', 'altraw_dsamp', 'altraw_samp',...
                 'status0', 'fom', 'temp_press', 'press_std',...
-                'pitch_std', 'roll_std', 'heading_std'};
+                'pitch_std', 'roll_std', 'heading_std', 'xmit_energy'};
             for j = 1:numel(iter_keys)
                 ky = iter_keys{j};                
                 if isfield(dat.(key),ky)
@@ -1214,35 +1216,111 @@ function ds=read_signature(filename,options)
                     outdat.data_vars = rmfield(outdat.data_vars,ky);
                 end
             end
+
+            % Read altimeter status
+            alt_status = alt_status2data(outdat.data_vars.alt_status);
+            alt_fields = fieldnames(alt_status);
+            for kk=1:numel(alt_fields)
+                ky = alt_fields{kk};
+                outdat.attrs.(ky) = collapse(alt_status.(ky),ky,[]);
+            end
+            outdat.data_vars = rmfield(outdat.data_vars,'alt_status');
+            
+            % Power level index
+            if outdat.attrs.power_level_idx_alt == 0
+                outdat.attrs.power_level_alt = 'high';
+            elseif outdat.attrs.power_level_idx_alt == 1
+                outdat.attrs.power_level_alt = 'med-high';
+            elseif outdat.attrs.power_level_idx_alt == 2
+                outdat.attrs.power_level_alt = 'med-low';
+            elseif outdat.attrs.power_level_idx_alt == 3
+                outdat.attrs.power_level_alt = 'low';
+            end
+            outdat.attrs = rmfield(outdat.attrs,'power_level_idx_alt');
         end
-        
+
+        % Read status data
+        status0_vars = {};
+        data_vars_fields = fieldnames(outdat.data_vars);
+        for kk = 1:numel(data_vars_fields)
+            if contains(data_vars_fields{kk}, 'status0')
+                status0_vars{end+1} = data_vars_fields{kk};
+            end
+        end
+        status0_key = status0_vars{1};
+        status0_data = status02data(outdat.data_vars.(status0_key));
+        status_key = strrep(status0_key, '0', '');
+        status_data = status2data(outdat.data_vars.(status_key));
+
+        % Individual status codes
+        % Wake up state
+        wake = collapse(status_data.wakeup_state, '', []);
+        if wake == 0
+            outdat.attrs.wakeup_state = 'bad power';
+        elseif wake == 1
+            outdat.attrs.wakeup_state = 'power on';
+        elseif wake == 2
+            outdat.attrs.wakeup_state = 'break';
+        elseif wake == 3
+            outdat.attrs.wakeup_state = 'clock';
+        end
+
+        % Instrument direction
+        % 0: XUP, 1: XDOWN, 2: YUP, 3: YDOWN, 4: ZUP, 5: ZDOWN,
+        % 7: AHRS, handle as ZUP
+        tmp = collapse(status_data.orient_up);
+        if any([0, 1, 2, 3] == tmp)
+            outdat.attrs.orientation = 'horizontal';
+        elseif tmp == 4
+            outdat.attrs.orientation = 'up';
+        elseif tmp == 5
+            outdat.attrs.orientation = 'down';
+        elseif tmp == 7
+            outdat.attrs.orientation = 'AHRS';
+        end
+
+        % Orientation Detection
+        tmp = collapse(status_data.auto_orientation);
+        if tmp == 0
+            outdat.attrs.orient_status = 'fixed';
+        elseif tmp == 1
+            outdat.attrs.orient_status = 'auto_UD';
+        elseif tmp == 3
+            outdat.attrs.orient_status = 'AHRS-3D';
+        end
+
+        % Status variables
+        stat_keys = {'low_volt_skip', 'active_config', 'telemetry_data',...
+            'boost_running'};
+        for kk = 1:numel(stat_keys)
+            ky = stat_keys{kk};
+            outdat.data_vars.(ky) = status_data.(ky);
+        end
+
+        % Processor idle state - need to save as 1/0 per 
+        % netcdf attribute limitations
+        status0_fields = fieldnames(status0_data);
+        for kk = 1:numel(status0_fields)
+            ky = status0_fields{kk};
+            outdat.attrs.(ky) = collapse(status0_data.(ky),'',[]);
+        end
+
+        % Remove status0 variables - keep status variables as they useful
+        % for finding missing pings
+        for kk = 1:numel(status0_vars)
+            outdat.data_vars = rmfield(outdat.data_vars, status0_vars{kk});
+        end
+
+        % Set coordinate system
         if strcmpi(outdat.attrs.coord_sys_axes,'XYZ')
             outdat.attrs.coord_sys = 'inst';
         elseif strcmpi(outdat.attrs.coord_sys_axes,'ENU')
             outdat.attrs.coord_sys = 'earth';
         elseif strcmpi(outdat.attrs.coord_sys_axes,'beam')
             outdat.attrs.coord_sys = 'beam';
-        end
+        end             
 
-        tmp = status2data(outdat.data_vars.status);
-        if any([0, 1, 2, 3] == tmp.orient_up(1))
-            outdat.attrs.orientation = 'horizontal';
-        elseif tmp.orient_up(1) == 4
-            outdat.attrs.orientation = 'up';
-        elseif tmp.orient_up(1) == 5
-            outdat.attrs.orientation = 'down';
-        elseif tmp.orient_up(1) == 6
-            outdat.attrs.orientation = 'AHRS';
-        end
-
-        if tmp.auto_orientation(1) == 0
-            outdat.attrs.orient_status = 'fixed';
-        elseif tmp.auto_orientation(1) == 1
-            outdat.attrs.orient_status = 'auto_UD';
-        elseif tmp.auto_orientation(1) == 3
-            outdat.attrs.orient_status = 'AHRS-3D';
-        end
-
+        % Copy appropriate vars to rotate_vars
         keys = {'accel', 'angrt', 'mag'};
         for i = 1:3
             ky = keys{i};
@@ -1269,7 +1347,7 @@ function ds=read_signature(filename,options)
 
         % Average these fields
         fields = {'c_sound', 'temp', 'pressure','temp_press',...
-            'temp_clock', 'temp_mag','batt'};
+            'temp_clock','batt'};
         for i = 1:numel(fields)
             ky = fields{i};
             dat.data_vars = reduce_by_average(dat.data_vars,...
@@ -1325,7 +1403,7 @@ function ds=read_signature(filename,options)
                     strjoin({'M',num2str(ii),num2str(qq)},''));
             end
         end
-        dat.data_vars.beam2inst_orientmat = tm;
+        dat.data_vars.beam2inst_orientmat = tm';
 
         out = dat;
     end
@@ -1336,11 +1414,26 @@ function ds=read_signature(filename,options)
         if is_uniform(vec,[])
             out = vec(1);
         elseif is_uniform(vec, exclude)
-            out = something;
+            tmp = vec(setdiff(1:end,exclude));
+            out = tmp(1);
         else
-            warning(['The variable %s is expected to be uniform, but ' ...
-                'it is not.\n',name])
-            out = vec(1);
+            [uniq, idx] = unique(vec);
+            counts = histcounts(vec, length(uniq));
+            if all(counts == counts(1))
+                out = max(uniq); % pings saved out of order, but equal # of pings
+            else
+                [mx,max_id] = max(counts);
+                out = vec(idx(max_id));
+            end
+
+            if all(size(uniq) == size([0; out])) && ...
+                    all(size(counts) == size([1;max(counts)]))
+                if ~all(uniq == [0; out]) && all(counts == [1;max(counts)])
+                    warning(["The variable %s is expected to be uniform," + ...
+                        " but it is not.\n%d values found\nUsing the most"+ ...
+                        " common value: %4.4f",name, numel(counts),out])
+                end
+            end            
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -1357,12 +1450,12 @@ function ds=read_signature(filename,options)
         out.orient_up = bitindexer(val, [25,28]);
         out.auto_orientation = bitindexer(val, [22,25]);
         out.previous_wakeup_state = bitindexer(val, [18,22]);
-        out.last_meas_low_voltage_skip = bitindexer(val, [17]);
+        out.low_volt_skip = bitindexer(val, [17]);
         out.active_config = bitindexer(val, [16]);
-        out.echo_sounder_index = bitindexer(val, [12,16]);
+        out.echo_index = bitindexer(val, [12,16]);
         out.telemetry_data = bitindexer(val, [11]);
         out.boost_running = bitindexer(val, [10]);
-        out.echo_sounder_freq_bin = bitindexer(val, [5,10]);
+        out.echo_freq_bin = bitindexer(val, [5,10]);
         % 2, 3, 4 unused
         out.bd_scaling = bitindexer(val, [1]);  % if True: cm scaling of blanking dist
         % 0 unused
@@ -1413,6 +1506,24 @@ function ds=read_signature(filename,options)
                 out.(ky0) = out.(ky1);
                 out = rmfield(out, ky1);
             end
+        end
+    end
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+    function out = alt_status2data(val)
+        out = struct();
+        out.tilt_over_5deg = bitindexer(val, 0);
+        out.tilt_over_10deg = bitindexer(val, 1);
+        out.multibeam_alt = bitindexer(val, 2);
+        out.n_beams_alt = bitindexer(val, [3,7]);
+        out.power_level_idx_alt = bitindexer(val, [7,10]);
+    end
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+    function out = status02data(val)
+        out = struct();
+        if any(bitindexer(val, 15)) % status0_in_use
+            out.proc_idle_less_3pct = bitindexer(val, 0);
+            out.proc_idle_less_6pct = bitindexer(val, 1);
+            out.proc_idle_less_12pct = bitindexer(val, 2);
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>

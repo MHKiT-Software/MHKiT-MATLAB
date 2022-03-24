@@ -43,7 +43,7 @@ function ds = read_netcdf(filename)
     % Loop through the variables once to get the coords
     var_size = numel(info.Variables);
     for qq = 1:var_size
-        name = info.Variables(qq).Name;
+        name = info.Variables(qq).Name;        
         dimensions = info.Variables(qq).Dimensions;
         sz = info.Variables(qq).Size;
         dtype = info.Variables(qq).Datatype;
@@ -54,19 +54,12 @@ function ds = read_netcdf(filename)
                 % if its a string then we read a string array
                 ds.coords.(name) = ...
                     convertStringsToChars(ncread(filename,name));
-            else
-                % if its numeric and its length is 3 we change it to 4 to
-                % account for the different dimensions between numpy and
-                % matlab
-                if dimensions.Length == 3
-                    ds.coords.(name) = 1:4;
+            else                
+                if strcmpi(dimensions.Name, 'x*')
+                    ds.coords.x_star = ncread(filename,name);
                 else
-                    if strcmpi(dimensions.Name, 'x*')
-                        ds.coords.x_star = ncread(filename,name);
-                    else
-                        ds.coords.(name) = ncread(filename,name);
-                    end
-                end
+                    ds.coords.(name) = ncread(filename,name);
+                end                
             end  
             if numel(fieldnames(ds.coords)) == dim_size
                 break

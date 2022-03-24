@@ -234,10 +234,10 @@ function ds=read_nortek(filename,options)
                          ds.roll.data,...
                          od);
         ds.orientmat.data = omat;
-        ds.orientmat.dims = {'earth', 'inst', 'time'};
+        ds.orientmat.dims = { 'time', 'inst', 'earth' };
         ds.orientmat.coords.time = ds.time;
-        ds.orientmat.coords.earth = {'E' 'N' 'U'};
         ds.orientmat.coords.inst = {'X' 'Y' 'Z'};
+        ds.orientmat.coords.earth = {'E' 'N' 'U'};        
         
     end
 
@@ -247,6 +247,7 @@ function ds=read_nortek(filename,options)
     if ~isnan(declin)
         ds = set_declination(ds, declin);
     end
+
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                        End Post Process
     %                        End Function
@@ -384,7 +385,7 @@ function ds=read_nortek(filename,options)
         fseek(fid, 8, 0);   % skip beginning of system data
         temp = fread(fid,9,'int16',endian);
         temp = temp./4096.;
-        config.('beam2inst_orientmat') = transpose(reshape(temp,[3,3]));
+        config.('beam2inst_orientmat') = reshape(temp,[3,3]);
         fseek(fid, 150, 0); % skip the rest of system data
         fseek(fid, 22, 0);  % skip spare
         fseek(fid, 2, 0);   % skip number of beams
@@ -463,7 +464,7 @@ function ds=read_nortek(filename,options)
         fseek(fid, 2, 0);   % skip salinity
         config.('VelAdjTable') = fread(fid,90,'ushort',endian);
         temp = fread(fid,80,'char',endian);
-        config.('Comments') = convertCharsToStrings(char(temp)); 
+        config.('Comments') = deblank(convertCharsToStrings(char(temp))); 
         fseek(fid, 100, 0);   % skip spare, prcoessing method, spare
         config.('Mode1') = int2binarray(fread(fid,1,'ushort',endian), 16);
         config.('DynPercPos') = fread(fid,1,'ushort',endian);
@@ -1172,7 +1173,8 @@ function ds=read_nortek(filename,options)
                         va.offset;
                 end
                 if isfield(va,'factor')
-                    data.(va.group).(nm) = data.(va.group).(nm)*va.factor;
+                    data.(va.group).(nm) = double(...
+                        data.(va.group).(nm)*va.factor);
                 end
             end            
         end
@@ -1375,7 +1377,7 @@ function ds=read_nortek(filename,options)
         if sum(not_nums,'all') > 0
             data.coords.time = data.coords.time(~not_nums);
             for k=1:numel(fn)
-                if length(data.data_vars.(fn{k})) == l
+                if size(data.data_vars.(fn{k}),1) == l
                     dims = size(data.data_vars.(fn{k}));
                     dim = dims(end);
                     dim2 = dims(end-1);
