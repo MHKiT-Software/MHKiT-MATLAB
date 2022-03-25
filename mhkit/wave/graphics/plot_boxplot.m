@@ -76,9 +76,10 @@ text(1:12, means, means_text, ...
 
 % Sample 'legend' boxplot
 ax2 = subplot(2, 1, 2);
-relative_file_name = "../../../examples/data/wave/sample_boxplot.txt";
-full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
-sample_data = readmatrix(full_file_name);
+sample_data = randn(500,1) * 0.5 + 2.5;     % std.dev=0.5, median=2.5
+sample_data = cat(1, sample_data, repmat(max(sample_data), 30, 1));  % skew
+sample_data = cat(1, sample_data, max(sample_data)*1.1);   % ensure outliers
+sample_data = cat(1, sample_data, max(sample_data)*1.102); % ensure outliers
 bplot(sample_data, 'horiz', 'outliers');
 title('Sample Boxplot', 'FontSize', 9)
 set(gca, 'xtick', [])
