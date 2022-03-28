@@ -71,7 +71,7 @@ function ds = read_rdi(filename,options)
     end   
 
     %% <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    %                        Initialize Routine
+    %                    year    Initialize Routine
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     debug7f79_ = nan;
     nbyte_ = 0;
@@ -206,9 +206,6 @@ function ds = read_rdi(filename,options)
             nm = fields{i};
             dat.attrs.(nm) = cfg.(nm);
         end
-        % Matlab datetime does not carry microseconds precision so  
-        % microseconds are stored in a separate variable 
-        dat.coords.micro_time = zeros(size(dat.coords.time));
        
         for i = 1:nens_
             try
@@ -237,12 +234,13 @@ function ds = read_rdi(filename,options)
             end
             try 
                 clock = ensemble.rtc.data(:);
-                clock(7) = clock(7) * 10000;                
-                dat.coords.time(i) = datetime(clock(1:6)');
-                dat.coords.micro_time(i) = clock(7);
+                clock(7) = clock(7) * 0.01;                
+                dat.coords.time(i) = double(convertTo(datetime(clock(1)...
+                    ,clock(2),clock(3),clock(4),clock(5),clock(6)),...
+                    'epochtime','Epoch','1970-01-01'));
+                dat.coords.time(i) = dat.coords.time(i) + clock(7);
             catch
-                dat.coords.time(i) = NaT;
-                dat.coords.time.micro_time(i) = nan;
+                dat.coords.time(i) = nan;
                 warning("Invalid time stamp in ping %d.",...
                     ensemble.number);
             end
@@ -962,9 +960,6 @@ function ds = read_rdi(filename,options)
                 out.(group).(key) = nan(shape);
             else
                 out.(group).(key) = zeros(shape);
-            end
-            if strcmpi(key,'time')
-                out.(group).(key) = NaT(shape);
             end
             out.units.(key) = units;
         end

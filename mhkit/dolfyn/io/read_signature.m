@@ -123,6 +123,18 @@ function ds=read_signature(filename,options)
     ds = reorg(ds);
     ds = reduce(ds);
 
+    % Fill time gaps (a zero will result in a datenum = 693930)
+    coord_fields = fieldnames(ds.coords);
+    for qq = 1:numel(coord_fields)
+        ky = coord_fields{qq};
+        if contains(ky,'time')
+            if any(ds.coords.(ky) < 0)
+                % There are blanks
+                ds.coords.(ky)= fill_time_gaps(ds.coords.(ky),ds.attrs.fs);
+            end
+        end
+    end
+
     declin = nan;
     fn = fieldnames(userdata);
     for k=1:numel(fn)
@@ -273,7 +285,7 @@ function ds=read_signature(filename,options)
                 fseek(fid,hdr.sz,0);
             end
 
-            c = advance_ens_count(c, ens_start, nens_total);
+            c = advance_ens_count(c, ens_start, nens_total);            
             if c > nens
                 ds = outdat;
                 break;
@@ -414,6 +426,52 @@ function ds=read_signature(filename,options)
             end
         end
         fclose(f);
+        out = check_index(out);
+    end
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> 
+    function idx = check_index(idx_in)
+        idx = idx_in;
+        uid = unique(idx.ID);
+        hwe = idx.hw_ens;
+        period = max(hwe); 
+        N_id = length(uid);
+        flag_ = false;
+        % This loop fixes 'skips' inside the file
+        for qq = 1:N_id
+            id = uid(qq);
+            % These are the indices for this ID
+            inds = find(id==idx.ID);
+            % These are bad steps in the indices for this ID
+            ibad = find(diff(inds)>N_id);
+            if ~isempty(ibad)
+                for kk = 1:numel(ibad)
+                    flag_ = true;
+                    ib = ibad(kk);
+                    % The ping number reported here may not be quite right
+                    % if the ensemble count is wrong.
+                    warning(['Skipped ping (ID: %d) in file %s at ' ...
+                        'ensemble %s.'],id,filename,idx.ens(inds(ib+1)-1));
+                    hwe(inds(ib+1:end)) = hwe(inds(ib+1:end)) + 1;
+                    idx.ens(inds(ib+1:end)) = idx.ens(inds(ib+1:end)) + 1;
+                end
+            end
+        end
+
+        % This block fixes skips that originate from before this file.
+        delta = max(hwe(1:N_id)) - hwe(1:N_id);
+        for qq = 1:numel(delta)
+            d = delta(qq);
+            id = idx.ID(qq);
+            if d ~= 0
+                flag_ = true;
+                hwe(id == idx.ID) = hwe(id == idx.ID) + d;
+                idx.ens(id == idx.ID) = idx.ens(id == idx.ID) + d;
+            end
+        end 
+
+        if any(diff(idx.ens)> 1) && flag_
+            idx.ens = hwe - hwe(1);
+        end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> 
     function out2 = read_filehead_config_string()
@@ -522,7 +580,7 @@ function ds=read_signature(filename,options)
             else
                 size_(2) = 1;
             end
-            out.(nm) = nan(size_);
+            out.(nm) = zeros(size_);
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -681,8 +739,19 @@ function ds=read_signature(filename,options)
             out.p_gd = getbit(val, 13);
             out.std = getbit(val, 14);
             % bit 15 is unused
-        else
+        elseif strcmpi(mode,'bt')
             out = struct();
+            out.press_valid = getbit(val, 0);
+            out.temp_valid = getbit(val, 1);
+            out.compass_valid = getbit(val, 2);
+            out.tilt_valid = getbit(val, 3);
+            % bit 4 is unused
+            out.vel = getbit(val, 5);
+            % bits 6-7 unused
+            out.dist = getbit(val, 8);
+            out.fom = getbit(val, 9);
+            out.ahrs = getbit(val, 10);
+            % bits 11-15 unused
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -721,7 +790,7 @@ function ds=read_signature(filename,options)
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    function calc_echo_struct(cfg, nc)
+    function out = calc_echo_struct(cfg, nc)
         out = struct();
         flags = headconfig_int2dict(cfg,'burst');
         dd = get_burst_hdr_struct();
@@ -748,7 +817,7 @@ function ds=read_signature(filename,options)
         out = datadef(dd);
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    function calc_bt_struct(cfg, nb)
+    function out = calc_bt_struct(cfg, nb)
         out = struct();
         flags = headconfig_int2dict(cfg,'bt');
         dd = get_bt_hdr_struct();
@@ -1125,7 +1194,7 @@ function ds=read_signature(filename,options)
             id = id_tag.(key).id;
             tag = id_tag.(key).tag;
             if id == 24 || id == 26
-                collapse_exclude = [1];
+                collapse_exclude = [0.0];
             else
                 collapse_exclude = [];
             end
@@ -1143,14 +1212,21 @@ function ds=read_signature(filename,options)
                 headconfig_int2dict(collapse(dat.(key).config,...
                 'config', collapse_exclude),'burst');
             outdat.coords.(strjoin({'time',tag},'')) = ...
-                datenum(datestr(datetime(...
+                convertTo(datetime(...
                 dat.(key).year(:)+ 1900,...
-                dat.(key).month,...
+                dat.(key).month + 1,...
                 dat.(key).day,...
                 dat.(key).hour,...
                 dat.(key).minute,...
-                dat.(key).second,...
-                dat.(key).usec100)));
+                dat.(key).second),...
+                'epochtime','Epoch','1970-01-01');
+            % Check for bad time
+            bad_time = find(10000-dat.(key).usec100 < 0);
+            outdat.coords.(strjoin({'time',tag},'')) = ...
+                double(outdat.coords.(strjoin({'time',tag},''))) + ...
+                (dat.(key).usec100 * 0.0001); % micro to milli
+            outdat.coords.(strjoin({'time',tag},''))(bad_time) = -9999;
+
             temp = beams_cy_int2dict(collapse(dat.(key).beam_config,...
                 'beam_config', collapse_exclude),21);
             outdat.attrs.(strjoin({'n_cells',tag},'')) = temp.n_cells;
@@ -1414,11 +1490,11 @@ function ds=read_signature(filename,options)
         if is_uniform(vec,[])
             out = vec(1);
         elseif is_uniform(vec, exclude)
-            tmp = vec(setdiff(1:end,exclude));
-            out = tmp(1);
+            vec(vec == exclude(1)) = [];
+            out = vec(1);
         else
             [uniq, idx] = unique(vec);
-            counts = histcounts(vec, length(uniq));
+            counts = histc(vec, uniq);
             if all(counts == counts(1))
                 out = max(uniq); % pings saved out of order, but equal # of pings
             else
@@ -1439,7 +1515,7 @@ function ds=read_signature(filename,options)
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out = is_uniform(vec, exclude)        
         if ~isempty(exclude)
-            vec(exclude) = [];            
+            vec(vec == exclude(1)) = [];            
         end
         out = all(vec == vec(1));
     end
