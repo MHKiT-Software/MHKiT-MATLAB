@@ -60,9 +60,7 @@ function write_netcdf(ds, filename)
                     'Datatype', type,...
                     'Format','netcdf4');
             if iscell(ds.coords.(key))
-                ncwrite(filename, key, temp);
-            elseif numel(ds.coords.(key)) == 4
-                ncwrite(filename, key, ds.coords.(key)(1:3));
+                ncwrite(filename, key, temp);            
             else
                 ncwrite(filename, key, ds.coords.(key));
             end
@@ -88,6 +86,9 @@ function write_netcdf(ds, filename)
                 end
                 % dimensions cell can now be used to create the netcdf
                 % variable
+                if islogical(ds.(key).data)
+                    ds.(key).data = int32(ds.(key).data);
+                end
                 nccreate(filename, key,'Dimensions',dimensions,...
                     'Datatype', class(ds.(key).data),...
                     'FillValue', nan, 'Format','netcdf4');

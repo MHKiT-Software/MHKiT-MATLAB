@@ -24,8 +24,9 @@ function userdata = read_userdata(filename, userdata)
             return
         else
             % determine name of userdata file from base name
-            basefile = split(filename,".");
-            jsonfile = basefile(1) + ".userdata.json";
+            basefile = extractBefore(filename,...
+                find(filename == '.', 1, 'last'));
+            jsonfile = basefile + ".userdata.json";
         end
     else
         % use name directly as supplied

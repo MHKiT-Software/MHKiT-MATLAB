@@ -135,12 +135,15 @@ function ds = read_rdi(filename,options)
         ds.beam2inst_orientmat.dims = {'x_star', 'x'};
         ds.beam2inst_orientmat.coords = struct('x_star',...
             [1,2,3,4], 'x', [1,2,3,4]);
+        ds.coords.x_star = [1,2,3,4];
+        ds.coords.x = [1,2,3,4];
     end
 
     if ~isfield(ds, 'orientmat')
-        ds.orientmat.data = calc_orientmat(ds);
-        ds.orientmat.coords = struct('time', ds.time, ...
-            'inst', {'X','Y','Z'}, 'earth', {'E', 'N', 'U'});
+        ds.orientmat.data = calc_orientmat(ds);        
+        ds.orientmat.coords.time = ds.time;
+        ds.orientmat.coords.inst = {'X' 'Y' 'Z'}; 
+        ds.orientmat.coords.earth = {'E' 'N' 'U'};
         ds.orientmat.dims = {'time', 'inst', 'earth'};
     end
 

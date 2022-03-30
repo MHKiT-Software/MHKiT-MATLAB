@@ -589,22 +589,27 @@ function ds=read_signature(filename,options)
         fout = fopen(outfile, 'w');
         fwrite(fout, 'Index Ver:', 'uchar', 'l');
         fwrite(fout, 1, 'ushort', 'l');
+        ens = struct('id_21', 0, 'id_23', 0, 'id_24', 0, 'id_26', 0, ...
+            'id_28', 0);
+        N = struct('id_21', 0, 'id_23', 0, 'id_24', 0, 'id_26', 0, ...
+            'id_28', 0);
+        config = 0;
+        last_ens = struct('id_21', -1, 'id_23', -1, 'id_24', -1,...
+            'id_26', -1, 'id_28', -1);
         fseek(fin, 0, "eof");
         size = ftell(fin);
         frewind(fin);
-        ens = 0;
-        N = 0;
-        config = 0;
-        last_ens = -1;        
-        while N < N_ens
+        eof = 1;
+        while N.id_21 < N_ens
             pos = ftell(fin);
-            if pos == size                
+            if pos == size || eof < 0              
                 break
             end
             dat1 = fread(fin,4,'uchar',endian);
-            dat2 = fread(fin,3,'short',endian);
-            
+            dat2 = fread(fin,3,'short',endian);            
             if any([21, 23, 24, 26, 28] == dat1(3))
+                idk = dat1(3);
+                idkey = append('id_',num2str(idk));
                 d_ver = fread(fin,1,'uchar',endian);
                 d_off = fread(fin,1,'uchar',endian);
                 config = fread(fin,1,'ushort',endian);
@@ -617,32 +622,34 @@ function ds=read_signature(filename,options)
                 s  = fread(fin,1,'uchar', endian);
                 u  = fread(fin,1,'ushort',endian);
                 fseek(fin,14,0);
-                beams_cy = fread(fin,1,'ushort',endian);
+                beams_cy = fread(fin,1,'ushort',endian); 
                 if dat1(3) ~= 23
                     fseek(fin,40,0);
                 else
                     fseek(fin,42,0);
                 end
-                ens = fread(fin,1, 'uint', endian);
-                if dat1(3) == 23 || dat1(3) == 28
-                    ens = last_ens;
+
+                ens.(idkey) = fread(fin,1, 'uint', endian);
+                if ens.(idkey) == 1 && last_ens.(idkey) > 0
+                    ens.(idkey) = last_ens.(idkey) + 1;
                 end
-                if last_ens > 0 && last_ens ~= ens
-                    N = N + 1;
+                if last_ens.(idkey) > 0 && last_ens.(idkey) ~= ens.(idkey)
+                    N.(idkey) = N.(idkey) + 1;
                 end
-                fwrite(fout, N, 'uint64', 'l');
-                fwrite(fout, ens, 'uint', 'l');
+                
+                fwrite(fout, N.(idkey), 'uint64', 'l');
+                fwrite(fout, ens.(idkey), 'uint', 'l');
                 fwrite(fout, pos, 'uint64', 'l');
-                fwrite(fout,[dat1(3), config, beams_cy, 0], 'ushort', 'l');
+                fwrite(fout,[idk, config, beams_cy, 0], 'ushort', 'l');
                 fwrite(fout, [yr, mo + 1, dy, h, m, s], 'uchar', 'l');
                 fwrite(fout, u, 'ushort', 'l');
                 fwrite(fout, d_ver, 'uchar', 'l');
-                if dat1(3) ~= 23
-                    fseek(fin,dat2(1) - (36 + 40),0);
+                if idk ~= 23
+                    eof = fseek(fin,dat2(1) - (36 + 40),0);
                 else
-                    fseek(fin,dat2(1) - (36 + 42),0); 
-                end     
-                last_ens = ens;
+                    eof = fseek(fin,dat2(1) - (36 + 42),0); 
+                end
+                last_ens.(idkey) = ens.(idkey);
             else
                 fseek(fin,dat2(1),0);
             end
