@@ -387,7 +387,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
-            
+           
             fid = fopen(full_file_name); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
