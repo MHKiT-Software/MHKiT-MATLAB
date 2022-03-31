@@ -99,3 +99,5 @@ while start_period_datetime <= end_datetime
                 data_in_period.(timeseries_fields{i}));
         end
     end
+end
+end
