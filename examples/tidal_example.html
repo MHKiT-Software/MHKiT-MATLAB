@@ -60,9 +60,11 @@
 % MHKIT uses SI units, speed is converted to m/s.
 
 % Create a file name to save the requested data to
-currents_file = "data/tidal/s08010.json"; % South Hampton Shoal LB
+relative_file_name = "data/tidal/s08010.json"; % South Hampton Shoal LB
+current_dir = fileparts(matlab.desktop.editor.getActiveFilename);
+full_file_name = fullfile(current_dir, relative_file_name);
 
-data = read_noaa_json(currents_file)
+data = read_noaa_json(full_file_name)
 % Example of how you could request NOAA-Currents data
 %data = request_noaa_data("s08010","currents","20161101","20180401","write_json",currents_file);
 
@@ -150,12 +152,20 @@ plot_rose(data,width_direction,width_velocity,"flood_ebb",[flood,ebb]);
 % velocity value. After computing the exceedance probability, the rank order of 
 % velocity values can be plotted as follows.
 
-% Calculate teh exceedance probability of the data
+% Calculate the exceedance probability of the data
 data.Discharge = data.s; % need to change structure name for exceedance probability function
 F = exceedance_probability(data);
 
 % Plot the VDC
 
 plot_velocity_duration_curve(data.s,F.F);
+%% Plot by Phase Direction
+% MHKiT can produce plots of velocity by probability and exceedance probability 
+% for each tidal phase. Using the ebb and flood direction calculated earlier we 
+% can simply pass our directions, velocities, ebb, and flood direction to createthe 
+% following plots.
+
+plot_tidal_phase_probability(data,flood,ebb);
+plot_tidal_phase_exceedance(data,flood,ebb);
 ##### SOURCE END #####
 --></body></html>
