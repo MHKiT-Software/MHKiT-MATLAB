@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.toolbox" plugin-version="1.0">
-  <configuration build-checksum="2358441271" file="/Users/rpauly/Documents/MHKit/MHKiT/mhkit-matlab-1/mhkit_0.3.prj" location="/Users/rpauly/Documents/MHKit/MHKiT/mhkit-matlab-1" name="mhkit_0.3" target="target.toolbox" target-name="Package Toolbox">
+  <configuration build-checksum="2051742161" file="/Users/rpauly/Documents/MHKit/MHKiT/mhkit-matlab-1/mhkit_0.4.prj" location="/Users/rpauly/Documents/MHKit/MHKiT/mhkit-matlab-1" name="mhkit_0.4" target="target.toolbox" target-name="Package Toolbox">
     <param.appname>mhkit</param.appname>
     <param.authnamewatermark />
     <param.email />
@@ -7,7 +7,7 @@
     <param.summary>Toolbox for processing data relevent to Marine Hydrokinetic energy converters.</param.summary>
     <param.description />
     <param.screenshot />
-    <param.version>0.3.2</param.version>
+    <param.version>0.4.0</param.version>
     <param.output>${PROJECT_ROOT}/mhkit.mltbx</param.output>
     <param.products.name />
     <param.products.id />
@@ -66,7 +66,7 @@ python-utils
     <param.required.addons />
     <param.matlab.project.id />
     <param.matlab.project.name />
-    <param.release.start>R2019b</param.release.start>
+    <param.release.start>R2020a</param.release.start>
     <param.release.end>latest</param.release.end>
     <param.release.current.only>false</param.release.current.only>
     <param.compatiblity.windows>true</param.compatiblity.windows>
