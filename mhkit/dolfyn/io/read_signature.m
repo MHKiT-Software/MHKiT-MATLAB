@@ -201,13 +201,14 @@ function ds=read_signature(filename,options)
             try 
                 hdr = read_hdr();
             catch
-                ds = outdat;
+                %ds = outdat;
+                ds = assign_ids(outdat);
                 break
             end            
             id = hdr.id;
             ky = join(["id",string(id)],"_");
             if any([21, 23, 24, 28] == id) % vel, bt, vel_b5, echo
-                outdat.(ky) = read_burst(outdat.(ky), ky, c);
+                outdat.(ky).dummy_read(:,c)=read(ky);
             elseif id == 26 % alt_raw (altimeter burst)
                 if ~isfield(burst_readers.(ky),'nsamp_index')
                     first_pass = true;
@@ -256,7 +257,7 @@ function ds=read_signature(filename,options)
                         throwAsCaller(ME)
                     end
                 end
-                outdat.(ky) = read_burst(outdat.(ky), ky, c);
+                outdat.(ky).dummy_read(:,c)=read(ky);
                 outdat.(ky).ensemble(c26) = c;
                 c26 = c26 + 1;
             elseif any([22, 27, 29, 30, 31, 35, 36] == id) % avg record, 
@@ -287,39 +288,16 @@ function ds=read_signature(filename,options)
 
             c = advance_ens_count(c, ens_start, nens_total);            
             if c > nens
-                ds = outdat;
+                %ds = outdat;
+                ds = assign_ids(outdat);
                 break;
             end
-        end        
+        end         
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    function out = read_burst(dat, key, ens)
-        out = dat;
-        dat_array = read(key);
-        fields = fieldnames(out);
-        qq = 1;
-        for i = 1:numel(burst_readers.(key).N)
-            l = length(size(out.(fields{i})));
-            otherdims = repmat({':'},1,l-1);
-            try
-                out.(fields{i})(otherdims{:},ens) = ...
-                    reshape(dat_array(qq:qq+(burst_readers.(key).N{i}-1))...
-                    , size(out.(fields{i})(otherdims{:},ens)));
-            catch
-                if l < 4
-                    out.(fields{i})(:) = ...
-                        dat_array(qq:qq+(burst_readers.(key).N{i}-1));
-                else
-                    dim = length(out.(fields{i})(ens,:,:,1));
-                    for j = 1:size(out.(fields{i}),4)                       
-                        out.(fields{i})(ens,:,:,j) = ...
-                        dat_array(qq+((j-1)*dim):qq+((j)*dim)-1);
-                    end
-                end
-            end
-            qq = qq + burst_readers.(key).N{i};
-        end
-    end
+%     function out = read_burst(dat, key, ens)
+%         out = read(key);
+%     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out = read(key)        
         out = zeros([sum([burst_readers.(key).N{:}]),1]);        
@@ -569,10 +547,10 @@ function ds=read_signature(filename,options)
                 n = nens;
             end
             outdat.(ky) = init_burst_data(n, burst_readers.(ky));
-            outdat.(ky) = flip_matrix_order_in_struct(outdat.(ky)); % flip 
-            % the oder of the matrix to increase assignement speed
             outdat.(ky).ensemble = ens;
-            outdat.(ky).units = burst_readers.(ky).units;            
+            outdat.(ky).units = burst_readers.(ky).units;     
+            outdat.(ky).dummy_read = ...
+                zeros(sum([burst_readers.(ky).N{:}]),n);
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -1186,7 +1164,6 @@ function ds=read_signature(filename,options)
         fields = fieldnames(burst_readers);
         for i = 1:numel(fields)            
             key1 = fields{i};
-            out.(key1) = flip_matrix_order_in_struct(out.(key1));
             f = burst_readers.(key1).names;
             for j = 1:numel(f)
                 key2 = f{j};
@@ -1634,16 +1611,22 @@ function ds=read_signature(filename,options)
             out.proc_idle_less_6pct = bitindexer(val, 1);
             out.proc_idle_less_12pct = bitindexer(val, 2);
         end
-    end
-    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    function out = flip_matrix_order_in_struct(struct_in)
-        out = struct_in;
-        fields = fieldnames(out);
-        for i = 1:numel(fields)
-            field = fields{i};
-            ndim = length(size(out.(field)));
-            reverse = [ndim:-1:1];
-            out.(field) = permute(out.(field),reverse);
+    end    
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>    
+    function outdat = assign_ids(outdat)
+        ids = fieldnames(burst_readers);
+        for i = 1:numel(ids)            
+            id = ids{i};
+            outdat.(id).dummy_read = outdat.(id).dummy_read';
+            fields = fieldnames(outdat.(id));
+            qq = 1;
+            for j = 1:numel(burst_readers.(id).N)
+                field = fields{j};
+                cur_size = size(outdat.(id).(field));
+                outdat.(id).(field) = reshape(outdat.(id).dummy_read(...
+                    :,qq:qq+(burst_readers.(id).N{j}-1)),cur_size);
+                qq = qq + burst_readers.(id).N{j};
+            end
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
