@@ -119,7 +119,7 @@ function ds=read_signature(filename,options)
     %% <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                       Post Process
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    ds = sci_data(ds);
+    ds = sci_data(ds);    
     ds = reorg(ds);
     ds = reduce(ds);
 
@@ -196,7 +196,7 @@ function ds=read_signature(filename,options)
         if ens_start == 0
             ens_start = 1;
         end
-        fseek(fid,ens_pos(ens_start),'bof');
+        fseek(fid,ens_pos(ens_start),'bof');        
         while true
             try 
                 hdr = read_hdr();
@@ -290,7 +290,7 @@ function ds=read_signature(filename,options)
                 ds = outdat;
                 break;
             end
-        end
+        end        
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out = read_burst(dat, key, ens)
@@ -302,8 +302,9 @@ function ds=read_signature(filename,options)
             l = length(size(out.(fields{i})));
             otherdims = repmat({':'},1,l-1);
             try
-                out.(fields{i})(ens,otherdims{:}) = ...
-                    dat_array(qq:qq+(burst_readers.(key).N{i}-1));
+                out.(fields{i})(otherdims{:},ens) = ...
+                    reshape(dat_array(qq:qq+(burst_readers.(key).N{i}-1))...
+                    , size(out.(fields{i})(otherdims{:},ens)));
             catch
                 if l < 4
                     out.(fields{i})(:) = ...
@@ -321,26 +322,27 @@ function ds=read_signature(filename,options)
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out = read(key)        
-        out = zeros([sum([burst_readers.(key).N{:}]),1]);
+        out = zeros([sum([burst_readers.(key).N{:}]),1]);        
+        read_format = join_format_strings(key);
         qq = 1;
-        for i = 1:length(burst_readers.(key).N)
+        for i = 1:length(read_format)
             if ftell(fid) == filesize
                 ME = MException('MATLAB:read_signature:readfile',...
                     'End of File.');
                 throwAsCaller(ME)
             end
-            if strcmp(burst_readers.(key).format{i}, 'B7x')
-                out(qq:qq+(burst_readers.(key).N{i}-1)) = ...
-                fread(fid,burst_readers.(key).N{i},'uchar',endian);
-                qq = qq + burst_readers.(key).N{i};
+            if strcmp(read_format{i}{2}, 'B7x')
+                out(qq:qq+(read_format{i}{1}-1)) = ...
+                fread(fid,read_format{i}{1},'uchar',endian);
+                qq = qq + read_format{i}{1};
                 fseek(fid,7,0);
             else
-                sz_str = fmt_str(burst_readers.(key).format{i},...
-                            burst_readers.(key).N{i});
-                [fmt, nbyte] = py_struct_2_bytes_format(sz_str, false);
-                out(qq:qq+(burst_readers.(key).N{i}-1)) = ...
-                    fread(fid,burst_readers.(key).N{i},fmt,endian);
-                qq = qq + burst_readers.(key).N{i};
+                %sz_str = [num2str(read_format{i}{1}),read_format{i}{2}];
+                [fmt, ~] = py_struct_2_bytes_format(read_format{i}{2},...
+                    false);
+                out(qq:qq+(read_format{i}{1}-1)) = ...
+                    fread(fid,read_format{i}{1},fmt,endian);
+                qq = qq + read_format{i}{1};
             end
         end
     end
@@ -354,8 +356,8 @@ function ds=read_signature(filename,options)
         fseek(f, 0, "eof");
         size = ftell(f);
         frewind(f);
-        temp = fread(f,10,'char',endian);
-        if strcmp(convertCharsToStrings(char(temp)), 'Index Ver:') 
+        temp = fread(f,10,'*char',endian);
+        if strcmp(convertCharsToStrings(temp), 'Index Ver:') 
             index_ver = fread(f,1,'uchar',endian);
             fseek(f,1,0);
             out = struct('ens',zeros((size-12)/37,1),...
@@ -378,16 +380,18 @@ function ds=read_signature(filename,options)
                 out.ens(i) = fread(f,1,'uint64');
                 out.hw_ens(i) = fread(f,1,'uint32');
                 out.pos(i) = fread(f,1,'uint64');
-                out.ID(i) = fread(f,1,'uint16');
-                out.config(i) = fread(f,1,'uint16');
-                out.beams_cy(i) = fread(f,1,'uint16');
-                out.blank(i) = fread(f,1,'uint16');
-                out.year(i) = fread(f,1,'uint8');
-                out.month(i) = fread(f,1,'uint8');
-                out.day(i) = fread(f,1,'uint8');
-                out.hour(i) = fread(f,1,'uint8');
-                out.minute(i) = fread(f,1,'uint8');
-                out.second(i) = fread(f,1,'uint8');
+                temp = fread(f,4,'uint16');
+                out.ID(i) = temp(1);
+                out.config(i) = temp(2);
+                out.beams_cy(i) = temp(3);
+                out.blank(i) = temp(4);
+                temp = fread(f,6,'uint8');
+                out.year(i) = temp(1);
+                out.month(i) = temp(2);
+                out.day(i) = temp(3);
+                out.hour(i) = temp(4);
+                out.minute(i) = temp(5);
+                out.second(i) = temp(6);
                 out.usec100(i) = fread(f,1,'uint16');
                 out.d_ver(i) = fread(f,1,'uint8');
             end
@@ -410,18 +414,21 @@ function ds=read_signature(filename,options)
                 'usec100',zeros(size/32,1));
             out.index_ver = index_ver;
             for i = 1:size/32
-                out.ens(i) = fread(f,1,'uint64');
-                out.pos(i) = fread(f,1,'uint64');
-                out.ID(i) = fread(f,1,'uint16');
-                out.config(i) = fread(f,1,'uint16');
-                out.beams_cy(i) = fread(f,1,'uint16');
-                out.blank(i) = fread(f,1,'uint16');
-                out.year(i) = fread(f,1,'uint8');
-                out.month(i) = fread(f,1,'uint8');
-                out.day(i) = fread(f,1,'uint8');
-                out.hour(i) = fread(f,1,'uint8');
-                out.minute(i) = fread(f,1,'uint8');
-                out.second(i) = fread(f,1,'uint8');
+                temp = fread(f,2,'uint64');
+                out.ens(i) = temp(1);
+                out.pos(i) = temp(2);
+                temp = fread(f,4,'uint16');
+                out.ID(i) = temp(1);
+                out.config(i) = temp(2);
+                out.beams_cy(i) = temp(3);
+                out.blank(i) = temp(4);
+                temp = fread(f,6,'uint8');
+                out.year(i) = temp(1);
+                out.month(i) = temp(2);
+                out.day(i) = temp(3);
+                out.hour(i) = temp(4);
+                out.minute(i) = temp(5);
+                out.second(i) = temp(6);
                 out.usec100(i) = fread(f,1,'uint16');
             end
         end
@@ -562,8 +569,10 @@ function ds=read_signature(filename,options)
                 n = nens;
             end
             outdat.(ky) = init_burst_data(n, burst_readers.(ky));
+            outdat.(ky) = flip_matrix_order_in_struct(outdat.(ky)); % flip 
+            % the oder of the matrix to increase assignement speed
             outdat.(ky).ensemble = ens;
-            outdat.(ky).units = burst_readers.(ky).units;
+            outdat.(ky).units = burst_readers.(ky).units;            
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -745,7 +754,7 @@ function ds=read_signature(filename,options)
             out.ahrs = getbit(val, 12);
             out.p_gd = getbit(val, 13);
             out.std = getbit(val, 14);
-            % bit 15 is unused
+            % bit 15 is ucalc_echo_structnused
         elseif strcmpi(mode,'bt')
             out = struct();
             out.press_valid = getbit(val, 0);
@@ -1120,12 +1129,28 @@ function ds=read_signature(filename,options)
         else
             for i = 1:numel(fmt_)
                 if N_ == 1
-                    out_chr = char(strcat(out_chr,fmt_));
+                    out_chr = fmt_; %char(strcat(out_chr,fmt_));
                 else
                     temp = num2str(N_);
-                    py_char = strcat(temp,fmt_);
-                    out_chr = char(strcat(out_chr,py_char));
+                    out_chr = strcat(temp,fmt_);
+                    %out_chr = py_char; %char(strcat(out_chr,py_char));
                 end
+            end
+        end
+    end
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+    function out = join_format_strings(key)
+        out = {};
+        n = burst_readers.(key).N;
+        f = burst_readers.(key).format;
+        out{1} = {n{1},f{1}};
+        kk = 1;
+        for qq = 2:numel(n)            
+            if strcmp(f{qq}, out{kk}{2})
+                out{kk}{1} = out{kk}{1} + n{qq};
+            else
+                kk = kk + 1;
+                out{kk} = {n{qq},f{qq}};
             end
         end
     end
@@ -1159,8 +1184,9 @@ function ds=read_signature(filename,options)
     function out = sci_data(dat) 
         out = dat;
         fields = fieldnames(burst_readers);
-        for i = 1:numel(fields)
+        for i = 1:numel(fields)            
             key1 = fields{i};
+            out.(key1) = flip_matrix_order_in_struct(out.(key1));
             f = burst_readers.(key1).names;
             for j = 1:numel(f)
                 key2 = f{j};
@@ -1607,6 +1633,17 @@ function ds=read_signature(filename,options)
             out.proc_idle_less_3pct = bitindexer(val, 0);
             out.proc_idle_less_6pct = bitindexer(val, 1);
             out.proc_idle_less_12pct = bitindexer(val, 2);
+        end
+    end
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+    function out = flip_matrix_order_in_struct(struct_in)
+        out = struct_in;
+        fields = fieldnames(out);
+        for i = 1:numel(fields)
+            field = fields{i};
+            ndim = length(size(out.(field)));
+            reverse = [ndim:-1:1];
+            out.(field) = permute(out.(field),reverse);
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>

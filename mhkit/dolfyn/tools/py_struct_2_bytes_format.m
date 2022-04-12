@@ -10,7 +10,7 @@ function [format, bytes] = py_struct_2_bytes_format(py_format, size_only)
         mltply = nan;
         for i = 1:length(py_format)
             chr = py_format(i);
-            if ~isnan(str2double(chr)) && chr ~= 'i'
+            if ~isstrprop(chr,'alpha')
                 if isnan(mltply)
                     mltply = str2double(chr);
                 else
