@@ -47,52 +47,53 @@ function [format, bytes] = py_struct_2_bytes_format(py_format, size_only)
     end
 
     function [fmt, size] = assign_value(input)
-        if strcmp(input,'c')
-            fmt = 'char*1';
-            size = 1;
-        elseif strcmp(input,'x')
-            fmt = 'char*1';
-            size = 1;
-        elseif strcmp(input,'b')
-            fmt = 'schar';
-            size = 1;
-        elseif strcmp(input,'B')
-            fmt = 'uchar';
-            size = 1;
-        elseif strcmp(input,'h')
-            fmt = 'short';
-            size = 2;
-        elseif strcmp(input,'H')
-            fmt = 'ushort';
-            size = 2;
-        elseif strcmp(input,'i')
-            fmt = 'int32';
-            size = 4;
-        elseif strcmp(input,'I')
-            fmt = 'uint32';
-            size = 4;
-        elseif strcmp(input,'l')
-            fmt = 'long';
-            size = 4;
-        elseif strcmp(input,'L')
-            fmt = 'ulong';
-            size = 4;
-        elseif strcmp(input,'q')
-            fmt = 'int64';
-            size = 8;
-        elseif strcmp(input,'Q')
-            fmt = 'uint64';
-            size = 8;
-        elseif strcmp(input,'f')
-            fmt = 'float';
-            size = 4;
-        elseif strcmp(input,'d')
-            fmt = 'double';
-            size = 8;  
-        else
-            ME = MException('MATLAB:py_struct_2_bytes_format',['Unsupported'...
-                ' python struct charcter: %s',input]);
-            throwAsCaller(ME)
+        switch input
+            case 'c'        
+                fmt = 'char*1';
+                size = 1;
+            case 'x'
+                fmt = 'char*1';
+                size = 1;
+            case 'b'
+                fmt = 'schar';
+                size = 1;
+            case 'B'
+                fmt = 'uchar';
+                size = 1;
+            case 'h'
+                fmt = 'short';
+                size = 2;
+            case 'H'
+                fmt = 'ushort';
+                size = 2;
+            case 'i'
+                fmt = 'int32';
+                size = 4;
+            case 'I'
+                fmt = 'uint32';
+                size = 4;
+            case 'l'
+                fmt = 'long';
+                size = 4;
+            case 'L'
+                fmt = 'ulong';
+                size = 4;
+            case 'q'
+                fmt = 'int64';
+                size = 8;
+            case 'Q'
+                fmt = 'uint64';
+                size = 8;
+            case 'f'
+                fmt = 'float';
+                size = 4;
+            case 'd'
+                fmt = 'double';
+                size = 8;  
+            otherwise
+                ME = MException('MATLAB:py_struct_2_bytes_format',['Unsupported'...
+                    ' python struct charcter: %s',input]);
+                throwAsCaller(ME)
         end
     end
 end

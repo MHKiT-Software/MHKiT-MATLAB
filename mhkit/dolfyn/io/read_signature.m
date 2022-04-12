@@ -1118,9 +1118,9 @@ function ds=read_signature(filename,options)
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out = join_format_strings(key)
-        out = {};
         n = burst_readers.(key).N;
         f = burst_readers.(key).format;
+        out = cell(1,numel(n));
         out{1} = {n{1},f{1}};
         kk = 1;
         for qq = 2:numel(n)            
@@ -1131,6 +1131,7 @@ function ds=read_signature(filename,options)
                 out{kk} = {n{qq},f{qq}};
             end
         end
+        out = out(~cellfun('isempty',out));
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out = advance_ens_count(c, ens_start, nens_total)
