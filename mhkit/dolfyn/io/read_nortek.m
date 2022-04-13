@@ -377,18 +377,15 @@ function ds=read_nortek(filename,options)
         % Read head configuration              
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-        fseek(fid, 2, 0);   % skip size of structure
-        fseek(fid, 2, 0);   % skip config
+        fseek(fid, 4, 0);   % skip size of structure then config (2,2)
         config.('freq') = fread(fid,1,'ushort',endian);
-        fseek(fid, 2, 0);   % skip head type
-        fseek(fid, 12, 0);  % skip head serial number
-        fseek(fid, 8, 0);   % skip beginning of system data
+        fseek(fid, 22, 0);  % 2 for head type, 12 for serial #, 
+        % 8 for beginning of system data        
         temp = fread(fid,9,'int16',endian);
         temp = temp./4096.;
         config.('beam2inst_orientmat') = reshape(temp,[3,3]);
-        fseek(fid, 150, 0); % skip the rest of system data
-        fseek(fid, 22, 0);  % skip spare
-        fseek(fid, 2, 0);   % skip number of beams
+        fseek(fid, 174, 0); % skip the rest of system data [150], 
+        % skip spare [22], skip #beams [2]
         do_checksum;
     end 
 
@@ -412,21 +409,16 @@ function ds=read_nortek(filename,options)
         dynamic_pos_type = {'pct of mean press', 'pct of min re'};
         %
         fseek(fid, 2, 0);   % skip size of structure
-        config.('Transmit').('pulse_length') = ...
-            fread(fid,1,'ushort',endian);
-        config.('Transmit').('blank_distance') = ...
-            fread(fid,1,'ushort',endian);
-        config.('Transmit').('receive_length') = ...
-            fread(fid,1,'ushort',endian);
-        config.('Transmit').('time_between_pings') = ...
-            fread(fid,1,'ushort',endian);
-        config.('Transmit').('time_between_bursts') = ...
-            fread(fid,1,'ushort',endian);
-        config.('Npings') = fread(fid,1,'ushort',endian);
-        config.('AvgInterval') = fread(fid,1,'ushort',endian);  
-        config.('NBeams') = fread(fid,1,'ushort',endian); 
-        config.('TimCtrlReg') = int2binarray(...
-            fread(fid,1,'ushort',endian),16); 
+        temp = fread(fid,9,'ushort',endian);
+        config.('Transmit').('pulse_length')    = temp(1);
+        config.('Transmit').('blank_distance')  = temp(2);
+        config.('Transmit').('receive_length')  = temp(3);
+        config.('Transmit').('time_between_pings')  = temp(4);
+        config.('Transmit').('time_between_bursts') = temp(5);
+        config.('Npings') = temp(6);
+        config.('AvgInterval') = temp(7);  
+        config.('NBeams') = temp(8); 
+        config.('TimCtrlReg') = int2binarray(temp(9),16); 
         % From the nortek system integrator manual
         % (note: bit numbering is zero-based)
         treg = int16(config.('TimCtrlReg'));
@@ -437,46 +429,50 @@ function ds=read_nortek(filename,options)
         config.('Sample_on_Sync') = logical(treg(9));
         config.('Start_on_Sync') = logical(treg(10));
         config.('PwrCtrlReg') = int2binarray(...
-            fread(fid,1,'ushort',endian),16); 
-        config.('A1') = fread(fid,1,'ushort',endian); 
-        config.('B0') = fread(fid,1,'ushort',endian); 
-        config.('B1') = fread(fid,1,'ushort',endian); 
-        config.('CompassUpdRate') = fread(fid,1,'ushort',endian); 
+            fread(fid,1,'ushort',endian),16);
+        temp = fread(fid,8,'ushort',endian);
+        config.('A1') = temp(1); 
+        config.('B0') = temp(2); 
+        config.('B1') = temp(3); 
+        config.('CompassUpdRate') = temp(4); 
         config.('coord_sys_axes') = ...
-            coord_sys_axes{fread(fid,1,'ushort',endian) + 1}; 
-        config.('NBins') = fread(fid,1,'ushort',endian); 
-        config.('BinLength') = fread(fid,1,'ushort',endian); 
-        config.('MeasInterval') = fread(fid,1,'ushort',endian);
+            coord_sys_axes{temp(5) + 1}; 
+        config.('NBins') = temp(6); 
+        config.('BinLength') = temp(7); 
+        config.('MeasInterval') = temp(8);
         temp = fread(fid,6,'char',endian);
         config.('DeployName') = convertCharsToStrings(char(temp(1:4)));
-        config.('WrapMode') = fread(fid,1,'ushort',endian);
-        config.('ClockDeploy') = fread(fid,3,'ushort',endian);
+        temp = fread(fid,4,'ushort',endian);
+        config.('WrapMode') = temp(1);
+        config.('ClockDeploy') = temp(2:4);
         config.('DiagInterval') = fread(fid,1,'ulong',endian);
-        config.('Mode0') = int2binarray(fread(fid,1,'ushort',endian), 16);
-        config.('AdjSoundSpeed') = fread(fid,1,'ushort',endian); 
-        config.('NSampDiag') = fread(fid,1,'ushort',endian); 
-        config.('NBeamsCellDiag') = fread(fid,1,'ushort',endian); 
-        config.('NPingsDiag') = fread(fid,1,'ushort',endian); 
-        config.('ModeTest') = ...
-            int2binarray(fread(fid,1,'ushort',endian), 16); 
-        config.('AnaInAddr') = fread(fid,1,'ushort',endian); 
-        config.('SWVersion') = fread(fid,1,'ushort',endian); 
+        temp = fread(fid,8,'ushort',endian);
+        config.('Mode0') = int2binarray(temp(1), 16);
+        config.('AdjSoundSpeed')    = temp(2); 
+        config.('NSampDiag')        = temp(3); 
+        config.('NBeamsCellDiag')   = temp(4); 
+        config.('NPingsDiag')       = temp(5); 
+        config.('ModeTest') = int2binarray(temp(6), 16); 
+        config.('AnaInAddr') = temp(7); 
+        config.('SWVersion') = temp(8); 
         fseek(fid, 2, 0);   % skip salinity
         config.('VelAdjTable') = fread(fid,90,'ushort',endian);
         temp = fread(fid,80,'char',endian);
         config.('Comments') = deblank(convertCharsToStrings(char(temp))); 
         fseek(fid, 100, 0);   % skip spare, prcoessing method, spare
-        config.('Mode1') = int2binarray(fread(fid,1,'ushort',endian), 16);
-        config.('DynPercPos') = fread(fid,1,'ushort',endian);
-        config.('T1w') = fread(fid,1,'ushort',endian);
-        config.('T2w') = fread(fid,1,'ushort',endian);
-        config.('T3w') = fread(fid,1,'ushort',endian);
-        config.('NSamp') = fread(fid,1,'ushort',endian);
+        temp = fread(fid,6,'ushort',endian);
+        config.('Mode1') = int2binarray(temp(1), 16);
+        config.('DynPercPos') = temp(2);
+        config.('T1w') = temp(3);
+        config.('T2w') = temp(4);
+        config.('T3w') = temp(5);
+        config.('NSamp') = temp(6);
         fseek(fid, 4, 0);   % skip A1 & B0
         config.('NBurst') = fread(fid,1,'ushort',endian);
         fseek(fid, 2, 0);   % skip spare
-        config.('AnaOutScale') = fread(fid,1,'ushort',endian);
-        config.('CorrThresh') = fread(fid,1,'ushort',endian);
+        temp = fread(fid,2,'ushort',endian);
+        config.('AnaOutScale') = temp(1);
+        config.('CorrThresh')  = temp(2);
         fseek(fid, 2, 0);   % skip spare
         config.('TiLag2') = fread(fid,1,'ushort',endian);
         fseek(fid, 30, 0);   % skip spare
@@ -542,22 +538,26 @@ function ds=read_nortek(filename,options)
                 dtypes{end+1} = 'vec_data';
             end             
         end
-
-        data.sys.AnaIn2LSB(c) = fread(fid,1,'uint8',endian);
-        data.sys.Count(c) = fread(fid,1,'uint8',endian);
-        data.data_vars.PressureMSB(c) = fread(fid,1,'uint8',endian);
-        data.sys.AnaIn2MSB(c) = fread(fid,1,'uint8',endian);
-        data.data_vars.PressureLSW(c) = fread(fid,1,'ushort',endian);
-        data.sys.AnaIn1(c) = fread(fid,1,'ushort',endian);
-        data.data_vars.vel(c,1,1) = fread(fid,1,'short',endian);
-        data.data_vars.vel(c,1,2) = fread(fid,1,'short',endian);
-        data.data_vars.vel(c,1,3) = fread(fid,1,'short',endian);
-        data.data_vars.amp(c,1,1) = fread(fid,1,'uint8',endian);
-        data.data_vars.amp(c,1,2) = fread(fid,1,'uint8',endian);
-        data.data_vars.amp(c,1,3) = fread(fid,1,'uint8',endian);
-        data.data_vars.corr(c,1,1) = fread(fid,1,'uint8',endian);
-        data.data_vars.corr(c,1,2) = fread(fid,1,'uint8',endian);
-        data.data_vars.corr(c,1,3) = fread(fid,1,'uint8',endian);
+        
+        temp = fread(fid,4,'uint8',endian);
+        data.sys.AnaIn2LSB(c) = temp(1);
+        data.sys.Count(c) = temp(2);
+        data.data_vars.PressureMSB(c) = temp(3);
+        data.sys.AnaIn2MSB(c) = temp(4);
+        fread(fid,2,'ushort',endian);
+        data.data_vars.PressureLSW(c) = temp(1);
+        data.sys.AnaIn1(c) = temp(2);
+        temp = fread(fid,3,'short',endian);
+        data.data_vars.vel(c,1,1)  = temp(1);
+        data.data_vars.vel(c,1,2)  = temp(2);
+        data.data_vars.vel(c,1,3)  = temp(3);
+        temp = fread(fid,6,'uint8',endian);
+        data.data_vars.amp(c,1,1)  = temp(1);
+        data.data_vars.amp(c,1,2)  = temp(2);
+        data.data_vars.amp(c,1,3)  = temp(3);
+        data.data_vars.corr(c,1,1) = temp(4);
+        data.data_vars.corr(c,1,2) = temp(5);
+        data.data_vars.corr(c,1,3) = temp(6);
 
         do_checksum;
         c = c + 1;
@@ -583,14 +583,17 @@ function ds=read_nortek(filename,options)
         end
         fseek(fid, 2, 0); % skip size of structure    
         data.coords.time(c) = rd_time();
-        data.data_vars.batt(c) = fread(fid,1,'ushort',endian);
-        data.data_vars.c_sound(c) = fread(fid,1,'ushort',endian);
-        data.data_vars.heading(c) = fread(fid,1,'short',endian);        
-        data.data_vars.pitch(c) = fread(fid,1,'short',endian);        
-        data.data_vars.roll(c) = fread(fid,1,'short',endian);
+        temp = fread(fid,2,'ushort',endian);
+        data.data_vars.batt(c) = temp(1);
+        data.data_vars.c_sound(c) = temp(2);
+        temp = fread(fid,3,'short',endian); 
+        data.data_vars.heading(c) = temp(1);       
+        data.data_vars.pitch(c) = temp(2);        
+        data.data_vars.roll(c) = temp(3);
         data.data_vars.temp(c) = fread(fid,1,'ushort',endian);
-        data.data_vars.error(c) = fread(fid,1,'uint8',endian);
-        data.data_vars.status(c) = fread(fid,1,'uint8',endian);
+        temp = fread(fid,2,'uint8',endian);
+        data.data_vars.error(c) = temp(1);
+        data.data_vars.status(c) = temp(2);
         data.sys.AnaIn(c) = fread(fid,1,'ushort',endian);
         do_checksum();
         out = false;
@@ -608,13 +611,14 @@ function ds=read_nortek(filename,options)
         fseek(fid, 2, 0); % skip size of structure        
         hdrnow.time = rd_time();
         hdrnow.NRecords = fread(fid,1,'ushort',endian);
-        hdrnow.Noise1   = fread(fid,1,'uint8',endian);
-        hdrnow.Noise2   = fread(fid,1,'uint8',endian);
-        hdrnow.Noise3   = fread(fid,1,'uint8',endian); 
-        hdrnow.Spare0   = fread(fid,1,'uint8',endian);
-        hdrnow.Corr1    = fread(fid,1,'uint8',endian);
-        hdrnow.Corr2    = fread(fid,1,'uint8',endian);
-        hdrnow.Corr3    = fread(fid,1,'uint8',endian);
+        temp = fread(fid,7,'uint8',endian);
+        hdrnow.Noise1   = temp(1);
+        hdrnow.Noise2   = temp(2);
+        hdrnow.Noise3   = temp(3); 
+        hdrnow.Spare0   = temp(4);
+        hdrnow.Corr1    = temp(5);
+        hdrnow.Corr2    = temp(6);
+        hdrnow.Corr3    = temp(7);
         hdrnow.Spare1   = fread(fid,21,'char',endian);
         do_checksum();
         if ~isfield(data.attrs.config,'data_header')
@@ -767,17 +771,20 @@ function ds=read_nortek(filename,options)
         n = config.NBeams;
         fseek(fid, 2, 0); % skip size of structure        
         data.coords.time(c) = rd_time();
-        data.data_vars.error(c) = fread(fid,1,'ushort',endian);
-        data.sys.AnaIn1(c) = fread(fid,1,'ushort',endian);
-        data.data_vars.batt(c) = fread(fid,1,'ushort',endian);
-        data.data_vars.c_sound(c) = fread(fid,1,'ushort',endian);
-        data.data_vars.heading(c) = fread(fid,1,'ushort',endian);
-        data.data_vars.pitch(c) = fread(fid,1,'ushort',endian);
-        data.data_vars.roll(c) = fread(fid,1,'ushort',endian);
-        p_msb = fread(fid,1,'char*1',endian);
-        data.data_vars.status(c) = fread(fid,1,'*char',endian);
-        p_lsw = fread(fid,1,'ushort',endian);
-        data.data_vars.temp(c) = fread(fid,1,'ushort',endian);
+        temp = fread(fid,7,'ushort',endian);
+        data.data_vars.error(c)     = temp(1);
+        data.sys.AnaIn1(c)          = temp(2);
+        data.data_vars.batt(c)      = temp(3);
+        data.data_vars.c_sound(c)   = temp(4);
+        data.data_vars.heading(c)   = temp(5);
+        data.data_vars.pitch(c)     = temp(6);
+        data.data_vars.roll(c)      = temp(7);
+        temp = fread(fid,2,'char*1',endian);
+        p_msb = temp(1);
+        data.data_vars.status(c) = temp(2);
+        temp = fread(fid,2,'ushort',endian);
+        p_lsw = temp(1);
+        data.data_vars.temp(c) = temp(2);
         data.data_vars.pressure(c) = (65536 * p_msb + p_lsw);
         % The nortek system integrator manual specifies an 88byte 'spare'
         fseek(fid, 88, 0); % skip size of structure 
@@ -814,7 +821,7 @@ function ds=read_nortek(filename,options)
         data.('units')  = struct;
         data.('sys')    = struct;
         dlta = code_spacing('0x11');
-        n_samp_guess = int32(filesize / dlta + 1);
+        n_samp_guess = floor(filesize / dlta + 1);
         n_samp_guess = n_samp_guess * int32(config.("fs"));
     end
 
@@ -911,7 +918,7 @@ function ds=read_nortek(filename,options)
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
         p0 = findnextid(searchcode);
-        for i = 1:51
+        for i = 1:50
             try
                 findnextid(searchcode);
             catch
@@ -986,13 +993,18 @@ function ds=read_nortek(filename,options)
                     data.("units").(nm) = va.("units");
                 end
             end
-        end       
-        
+        end 
     end
 
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
     function dat2sci()
+        % Convert time to epoch time
+        time = NaN(size(data.coords.time));
+        ind = ~isnat(data.coords.time);
+        time(ind) = double(convertTo(data.coords.time(ind)...
+            ,'epochtime','Epoch','1970-01-01'));
+        data.coords.time = time;
         for i = 1:length(dtypes)
             nm = dtypes{i};
             id = append("sci_" + nm);
@@ -1198,6 +1210,8 @@ function ds=read_nortek(filename,options)
                 dtype = "double";
             end
             out = NaN(shape,dtype);
+        elseif dtype == "datetime"
+            out = NaT(shape);
         else
             out = zeros(shape,dtype);
         end
@@ -1206,18 +1220,19 @@ function ds=read_nortek(filename,options)
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
     function time = rd_time()
-        minutes = bcd2char(fread(fid,1,'char*1',endian));
-        seconds = bcd2char(fread(fid,1,'char*1',endian));
-        day     = bcd2char(fread(fid,1,'char*1',endian));
-        hour    = bcd2char(fread(fid,1,'char*1',endian)); 
-        year    = bcd2char(fread(fid,1,'char*1',endian)); 
-        month   = bcd2char(fread(fid,1,'char*1',endian));   
+        temp = fread(fid,6,'char*1',endian);
+        minutes = bcd2char(temp(1));
+        seconds = bcd2char(temp(2));
+        day     = bcd2char(temp(3));
+        hour    = bcd2char(temp(4)); 
+        year    = bcd2char(temp(5)); 
+        month   = bcd2char(temp(6));   
         if year < 100
             year = year + 1900 + 100 * (year < 90);
         end
         format long
         time = datetime(year,month,day,hour,minutes,seconds);
-        time = double(convertTo(time,'epochtime','Epoch','1970-01-01'));
+        %time = double(convertTo(time,'epochtime','Epoch','1970-01-01'));
         % to convert bacconk to datetime
         % date = datetime(datenum value,'ConvertFrom','datenum')
         % date = date.Format = 'dd-MMM-uuuu HH:mm:ss.SSSSS'

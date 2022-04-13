@@ -577,6 +577,7 @@ function ds=read_signature(filename,options)
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function create_index_slow(outfile, N_ens)
+        fprintf('\nIndexing %s\n', filename)
         fin = fopen(filename, 'r');
         fout = fopen(outfile, 'w');
         fwrite(fout, 'Index Ver:', 'uchar', 'l');

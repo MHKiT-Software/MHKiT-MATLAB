@@ -60,7 +60,7 @@ vec_data.('corr').('units') = "%";
 %                        vec_sysdata
 % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 vec_sysdata.('time').('dims') = {};
-vec_sysdata.('time').('dtype') = "float64";
+vec_sysdata.('time').('dtype') = "datetime";
 vec_sysdata.('time').('group') = "coords";
 vec_sysdata.('time').('default_val') = nan;
 vec_sysdata.('time').('units') = "";
@@ -131,7 +131,7 @@ vec_sysdata.('AnaIn').('units') = "";
 %                        awac_profile
 % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 awac_profile.("time").("dims") = {};
-awac_profile.("time").("dtype") = "float64";
+awac_profile.("time").("dtype") = "datetime";
 awac_profile.("time").("group") = "coords";
 awac_profile.("time").("units") = "";
 
