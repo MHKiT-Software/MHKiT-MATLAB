@@ -208,7 +208,7 @@ function ds=read_signature(filename,options)
             id = hdr.id;
             ky = join(["id",string(id)],"_");
             if any([21, 23, 24, 28] == id) % vel, bt, vel_b5, echo
-                outdat.(ky).dummy_read(:,c)=read(ky);
+                outdat.(ky).dummy_read(:,c) = read(ky);
             elseif id == 26 % alt_raw (altimeter burst)
                 if ~isfield(burst_readers.(ky),'nsamp_index')
                     first_pass = true;
@@ -218,7 +218,7 @@ function ds=read_signature(filename,options)
                     tmp_idx = burst_readers.(ky).nsamp_index;
                     sz_str = fmt_str(burst_readers.(ky).format(1:tmp_idx-1),...
                         burst_readers.(ky).N(1:tmp_idx-1));
-                    [fmt, shift] = py_struct_2_bytes_format(sz_str, true);
+                    [~, shift] = py_struct_2_bytes_format(sz_str, true);
                     burst_readers.(ky).nsamp_shift = shift;
                 else
                     first_pass = false;
@@ -244,11 +244,16 @@ function ds=read_signature(filename,options)
                     burst_readers.(ky).N{tmp_idx} = sz;
                     sz_str = fmt_str(burst_readers.(ky).format,...
                         burst_readers.(ky).N);
-                    [fmt, nbyte] = py_struct_2_bytes_format(sz_str, true);
+                    [~, nbyte] = py_struct_2_bytes_format(sz_str, true);
                     burst_readers.(ky).nbyte = nbyte;
                     %  Initialize the array
                     outdat.(ky).altraw_samp = zeros([sz,1,...
                         length(outdat.(ky).altraw_samp)]);
+                    % fix the dummy_read now that another field has been
+                    % added
+                    outdat.(ky).dummy_read = zeros(sum(...
+                        [burst_readers.(ky).N{:}]),...
+                        size(outdat.(ky).dummy_read,2));
                 else
                     if sz ~= burst_readers.(ky).N{tmp_idx}
                         ME = MException('MATLAB:read_signature:readfile',...
@@ -257,7 +262,7 @@ function ds=read_signature(filename,options)
                         throwAsCaller(ME)
                     end
                 end
-                outdat.(ky).dummy_read(:,c)=read(ky);
+                outdat.(ky).dummy_read(:,c) = read(ky);
                 outdat.(ky).ensemble(c26) = c;
                 c26 = c26 + 1;
             elseif any([22, 27, 29, 30, 31, 35, 36] == id) % avg record, 
@@ -1628,6 +1633,8 @@ function ds=read_signature(filename,options)
                     :,qq:qq+(burst_readers.(id).N{j}-1)),cur_size);
                 qq = qq + burst_readers.(id).N{j};
             end
+            % Remove dummy_read
+            outdat.(id) = rmfield(outdat.(id),'dummy_read');
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
