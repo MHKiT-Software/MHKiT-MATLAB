@@ -209,6 +209,11 @@ function ds = read_rdi(filename,options)
             nm = fields{i};
             dat.attrs.(nm) = cfg.(nm);
         end
+
+        % Changing each time to epoch time is very slow to do each
+        % iteration so we save time seperately and change it at the end.
+        time = NaT(size(dat.coords.time));
+        ms = zeros(size(dat.coords.time));
        
         for i = 1:nens_
             try
@@ -237,17 +242,22 @@ function ds = read_rdi(filename,options)
             end
             try 
                 clock = ensemble.rtc.data(:);
-                clock(7) = clock(7) * 0.01;                
-                dat.coords.time(i) = double(convertTo(datetime(clock(1)...
-                    ,clock(2),clock(3),clock(4),clock(5),clock(6)),...
-                    'epochtime','Epoch','1970-01-01'));
-                dat.coords.time(i) = dat.coords.time(i) + clock(7);
+                clock(7) = clock(7) * 0.01;    
+                time(i) = datetime(clock(1)...
+                     ,clock(2),clock(3),clock(4),clock(5),clock(6));
+                ms(i) = clock(7);
             catch
-                dat.coords.time(i) = nan;
+                time(i) = NaT;
                 warning("Invalid time stamp in ping %d.",...
                     ensemble.number);
             end
         end
+        % Now convert time to epochtime
+        ind = ~isnat(time);
+        dat.coords.time(ind) = double(convertTo(time(ind)...
+            ,'epochtime','Epoch','1970-01-01'));
+        dat.coords.time(ind) = dat.coords.time(ind) + ms(ind);        
+        %
         dat = finalize(dat);
         if isfield(dat.data_vars, 'vel_bt')
             dat.attrs.rotate_vars{end+1} = 'vel_bt';
@@ -406,15 +416,18 @@ function ds = read_rdi(filename,options)
         cfg.orientation = orientation_options{...
             int32((bitand(config(1),128)==128)+1)};
         fseek(fid,1,0);
-        cfg.n_beams = fread(fid,1,'uint8');
-        cfg.n_cells = fread(fid,1,'uint8');
-        cfg.pings_per_ensemble = fread(fid,1,'uint16');
-        cfg.cell_size = fread(fid,1,'uint16') * .01;
-        cfg.blank = fread(fid,1,'uint16') * .01;
-        cfg.prof_mode = fread(fid,1,'uint8');
-        cfg.corr_threshold = fread(fid,1,'uint8');
-        cfg.prof_codereps = fread(fid,1,'uint8');
-        cfg.min_pgood = fread(fid,1,'uint8');
+        temp = fread(fid,2,'uint8');
+        cfg.n_beams = temp(1);
+        cfg.n_cells = temp(2);
+        temp = fread(fid,3,'uint16');
+        cfg.pings_per_ensemble = temp(1);
+        cfg.cell_size = temp(2) * .01;
+        cfg.blank = temp(3) * .01;
+        temp = fread(fid,4,'uint8');
+        cfg.prof_mode = temp(1);
+        cfg.corr_threshold = temp(2);
+        cfg.prof_codereps = temp(3);
+        cfg.min_pgood = temp(4);
         cfg.evel_threshold = fread(fid,1,'uint16');
         cfg.sec_between_ping_groups = ...
             sum(fread(fid,3,'uint8').*[60.; 1.; .01]);
@@ -425,14 +438,18 @@ function ds = read_rdi(filename,options)
         cfg.use_pitchroll = bitand(coord_sys, 4) == 4;
         cfg.use_3beam = bitand(coord_sys, 2) == 2; 
         cfg.bin_mapping = bitand(coord_sys, 1) == 1;
-        cfg.xducer_misalign_deg = fread(fid,1,'int16') * .01;
-        cfg.magnetic_var_deg = fread(fid,1,'int16') * .01;
-        cfg.sensors_src = dec2bin(fread(fid,1,'uint8'),8);
-        cfg.sensors_avail = dec2bin(fread(fid,1,'uint8'),8);
-        cfg.bin1_dist_m = fread(fid,1,'uint16') * .01;
-        cfg.xmit_pulse = fread(fid,1,'uint16') * .01;
-        cfg.water_ref_cells = fread(fid,2,'uint8');
-        cfg.fls_target_threshold = fread(fid,1,'uint8');
+        temp = fread(fid,2,'int16');
+        cfg.xducer_misalign_deg = temp(1) * .01;
+        cfg.magnetic_var_deg = temp(2) * .01;
+        temp = fread(fid,2,'uint8');
+        cfg.sensors_src = dec2bin(temp(1),8);
+        cfg.sensors_avail = dec2bin(temp(2),8);
+        temp = fread(fid,2,'uint16');
+        cfg.bin1_dist_m = temp(1) * .01;
+        cfg.xmit_pulse  = temp(2) * .01;
+        temp = fread(fid,3,'uint8');
+        cfg.water_ref_cells = temp(1:2);
+        cfg.fls_target_threshold = temp(3);
         fseek(fid,1,0);
         cfg.xmit_lag_m = fread(fid,1,'uint16') * .01;
         nbyte_ = 40;
@@ -476,20 +493,23 @@ function ds = read_rdi(filename,options)
         ensemble.rtc.data(ensemble.k,1,:) = fread(fid,7,'uint8');
         ensemble.number.data(ensemble.k) = ensemble.number.data(ensemble.k)...
             + 65535 * fread(fid,1,'uint8');
-        ensemble.builtin_test_fail.data(ensemble.k) = fread(fid,1,'uint16');
-        ensemble.c_sound.data(ensemble.k) = fread(fid,1,'uint16');
-        ensemble.depth.data(ensemble.k) = fread(fid,1,'uint16') * .1;
-        ensemble.heading.data(ensemble.k) = fread(fid,1,'uint16') * .01;
-        ensemble.pitch.data(ensemble.k) = fread(fid,1,'int16') * .01;
-        ensemble.roll.data(ensemble.k) = fread(fid,1,'int16') * .01;
-        ensemble.salinity.data(ensemble.k) = fread(fid,1,'int16');
-        ensemble.temp.data(ensemble.k) = fread(fid,1,'int16') * .01;
+        temp = fread(fid,4,'uint16');
+        ensemble.builtin_test_fail.data(ensemble.k) = temp(1);
+        ensemble.c_sound.data(ensemble.k)   = temp(2);
+        ensemble.depth.data(ensemble.k)     = temp(3) * .1;
+        ensemble.heading.data(ensemble.k)   = temp(4) * .01;
+        temp = fread(fid,4,'int16');
+        ensemble.pitch.data(ensemble.k)     = temp(1) * .01;
+        ensemble.roll.data(ensemble.k)      = temp(2) * .01;
+        ensemble.salinity.data(ensemble.k)  = temp(3);
+        ensemble.temp.data(ensemble.k)      = temp(4) * .01;        
         ensemble.min_preping_wait.data(ensemble.k) = ...
             sum(fread(fid,3,'uint8').*[60.; 1.; .01]);
-        ensemble.heading_std.data(ensemble.k) = fread(fid,1,'uint8');
-        ensemble.pitch_std.data(ensemble.k) = fread(fid,1,'uint8')*0.1;
-        ensemble.roll_std.data(ensemble.k) = fread(fid,1,'uint8')*0.1;
-        ensemble.adc.data(ensemble.k,1,:) = fread(fid,8,'uint8');
+        temp = fread(fid,11,'uint8');
+        ensemble.heading_std.data(ensemble.k)   = temp(1);
+        ensemble.pitch_std.data(ensemble.k)     = temp(2) * 0.1;
+        ensemble.roll_std.data(ensemble.k)      = temp(3) * 0.1;
+        ensemble.adc.data(ensemble.k,1,:)       = temp(4:11);
         nbyte_ = 2 + 40;
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -720,7 +740,7 @@ function ds = read_rdi(filename,options)
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function read_nocode(id)
-        fprintf('Unrecognized ID code: %0.4X.', id)
+        fprintf('Unrecognized ID code: %0.4X.\n', id)
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> 
 
