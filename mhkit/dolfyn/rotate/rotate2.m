@@ -90,6 +90,7 @@ function ds = rotate2(data_set, out_frame)
     end
 
     if iframe_out == iframe_in
+        fprintf('Data is already in the %s coordinate system', out_frame)
         ds = data_set;
         return;
     end
@@ -107,7 +108,11 @@ function ds = rotate2(data_set, out_frame)
         else
             func = join([rc(inow),'2',rc(inow+1)],'');
         end
-        data_set = feval(func{1}, data_set, reverse, rmod);
+        try
+            data_set = feval(func{1}, data_set, reverse, rmod);
+        catch
+            data_set = feval(func{1}, data_set, reverse);
+        end
     end
     ds = data_set;
 end

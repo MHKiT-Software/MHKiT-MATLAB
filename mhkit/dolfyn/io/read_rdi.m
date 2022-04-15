@@ -253,6 +253,7 @@ function ds = read_rdi(filename,options)
             end
         end
         % Now convert time to epochtime
+        dat.coords.time = nan(size(dat.coords.time));
         ind = ~isnat(time);
         dat.coords.time(ind) = double(convertTo(time(ind)...
             ,'epochtime','Epoch','1970-01-01'));

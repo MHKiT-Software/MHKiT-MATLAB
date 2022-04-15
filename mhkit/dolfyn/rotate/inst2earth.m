@@ -46,8 +46,7 @@ end
         elseif ~strcmp(cs, cs_now)
             msgtext = ["Data must be in the '%s' frame when using this "...
                 "function.", cs_now];
-            ME = MException('MATLAB:read_nortek:set_declination:rotate2'...
-                ,msgtext);
+            ME = MException('MATLAB:dolfyn:inst2earth',msgtext);
             throwAsCaller(ME)
         end
     
