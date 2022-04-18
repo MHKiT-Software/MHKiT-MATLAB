@@ -13,7 +13,9 @@ function ds = inst2earth(advo,reverse,make)
 %     make : char
 %       vector, signature, rdi
 
-if strcmpi(make,'awac')
+if strcmpi(make,'awac') 
+    ds = inst2earth_awac();
+elseif strcmpi(make,'vector')
     ds = inst2earth_vector();
 elseif strcmpi(make, 'signature')
     ds = inst2earth_signature();
@@ -21,7 +23,7 @@ elseif strcmpi(make, 'rdi')
     ds = inst2earth_rdi();
 end
 
-    function out = inst2earth_vector()
+    function out = inst2earth_awac()
         if reverse % earth -> inst
             % The transpose of the rotation matrix gives the inverse
             % rotation, so we simply reverse the order of the einsum:
@@ -77,6 +79,81 @@ end
             warning("Invalid orientation matrix (determinant != 1) " + ...
                 "in inst2earth")
         end
+    
+        for qq = 1:numel(rotate_vars)
+            nm = rotate_vars{qq};
+            n = size(advo.(nm).data);
+            n = n(end);
+            if n ~= 3
+                msgtext = ["The entry %s is not a vector, it cannot be "...
+                    "rotated.", nm];
+                ME = MException('MATLAB:inst2earth',msgtext);
+                throwAsCaller(ME)
+            end
+            advo.(nm).data = tensorproduct(rmat,advo.(nm).data,sumstr);
+        end
+        advo.coord_sys = cs_new;
+        advo = set_coords(advo, cs_new);
+        out = advo;
+    end
+
+    function out = inst2earth_vector()
+        if reverse % earth -> inst
+            % The transpose of the rotation matrix gives the inverse
+            % rotation, so we simply reverse the order of the einsum:
+            sumstr = 'dab,dcb->dca';%'jik,j...k->i...k';
+            cs_now = 'earth';
+            cs_new = 'inst';
+        else % inst->earth
+            sumstr = 'dba,dcb->dca'; %'ijk,j...k->i...k'; 
+            cs_now = 'inst';
+            cs_new = 'earth';
+        end
+    
+        if isfield(advo.attrs, 'rotate_vars')
+            rotate_vars = advo.attrs.rotate_vars;
+        else
+            rotate_vars = {'vel'};
+        end
+    
+        cs = lower(advo.coord_sys);
+        if strcmp(cs,cs_new)
+            return;
+        elseif ~strcmp(cs, cs_now)
+            msgtext = ["Data must be in the '%s' frame when using this "...
+                "function.", cs_now];
+            ME = MException('MATLAB:dolfyn:inst2earth',msgtext);
+            throwAsCaller(ME)
+        end
+    
+        if isfield(advo, 'orientmat')
+            omat = advo.orientmat.data;
+        else
+            if contains(lower(data_set.attrs.inst_model),'vector')
+                orientation_down = advo.orientation_down;
+            else
+                orientation_down = nan;
+            end
+            omat = calc_omat(advo.heading.data,...
+                             advo.pitch.data,...
+                             advo.roll.data,...
+                             orientation_down);
+        end
+    
+        % Take the transpose of the orientation to get the inst->earth rotation
+        % matrix.
+        rmat = permute(omat, [1 2 4 3]);
+        det_form = permute(omat, [4 3 2 1]);
+        determinate = 0;
+        for i = 1:length(det_form)
+            determinate = determinate + det(det_form(:,:,:,i));
+        end
+        determinate = determinate - length(det_form);
+        if determinate > 1e-3
+            warning("Invalid orientation matrix (determinant != 1) " + ...
+                "in inst2earth")
+        end
+        rmat = squeeze(rmat);
     
         for qq = 1:numel(rotate_vars)
             nm = rotate_vars{qq};
