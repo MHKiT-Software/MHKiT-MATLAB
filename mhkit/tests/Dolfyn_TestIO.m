@@ -327,14 +327,10 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                         dt1(tmp1) = 0.0;
                         tmp2 = isnan(ds_read.(field).data);
                         dt2 = double(ds_read.(field).data);
-                        dt2(tmp2) = 0.0;
-                        
-                        % The difference between significant figures in pi,
-                        % cos, sin, etc between numpy and matlab causes
-                        % an inherent difference in the answers for
-                        % orientmat and others    
-                        diff = diff + fix(abs(sum(abs(dt1 - dt2),...
-                                1:numel(size(dt1)))/length(dt1))*1e4)/1e4; 
+                        dt2(tmp2) = 0.0;                        
+                          
+                        diff = diff + abs(sum(abs(dt1 - dt2),...
+                                1:numel(size(dt1)))/length(dt1)); 
                         % Dims
                         for kk = 1:length(ds_cntrl.(field).dims)
                             diff = diff + double(~strcmpi(...
