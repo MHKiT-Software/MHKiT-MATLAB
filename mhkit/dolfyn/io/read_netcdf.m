@@ -92,7 +92,8 @@ function ds = read_netcdf(filename)
                     end
                 end
             elseif numel(sz) == 2
-                if contains(name, 'orientmat')
+                if contains(name, 'orientmat') || ...
+                        contains(name,'inst2head_rotmat')
                     % no modifications needed 
                     ds.(name).data = ncread(filename,name);
                 else

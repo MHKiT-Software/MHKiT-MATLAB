@@ -220,6 +220,47 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                 ds_read, ds_cntrl);
             testCase.assertLessThan(Obj.diff, 1e-6);
         end
+
+        % ADV Test Cases
+        function test_io_adv(testCase)
+            warning('off','all')            
+            ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/vector_data01.nc');            
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/vector_data01.VEC', nens=testCase.nens);
+            warning('on','all')            
+            Obj.diff = Dolfyn_TestIO.compare_structures(...
+                ds_read, ds_cntrl);
+            testCase.assertLessThan(Obj.diff, 1e-6);
+        end
+
+        function test_io_adv_imu(testCase)
+            warning('off','all')            
+            ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01.nc');            
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/vector_data_imu01.VEC', userdata=false, nens=testCase.nens);
+            warning('on','all')            
+            Obj.diff = Dolfyn_TestIO.compare_structures(...
+                ds_read, ds_cntrl);
+            testCase.assertLessThan(Obj.diff, 1e-6);
+        end
+
+        function test_io_adv_imu_userdata(testCase)
+            warning('off','all')            
+            ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01-json.nc');            
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/vector_data_imu01.VEC', nens=testCase.nens);
+            warning('on','all')            
+            Obj.diff = Dolfyn_TestIO.compare_structures(...
+                ds_read, ds_cntrl);
+            testCase.assertLessThan(Obj.diff, 1e-6);
+        end
+
+        function test_io_adv_burst(testCase)
+            warning('off','all')            
+            ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/burst_mode01.nc');            
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/burst_mode01.VEC', nens=testCase.nens);
+            warning('on','all')            
+            Obj.diff = Dolfyn_TestIO.compare_structures(...
+                ds_read, ds_cntrl);
+            testCase.assertLessThan(Obj.diff, 1e-6);
+        end
     end
         
     methods (Static)
@@ -358,7 +399,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                                 double(~strcmpi(ds_cntrl.(field),...
                                 ds_read.(field)));
                     end
-                end             
+                end  
             end  
             %fprintf('Final Diff = %f\n',diff)
             format(oldFmt);

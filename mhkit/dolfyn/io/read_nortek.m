@@ -544,7 +544,7 @@ function ds=read_nortek(filename,options)
         data.sys.Count(c) = temp(2);
         data.data_vars.PressureMSB(c) = temp(3);
         data.sys.AnaIn2MSB(c) = temp(4);
-        fread(fid,2,'ushort',endian);
+        temp = fread(fid,2,'ushort',endian);
         data.data_vars.PressureLSW(c) = temp(1);
         data.sys.AnaIn1(c) = temp(2);
         temp = fread(fid,3,'short',endian);
