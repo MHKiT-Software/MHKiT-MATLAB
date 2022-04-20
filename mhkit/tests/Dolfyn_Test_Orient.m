@@ -1,9 +1,5 @@
-classdef Dolfyn_Test_Orient < matlab.unittest.TestCase
-        
-    properties
-        Property1
-    end
-    
+classdef Dolfyn_Test_Orient < matlab.unittest.TestCase       
+   
     methods (Test)
           
         function orient_testcase(testCase) 

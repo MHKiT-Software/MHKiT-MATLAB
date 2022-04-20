@@ -236,7 +236,11 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
             warning('off','all')            
             ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01.nc');            
             ds_read  = dolfyn_read('../../examples/data/dolfyn/vector_data_imu01.VEC', userdata=false, nens=testCase.nens);
-            warning('on','all')            
+            warning('on','all')     
+            % These values are not correct for this data but I'm adding 
+            % them for test purposes only.
+            ds_read = set_inst2head_rotmat(ds_read, eye(3));
+            ds_read.attrs.inst2head_vec = [-1.0; 0.5; 0.2];
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
             testCase.assertLessThan(Obj.diff, 1e-6);
@@ -346,9 +350,10 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                                 sum(double(ds_cntrl.attrs.(field) ~=...
                                 ds_read.attrs.(field)'));
                         else
-                            diff = diff + abs(... 
-                                sum(double(round(ds_cntrl.attrs.(field),4) -...
-                                round(ds_read.attrs.(field)',4))));
+                            diff = diff + sum(abs(ds_cntrl.attrs.(field)...
+                                - ds_read.attrs.(field)'), ...
+                                1:numel(size(ds_cntrl.attrs.(field))))...
+                                /length(ds_cntrl.attrs.(field));
                         end
                     end
                 end
@@ -399,7 +404,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                                 double(~strcmpi(ds_cntrl.(field),...
                                 ds_read.(field)));
                     end
-                end  
+                end 
             end  
             %fprintf('Final Diff = %f\n',diff)
             format(oldFmt);
