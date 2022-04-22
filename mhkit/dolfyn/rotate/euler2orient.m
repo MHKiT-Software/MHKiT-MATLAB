@@ -1,15 +1,35 @@
-function omat = euler2orient(heading, pitch, roll)
+function omat = euler2orient(heading, pitch, roll, options)
     % For Nortek data only.
     % The heading, pitch, roll used here are from the Nortek binary files.
     %
-    % Heading input is clockwise from North
-    % Returns a rotation matrix that rotates earth (ENU) -> inst.
-    % This is based on the Nortek `Transforms.m` file, available in
-    % the refs folder.
-    heading = deg2rad(heading);
-    roll = deg2rad(roll);
-    pitch = deg2rad(pitch);
+    % Parameters
+    % ------------
+    %     heading: array
+    %         Heading input is clockwise from North
+    %     pitch: array
+    %     roll: array
+    %     units: string (optional)
+    %         radians or degrees (default degrees)
+    %         Whether heading, pitch, and roll are in degrees or radians.    
+    % Returns
+    % ---------
+    %     omat: 
+    %       a rotation matrix that rotates earth (ENU) -> inst.
+    %       This is based on the Nortek `Transforms.m` file, available in
+    %       the refs folder.
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    arguments
+        heading
+        pitch
+        roll
+        options.units = 'degrees';
+    end
 
+    if ~strcmpi(options.units, 'radians')
+        heading = deg2rad(heading);
+        roll = deg2rad(roll);
+        pitch = deg2rad(pitch);
+    end
     % The definition of heading below is consistent with the right-hand-rule;
     % heading is the angle positive counterclockwise from North of the y-axis.
     %

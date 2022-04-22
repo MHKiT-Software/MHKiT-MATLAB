@@ -30,7 +30,7 @@ function ds = rotate2(data_set, out_frame)
     if ~isfield(data_set,'inst2head_rotmat')
         r_vec = false;
     end
-    if r_vec && ~ data_set.inst2head_rotmat_was_set
+    if r_vec && ~ data_set.attrs.inst2head_rotmat_was_set
         msgtext = ['The inst2head rotation matrix exists in props, '...
             'but it was not set using `set_inst2head_rotmat.'];
         ME = MException('MATLAB:read_nortek:set_declination:rotate2'...

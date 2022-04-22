@@ -74,6 +74,7 @@ end
 
 ds = set_coords(ds, cs_new);
 ds.coord_sys = cs_new;
+ds.attrs.coord_sys = cs_new;
 
 end
 

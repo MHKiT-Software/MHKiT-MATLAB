@@ -93,6 +93,7 @@ end
             advo.(nm).data = tensorproduct(rmat,advo.(nm).data,sumstr);
         end
         advo.coord_sys = cs_new;
+        advo.attrs.coord_sys = cs_new;
         advo = set_coords(advo, cs_new);
         out = advo;
     end
@@ -129,8 +130,8 @@ end
         if isfield(advo, 'orientmat')
             omat = advo.orientmat.data;
         else
-            if contains(lower(data_set.attrs.inst_model),'vector')
-                orientation_down = advo.orientation_down;
+            if contains(lower(advo.attrs.inst_model),'vector')
+                orientation_down = advo.orientation_down.data;
             else
                 orientation_down = nan;
             end
@@ -168,6 +169,7 @@ end
             advo.(nm).data = tensorproduct(rmat,advo.(nm).data,sumstr);
         end
         advo.coord_sys = cs_new;
+        advo.attrs.coord_sys = cs_new;
         advo = set_coords(advo, cs_new);
         out = advo;
     end
@@ -318,6 +320,7 @@ end
 
         advo = set_coords(advo, cs_new);
         advo.coord_sys = cs_new;
+        advo.attrs.coord_sys = cs_new;
         out = advo;
     end
 
@@ -390,6 +393,7 @@ end
 
         advo = set_coords(advo, cs_new);
         advo.coord_sys = cs_new;
+        advo.attrs.coord_sys = cs_new;
         out = advo;
     end
 end

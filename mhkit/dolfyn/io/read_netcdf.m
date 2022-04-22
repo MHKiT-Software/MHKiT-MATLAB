@@ -156,6 +156,15 @@ function ds = read_netcdf(filename)
         value = info.Attributes(qq).Value;
         ds.attrs.(name) = value;
     end
+
+    % Corrections 
+    if isfield(ds.attrs,'rotate_vars')
+        ds.attrs.rotate_vars = cellstr(ds.attrs.rotate_vars);
+    end
+    if isfield(ds, 'orientation_down')
+        ds.orientation_down.data = logical(ds.orientation_down.data);
+    end
+
     ds.coord_sys = ds.attrs.coord_sys;
     ds.time = ds.coords.time;
 
