@@ -60,6 +60,43 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             testCase.assertLessThan(diff2, 1e-6);
             testCase.assertLessThan(diff3, 1e-6);
         end
+
+        function test_rotate_earth2inst(testCase)
+            td = read_netcdf('../../examples/data/dolfyn/control/vector_data01_rotate_inst2earth.nc');
+            td = rotate2(td, 'inst');
+            tdm = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01_rotate_inst2earth.nc');
+            tdm = rotate2(tdm,'inst');
+
+            cd = read_netcdf('../../examples/data/dolfyn/control/vector_data01.nc');
+            cdm = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01.nc');
+            % The heading/pitch/roll data gets modified during rotation, 
+            % so it doesn't go back to what it was.
+            cdm = rmfield(cdm, {'heading', 'pitch', 'roll'});
+            tdm = rmfield(tdm, {'heading', 'pitch', 'roll'});
+            
+            diff1 = Dolfyn_Test_Rotate.compare_structures(td, cd);
+            diff2 = Dolfyn_Test_Rotate.compare_structures(tdm, cdm);
+            testCase.assertLessThan(diff1, 1e-6);
+            testCase.assertLessThan(diff2, 1e-6);
+        end
+
+        function test_rotate_inst2beam(testCase)
+            td = read_netcdf('../../examples/data/dolfyn/control/vector_data01.nc');
+            td = rotate2(td, 'beam');
+            tdm = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01.nc');
+            tdm = rotate2(tdm, 'beam');
+
+            cd  = read_netcdf('../../examples/data/dolfyn/control/vector_data01_rotate_inst2beam.nc');
+            cdm = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01_rotate_inst2beam.nc');
+
+            diff1 = Dolfyn_Test_Rotate.compare_structures(td, cd);
+            diff2 = Dolfyn_Test_Rotate.compare_structures(tdm, cdm);
+            testCase.assertLessThan(diff1, 1e-6);
+            testCase.assertLessThan(diff2, 1e-6); 
+        end
+
+        function test_rotate_beam2inst(testCase)
+        end
         
     end
 

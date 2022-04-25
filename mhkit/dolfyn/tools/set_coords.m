@@ -49,6 +49,8 @@ function out = set_coords(ds, ref_frame)
             ds.coords.dirIMU = XYZ;
         end
     end
+    ds.attrs.coord_sys = ref_frame;
+    ds.coord_sys = ref_frame;
          
     tag = {'', '_echo', '_bt'};
     for qq = 1:3
