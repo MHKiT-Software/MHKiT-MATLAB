@@ -72,10 +72,7 @@ function write_netcdf(ds, filename)
         % file then write the data.
         fields = fieldnames(ds);
         for qq = 1:numel(fields)
-            key = fields{qq};
-            if strcmp(key,'orientmat')
-                debug = 1;
-            end
+            key = fields{qq};            
             if ~any(strcmp(exclude,key))
                 dim_fields = fieldnames(ds.(key).coords);
                 dimensions = cell(1,numel(dim_fields)*2);

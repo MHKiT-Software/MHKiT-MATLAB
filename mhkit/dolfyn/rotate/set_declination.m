@@ -66,8 +66,9 @@ function ds = set_declination(data_set, declin)
     if rotate2earth
         data_set = rotate2(data_set, 'earth');
     end
-    if isfield(data_set,'principal_heading')
-        data_set.principal_heading = data_set.principal_heading + angle;
+    if isfield(data_set.attrs,'principal_heading')
+        data_set.attrs.principal_heading = ...
+            data_set.attrs.principal_heading + angle;
     end
 
     data_set.attrs.declination = declin;

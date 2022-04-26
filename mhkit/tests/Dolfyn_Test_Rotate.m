@@ -95,8 +95,66 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             testCase.assertLessThan(diff2, 1e-6); 
         end
 
-        function test_rotate_beam2inst(testCase)
+        function adv_rotate_beam2inst(testCase)
+            td  = read_netcdf('../../examples/data/dolfyn/control/vector_data01_rotate_inst2beam.nc');
+            td = rotate2(td, 'inst');
+            tdm = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01_rotate_inst2beam.nc');
+            tdm = rotate2(tdm, 'inst');
+
+            cd = read_netcdf('../../examples/data/dolfyn/control/vector_data01.nc');
+            cdm = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01.nc');
+
+            diff1 = Dolfyn_Test_Rotate.compare_structures(td, cd);
+            diff2 = Dolfyn_Test_Rotate.compare_structures(tdm, cdm);
+            testCase.assertLessThan(diff1, 1e-6);
+            testCase.assertLessThan(diff2, 1e-6); 
         end
+
+        function test_rotate_earth2principal(testCase)
+            td = read_netcdf('../../examples/data/dolfyn/control/vector_data01_rotate_inst2earth.nc');
+            td.attrs.principal_heading = ...
+                calc_principal_heading(td.vel.data,true);
+            td = rotate2(td, 'principal');
+            tdm = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01_rotate_inst2earth.nc');
+            tdm.attrs.principal_heading = ...
+                calc_principal_heading(tdm.vel.data,true);
+            tdm = rotate2(tdm, 'principal');
+
+            cd = read_netcdf('../../examples/data/dolfyn/control/vector_data01_rotate_earth2principal.nc');
+            cdm = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01_rotate_earth2principal.nc');
+            
+            diff1 = Dolfyn_Test_Rotate.compare_structures(td, cd);
+            diff2 = Dolfyn_Test_Rotate.compare_structures(tdm, cdm);
+            testCase.assertLessThan(diff1, 1e-6);
+            testCase.assertLessThan(diff2, 1e-6); 
+        end
+
+        function test_rotate_earth2principal_set_declination(testCase)
+            declin = 3.875;
+            td = read_netcdf('../../examples/data/dolfyn/control/vector_data01_rotate_inst2earth.nc');
+            td0 = td;
+
+            td.attrs.principal_heading = ...
+                calc_principal_heading(td.vel.data,true);
+            td = rotate2(td, 'principal');
+            td = set_declination(td, declin);
+            td = rotate2(td,'earth');
+
+            td0 = set_declination(td0, -1);
+            td0 = set_declination(td0, declin);
+            td0.attrs.principal_heading = ...
+                calc_principal_heading(td0.vel.data,true);
+            td0 = rotate2(td0, 'earth');
+            diff = Dolfyn_Test_Rotate.compare_structures(td0, td);
+            testCase.assertLessThan(diff, 1e-6);
+        end
+
+        %##################################################################
+
+        % ADP Rotation Cases  
+%         function adp_rotate_beam2inst(testCase)
+%             
+%         end
         
     end
 
