@@ -102,6 +102,10 @@ function ds = rotate2(data_set, out_frame)
     end
 
     while ~strcmpi(data_set.coord_sys, out_frame)
+        csin = lower(data_set.coord_sys);
+        if strcmp(csin,'ship')
+            csin = 'inst';
+        end
         inow = find(strcmp(rc,csin));
         if reverse
             func = join([rc(inow-1),'2',rc(inow)],'');

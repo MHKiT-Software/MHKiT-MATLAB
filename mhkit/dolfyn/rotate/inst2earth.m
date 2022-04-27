@@ -11,7 +11,7 @@ function ds = inst2earth(advo,reverse,make)
 %            (earth->inst).
 % 
 %     make : char
-%       vector, signature, rdi
+%       awac, vector, signature, rdi
 
 if strcmpi(make,'awac') 
     ds = inst2earth_awac();
@@ -267,16 +267,17 @@ end
             rmd_4 = permute(step3,[4,3,1,2]);
         end
 
-        for qq = 1:numel(advo.attrs.rotate_vars)
-            nm = advo.attrs.rotate_vars{qq};
+        for qq = 1:numel(rotate_vars)
+            nm = rotate_vars{qq};
             dat = advo.(nm).data;
             shape = size(dat);
             n = shape(end);
+            otherdims = repmat({':'},1,length(shape)-1);
             % Nortek documents sign change for upside-down instruments
             if down                
                 if ~reverse
                     for kk = 2:n
-                        dat(:,:,:,kk) = dat(:,:,:,kk) .* -1.;
+                        dat(otherdims{:},kk) = dat(otherdims{:},kk) .* -1.;
                     end
                     if n == 3
                         dat = tensorproduct(rmd_3,dat,sumstr);
@@ -298,9 +299,9 @@ end
                             "cannot be rotated.", nm];
                         ME = MException('MATLAB:inst2earth',msgtext);
                         throwAsCaller(ME)
-                    end
+                    end                    
                     for kk = 2:n
-                        dat(:,:,:,kk) = dat(:,:,:,kk) .* -1.;
+                        dat(otherdims{:},kk) = dat(otherdims{:},kk) .* -1.;
                     end
                 end
             else % 'up' and AHRS
@@ -377,18 +378,29 @@ end
         % view (not a new array)
         rmat = permute(omat, [1 2 4 3]);
         if reverse % earth -> inst
-            sumstr = 'dcab,dceb->dcea';%'jik,j...k->i...k';
+            sumstr4 = 'dcab,dceb->dcea';%'jik,j...k->i...k';
+            sumstr3 = 'dcab,deb->dea';
             cs_new = 'inst';
         else % inst->earth
-            sumstr = 'dcba,dceb->dcea'; %'ijk,j...k->i...k';
+            sumstr4 = 'dcba,dceb->dcea'; %'ijk,j...k->i...k';
+            sumstr3 = 'dcba,deb->dea';
             cs_new = 'earth';
         end
 
         % Only operate on the first 3-components, b/c the 4th is err_vel
         for qq = 1:numel(advo.attrs.rotate_vars)
             nm = advo.attrs.rotate_vars{qq};
-            dat = advo.(nm).data(:,:,:,1:3);
-            advo.(nm).data(:,:,:,1:3) = tensorproduct(rmat,dat,sumstr);            
+            dat = advo.(nm).data;
+            n = length(size(dat));
+            otherdims = repmat({':'},1,n-1);
+            dat = advo.(nm).data(otherdims{:},1:3);
+            if n == 3
+                sumstr = sumstr3;
+            else
+                sumstr = sumstr4;
+            end            
+            advo.(nm).data(otherdims{:},1:3) = ...
+                tensorproduct(rmat,dat,sumstr);            
         end
 
         advo = set_coords(advo, cs_new);

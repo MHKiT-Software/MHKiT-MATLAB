@@ -1,4 +1,4 @@
-function ds = beam2inst(dat,reverse)
+function ds = beam2inst(dat,reverse,rmod)
 % Rotate velocities from beam to instrument coordinates.
 %
 %    Parameters
@@ -7,22 +7,29 @@ function ds = beam2inst(dat,reverse)
 %        The ADCP dataset
 %    reverse : bool 
 %        If True, this function performs the inverse rotation (inst->beam).
-
+%    rmod: string
+%        awac, vector, signature, rdi
 %__________________________________________________________________________
-% Order of rotations matters
-% beam->head(ADV instrument head)->inst(ADV battery case|imu)
-if reverse
-    % First rotate velocities from ADV inst frame back to head frame
-    dat = inst2head(dat, reverse);
-    % Now rotate from the head frame to the beam frame
-    ds = rotate(dat, reverse);
 
-% inst(ADV battery case|imu)->head(ADV instrument head)->beam
+% There are two paths depending on the make of the data
+if strcmpi(rmod,'vector')
+    % Order of rotations matters
+    % beam->head(ADV instrument head)->inst(ADV battery case|imu)
+    if reverse
+        % First rotate velocities from ADV inst frame back to head frame
+        dat = inst2head(dat, reverse);
+        % Now rotate from the head frame to the beam frame
+        ds = rotate(dat, reverse);
+    
+    % inst(ADV battery case|imu)->head(ADV instrument head)->beam
+    else
+        % First rotate velocities from beam to ADV head frame
+        dat = rotate(dat, reverse);
+        % Then rotate from ADV head frame to ADV inst frame
+        ds = inst2head(dat, reverse);
+    end
 else
-    % First rotate velocities from beam to ADV head frame
-    dat = rotate(dat, reverse);
-    % Then rotate from ADV head frame to ADV inst frame
-    ds = inst2head(dat, reverse);
+    ds = rotate(dat, reverse);
 end
 %__________________________________________________________________________
 
@@ -58,8 +65,13 @@ end
         for qq = 1:numel(advo.attrs.rotate_vars)
             nm = advo.attrs.rotate_vars{qq};
             if startsWith(nm, 'vel')
-                advo.(nm).data = tensorproduct(...
-                    rotmat,advo.(nm).data, 'ab,cda->cdb');
+                if length(size(advo.(nm).data)) == 3
+                    advo.(nm).data = tensorproduct(...
+                        rotmat,advo.(nm).data, 'ab,cda->cdb');
+                else
+                    advo.(nm).data = tensorproduct(...
+                        rotmat,advo.(nm).data, 'ab,cdea->cdeb');
+                end
             end
         end
         
