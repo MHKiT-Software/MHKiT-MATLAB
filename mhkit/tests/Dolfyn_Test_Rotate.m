@@ -110,7 +110,7 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             testCase.assertLessThan(diff2, 1e-6); 
         end
 
-        function test_rotate_earth2principal(testCase)
+        function adv_rotate_earth2principal(testCase)
             td = read_netcdf('../../examples/data/dolfyn/control/vector_data01_rotate_inst2earth.nc');
             td.attrs.principal_heading = ...
                 calc_principal_heading(td.vel.data,true);
@@ -132,7 +132,7 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
         function test_rotate_earth2principal_set_declination(testCase)
             declin = 3.875;
             td = read_netcdf('../../examples/data/dolfyn/control/vector_data01_rotate_inst2earth.nc');
-            td0 = td;
+            td0 = read_netcdf('../../examples/data/dolfyn/control/vector_data01_rotate_inst2earth.nc');
 
             td.attrs.principal_heading = ...
                 calc_principal_heading(td.vel.data,true);
@@ -281,11 +281,95 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             testCase.assertLessThan(diff7, 1e-5);
         end
 
-%         tr.dat_rdi = '../../examples/data/dolfyn/control/RDI_test01.nc';
-%         tr.dat_sig = '../../examples/data/dolfyn/control/BenchFile01.nc';
-%         tr.dat_sig_i = '../../examples/data/dolfyn/control/Sig1000_IMU.nc';
-%         tr.dat_sig_ieb = '../../examples/data/dolfyn/control/VelEchoBT01.nc';
-        
+        function adp_rotate_earth2inst(testCase)
+            td_rdi = read_netcdf('../../examples/data/dolfyn/control/RDI_test01_rotate_inst2earth.nc');
+            td_rdi = rotate2(td_rdi, 'inst');
+            tdwr2 = read_netcdf('../../examples/data/dolfyn/control/winriver02_rotate_ship2earth.nc');
+            tdwr2 = rotate2(tdwr2, 'inst');
+            
+            td_awac = read_netcdf('../../examples/data/dolfyn/control/AWAC_test01.nc');
+            td_awac = rotate2(td_awac, 'inst');
+            td_sig = read_netcdf('../../examples/data/dolfyn/control/BenchFile01_rotate_inst2earth.nc');
+            td_sig = rotate2(td_sig, 'inst');
+            td_sig_i = read_netcdf('../../examples/data/dolfyn/control/Sig1000_IMU_rotate_inst2earth.nc');
+            warning('off','all')
+            td_sig_i = rotate2(td_sig_i, 'inst');
+            warning('on','all')
+                        
+            cd_rdi = read_netcdf('../../examples/data/dolfyn/control/RDI_test01_rotate_beam2inst.nc');
+            cd_wr2 = read_netcdf('../../examples/data/dolfyn/control/winriver02.nc');
+            % ship and inst are considered equivalent in dolfy  
+            cd_wr2.attrs.coord_sys = 'inst'; cd_wr2.coord_sys = 'inst';
+            cd_awac = read_netcdf('../../examples/data/dolfyn/control/AWAC_test01_earth2inst.nc');
+            cd_sig = read_netcdf('../../examples/data/dolfyn/control/BenchFile01_rotate_beam2inst.nc');
+            cd_sig_i = read_netcdf('../../examples/data/dolfyn/control/Sig1000_IMU_rotate_beam2inst.nc');
+
+            diff1 = Dolfyn_Test_Rotate.compare_structures(td_rdi, cd_rdi);
+            diff2 = Dolfyn_Test_Rotate.compare_structures(tdwr2, cd_wr2);
+            diff3 = ...
+                Dolfyn_Test_Rotate.compare_structures(td_awac, cd_awac);
+            diff4 = ...
+                Dolfyn_Test_Rotate.compare_structures(td_sig, cd_sig);
+            diff5 = ...
+                Dolfyn_Test_Rotate.compare_structures(td_sig_i, cd_sig_i);
+            
+            tmp1 = isnan(cd_sig_i.accel.data);
+            tmp2 = isnan(td_sig_i.accel.data);
+            tmp = tmp1|tmp2;
+
+            dt1 = double(cd_sig_i.accel.data);
+            dt1(tmp) = 0.0;                        
+            dt2 = double(td_sig_i.accel.data);
+            dt2(tmp) = 0.0;  
+            diff6 = abs(sum(abs(dt1 - dt2),...
+                    1:numel(size(dt1)))/length(dt1));
+            
+            testCase.assertLessThan(diff1, 1e-5);
+            testCase.assertLessThan(diff2, 1e-5);            
+            testCase.assertLessThan(diff3, 1e-5);
+            testCase.assertLessThan(diff4, 1e-5);
+            % known failure due to orientmat, see test_vs_nortek
+            % assert_allclose(td_sig_i, cd_sig_i, atol=1e-3)
+            %testCase.assertLessThan(diff5, 1e-5);
+            testCase.assertLessThan(diff6, 1e-3);
+        end
+
+        function adp_rotate_earth2principal(testCase)
+            td_rdi = read_netcdf('../../examples/data/dolfyn/control/RDI_test01_rotate_inst2earth.nc');
+            td_sig = read_netcdf('../../examples/data/dolfyn/control/BenchFile01_rotate_inst2earth.nc');
+            td_awac = read_netcdf('../../examples/data/dolfyn/control/AWAC_test01.nc');
+
+            avg_td_rdi_vel = Dolfyn_Test_Rotate.xarray_mean(...
+                td_rdi.vel.data, 2);      
+            avg_td_sig_vel = Dolfyn_Test_Rotate.xarray_mean(...
+                td_sig.vel.data, 2); 
+            avg_td_awac_vel = Dolfyn_Test_Rotate.xarray_mean(...
+                td_awac.vel.data, 2); 
+
+            td_rdi.attrs.principal_heading = calc_principal_heading(...
+                avg_td_rdi_vel, true);
+            td_sig.attrs.principal_heading = calc_principal_heading(...
+                avg_td_sig_vel, true);
+            td_awac.attrs.principal_heading = calc_principal_heading(...
+                avg_td_awac_vel, false);
+
+            td_rdi  = rotate2(td_rdi ,'principal'); 
+            td_sig  = rotate2(td_sig ,'principal');
+            td_awac = rotate2(td_awac,'principal');
+
+            cd_rdi =  read_netcdf('../../examples/data/dolfyn/control/RDI_test01_rotate_earth2principal.nc');
+            cd_sig =  read_netcdf('../../examples/data/dolfyn/control/BenchFile01_rotate_earth2principal.nc');
+            cd_awac = read_netcdf('../../examples/data/dolfyn/control/AWAC_test01_earth2principal.nc');
+
+            diff1 = Dolfyn_Test_Rotate.compare_structures(td_rdi, cd_rdi);
+            diff2 = Dolfyn_Test_Rotate.compare_structures(td_awac,cd_awac);
+            diff3 = Dolfyn_Test_Rotate.compare_structures(td_sig, cd_sig);
+
+            testCase.assertLessThan(diff1, 1e-6);
+            testCase.assertLessThan(diff2, 1e-6); 
+            testCase.assertLessThan(diff3, 1e-6); 
+        end
+
     end
 
     methods (Static)
@@ -338,7 +422,6 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
                         end
                     end
                 end
-                fprintf('Field = %s | Diff = %f\n',field, diff)
             end
     
             % Check Attributes
@@ -379,7 +462,6 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
                         end
                     end
                 end
-                fprintf('Field = %s | Diff = %f\n',field, diff)
             end
     
             % Now check the remaining fields
@@ -430,11 +512,32 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
                                 ds_read.(field)));
                     end
                 end 
-                fprintf('Field = %s | Diff = %f\n',field, diff)
             end  
             %fprintf('Final Diff = %f\n',diff)
             format(oldFmt);
         end
+
+        function mean = xarray_mean(data, dim)
+            data = squeeze(data);
+            shape = size(data);
+            mean_shape = [];
+            for i = 1:numel(shape)
+                if i~=dim
+                    mean_shape(end+1) = shape(i);
+                end
+            end
+            mean = zeros(mean_shape);
+            for qq = 1:mean_shape(1)   
+                for jj = 1:mean_shape(end)
+                    ind = ~isnan(data(qq,:,jj));
+                    temp = data(qq,:,jj);
+                    temp = temp(ind);
+                    mean(qq,jj) = sum(temp)/length(temp);
+                end
+            end
+            mean = reshape(mean, [mean_shape(1),1,mean_shape(2:end)]);
+        end
+
     end
 end
 
