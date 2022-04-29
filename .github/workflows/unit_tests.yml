@@ -51,4 +51,11 @@ jobs:
                    results = runner.run(suite), 
                    assertSuccess(results)" >> run.m
       - name: Install and test MHKiT-MATLAB
+        id: runTests
         run: matlab -batch "run"
+      - name: Test MHKiT-Python
+        run: |
+          pip install nose pytest
+          nosetests -v --traverse-namespace mhkit
+        working-directory: ${{env.mhkit-python-dir}}
+        if: always() && steps.runTests.outcome == 'failure'
