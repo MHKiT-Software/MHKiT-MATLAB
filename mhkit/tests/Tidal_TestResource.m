@@ -3,10 +3,10 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
     methods (Test) 
         
         function test_exceedance_probability(testCase)
-            Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[1 2 3 4 5 6 7 8 9]);
+            Q = [0;1;2;3;4;5;6;7;8];
             f = exceedance_probability(Q);
-            assertEqual(testCase,min(f.F), 10);
-            assertEqual(testCase,max(f.F), 90);
+            assertEqual(testCase,min(f), 10);
+            assertEqual(testCase,max(f), 90);
         end
 
         function test_principal_flow_directions(testCase)
@@ -112,7 +112,6 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
             file_name = '../../examples/data/tidal/s08010.json';
             data = read_noaa_json(file_name);
             data.s = data.s/100;
-            data.Discharge = data.s;
             width_direction = 1;
             [direction1, direction2] = ...
                 principal_flow_directions(data.d,width_direction);
