@@ -38,7 +38,7 @@ jobs:
       - name: Set MATLAB OutOfProcess Python execution mode
         shell: bash
         run: echo "pyenv('ExecutionMode', 'OutOfProcess')" > run.m
-        if: ${{ matrix.os == 'macos-latest' || matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version, 
@@ -51,4 +51,11 @@ jobs:
                    results = runner.run(suite), 
                    assertSuccess(results)" >> run.m
       - name: Install and test MHKiT-MATLAB
+        id: runTests
         run: matlab -batch "run"
+      - name: Test MHKiT-Python
+        run: |
+          pip install nose pytest
+          nosetests -v --traverse-namespace mhkit
+        working-directory: ${{env.mhkit-python-dir}}
+        if: always() && steps.runTests.outcome == 'failure'
