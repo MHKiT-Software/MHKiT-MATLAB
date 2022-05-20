@@ -30,7 +30,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
         function test_io_rdi_withBT(testCase)
             warning('off','all')            
             ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/RDI_withBT.nc');    
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/RDI_withBT.000', nens=testCase.nens);
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/RDI_withBT.000','nens',testCase.nens);
             warning('on','all')
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
@@ -40,7 +40,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
         function test_io_rdi_vm(testCase)
             warning('off','all')
             ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/vmdas01.nc');                
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/vmdas01.ENX', nens=testCase.nens);
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/vmdas01.ENX', 'nens',testCase.nens);
             warning('on','all')
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
@@ -71,7 +71,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
         function test_io_norteck(testCase)  
             warning('off','all')
             ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/AWAC_test01.nc'); 
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/AWAC_test01.wpr', userdata=false, nens=testCase.nens);            
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/AWAC_test01.wpr','userdata',false,'nens',testCase.nens);            
             warning('on','all')
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
@@ -81,7 +81,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
         function test_io_norteck_ud(testCase)  
             warning('off','all')            
             ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/AWAC_test01_ud.nc');
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/AWAC_test01.wpr', nens=testCase.nens);            
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/AWAC_test01.wpr','nens',testCase.nens);            
             warning('on','all')
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
@@ -106,7 +106,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                 delete '../../examples/data/dolfyn/BenchFile01.ad2cp.index';
             catch
             end
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/BenchFile01.ad2cp', nens=testCase.nens');
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/BenchFile01.ad2cp','nens',testCase.nens');
             warning('on','all')            
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
@@ -120,7 +120,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                 delete '../../examples/data/dolfyn/Sig1000_IMU.ad2cp.index';
             catch
             end
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/Sig1000_IMU.ad2cp', userdata=false, nens=testCase.nens);
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/Sig1000_IMU.ad2cp','userdata',false,'nens',testCase.nens);
             warning('on','all')            
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
@@ -130,7 +130,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
         function test_io_sig_i_ud(testCase)
             warning('off','all')            
             ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/Sig1000_IMU_ud.nc');
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/Sig1000_IMU.ad2cp', nens=testCase.nens);
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/Sig1000_IMU.ad2cp','nens',testCase.nens);
             warning('on','all')            
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
@@ -144,7 +144,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                 delete '../../examples/data/dolfyn/VelEchoBT01.ad2cp.index';
             catch
             end
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/VelEchoBT01.ad2cp', nens=testCase.nens);
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/VelEchoBT01.ad2cp','nens',testCase.nens);
             warning('on','all')            
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
@@ -158,7 +158,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                 delete '../../examples/data/dolfyn/Sig500_Echo.ad2cp.index';
             catch
             end
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/Sig500_Echo.ad2cp', nens=testCase.nens);
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/Sig500_Echo.ad2cp','nens',testCase.nens);
             warning('on','all')            
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
@@ -172,7 +172,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                 delete '../../examples/data/dolfyn/Sig1000_tidal.ad2cp.index';
             catch
             end
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/Sig1000_tidal.ad2cp', nens=testCase.nens);
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/Sig1000_tidal.ad2cp','nens',testCase.nens);
             warning('on','all')            
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
@@ -225,7 +225,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
         function test_io_adv(testCase)
             warning('off','all')            
             ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/vector_data01.nc');            
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/vector_data01.VEC', nens=testCase.nens);
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/vector_data01.VEC','nens',testCase.nens);
             warning('on','all')            
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
@@ -235,7 +235,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
         function test_io_adv_imu(testCase)
             warning('off','all')            
             ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01.nc');            
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/vector_data_imu01.VEC', userdata=false, nens=testCase.nens);
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/vector_data_imu01.VEC','userdata',false,'nens',testCase.nens);
             warning('on','all')     
             % These values are not correct for this data but I'm adding 
             % them for test purposes only.
@@ -249,7 +249,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
         function test_io_adv_imu_userdata(testCase)
             warning('off','all')            
             ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01-json.nc');            
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/vector_data_imu01.VEC', nens=testCase.nens);
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/vector_data_imu01.VEC','nens',testCase.nens);
             warning('on','all')            
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);
@@ -259,7 +259,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
         function test_io_adv_burst(testCase)
             warning('off','all')            
             ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/burst_mode01.nc');            
-            ds_read  = dolfyn_read('../../examples/data/dolfyn/burst_mode01.VEC', nens=testCase.nens);
+            ds_read  = dolfyn_read('../../examples/data/dolfyn/burst_mode01.VEC','nens',testCase.nens);
             warning('on','all')            
             Obj.diff = Dolfyn_TestIO.compare_structures(...
                 ds_read, ds_cntrl);

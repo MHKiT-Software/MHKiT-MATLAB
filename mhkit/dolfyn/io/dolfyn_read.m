@@ -15,7 +15,7 @@ function ds=dolfyn_read(filename,options)
 %         nan (default: read entire file), int, or 2-element tuple 
 %         (start, stop) Number of pings to read from the file.
 %
-%     call with options -> dolfyn_read(filename, userdata=false, nens=12) 
+%     call with options -> dolfyn_read(filename,'userdata',false,'nens',12) 
 %
 % Returns
 % ---------
@@ -78,7 +78,7 @@ function ds=dolfyn_read(filename,options)
     else        
         try
             ds = feval(fun_map.(reader),...
-                filename,userdata=options.userdata,nens=options.nens);
+                filename,'userdata',options.userdata,'nens',options.nens);
         catch e
             fprintf("\nError in read: %s\n", e.message);
         end

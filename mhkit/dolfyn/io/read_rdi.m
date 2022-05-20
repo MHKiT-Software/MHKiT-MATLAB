@@ -13,7 +13,7 @@ function ds = read_rdi(filename,options)
 %         nan (default: read entire file), int, or 2-element tuple 
 %         (start, stop) Number of pings to read from the file.
 %
-%     call with options -> read_rdi(filename, userdata=false, do_checksum=true, nens=12) 
+%     call with options -> read_rdi(filename,'userdata',false,'do_checksum',true,'nens',12) 
 %
 % Returns
 % ---------

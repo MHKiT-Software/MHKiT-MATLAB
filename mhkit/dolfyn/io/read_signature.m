@@ -14,7 +14,7 @@ function ds=read_signature(filename,options)
 %         nan (default: read entire file), int, or 2-element tuple 
 %         (start, stop) Number of pings to read from the file.
 %
-%     call with options -> read_signature(filename, userdata=false, nens=12) 
+%     call with options -> read_signature(filename,'userdata',false,'nens',12) 
 %
 % Returns
 % ---------
