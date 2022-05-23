@@ -14,7 +14,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         python-version: [3.8, 3.9]
-        mat_release: latest
+        mat_release: [latest]
         include:
           - os: windows-latest
             mat_release: R2020b
