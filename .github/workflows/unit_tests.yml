@@ -16,7 +16,7 @@ jobs:
         python-version: [3.8, 3.9]
         mat_release: [latest]
         include:
-          - os: windows-latest
+          - os: ubuntu-latest
             mat_release: R2020b
     runs-on: ${{ matrix.os }}
     env:
