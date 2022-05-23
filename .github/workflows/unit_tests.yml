@@ -38,7 +38,7 @@ jobs:
       - name: Set MATLAB OutOfProcess Python execution mode
         shell: bash
         run: echo "pyenv('ExecutionMode', 'OutOfProcess')" > run.m
-        if: ${{ matrix.os == 'macos-latest' || matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version, 
