@@ -48,3 +48,4 @@ S.spectrum=double(py.array.array('d',py.numpy.nditer(S_py.values))).';
 char_arr=char(S_py.index.values);
 S.frequency=double(py.array.array('d',py.numpy.nditer(S_py.index))).';
 S.Tp=Tp;
+S.Hs = Hs;
