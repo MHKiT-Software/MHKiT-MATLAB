@@ -16,15 +16,20 @@ function ds = read_netcdf(filename)
 
     % check to see if the filename input is a string
     if ~ischar(filename)
-        ME = MException('MATLAB:read_nortek',['filename must be a ' ...
+        ME = MException('MATLAB:read_netcdf',['filename must be a ' ...
             'character string']);
         throw(ME);
     end
     
     % check to see if the file exists
     if ~isfile(filename)
-        ME = MException('MATLAB:read_nortek','file does not exist');
+        ME = MException('MATLAB:read_netcdf','file does not exist');
         throw(ME);
+    end
+
+    if isMATLABReleaseOlderThan("R2021b") || endsWith(filename, ".h5")
+        ds = read_h5(filename);
+        return
     end
 
     ds = struct();
@@ -169,4 +174,3 @@ function ds = read_netcdf(filename)
     ds.time = ds.coords.time;
 
 end
-

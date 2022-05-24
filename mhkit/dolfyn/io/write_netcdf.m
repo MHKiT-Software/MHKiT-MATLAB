@@ -26,6 +26,12 @@ function write_netcdf(ds, filename)
     end
 
     overwriteFile = true; % Default to overwriting or creating new file.
+    if ~isMATLABReleaseOlderThan("R2021b")
+        if ~endsWith(filename, ".h5")
+            temp = extractBetween(filename,1,strfind(filename, "."));
+            filename = join([temp{1},"h5"],"");
+        end
+    end
     if exist(filename, 'file')
         % Ask user if they want to overwrite the file.
         promptMessage = sprintf(['This file already exists:\n%s\nDo you ' ...
@@ -44,7 +50,22 @@ function write_netcdf(ds, filename)
         % an existing file.
         if exist(filename, 'file')
             delete(filename);
-        end
+        end        
+
+        if ~isMATLABReleaseOlderThan("R2021b")
+            % Older versions of Matlab did not allow strings to be
+            % written to netcdf so we have to use h5
+            fun_map = struct(  ...
+                'create',{@create_h5},...
+                'write',{@write_h5},...
+                'attribute',{@attr_h5}); 
+        else
+            fun_map = struct(  ...
+                'create',{@create_nc},...
+                'write',{@write_nc},...
+                'attribute',{@attr_nc});
+        end            
+        
         % Loop through coords and create netcdf dimensions
         fields = fieldnames(ds.coords);
         for qq = 1:numel(fields)
@@ -56,13 +77,11 @@ function write_netcdf(ds, filename)
             else
                 type = class(ds.coords.(key));
             end
-            nccreate(filename, key,'Dimensions',{key, n},...
-                    'Datatype', type,...
-                    'Format','netcdf4');
+            feval(fun_map.create, filename, key, {key, n}, type, true);
             if iscell(ds.coords.(key))
-                ncwrite(filename, key, temp);            
+                feval(fun_map.write, filename, key, temp, true);            
             else
-                ncwrite(filename, key, ds.coords.(key));
+                feval(fun_map.write, filename, key, ds.coords.(key), true);                
             end
         end        
         
@@ -86,17 +105,17 @@ function write_netcdf(ds, filename)
                 if islogical(ds.(key).data)
                     ds.(key).data = int32(ds.(key).data);
                 end
-                nccreate(filename, key,'Dimensions',dimensions,...
-                    'Datatype', class(ds.(key).data),...
-                    'FillValue', nan, 'Format','netcdf4');
+                feval(fun_map.create, filename, key, dimensions,...
+                    class(ds.(key).data), false);
                 % Now that the variable exists we can write the data to it 
                 out_data = squeeze(ds.(key).data);
-                ncwrite(filename, key, out_data);
+                feval(fun_map.write, filename, key, out_data, false);
                 % add the units
                 if isfield(ds.(key), 'units')
-                    ncwriteatt(filename, key, "units", [ds.(key).units]);
+                    feval(fun_map.attribute, filename, key, ...
+                        [ds.(key).units], false);
                 else
-                    ncwriteatt(filename, key, "units", 'None');
+                    feval(fun_map.attribute, filename, key, 'None', false);
                 end
             end
         end 
@@ -107,18 +126,81 @@ function write_netcdf(ds, filename)
             key = fields{qq};
             if ~isstruct(ds.attrs.(key))
                 if iscell(ds.attrs.(key))
-                    ncwriteatt(filename, '/', key, ...
-                        convertCharsToStrings(ds.attrs.(key)));
+                    feval(fun_map.attribute, filename, key, ...
+                        convertCharsToStrings(ds.attrs.(key)), true);
                 elseif islogical(ds.attrs.(key))
-                    ncwriteatt(filename, '/', key, int32(ds.attrs.(key)));
+                    feval(fun_map.attribute, filename, key, ...
+                        int32(ds.attrs.(key)), true);
                 else
-                    ncwriteatt(filename, '/', key, ds.attrs.(key));
+                    feval(fun_map.attribute, filename, key, ...
+                        ds.attrs.(key), true);
                 end
             end
         end
         % Not currently functional but needed for python counterpart
-        ncwriteatt(filename, '/', 'complex_vars', []);
+        feval(fun_map.attribute, filename, 'complex_vars', [], true);            
+    end   
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % NetCDF Functions 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function create_nc(filename, key, dim_cell, type, coords)
+        if coords
+            nccreate(filename, key,'Dimensions',dim_cell,...
+			    'Datatype', type,'Format','netcdf4');
+        else
+            nccreate(filename, key,'Dimensions',dim_cell,...
+			'Datatype', type,'FillValue', nan, 'Format','netcdf4');
+        end
     end
 
+    function write_nc(filename, key, data, ~)
+        ncwrite(filename, key, data)
+    end
+
+    function attr_nc(filename, key, attribute, attrs)
+        if attrs
+            ncwriteatt(filename,'/', key, attribute);
+        else
+            ncwriteatt(filename, key, "units", attribute);
+        end
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % H5 Functions
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function create_h5(filename, key, dim_cell, type, coords)
+        if coords
+            loc = join(['/coords/',key],'');
+            size = dim_cell{2};
+        else
+            loc = join(['/',key],'');
+            size = zeros(1,numel(dim_cell)/2);
+            dims = '';
+            for i = 1:numel(dim_cell)/2
+                size(i) = dim_cell{i*2};
+                dims = join([dims,"/",dim_cell{(i-1)*2 + 1}],'');
+            end
+        end
+        h5create(filename, loc, size,'Datatype', type);
+        if ~coords
+            h5writeatt(filename, join(['/',key]), "dims", dims);
+        end
+    end
+
+    function write_h5(filename, key, data, coords)
+        if coords
+            h5write(filename, join(['/coords/',key],''), data);
+        else
+            h5write(filename, join(['/',key],''), data);
+        end
+    end
+
+    function attr_h5(filename, key, attribute, attrs)
+        if attrs
+            h5writeatt(filename,'/', key, attribute);
+        else
+            h5writeatt(filename, join(['/',key]), "units", attribute);
+        end
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 
