@@ -50,9 +50,7 @@ function ds = read_netcdf(filename)
     for qq = 1:var_size
         name = info.Variables(qq).Name;        
         dimensions = info.Variables(qq).Dimensions;
-        sz = info.Variables(qq).Size;
         dtype = info.Variables(qq).Datatype;
-        attrs = info.Variables(qq).Attributes;
         if any(strcmp(name,coords))
             % variable is a coordinate
             if strcmp(dtype, 'string')
@@ -82,20 +80,7 @@ function ds = read_netcdf(filename)
             % variable goes in the main structure field
             if numel(sz) == 1
                 % no modifications needed (the read function does it)
-                ds.(name).data = ncread(filename,name);
-                ds.(name).dims = cell(numel(dimensions),1);
-                for kk = 1:numel(dimensions)
-                    ds.(name).dims{kk} = dimensions(kk).Name;
-                    ds.(name).coords.(dimensions(kk).Name) = ...
-                        ds.coords.(dimensions(kk).Name);
-                end
-                if ~isempty(attrs)
-                    for ii = 1:numel(attrs)
-                        if strcmpi(attrs(ii).Name,'units')
-                            ds.(name).units = attrs(ii).Value;
-                        end
-                    end
-                end
+                ds.(name).data = ncread(filename,name);                       
             elseif numel(sz) == 2
                 if contains(name, 'orientmat') || ...
                         contains(name,'inst2head_rotmat')
@@ -108,51 +93,33 @@ function ds = read_netcdf(filename)
                     tmp_shape = [tmp_shape(1),1,tmp_shape(2)];
                     temp_dat = reshape(temp_dat,tmp_shape);
                     ds.(name).data = temp_dat;
-                end
-                ds.(name).dims = cell(numel(dimensions),1);
-                for kk = 1:numel(dimensions)
-                    if strcmpi(dimensions(kk).Name, 'x*')
-                        ds.(name).dims{kk} = 'x_star';
-                        ds.(name).coords.x_star = ds.coords.x_star;
-                    else
-                        ds.(name).dims{kk} = dimensions(kk).Name;
-                        ds.(name).coords.(dimensions(kk).Name) = ...
-                            ds.coords.(dimensions(kk).Name);
-                    end
-                end
-                if ~isempty(attrs)
-                    for ii = 1:numel(attrs)
-                        if strcmpi(attrs(ii).Name,'units')
-                            ds.(name).units = attrs(ii).Value;
-                        end
-                    end
-                end
+                end                               
             else
                 % Need to reshape the data
                 temp_dat = ncread(filename,name); 
                 tmp_shape = size(temp_dat);
                 tmp_shape = [tmp_shape(1),1,tmp_shape(2:3)];
                 temp_dat = reshape(temp_dat,tmp_shape);
-                ds.(name).data = temp_dat;
-                ds.(name).dims = cell(numel(dimensions),1);
-                for kk = 1:numel(dimensions)
-                    if strcmpi(dimensions(kk).Name, 'x*')
-                        ds.(name).dims{kk} = 'x_star';
-                    else
-                        ds.(name).dims{kk} = dimensions(kk).Name;
-                    end
-                    ds.(name).coords.(dimensions(kk).Name) = ...
-                        ds.coords.(dimensions(kk).Name);
-                end
-                if ~isempty(attrs)
-                    for ii = 1:numel(attrs)
-                        if strcmpi(attrs(ii).Name,'units')
-                            ds.(name).units = attrs(ii).Value;
-                        end
-                    end
-                end                
+                ds.(name).data = temp_dat;                                                              
             end
-        end
+            ds.(name).dims = cell(numel(dimensions),1);
+            for kk = 1:numel(dimensions)
+                if strcmpi(dimensions(kk).Name, 'x*')
+                    ds.(name).dims{kk} = 'x_star';
+                else
+                    ds.(name).dims{kk} = dimensions(kk).Name;
+                end
+                ds.(name).coords.(dimensions(kk).Name) = ...
+                    ds.coords.(dimensions(kk).Name);
+            end 
+            if ~isempty(attrs)
+                for ii = 1:numel(attrs)
+                    if strcmpi(attrs(ii).Name,'units')
+                        ds.(name).units = attrs(ii).Value;
+                    end
+                end
+            end
+        end        
     end
 
     % Finally grab the attributes

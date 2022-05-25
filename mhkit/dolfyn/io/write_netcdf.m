@@ -68,6 +68,7 @@ function write_netcdf(ds, filename)
         
         % Loop through coords and create netcdf dimensions
         fields = fieldnames(ds.coords);
+        dim_map = containers.Map(fields,[1:numel(fields)]);
         for qq = 1:numel(fields)
             key = fields{qq};
             n = numel(ds.coords.(key));            
@@ -77,11 +78,11 @@ function write_netcdf(ds, filename)
             else
                 type = class(ds.coords.(key));
             end
-            feval(fun_map.create, filename, key, {key, n}, type, true);
+            feval(fun_map.create, filename, key, {key, n}, type, true, qq);
             if iscell(ds.coords.(key))
-                feval(fun_map.write, filename, key, temp, true);            
+                feval(fun_map.write, filename, key, temp);            
             else
-                feval(fun_map.write, filename, key, ds.coords.(key), true);                
+                feval(fun_map.write, filename, key, ds.coords.(key));                
             end
         end        
         
@@ -109,7 +110,7 @@ function write_netcdf(ds, filename)
                     class(ds.(key).data), false);
                 % Now that the variable exists we can write the data to it 
                 out_data = squeeze(ds.(key).data);
-                feval(fun_map.write, filename, key, out_data, false);
+                feval(fun_map.write, filename, key, out_data);
                 % add the units
                 if isfield(ds.(key), 'units')
                     feval(fun_map.attribute, filename, key, ...
@@ -143,7 +144,7 @@ function write_netcdf(ds, filename)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % NetCDF Functions 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    function create_nc(filename, key, dim_cell, type, coords)
+    function create_nc(filename, key, dim_cell, type, coords, ~)
         if coords
             nccreate(filename, key,'Dimensions',dim_cell,...
 			    'Datatype', type,'Format','netcdf4');
@@ -153,7 +154,7 @@ function write_netcdf(ds, filename)
         end
     end
 
-    function write_nc(filename, key, data, ~)
+    function write_nc(filename, key, data)
         ncwrite(filename, key, data)
     end
 
@@ -167,31 +168,30 @@ function write_netcdf(ds, filename)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % H5 Functions
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    function create_h5(filename, key, dim_cell, type, coords)
+    function create_h5(filename, key, dim_cell, type, coords, id)
+        loc = join(['/',key],'');
         if coords
-            loc = join(['/coords/',key],'');
             size = dim_cell{2};
-        else
-            loc = join(['/',key],'');
+        else            
             size = zeros(1,numel(dim_cell)/2);
-            dims = '';
+            dims = zeros(numel(dim_cell)/2,1);
             for i = 1:numel(dim_cell)/2
                 size(i) = dim_cell{i*2};
-                dims = join([dims,"/",dim_cell{(i-1)*2 + 1}],'');
+                dims(i) = dim_map(dim_cell{(i-1)*2 + 1});
             end
         end
-        h5create(filename, loc, size,'Datatype', type);
-        if ~coords
-            h5writeatt(filename, join(['/',key]), "dims", dims);
+        h5create(filename, loc, size,'Datatype', type, 'ChunkSize', size);
+        if coords
+            h5writeatt(filename, loc, 'CLASS', 'DIMENSION_SCALE');
+            h5writeatt(filename, loc, 'NAME', key);
+            h5writeatt(filename, loc, '_Netcdf4Dimid', int32(id));
+        else
+            h5writeatt(filename, loc, "_Netcdf4Coordinates", dims);
         end
     end
 
-    function write_h5(filename, key, data, coords)
-        if coords
-            h5write(filename, join(['/coords/',key],''), data);
-        else
-            h5write(filename, join(['/',key],''), data);
-        end
+    function write_h5(filename, key, data)        
+        h5write(filename, join(['/',key],''), data);        
     end
 
     function attr_h5(filename, key, attribute, attrs)
