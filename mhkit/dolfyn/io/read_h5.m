@@ -84,6 +84,7 @@ function ds = read_h5(filename)
         attrs = info.Datasets(qq).Attributes;
         sz = info.Datasets(qq).ChunkSize;
         units = 'None';
+        dimensions = {};
         if ~any(strcmp(name,coord_vals))
             % variable goes in the main structure field
             for i= 1:numel(attrs)
@@ -104,10 +105,15 @@ function ds = read_h5(filename)
                 elseif strcmpi(attrs(i).Name,'units') 
                     if iscell(attrs(i).Value)
                         units = attrs(i).Value{1};
+                    elseif isempty(attrs(i).Value)
+                        units = "";
                     else
                         units = attrs(i).Value;
                     end
                 end
+            end
+            if isempty(dimensions)
+                dimensions = {'time'};
             end
             if numel(sz) == 1
                 % no modifications needed (the read function does it)
@@ -158,6 +164,9 @@ function ds = read_h5(filename)
     end
     if isfield(ds, 'orientation_down')
         ds.orientation_down.data = logical(ds.orientation_down.data);
+    end
+    if isfield(ds, 'builtin_test_fail')
+        ds = rmfield(ds,'builtin_test_fail');
     end
 
     ds.coord_sys = ds.attrs.coord_sys;

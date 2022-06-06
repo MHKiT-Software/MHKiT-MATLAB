@@ -322,7 +322,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
             % Check Attributes
             fields = fieldnames(ds_cntrl.attrs);
             for qq = 1:numel(fields)
-                field = fields{qq};            
+                field = fields{qq};                
                 if ~any(contains(field, exclude))
                     if iscell(ds_cntrl.attrs.(field))                
                         for kk = 1:numel(ds_cntrl.attrs.(field))
@@ -350,8 +350,14 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                                 sum(double(ds_cntrl.attrs.(field) ~=...
                                 ds_read.attrs.(field)'));
                         else
+                            if all(size(ds_cntrl.attrs.(field)) ==...
+                                    size(ds_read.attrs.(field)))
+                                atr_vl = ds_read.attrs.(field);
+                            else
+                                atr_vl = ds_read.attrs.(field)';
+                            end
                             diff = diff + sum(abs(ds_cntrl.attrs.(field)...
-                                - ds_read.attrs.(field)'), ...
+                                - atr_vl), ...
                                 1:numel(size(ds_cntrl.attrs.(field))))...
                                 /length(ds_cntrl.attrs.(field));
                         end
@@ -362,7 +368,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
             % Now check the remaining fields
             fields = fieldnames(ds_cntrl);
             for qq = 1:numel(fields)
-                field = fields{qq};
+                field = fields{qq};                
                 if ~any(contains(field, exclude))
                     cls = class(ds_cntrl.(field));
                     if strcmp(cls,'struct')
