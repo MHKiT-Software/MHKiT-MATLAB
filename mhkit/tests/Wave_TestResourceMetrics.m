@@ -3,8 +3,9 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
     methods (Test)
    
         function test_kfromw(testCase)
-            fileName = '../../examples/data/wave/ValData1.json'; % filename in JSON extension
-            fid = fopen(fileName); % Opening the file
+            relative_file_name = '../../examples/data/wave/ValData1.json'; % filename in JSON extension
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            fid = fopen(full_file_name); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
@@ -33,7 +34,9 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
         function test_moments(testCase)
             format long
-            data = load('../../examples/data/wave/ValData2.mat');
+            relative_file_name = '../../examples/data/wave/ValData2.mat';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = load(full_file_name);
             Valdata = data.CalcSpecCheckData;
             
             H5SP = Valdata.H5sP;
@@ -74,7 +77,9 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
         end
 
        function test_metrics_HsP(testCase)
-            data = load('../../examples/data/wave/ValData2.mat');
+            relative_file_name = '../../examples/data/wave/ValData2.mat';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = load(full_file_name);
             Valdata = data.CalcSpecCheckData;
             H5SP = Valdata.H5sP;            
             S1 = struct('spectrum',H5SP.PowSpecHanWin','type','TimeSeries','frequency',H5SP.freq);
@@ -129,7 +134,9 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
        end
        
        function test_metrics_AH(testCase)
-            data = load('../../examples/data/wave/ValData2.mat');
+            relative_file_name = '../../examples/data/wave/ValData2.mat';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = load(full_file_name);
             Valdata = data.CalcSpecCheckData;
             AH1 = Valdata.AH1;
             S1 = struct('spectrum',AH1.PowSpecHanWin,'type','TimeSeries','frequency',AH1.freq);
@@ -184,7 +191,9 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
        end
        
        function test_metrics_CDIP1(testCase)
-            data = load('../../examples/data/wave/ValData2.mat');
+            relative_file_name = '../../examples/data/wave/ValData2.mat';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = load(full_file_name);
             Valdata = data.CalcSpecCheckData;
             CDIP1 = Valdata.CDiP1;
             S1 = struct('spectrum',CDIP1.PowSpec,'type','TimeSeries','frequency',CDIP1.freq);
@@ -236,10 +245,12 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             calculated = spectral_width(S1,CDIP1.freqBinWidth);
             error = abs(expected-calculated)/expected;
             assertLessThan(testCase,error, 0.01);
-       end
+        end
                 
         function test_plot_elevation_timeseries(testCase)
-            data = load('../../examples/data/wave/ValData2.mat');
+            relative_file_name = '../../examples/data/wave/ValData2.mat';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = load(full_file_name);
             Valdata = data.CalcSpecCheckData;
             H5sP = Valdata.H5sP;
             
@@ -270,9 +281,13 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
         end
         
         function test_environmental_contour(testCase)
-            fileName= '../../examples/data/wave/Hm0_Te_46022.json';
             
-            fid = fopen(fileName); % Opening the file
+            assumeFail(testCase, "Not compatible with latest MHKIT-Python")
+            
+            relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            
+            fid = fopen(full_file_name); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
@@ -302,7 +317,9 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
             contour = environmental_contour(Hm0, Te, dt, time_R);
             
-            expected_contours = readmatrix('../../examples/data/wave/Hm0_Te_contours_46022.csv');
+            relative_file_name= '../../examples/data/wave/Hm0_Te_contours_46022.csv';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            expected_contours = readmatrix(full_file_name);
             
             Hm0_expected = expected_contours(:,2);
             Te_expected = expected_contours(:,1);
@@ -314,9 +331,13 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
         end
         
         function test_plot_environmental_contour(testCase)
-            fileName= '../../examples/data/wave/Hm0_Te_46022.json';
             
-            fid = fopen(fileName); % Opening the file
+            assumeFail(testCase, "Not compatible with latest MHKIT-Python")
+            
+            relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            
+            fid = fopen(full_file_name); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
@@ -361,9 +382,13 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
         end
         
         function test_plot_environmental_contour_multiyear(testCase)
-            fileName= '../../examples/data/wave/Hm0_Te_46022.json';
             
-            fid = fopen(fileName); % Opening the file
+            assumeFail(testCase, "Not compatible with latest MHKIT-Python")
+            
+            relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            
+            fid = fopen(full_file_name); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
@@ -419,5 +444,68 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
+        
+        function test_wave_length(testCase)
+         k=[1,2,10,3];
+         l_expected = (2.*3.14)./k;
+
+         
+         l_calculated = wave_length(k);            
+         assertEqual(testCase,l_expected,l_calculated,'RelTol',0.01);
+        
+         end
+        
+
+         function test_depth_regime(testCase)
+         expected = [1,1,0,1];
+         l_vector=[1,2,10,3];
+
+         h = 10;
+
+         calculated = depth_regime(l_vector,h);            
+         assertEqual(testCase,expected,calculated);
+
+         end
+         
+         function test_wave_celerity(testCase)
+         % small change in f will give similar value cg
+         f=linspace(20.0001,20.0005,5);
+
+         % Choose index to spike at. cg spike is inversly proportional to k
+         k_tmp=[1, 1, 0.5, 1, 1];
+         k.values = k_tmp;
+         k.frequency=f;
+
+         % all shallow
+         cg_shallow1 = wave_celerity(k,0.0001,"depth_check",py.True);
+         cg_shallow2 = wave_celerity(k, 0.0001,"depth_check",py.False);
+         assertEqual(testCase,cg_shallow1, cg_shallow2);
+
+         x = (3.14.*f)./k.values;
+         % all deep 
+         cg = wave_celerity(k, 1000,"depth_check",py.True);
+         assertEqual(testCase,x,cg.values,'RelTol',0.01);
+         end
+         
+         function test_energy_flux_deep(testCase)
+             
+         omega = [0.1:0.01:3.5];
+         f = omega./(2*pi);
+         Hs = 2.5;
+         Tp = 8 ;   
+         % Dependent on mhkit.resource.BS spectrum
+         S = jonswap_spectrum(f,Tp,Hs);
+         Te = energy_period(S);
+         Hm0 = significant_wave_height(S);
+         rho=1025;
+         g=9.80665;
+         coeff = rho*(g^2)/(64*pi);
+         J = coeff*(Hm0^2)*Te;
+
+         h=-1; % not used when deep=True
+         J_calc = energy_flux(S, h, "deep",py.True);
+
+         assertEqual(testCase,J_calc,J,'RelTol',0.01);
+         end
     end
 end

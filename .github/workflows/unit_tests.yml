@@ -1,0 +1,67 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  main:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        python-version: [3.8, 3.9]
+        mat_release: [latest]
+        include:
+          - os: ubuntu-latest
+            mat_release: R2020b
+    runs-on: ${{ matrix.os }}
+    env:
+      mhkit-python-dir: 'MHKiT-Python'
+    steps:
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v2
+      - name: Check out MHKiT-Python
+        uses: actions/checkout@v2
+        with:
+          repository: 'MHKiT-Software/MHKiT-Python'
+          path: ${{env.mhkit-python-dir}}
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v1
+        with:
+          release: ${{ matrix.mat_release }}
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install mhkit module (from source)
+        run: python -m pip install -e .
+        working-directory: ${{env.mhkit-python-dir}}
+      - name: Install mhkit-python-utils module
+        run: python -m pip install -e .
+      - name: Set MATLAB OutOfProcess Python execution mode
+        shell: bash
+        run: echo "pyenv('ExecutionMode', 'OutOfProcess')" > run.m
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+      - name: Add MATLAB test commands
+        shell: bash
+        run: echo "version, 
+                   addpath(genpath('mhkit')), 
+                   import matlab.unittest.TestSuite, 
+                   import matlab.unittest.TestRunner, 
+                   testFolder = ['mhkit' filesep 'tests'], 
+                   suite = TestSuite.fromFolder(testFolder), 
+                   runner = TestRunner.withTextOutput,
+                   results = runner.run(suite), 
+                   assertSuccess(results)" >> run.m
+      - name: Install and test MHKiT-MATLAB
+        id: runTests
+        run: matlab -batch "run"
+      - name: Test MHKiT-Python
+        run: |
+          pip install nose pytest
+          nosetests -v --traverse-namespace mhkit
+        working-directory: ${{env.mhkit-python-dir}}
+        if: always() && steps.runTests.outcome == 'failure'
