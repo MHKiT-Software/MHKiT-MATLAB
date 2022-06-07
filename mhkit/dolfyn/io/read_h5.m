@@ -166,6 +166,9 @@ function ds = read_h5(filename)
             continue
         end
         value = info.Attributes(qq).Value;
+        if isempty(value)
+            value = "";
+        end
         ds.attrs.(name) = value;
     end
 
