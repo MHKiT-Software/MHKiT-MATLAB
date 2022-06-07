@@ -113,7 +113,18 @@ function ds = read_h5(filename)
                 end
             end
             if isempty(dimensions)
+                % There should be a way to determine which dimension is
+                % correct through the available data but I was unable to
+                % determine what that method might be
                 dimensions = {'time'};
+                if contains(name,'_')
+                    split = strsplit(name,'_');
+                    if any(strcmp(coord_vals,join(...
+                            ['time',"_",split{end}],"")))
+                        dimensions{1} = convertStringsToChars(...
+                            join(['time',"_",split{end}],""));
+                    end
+                end                
             end
             if numel(sz) == 1
                 % no modifications needed (the read function does it)

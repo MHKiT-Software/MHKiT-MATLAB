@@ -39,7 +39,7 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
 
         function test_io_rdi_vm(testCase)
             warning('off','all')
-            ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/vmdas01.nc');                
+            ds_cntrl = read_netcdf('../../examples/data/dolfyn/control/vmdas01.nc');
             ds_read  = dolfyn_read('../../examples/data/dolfyn/vmdas01.ENX', 'nens',testCase.nens);
             warning('on','all')
             Obj.diff = Dolfyn_TestIO.compare_structures(...
