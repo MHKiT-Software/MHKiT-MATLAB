@@ -1,4 +1,4 @@
-classdef genextreme
+classdef genextreme < handle
     %GENEXTREME A generalized extreme value 
     % continuous random variable.
     %
@@ -10,6 +10,7 @@ classdef genextreme
     properties
         block_maxima
         paramEsts
+        fcalls
     end
     
     methods
@@ -18,7 +19,8 @@ classdef genextreme
             %   Block maxima is an array of the maximum of each block being
             %   used to estimate the short-term extreme distribution
             obj.block_maxima = block_maxima;
-            paramEsts = cell([1,3]);
+            obj.paramEsts = cell([1,3]);
+            obj.fcalls = 0;
         end
         
         function fit(obj)
@@ -47,9 +49,13 @@ classdef genextreme
             end
             obj.paramEsts{1} = a;
             % Starting point for fit (shape arguments + loc + scale).
-            [loc, scale] = obj.fit_loc_scale_support(obj.block_maxima);
+            [loc, scale] = obj.fit_loc_scale_support();
             obj.paramEsts{2} = loc;
             obj.paramEsts{3} = scale;
+            [xopt, fopt, iter] = obj.fmin();
+            obj.paramEsts{1} = xopt(1);
+            obj.paramEsts{2} = xopt(2);
+            obj.paramEsts{3} = xopt(3);            
         end   
 
         function skewed = skew(obj, data)
@@ -61,25 +67,176 @@ classdef genextreme
             skewed = m3 / (m2^1.5);
         end
 
-        function [loc_hat, scale_hat] = fit_loc_scale_support(obj, data)
+        function [xopt, fopt, iter] = fmin(obj)
+            % Minimize a function using the downhill simplex algorithm.
+	        % 
+            % This algorithm only uses function values, not derivatives or
+            % second derivatives.
+	        % 
+            % Parameters
+            % ----------        
+	        % 
+            % Returns
+            % -------
+            % xopt : ndarray
+            %     Parameter that minimizes function.
+            % fopt : float
+            %     Value of function at minimum: ``fopt = func(xopt)``.
+            % iter : int
+            %     Number of iterations performed.    
+	        %     
+            % Notes
+            % -----
+            % Uses a Nelder-Mead simplex algorithm to find the minimum of 
+            % function of one or more variables.
+	        % 
+            % This algorithm has a long history of successful use in 
+            % applications. But it will usually be slower than an algorithm 
+            % that uses first or second derivative information. In 
+            % practice, it can have poor performance in high-dimensional 
+            % problems and is not robust to minimizing complicated 
+            % functions. Additionally, there currently is no complete 
+            % theory describing when the algorithm will successfully
+            % converge to the minimum, or how fast it will if it does. 
+            % Both the ftol and xtol criteria must be met for convergence.
+	        %     
+	        % 
+            % References
+            % ----------
+            % .. [1] Nelder, J.A. and Mead, R. (1965), "A simplex method 
+            %        for function minimization", The Computer Journal, 7,
+            %        pp. 308-313
+	        % 
+            % .. [2] Wright, M.H. (1996), "Direct Search Methods: Once 
+            %        Scorned, Now Respectable", in Numerical Analysis 1995, 
+            %        Proceedings of the 1995 Dundee Biennial Conference in 
+            %        Numerical Analysis, D.F. Griffiths and G.A. Watson 
+            %        (Eds.), Addison Wesley Longman,Harlow, UK, pp. 191-208.
+            xtol = 1e-4;
+            ftol = 1e-4;
+            obj.fcalls = 0;
+            % initial guess
+            x0 = [obj.paramEsts{1}, obj.paramEsts{2}, obj.paramEsts{3}];
+
+            % Minimization of scalar function of one or more variables 
+            % using the Nelder-Mead algorithm.
+            rho = 1;
+            chi = 2;
+            psi = 0.5;
+            sigma = 0.5;
+            nonzdelt = 0.05;
+            zdelt = 0.00025;
+            N = length(x0);
+            sim = zeros([N + 1, N]);
+            sim(1,:) = x0;
+            for k = 1:N
+                y = x0;
+                if y(k) ~= 0
+                    y(k) = (1 + nonzdelt)*y(k);
+                else
+                    y(k) = zdelt;
+                end
+                sim(k + 1,:) = y;
+            end
+            maxiter = N * 200;
+            maxfun = N * 200;
+            one2np1 = 2:N + 1;
+            fsim = zeros([N + 1,1]);
+
+            for k= 1:(N + 1)
+                fsim(k) = obj.penalized_nnlf(sim(k,:));                
+            end
+            [~,ind] = sort(fsim);
+            fsim = fsim(ind);
+            % sort so sim[0,:] has the lowest function value
+            sim = sim(ind,:);
+        
+            iterations = 1;
+            while obj.fcalls < maxfun && iterations < maxiter                
+                if max(reshape(abs((sim(2:end,:) - sim(1,:))).',1,[]))...
+                        <= 1e-4 && max(abs(fsim(1)-fsim(2:end))) <= 0.0001
+                    break
+                end
+
+                xbar = sum(sim(1:end-1,:),1) / N;
+                xr = (1 + rho) * xbar - rho * sim(end,:);
+                fxr = obj.penalized_nnlf(xr);
+                doshrink = false;
+
+                if fxr < fsim(1)
+                    xe = (1 + rho * chi) * xbar - rho * chi * sim(end,:);
+                    fxe = obj.penalized_nnlf(xe);
+                    if fxe < fxr
+                        sim(end,:) = xe;
+                        fsim(end,:) = fxe;
+                    else
+                        sim(end,:) = xr;
+                        fsim(end,:) = fxr;
+                    end
+                else  % fsim(1) <= fxr
+                    if fxr < fsim(end-1)
+                        sim(end,:) = xr;
+                        fsim(end,:) = fxr;
+                    else % fxr >= fsim(end-1)
+                    % Perform contraction
+                        if fxr < fsim(end) 
+                            xc = (1+psi * rho) * xbar-psi * rho*sim(end,:);
+                            fxc = obj.penalized_nnlf(xc);
+                        	if fxc <= fxr
+                                sim(end,:) = xc;
+                                fsim(end,:) = fxc;
+                            else
+                                doshrink = true;
+                        	end
+                        else
+                            % Perform an inside contraction
+                            xcc = (1 - psi) * xbar + psi * sim(end,:);
+                            fxcc = obj.penalized_nnlf(xcc);
+                            if fxcc < fsim(end)
+                                sim(end,:) = xcc;
+                                fsim(end,:) = fxcc;
+                            else
+                                doshrink = true;
+                            end                                                   
+                        end
+                        if doshrink
+                            for qq = 1:length(one2np1)
+                                j = one2np1(j);
+                                sim(j,:) = sim(1,:) + sigma * ...
+                                    (sim(j,:) - sim(1,:));
+                                fsim(j,:) = obj.penalized_nnlf(sim(j,:));
+                            end
+                        end
+                    end
+                end
+                [~,ind] = sort(fsim);
+                sim = sim(ind,:);
+                fsim = fsim(ind,:);
+                iterations = iterations + 1;
+            end
+
+            xopt = sim(1,:);
+            fopt = min(fsim);
+            iter = iterations;  
+        end
+
+        function [loc_hat, scale_hat] = fit_loc_scale_support(obj)
             % Estimate loc and scale parameters from data accounting 
             % for support.
- 
+            %
             % Parameters
-            % ----------
-            % data : array_like
-            %     Data to fit.
-     
+            % ----------           
+            %
             % Returns
             % -------
             % loc_hat : float
             %     Estimated location parameter for the data.
             % scale_hat : float
             %     Estimated scale parameter for the data.
-
+            %
             % Estimate location and scale according to the method of 
             % moments.
-            [loc_hat, scale_hat] = obj.fit_loc_scale(data);
+            [loc_hat, scale_hat] = obj.fit_loc_scale();
 
             % Compute the support according to the shape parameters.
             if obj.paramEsts{1} < 0
@@ -103,8 +260,8 @@ classdef genextreme
 
             % Use the moment-based estimates if they are compatible with 
             % the data.
-            data_a = min(data);
-            data_b = max(data);
+            data_a = min(obj.block_maxima);
+            data_b = max(obj.block_maxima);
             if a_hat < data_a && data_b < b_hat
                 return 
             end
@@ -141,7 +298,7 @@ classdef genextreme
 
         end
 
-        function [loc_hat, scale_hat] = fit_loc_scale(obj, data)
+        function [loc_hat, scale_hat] = fit_loc_scale(obj)
             % Estimate loc and scale parameters from data accounting 
             % for support.
  
@@ -242,7 +399,71 @@ classdef genextreme
             end
         end
 
+        function out = penalized_nnlf(obj, theta)
+            % Penalized negative loglikelihood function.
 
+            % i.e., - sum (log pdf(x, theta), axis=0) + penalty
+            % where theta are the parameters (including loc and scale)
+            obj.fcalls = obj.fcalls + 1;
+            args = theta(1);
+            loc = theta(2);
+            scale = theta(3);
+            x = ((obj.block_maxima - loc) ./ scale);
+            n_log_scale = length(x) * log(scale);
+            % return self._nnlf_and_penalty(x, args) + n_log_scale
+
+            % Negative loglikelihood function
+            cond0 = ~genextreme.support_mask(x, args);
+            n_bad = sum(cond0(:));
+            if n_bad > 0
+                x = x(~cond0);
+            end            
+            cx = x*args;
+            logex2 = log(1 + -1*cx);            
+            if args ~= 0
+                logpex2 = log(1 + -1*cx) /args;
+            else
+                logpex2 = -x;
+            end
+            pex2 = exp(logpex2);
+            if args == 0
+                logpex2(x == -inf) = 0.0;
+            end
+            logpdf = zeros(size(x));
+            inds = (cx == 1) | (cx == -inf);
+            sum_ = -pex2+logpex2-logex2;
+            logpdf(inds) = -inf;
+            logpdf(~inds) = sum_(~inds);
+            if args == 1
+                logpdf(x == 1) = 0.0;
+            end
+            finite_logpdf = isfinite(logpdf);
+            n_bad = n_bad + sum(~finite_logpdf);
+            if n_bad > 0
+                penalty = n_bad * log(1.7976931348623157e+308) * 100.0;
+                out = -sum(logpdf(finite_logpdf)) + penalty;
+            else
+                out = -sum(logpdf);
+            end            
+            % 
+            out = out + n_log_scale;
+        end       
+
+
+    end
+
+    methods(Static)
+
+        function out = support_mask(x, arg)
+            if arg < 0
+                a = 1.0/min(arg,-2.2250738585072014e-308);
+                b = inf;
+            else
+                a = -inf;
+                b = 1.0/max(arg, 2.2250738585072014e-308);
+            end
+            out = (a < x) & (x < b);
+        end
     end
 end
 
