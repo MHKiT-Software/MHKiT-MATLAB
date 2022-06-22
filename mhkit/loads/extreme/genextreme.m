@@ -11,6 +11,7 @@ classdef genextreme < handle
         block_maxima
         paramEsts
         fcalls
+        fit_called
     end
     
     methods
@@ -21,6 +22,82 @@ classdef genextreme < handle
             obj.block_maxima = block_maxima;
             obj.paramEsts = cell([1,3]);
             obj.fcalls = 0;
+            obj.fit_called = false;
+        end
+
+        function out = ppf(obj,q)
+            % Percent point function (inverse of `cdf`) at q of the given 
+            % RV.
+            % 
+            % Parameters
+            % ----------
+            % q : array_like
+            %     lower tail probability
+            % 
+            % Returns
+            % -------
+            % out : array_like
+            %     quantile corresponding to the lower tail probability q.
+
+            if ~obj.fit_called
+                obj.fit();
+            end
+            
+            args  = obj.paramEsts{1};
+            loc   = obj.paramEsts{2};
+            scale = obj.paramEsts{3};            
+            cond0 = scale > 0;
+            cond1 = (0 < q) && (q < 1);
+            cond = cond0 && cond1;
+
+            if cond
+                x = -log(-log(q));
+                if args ~= 0
+                    out = -1*(exp(-args * x) - 1) / args;
+                else
+                    out = x;
+                end
+                out = out * scale + loc;
+            end
+            if isempty(out)
+                out = [];
+            end
+        end
+        
+        function out = expect(obj)
+            % Calculate expected value of a function with respect to the 
+            % distribution for discrete distribution by numerical summation
+
+            % The expected value of a function ``f(x)`` with respect to a
+            % distribution ``dist`` is defined as::
+            % 
+            %             ub
+            %     E[f(x)] = Integral(f(x) * dist.pdf(x)),
+            %             lb
+            % 
+            % where ub and lb are arguments and x has the dist.pdf(x)
+            % distribution. If the bounds lb and ub correspond to the
+            % support of the distribution, e.g. [-inf, inf] in the default
+            % case, then the integral is the unrestricted expectation of 
+            % f(x). Also, the function f(x) may be defined such that f(x) 
+            % is 0 outside a finite interval in which case the expectation 
+            % is  calculated within the finite range [lb, ub].
+
+            if ~obj.fit_called
+                obj.fit();
+            end
+
+            args  = obj.paramEsts{1};
+            loc   = obj.paramEsts{2};
+            scale = obj.paramEsts{3};
+            
+            [a,b] = get_support(args);
+            lb = loc + a * scale;
+            ub = loc + b * scale;
+            invfac = 1.0;
+
+            something = obj.quad(lb,ub);
+
         end
         
         function fit(obj)
@@ -39,9 +116,8 @@ classdef genextreme < handle
                 throw(ME);
             end
 
-            start = nan([1,2]);
             % get distribution specific starting locations
-            g = obj.skew(obj.block_maxima);
+            g = genextreme.skew(obj.block_maxima);
             if g < 0
                 a = 0.5;
             else
@@ -55,18 +131,10 @@ classdef genextreme < handle
             [xopt, fopt, iter] = obj.fmin();
             obj.paramEsts{1} = xopt(1);
             obj.paramEsts{2} = xopt(2);
-            obj.paramEsts{3} = xopt(3);            
+            obj.paramEsts{3} = xopt(3); 
+            obj.fit_called = true;
         end   
-
-        function skewed = skew(obj, data)
-            % skew is third central moment / variance**(1.5)
-            data = reshape(data.',1,[]);
-            mu = mean(data);
-            m2 = mean((data-mu).^2);
-            m3 = mean((data-mu).^3);
-            skewed = m3 / (m2^1.5);
-        end
-
+        
         function [xopt, fopt, iter] = fmin(obj)
             % Minimize a function using the downhill simplex algorithm.
 	        % 
@@ -335,12 +403,107 @@ classdef genextreme < handle
             loc = 0;
             scale = 1;             
             
-            [mu, mu2, ~, ~] = obj.stats2(pos);
+            [mu, mu2, ~, ~] = genextreme.stats2(pos);
             mu = mu * scale + loc;
             mu2 = mu2 * scale * scale;
         end
+        
+        function out = penalized_nnlf(obj, theta)
+            % Penalized negative loglikelihood function.
 
-        function [m, v, sk, ku] = stats2(obj, c)
+            % i.e., - sum (log pdf(x, theta), axis=0) + penalty
+            % where theta are the parameters (including loc and scale)
+            obj.fcalls = obj.fcalls + 1;
+            args = theta(1);
+            loc = theta(2);
+            scale = theta(3);
+            x = ((obj.block_maxima - loc) ./ scale);
+            n_log_scale = length(x) * log(scale);
+            % return self._nnlf_and_penalty(x, args) + n_log_scale
+
+            % Negative loglikelihood function
+            cond0 = ~genextreme.support_mask(x, args);
+            n_bad = sum(cond0(:));
+            if n_bad > 0
+                x = x(~cond0);
+            end            
+            cx = x*args;
+            logex2 = log(1 + -1*cx);            
+            if args ~= 0
+                logpex2 = log(1 + -1*cx) /args;
+            else
+                logpex2 = -x;
+            end
+            pex2 = exp(logpex2);
+            if args == 0
+                logpex2(x == -inf) = 0.0;
+            end
+            logpdf = zeros(size(x));
+            inds = (cx == 1) | (cx == -inf);
+            sum_ = -pex2+logpex2-logex2;
+            logpdf(inds) = -inf;
+            logpdf(~inds) = sum_(~inds);
+            if args == 1
+                logpdf(x == 1) = 0.0;
+            end
+            finite_logpdf = isfinite(logpdf);
+            n_bad = n_bad + sum(~finite_logpdf);
+            if n_bad > 0
+                penalty = n_bad * log(1.7976931348623157e+308) * 100.0;
+                out = -sum(logpdf(finite_logpdf)) + penalty;
+            else
+                out = -sum(logpdf);
+            end            
+            % 
+            out = out + n_log_scale;
+        end       
+
+        function quad(obj, a, b)
+            % Compute a definite integral.
+            % 
+            % Integrate func from `a` to `b` (possibly infinite interval) 
+            % using a technique from the Fortran library QUADPACK.
+            
+            args  = obj.paramEsts{1};
+
+            % check the limits of integration: \int_a^b, expect a < b
+            flip = b < a;
+            a = min(a, b);
+            b = max(a, b);
+            infbounds = 0;
+
+            if b ~= Inf && a ~= -Inf
+                % standard integration
+            elseif b == Inf && a ~= -Inf
+                infbounds = 1;
+                bound = a;
+            elseif b == Inf && a == -Inf
+                infbounds = 2;
+                bound = 0;     % ignored
+            elseif b ~= Inf && a == -Inf
+                infbounds = -1;
+                bound = b;
+            else
+                ME = MException('MATLAB:genextreme:quad',"Infinity " + ...
+                    "comparisons don't work with this method.");
+                throw(ME);
+            end
+
+        end
+    end
+
+    methods(Static)
+
+        function skewed = skew(data)
+            % skew is third central moment / variance**(1.5)
+            data = reshape(data.',1,[]);
+            mu = mean(data);
+            m2 = mean((data-mu).^2);
+            m3 = mean((data-mu).^3);
+            skewed = m3 / (m2^1.5);
+        end
+
+        function [m, v, sk, ku] = stats2(c)
             g1 = gamma(1*c + 1);
             g2 = gamma(2*c + 1);
             g3 = gamma(3*c + 1);
@@ -399,61 +562,6 @@ classdef genextreme < handle
             end
         end
 
-        function out = penalized_nnlf(obj, theta)
-            % Penalized negative loglikelihood function.
-
-            % i.e., - sum (log pdf(x, theta), axis=0) + penalty
-            % where theta are the parameters (including loc and scale)
-            obj.fcalls = obj.fcalls + 1;
-            args = theta(1);
-            loc = theta(2);
-            scale = theta(3);
-            x = ((obj.block_maxima - loc) ./ scale);
-            n_log_scale = length(x) * log(scale);
-            % return self._nnlf_and_penalty(x, args) + n_log_scale
-
-            % Negative loglikelihood function
-            cond0 = ~genextreme.support_mask(x, args);
-            n_bad = sum(cond0(:));
-            if n_bad > 0
-                x = x(~cond0);
-            end            
-            cx = x*args;
-            logex2 = log(1 + -1*cx);            
-            if args ~= 0
-                logpex2 = log(1 + -1*cx) /args;
-            else
-                logpex2 = -x;
-            end
-            pex2 = exp(logpex2);
-            if args == 0
-                logpex2(x == -inf) = 0.0;
-            end
-            logpdf = zeros(size(x));
-            inds = (cx == 1) | (cx == -inf);
-            sum_ = -pex2+logpex2-logex2;
-            logpdf(inds) = -inf;
-            logpdf(~inds) = sum_(~inds);
-            if args == 1
-                logpdf(x == 1) = 0.0;
-            end
-            finite_logpdf = isfinite(logpdf);
-            n_bad = n_bad + sum(~finite_logpdf);
-            if n_bad > 0
-                penalty = n_bad * log(1.7976931348623157e+308) * 100.0;
-                out = -sum(logpdf(finite_logpdf)) + penalty;
-            else
-                out = -sum(logpdf);
-            end            
-            % 
-            out = out + n_log_scale;
-        end       
-
-
-    end
-
-    methods(Static)
-
         function out = support_mask(x, arg)
             if arg < 0
                 a = 1.0/min(arg,-2.2250738585072014e-308);
@@ -463,6 +571,16 @@ classdef genextreme < handle
                 b = 1.0/max(arg, 2.2250738585072014e-308);
             end
             out = (a < x) & (x < b);
+        end
+
+        function [a,b] = get_support(arg)
+            if arg < 0
+                a = 1.0/min(arg,-2.2250738585072014e-308);
+                b = inf;
+            else
+                a = -inf;
+                b = 1.0/max(arg, 2.2250738585072014e-308);
+            end
         end
     end
 end
