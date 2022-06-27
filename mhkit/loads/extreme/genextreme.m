@@ -64,6 +64,44 @@ classdef genextreme < handle
             end
         end
         
+        function out =  pdf(obj, x)
+            % Probability density function at x of the given RV.
+            % 
+            % Parameters
+            % ----------
+            % x : array_like
+            %     quantiles
+            % 
+            % Returns
+            % -------
+            % pdf : array
+            %     Probability density function evaluated at x
+
+            args  = obj.paramEsts{1};
+            loc   = obj.paramEsts{2};
+            scale = obj.paramEsts{3};
+            x = (x-loc)/scale;
+            cond0 = scale > 0;
+            cond1 = genextreme.support_mask(x, args) & scale > 0;
+            cond = cond0 & cond1;
+            out = zeros(size(cond));
+
+            if cond
+                cx = x*args;
+                logex2 = log(1 + -cx);
+                if args ~= 0
+                    logpex2 = log(1 + -args*x)/args;
+                else
+                    logpex2 = -x;
+                end
+                pex2 = exp(logpex2);
+
+                out(cx==1 | cx == -inf) = -inf;
+                out(cx~=1 & cx ~= -inf) = -pex2 + logpex2 - logex2; 
+                out = exp(out)/scale;
+            end              
+        end
+
         function out = expect(obj)
             % Calculate expected value of a function with respect to the 
             % distribution for discrete distribution by numerical summation
@@ -91,12 +129,11 @@ classdef genextreme < handle
             loc   = obj.paramEsts{2};
             scale = obj.paramEsts{3};
             
-            [a,b] = get_support(args);
+            [a,b] = genextreme.get_support(args);
             lb = loc + a * scale;
             ub = loc + b * scale;
-            invfac = 1.0;
 
-            something = obj.quad(lb,ub);
+            out = obj.quad(lb,ub);
 
         end
         
@@ -458,7 +495,7 @@ classdef genextreme < handle
             out = out + n_log_scale;
         end       
 
-        function quad(obj, a, b)
+        function out = quad(obj, a, b)
             % Compute a definite integral.
             % 
             % Integrate func from `a` to `b` (possibly infinite interval) 
@@ -488,8 +525,16 @@ classdef genextreme < handle
                     "comparisons don't work with this method.");
                 throw(ME);
             end
+            
+            fun = @(x) x .*obj.pdf(x);
+            out = integral(fun,a,b);
 
-        end
+            if flip
+                out = -out;
+            end
+            
+        end        
+
     end
 
     methods(Static)
