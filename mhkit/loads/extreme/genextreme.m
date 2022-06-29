@@ -86,19 +86,21 @@ classdef genextreme < handle
             cond = cond0 & cond1;
             out = zeros(size(cond));
 
-            if cond
-                cx = x*args;
+            if any(cond)
+                goodargs = x(cond);
+                cx = goodargs*args;
                 logex2 = log(1 + -cx);
                 if args ~= 0
-                    logpex2 = log(1 + -args*x)/args;
+                    logpex2 = log(1 + -args*goodargs)/args;
                 else
-                    logpex2 = -x;
+                    logpex2 = -goodargs;
                 end
                 pex2 = exp(logpex2);
 
-                out(cx==1 | cx == -inf) = -inf;
-                out(cx~=1 & cx ~= -inf) = -pex2 + logpex2 - logex2; 
-                out = exp(out)/scale;
+                logpdf = zeros(size(goodargs));
+                logpdf(cx==1 | cx == -inf) = -inf;
+                logpdf(cx~=1 & cx ~= -inf) = -pex2 + logpex2 - logex2; 
+                out(cond) = exp(logpdf)/scale;
             end              
         end
 
