@@ -153,10 +153,14 @@ classdef gumextreme < handle
             [loc, scale] = obj.fit_loc_scale_support();
             obj.paramEsts{2} = loc;
             obj.paramEsts{3} = scale;
-            [x, info] = obj.minpack_hybrd();
+            [x, info] = obj.minpack_hybrd();  
+
+            if info ~= 1
+                % error message
+            end
             
-            obj.paramEsts{2} = xopt(2);
-            obj.paramEsts{3} = xopt(3); 
+            obj.paramEsts{3} = x; % scale
+            obj.paramEsts{2} = -x*; % loc
             obj.fit_called = true;
         end   
         
@@ -204,6 +208,7 @@ classdef gumextreme < handle
             ml = n-1;
             mu = n-1;
             mode = 1;
+            fact = 100;
             diag = zeros([n,1]);
             wa3 = zeros([n,1]);
             r = zeros([(n*(n+1))/2,1]);
@@ -234,9 +239,9 @@ classdef gumextreme < handle
                 fjac = obj.fdjac1(n, x, fvec, n, ml, mu);
                 nfev = nfev + msum;
     
-                % Compute the QR factorization of the jacobian.
+                % Compute the QR factorization of the jacobian.                
                 [fjac, iwa, wa1, wa2] = ...
-                    obj.qrfac( n, n, fjac, false, 1);
+                    gumextreme.qrfac( n, n, fjac, false, 1);
 
                 %  On the first iteration, if MODE is 1, scale according
                 %  to the norms of the columns of the initial jacobian.
@@ -253,10 +258,10 @@ classdef gumextreme < handle
                     %  On the first iteration, calculate the norm of the 
                     %  scaled X and initialize the step bound DELTA.
                     wa3(1:n) = diag(1:n) * x(1:n);
-                    xnorm = enorm ( n, wa3 );
-                    delta = factor * xnorm;
+                    xnorm = norm(wa3);
+                    delta = fact * xnorm;
                     if delta == 0.0
-                        delta = factor;
+                        delta = fact;
                     end 
                 end % if iter=1
 
@@ -285,7 +290,7 @@ classdef gumextreme < handle
                 end
 
                 % Accumulate the orthogonal factor in FJAC.
-                fjac = obj.qform(n, n, fjac);
+                fjac = gumextreme.qform(n, n, fjac);
 
                 % Rescale if necessary.
                 if mode ~= 2
@@ -297,14 +302,14 @@ classdef gumextreme < handle
                 % Beginning of the inner loop.
                 while true
                     % Determine the direction P.
-                    wa1 = obj.dogleg(n, r, diag, qtf, delta);
+                    wa1 = gumextreme.dogleg(n, r, diag, qtf, delta);
 
                     % Store the direction P and X + P.
                     % Calculate the norm of P.
-                    wa1(1:n) = - wa1(1:n);
+                    wa1(1:n) = -wa1(1:n);
                     wa2(1:n) = x(1:n) + wa1(1:n);
                     wa3(1:n) = diag(1:n) * wa1(1:n);
-                    pnorm = norm(wa2);
+                    pnorm = norm(wa3);
 
                     % On the first iteration, adjust the initial step bound
                     if iter == 1
@@ -385,7 +390,7 @@ classdef gumextreme < handle
                     end
 
                     if actred >= 0.1
-                        nslow = 0;
+                        nslow2 = 0;
                     end
 
                     % Test for convergence 
@@ -400,11 +405,11 @@ classdef gumextreme < handle
                         info = 2;
                         return
                     end
-                    if (0.1*max(0.1*delta,pnorm)) <= epsmch*xnorm
+                    if (0.1*max(0.1*delta,pnorm)) <= eps*xnorm
                         info = 3;
                         return
                     end
-                    if nslow == 5
+                    if nslow2 == 5
                         info = 4;
                         return
                     end
@@ -429,13 +434,14 @@ classdef gumextreme < handle
                         end
                     end
 
-                    % Compute the QR factorization of the updated jacobian
-                    r1updt(n, n, r, lr, wa1, wa2, wa3 );
-                    r1mpyq(n, n, fjac, ldfjac, wa2, wa3 );
-                    r1mpyq(1, n, qtf, 1, wa2, wa3 );
+                    % Compute the QR factorization of the updated jacobian                    
+                    [r, wa2, wa3, sing] =...
+                        gumextreme.r1updt(n, n, r, wa1, wa2);                    
+                    fjac = gumextreme.r1mpyq(n, n, fjac, wa2, wa3);
+                    qtf = gumextreme.r1mpyq(1, n, qtf, wa2, wa3);
                 
                     jeval = false; 
-                    
+
                 end % while inner loop                
             end % while outer loop
         end     
@@ -490,7 +496,7 @@ classdef gumextreme < handle
                     wa1 = gumextreme.max_like(x, obj.block_maxima);
 
                     x(j) = temp;
-                    fjac(:,j) = (wa1 - fvec)./h;
+                    fjac(1:n,j) = (wa1(1:n) - fvec(1:n))./h;
                 end            
             else % Computation of banded approximate jacobian
                 for k = 1:msum
@@ -521,344 +527,7 @@ classdef gumextreme < handle
                 end
             end
         end
-
-        function [aout, ipvt, rdiag, acnorm] = qrfac(obj,m,n,a,pivot,lipvt)
-            %  QRFAC computes a QR factorization using Householder 
-            %  transformations.
-            %
-            %  Discussion:
-            %
-            %    This function uses Householder transformations with 
-            %    optional column pivoting to compute a QR factorization of 
-            %    the M by N matrix A.  That is, QRFAC determines an 
-            %    orthogonal matrix Q, a permutation matrix P, and an upper 
-            %    trapezoidal matrix R with diagonal elements of 
-            %    nonincreasing magnitude, such that A*P = Q*R.  
-            %
-            %    The Householder transformation for column 
-            %    K, K = 1,2,...,min(M,N), is of the form
-            %
-            %      I - ( 1 / U(K) ) * U * U'
-            %
-            %    where U has zeros in the first K-1 positions.
-            %
-            %  Parameters:
-            %
-            %    M, the number of rows of A.
-            %
-            %    N, the number of columns of A.
-            %
-            %    A(LDA,N), the M by N array.
-            %    A contains the matrix for which the QR factorization is to
-            %    be computed.  
-            %
-            %    LDA, the leading dimension of A, which must
-            %    be no less than M.
-            %
-            %    PIVOT, is TRUE if column pivoting is to be carried out.
-            %
-            %    LIPVT, the dimension of IPVT, which should 
-            %    be N if pivoting is used.
-            %
-            %  Output:
-            %
-            %    aout, the strict upper trapezoidal part of A contains
-            %    the strict upper trapezoidal part of R, and the lower 
-            %    trapezoidal part of A contains a factored form of Q, 
-            %    the non-trivial elements of the U vectors described above.
-            %
-            %    IPVT(LIPVT), defines the permutation matrix P 
-            %    such that A*P = Q*R. Column J of P is column IPVT(J) of 
-            %    the identity matrix. If PIVOT is false, IPVT is not 
-            %    referenced.
-            %
-            %    RDIAG(N), contains the diagonal elements of R.
-            %
-            %    ACNORM(N), the norms of the corresponding
-            %    columns of the input matrix A.  If this information is not 
-            %    needed, then ACNORM can coincide with RDIAG.
-
-            epsmch = eps;
-            ipvt = zeros([lipvt,1]);
-            rdiag = zeros([n,1]);
-            acnorm = zeros([n,1]);
-            wa = zeros([n,1]);
-
-            % Compute the initial column norms and initialize several 
-            % arrays.
-            for j = 1:n
-                acnorm(j) = norm(a(1:m,j));
-                rdiag(j) = acnorm(j);
-                wa(j) = rdiag(j);
-                if pivot               
-                  ipvt(j) = j;
-                end    
-            end
-            % Reduce A to R with Householder transformations.
-            minmn = min( m, n );
-            for j = 1:minmn
-                %  Bring the column of largest norm into the pivot position
-                if pivot
-                    kmax = j;
-                    for k = j:n
-                        if rdiag(kmax) < rdiag(k)
-                            kmax = k;
-                        end
-                    end
-
-                    if kmax ~= j
-                        r8_temp(1:m) = a(1:m,j);
-                        a(1:m,j)     = a(1:m,kmax);
-                        a(1:m,kmax)  = r8_temp(1:m);
-                
-                        rdiag(kmax) = rdiag(j);
-                        wa(kmax) = wa(j);
-                
-                        i4_temp    = ipvt(j);
-                        ipvt(j)    = ipvt(kmax);
-                        ipvt(kmax) = i4_temp;
-                    end
-                end
-
-                %  Compute the Householder transformation to reduce the
-                %  J-th column of A to a multiple of the J-th unit vector.
-                ajnorm = norm (a(j,j));
-                if ajnorm ~= 0
-                    if a(j,j) < 0
-                        ajnorm = -ajnorm;
-                    end
-                    
-                    a(j:m,j) = a(j:m,j)/ajnorm;
-                    a(j,j) = a(j,j) + 1.0;
-
-                    % Apply the transformation to the remaining columns and 
-                    % update the norms.
-                    for k = j+1:n
-                        temp = dot(a(j:m,j), a(j:m,k) ) / a(j,j);
-                        a(j:m,k) = a(j:m,k) - temp * a(j:m,j);
-                        if pivot && rdiag(k) ~= 0
-                            temp = a(j,k) / rdiag(k);
-                            rdiag(k) = rdiag(k) * sqrt(max(0,1.0-temp^2));
-                            if 0.05*(rdiag(k)/wa(k))^2 <= epsmch
-                                rdiag(k) = norm( a(j+1,k));
-                                wa(k) = rdiag(k);
-                            end
-                        end
-                    end
-                end
-                rdiag(j) = -ajnorm;
-            end
-            aout = a;
-        end
-
-        function out = qform(obj, m, n, q)
-            %  Purpose:
-            %
-            %    qform() constructs the standard form of Q from its 
-            %    factored form.
-            %
-            %  Discussion:
-            %
-            %    This function proceeds from the computed QR factorization of
-            %    an M by N matrix A to accumulate the M by M orthogonal matrix
-            %    Q from its factored form.            
-            %
-            %  Parameters:
-            %
-            %    m, the number of rows of A, and the order of Q.
-            %
-            %    n, the number of columns of A.
-            %
-            %    Q[LDQ*N], the full lower trapezoid in the first min(M,N) 
-            %    columns of Q contains the factored form.            
-            %
-            %    LDQ, the leading dimension of the array Q.
-            %
-            %  Output:
-            %
-            %    out, Q that has been accumulated into a square matrix.
-
-            % Zero out the upper triangle of Q in the first min(M,N) 
-            % columns.
-            minmn = min( m, n );
-            wa = zeros([m,1]);
-            out = zeros(size(q));
-
-            for j = 2:minmn
-                q(1:j-1,j) = 0.0;
-            end
-
-            % Initialize remaining columns to those of the identity matrix.
-            q(1:m, n+1:m) = 0.0;
-
-            for j = n+1:m
-                q(j,j) = 1.0;
-            end
-
-            % Accumulate Q from its factored form.
-            for l = 1:minmn
-                k = minmn - l + 1;
-                wa(k:m) = q(k:m,k);
-                q(k:m,k) = 0.0;
-                q(k,k) = 1.0;
-
-                if wa(k) ~= 0.0
-                    for j = k:m
-                        temp = dot(wa(k:m), q(k:m,j) ) / wa(k);
-                        q(k:m,j) = q(k:m,j) - temp * wa(k:m);
-                    end
-                end
-            end
-
-            out = q;
-        end
-
-        function x = dogleg(obj, n, r, diag, qtb, delta)
-            %  Purpose:
-            %
-            %    dogleg() combines Gauss-Newton and gradient for a 
-            %    minimizing step.
-            %
-            %  Discussion:
-            %
-            %    Given an M by N matrix A, an n by n nonsingular diagonal
-            %    matrix d, an m-vector b, and a positive number delta, the
-            %    problem is to determine the convex combination x of the
-            %    gauss-newton and scaled gradient directions that minimizes
-            %    (a*x - b) in the least squares sense, subject to the
-            %    restriction that the euclidean norm of d*x be at most 
-            %    delta.
-            %
-            %    This function completes the solution of the problem
-            %    if it is provided with the necessary information from the
-            %    qr factorization of a. 
-            %
-            %    That is, if a = q*r, where q has orthogonal columns and r 
-            %    is an upper triangular matrix, then dogleg expects the 
-            %    full upper triangle of r and the first n components of 
-            %    Q'*b.
-            %
-            %  Parameters:
-            %
-            %    n, the order of R.
-            %
-            %    r[lr], the upper triangular matrix R stored by rows.           
-            %
-            %    diag[n], the diagonal elements of the matrix D.
-            %
-            %    qtb[n], the first n elements of the vector 
-            %    (q transpose)*b.
-            %
-            %    delta, an upper bound on the euclidean norm of d*x.
-            %
-            %  Output
-            %
-            %    x[n], contains the desired convex combination of the 
-            %    gauss-newton direction and the scaled gradient direction.
-
-            epsmch = eps;
-            x = zeros([n,1]);
-            wa1 = zeros([n,1]);
-            wa2 = zeros([n,1]);
-
-            % Calculate the Gauss-Newton direction.
-            jj = ( n * ( n + 1 ) ) / 2 + 1;
-
-            for k = 1:n
-                j = n - k + 1;
-                jj = jj - k;
-                l = jj + 1;
-                sum2 = 0.0;
-
-                for i = j+1:n
-                    sum2 = sum2 + r(l)*x(i);
-                    l = l + 1;
-                end
-
-                temp = r(jj);
-
-                if temp == 0.0
-                    l = j;
-                    for i = 1:j
-                        temp = max(temp, abs(r(l)));
-                        l = l + n - i;
-                    end
-
-                    if temp == 0.0
-                        temp = epsmch;
-                    else
-                        temp = epsmch*temp;
-                    end
-                end
-
-                x(j) = ( qtb(j) - sum2 ) / temp;
-            end
-
-            % Test whether the Gauss-Newton direction is acceptable.
-            wa1(1:n) = 0.0;
-            wa2(1:n) = diag(1:n) * x(1:n);
-            qnorm = norm(wa2);
-
-            if qnorm <= delta
-                return
-            end
-
-            % The Gauss-Newton direction is not acceptable.
-            % Calculate the scaled gradient direction.
-            l = 1;
-            for j = 1:n
-                temp = qtb(j);
-                for i = j:n
-                    wa1(i) = wa1(i) + r(l) * temp;
-                    l = l + 1;
-                end
-                wa1(j) = wa1(j) / diag(j);
-            end
-
-            % Calculate the norm of the scaled gradient.
-            % Test for the special case in which the scaled gradient is 
-            % zero.
-            gnorm = norm(wa1);
-            sgnorm = 0.0;
-            alpha = delta./qnorm;
-
-            if gnorm ~= 0.0
-                % Calculate the point along the scaled gradient which 
-                % minimizes the quadratic.
-                wa1(1:n) = ( wa1(1:n) / gnorm ) / diag(1:n);
-                l = 1;
-                for j = 1:n
-                  sum2 = 0.0;
-                  for i = j:n
-                    sum2 = sum2 + r(l) * wa1(i);
-                    l = l + 1;
-                  end 
-                  wa2(j) = sum2;
-                end 
-            
-                temp = enorm ( n, wa2 );
-                sgnorm = ( gnorm / temp ) / temp;
-                alpha = 0.0;
-
-                % If the scaled gradient direction is not acceptable,
-                % calculate the point along the dogleg at which the
-                % quadratic is minimized.
-                if sgnorm < delta
-                    bnorm = norm(qtb);
-                    temp = (bnorm/gnorm) * (bnorm/qnorm) * (sgnorm/delta);
-                    temp = temp - (delta/qnorm) * (sgnorm/delta)^2 ...
-                        + sqrt((temp - (delta/qnorm) )^2 ...
-                        + (1.0 - (delta/qnorm)^2)*(1.0 - (sgnorm/delta)^2));
-                    alpha = ((delta/qnorm)*(1.0 - (sgnorm/delta)^2 ))/temp;
-                end
-            end
-
-            % Form appropriate convex combination of the Gauss-Newton
-            % direction and the scaled gradient direction.
-            temp = (1.0 - alpha) * min(sgnorm, delta);
-            x(1:n) = temp*wa1(1:n) + alpha*x(1:n);
-        end
-
+    
         function [loc_hat, scale_hat] = fit_loc_scale_support(obj)
             % Estimate loc and scale parameters from data accounting 
             % for support.
@@ -1059,6 +728,576 @@ classdef gumextreme < handle
     end
 
     methods(Static)
+        function [aout, ipvt, rdiag, acnorm] = qrfac(m,n,a,pivot,lipvt)
+            %  QRFAC computes a QR factorization using Householder 
+            %  transformations.
+            %
+            %  Discussion:
+            %
+            %    This function uses Householder transformations with 
+            %    optional column pivoting to compute a QR factorization of 
+            %    the M by N matrix A.  That is, QRFAC determines an 
+            %    orthogonal matrix Q, a permutation matrix P, and an upper 
+            %    trapezoidal matrix R with diagonal elements of 
+            %    nonincreasing magnitude, such that A*P = Q*R.  
+            %
+            %    The Householder transformation for column 
+            %    K, K = 1,2,...,min(M,N), is of the form
+            %
+            %      I - ( 1 / U(K) ) * U * U'
+            %
+            %    where U has zeros in the first K-1 positions.
+            %
+            %  Parameters:
+            %
+            %    M, the number of rows of A.
+            %
+            %    N, the number of columns of A.
+            %
+            %    A(LDA,N), the M by N array.
+            %    A contains the matrix for which the QR factorization is to
+            %    be computed.  
+            %
+            %    LDA, the leading dimension of A, which must
+            %    be no less than M.
+            %
+            %    PIVOT, is TRUE if column pivoting is to be carried out.
+            %
+            %    LIPVT, the dimension of IPVT, which should 
+            %    be N if pivoting is used.
+            %
+            %  Output:
+            %
+            %    aout, the strict upper trapezoidal part of A contains
+            %    the strict upper trapezoidal part of R, and the lower 
+            %    trapezoidal part of A contains a factored form of Q, 
+            %    the non-trivial elements of the U vectors described above.
+            %
+            %    IPVT(LIPVT), defines the permutation matrix P 
+            %    such that A*P = Q*R. Column J of P is column IPVT(J) of 
+            %    the identity matrix. If PIVOT is false, IPVT is not 
+            %    referenced.
+            %
+            %    RDIAG(N), contains the diagonal elements of R.
+            %
+            %    ACNORM(N), the norms of the corresponding
+            %    columns of the input matrix A.  If this information is not 
+            %    needed, then ACNORM can coincide with RDIAG.
+
+            epsmch = eps;
+            ipvt = zeros([lipvt,1]);
+            rdiag = zeros([n,1]);
+            acnorm = zeros([n,1]);
+            wa = zeros([n,1]);
+
+            % Compute the initial column norms and initialize several 
+            % arrays.
+            for j = 1:n
+                acnorm(j) = norm(a(1:m,j));
+                rdiag(j) = acnorm(j);
+                wa(j) = rdiag(j);
+                if pivot               
+                  ipvt(j) = j;
+                end    
+            end
+            % Reduce A to R with Householder transformations.
+            minmn = min( m, n );
+            for j = 1:minmn
+                %  Bring the column of largest norm into the pivot position
+                if pivot
+                    kmax = j;
+                    for k = j:n
+                        if rdiag(kmax) < rdiag(k)
+                            kmax = k;
+                        end
+                    end
+
+                    if kmax ~= j
+                        r8_temp(1:m) = a(1:m,j);
+                        a(1:m,j)     = a(1:m,kmax);
+                        a(1:m,kmax)  = r8_temp(1:m);
+                
+                        rdiag(kmax) = rdiag(j);
+                        wa(kmax) = wa(j);
+                
+                        i4_temp    = ipvt(j);
+                        ipvt(j)    = ipvt(kmax);
+                        ipvt(kmax) = i4_temp;
+                    end
+                end
+
+                %  Compute the Householder transformation to reduce the
+                %  J-th column of A to a multiple of the J-th unit vector.
+                ajnorm = norm (a(j,j));
+                if ajnorm ~= 0
+                    if a(j,j) < 0
+                        ajnorm = -ajnorm;
+                    end
+                    
+                    a(j:m,j) = a(j:m,j)/ajnorm;
+                    a(j,j) = a(j,j) + 1.0;
+
+                    % Apply the transformation to the remaining columns and 
+                    % update the norms.
+                    for k = j+1:n
+                        temp = dot(a(j:m,j), a(j:m,k) ) / a(j,j);
+                        a(j:m,k) = a(j:m,k) - temp * a(j:m,j);
+                        if pivot && rdiag(k) ~= 0
+                            temp = a(j,k) / rdiag(k);
+                            rdiag(k) = rdiag(k) * sqrt(max(0,1.0-temp^2));
+                            if 0.05*(rdiag(k)/wa(k))^2 <= epsmch
+                                rdiag(k) = norm( a(j+1,k));
+                                wa(k) = rdiag(k);
+                            end
+                        end
+                    end
+                end
+                rdiag(j) = -ajnorm;
+            end
+            aout = a;
+        end
+
+        function out = qform(m, n, q)
+            %  Purpose:
+            %
+            %    qform() constructs the standard form of Q from its 
+            %    factored form.
+            %
+            %  Discussion:
+            %
+            %    This function proceeds from the computed QR factorization of
+            %    an M by N matrix A to accumulate the M by M orthogonal matrix
+            %    Q from its factored form.            
+            %
+            %  Parameters:
+            %
+            %    m, the number of rows of A, and the order of Q.
+            %
+            %    n, the number of columns of A.
+            %
+            %    Q[LDQ*N], the full lower trapezoid in the first min(M,N) 
+            %    columns of Q contains the factored form.            
+            %
+            %    LDQ, the leading dimension of the array Q.
+            %
+            %  Output:
+            %
+            %    out, Q that has been accumulated into a square matrix.
+
+            % Zero out the upper triangle of Q in the first min(M,N) 
+            % columns.
+            minmn = min( m, n );
+            wa = zeros([m,1]);
+            out = zeros(size(q));
+
+            for j = 2:minmn
+                q(1:j-1,j) = 0.0;
+            end
+
+            % Initialize remaining columns to those of the identity matrix.
+            q(1:m, n+1:m) = 0.0;
+
+            for j = n+1:m
+                q(j,j) = 1.0;
+            end
+
+            % Accumulate Q from its factored form.
+            for l = 1:minmn
+                k = minmn - l + 1;
+                wa(k:m) = q(k:m,k);
+                q(k:m,k) = 0.0;
+                q(k,k) = 1.0;
+
+                if wa(k) ~= 0.0
+                    for j = k:m
+                        temp = dot(wa(k:m), q(k:m,j) ) / wa(k);
+                        q(k:m,j) = q(k:m,j) - temp * wa(k:m);
+                    end
+                end
+            end
+
+            out = q;
+        end
+
+        function x = dogleg(n, r, diag, qtb, delta)
+            %  Purpose:
+            %
+            %    dogleg() combines Gauss-Newton and gradient for a 
+            %    minimizing step.
+            %
+            %  Discussion:
+            %
+            %    Given an M by N matrix A, an n by n nonsingular diagonal
+            %    matrix d, an m-vector b, and a positive number delta, the
+            %    problem is to determine the convex combination x of the
+            %    gauss-newton and scaled gradient directions that minimizes
+            %    (a*x - b) in the least squares sense, subject to the
+            %    restriction that the euclidean norm of d*x be at most 
+            %    delta.
+            %
+            %    This function completes the solution of the problem
+            %    if it is provided with the necessary information from the
+            %    qr factorization of a. 
+            %
+            %    That is, if a = q*r, where q has orthogonal columns and r 
+            %    is an upper triangular matrix, then dogleg expects the 
+            %    full upper triangle of r and the first n components of 
+            %    Q'*b.
+            %
+            %  Parameters:
+            %
+            %    n, the order of R.
+            %
+            %    r[lr], the upper triangular matrix R stored by rows.           
+            %
+            %    diag[n], the diagonal elements of the matrix D.
+            %
+            %    qtb[n], the first n elements of the vector 
+            %    (q transpose)*b.
+            %
+            %    delta, an upper bound on the euclidean norm of d*x.
+            %
+            %  Output
+            %
+            %    x[n], contains the desired convex combination of the 
+            %    gauss-newton direction and the scaled gradient direction.
+
+            epsmch = eps;
+            x = zeros([n,1]);
+            wa1 = zeros([n,1]);
+            wa2 = zeros([n,1]);
+
+            % Calculate the Gauss-Newton direction.
+            jj = ( n * ( n + 1 ) ) / 2 + 1;
+
+            for k = 1:n
+                j = n - k + 1;
+                jj = jj - k;
+                l = jj + 1;
+                sum2 = 0.0;
+
+                for i = j+1:n
+                    sum2 = sum2 + r(l)*x(i);
+                    l = l + 1;
+                end
+
+                temp = r(jj);
+
+                if temp == 0.0
+                    l = j;
+                    for i = 1:j
+                        temp = max(temp, abs(r(l)));
+                        l = l + n - i;
+                    end
+
+                    if temp == 0.0
+                        temp = epsmch;
+                    else
+                        temp = epsmch*temp;
+                    end
+                end
+
+                x(j) = ( qtb(j) - sum2 ) / temp;
+            end
+
+            % Test whether the Gauss-Newton direction is acceptable.
+            wa1(1:n) = 0.0;
+            wa2(1:n) = diag(1:n) * x(1:n);
+            qnorm = norm(wa2);
+
+            if qnorm <= delta
+                return
+            end
+
+            % The Gauss-Newton direction is not acceptable.
+            % Calculate the scaled gradient direction.
+            l = 1;
+            for j = 1:n
+                temp = qtb(j);
+                for i = j:n
+                    wa1(i) = wa1(i) + r(l) * temp;
+                    l = l + 1;
+                end
+                wa1(j) = wa1(j) / diag(j);
+            end
+
+            % Calculate the norm of the scaled gradient.
+            % Test for the special case in which the scaled gradient is 
+            % zero.
+            gnorm = norm(wa1);
+            sgnorm = 0.0;
+            alpha = delta./qnorm;
+
+            if gnorm ~= 0.0
+                % Calculate the point along the scaled gradient which 
+                % minimizes the quadratic.
+                wa1(1:n) = ( wa1(1:n) / gnorm ) / diag(1:n);
+                l = 1;
+                for j = 1:n
+                  sum2 = 0.0;
+                  for i = j:n
+                    sum2 = sum2 + r(l) * wa1(i);
+                    l = l + 1;
+                  end 
+                  wa2(j) = sum2;
+                end 
+            
+                temp = enorm ( n, wa2 );
+                sgnorm = ( gnorm / temp ) / temp;
+                alpha = 0.0;
+
+                % If the scaled gradient direction is not acceptable,
+                % calculate the point along the dogleg at which the
+                % quadratic is minimized.
+                if sgnorm < delta
+                    bnorm = norm(qtb);
+                    temp = (bnorm/gnorm) * (bnorm/qnorm) * (sgnorm/delta);
+                    temp = temp - (delta/qnorm) * (sgnorm/delta)^2 ...
+                        + sqrt((temp - (delta/qnorm) )^2 ...
+                        + (1.0 - (delta/qnorm)^2)*(1.0 - (sgnorm/delta)^2));
+                    alpha = ((delta/qnorm)*(1.0 - (sgnorm/delta)^2 ))/temp;
+                end
+            end
+
+            % Form appropriate convex combination of the Gauss-Newton
+            % direction and the scaled gradient direction.
+            temp = (1.0 - alpha) * min(sgnorm, delta);
+            x(1:n) = temp*wa1(1:n) + alpha*x(1:n);
+        end
+
+        function [sout, vout, w, sing] = r1updt(m, n, s, u, v)
+            % R1UPDT re-triangularizes a matrix after a rank one update.
+            %
+            %  Discussion:
+            %
+            %    Given an M by N lower trapezoidal matrix S, an M-vector U, 
+            %    and an N-vector V, the problem is to determine an 
+            %    orthogonal matrix Q such that
+            %
+            %      (S + U * V' ) * Q
+            %
+            %    is again lower trapezoidal.
+            %
+            %    This function determines Q as the product of 2 * (N - 1)
+            %    transformations
+            %
+            %      GV(N-1)*...*GV(1)*GW(1)*...*GW(N-1)
+            %
+            %    where GV(I), GW(I) are Givens rotations in the (I,N) plane
+            %    which eliminate elements in the I-th and N-th planes,
+            %    respectively.  Q itself is not accumulated, rather the
+            %    information to recover the GV and GW rotations is returned
+            %
+            %  Parameters:
+            %
+            %    m, the number of rows of S.
+            %
+            %    n, the number of columns of S. N must not exceed M.
+            %
+            %    s(ls), the lower trapezoidal matrix S stored by columns. 
+            %
+            %    u(m), the U vector.
+            %
+            %    v(n),  On input, V must contain the vector V.
+            %
+            %  Output:
+            %
+            %    sout contains the lower trapezoidal
+            %    matrix produced as described above.
+            %
+            %    vout contains the information necessary to recover the
+            %    Givens rotations GV described above.
+            %
+            %    w(m), contains information necessary to
+            %    recover the Givens rotations GW described above.
+            %
+            %    SING, is set to TRUE if any of the diagonal elements
+            %    of the output S are zero.  Otherwise SING is set FALSE.
+
+            % Initialize the diagonal element pointer.
+            jj = (n*(2*m - n + 1)) / 2 - (m - n);
+
+            % Move the nontrivial part of the last column of S into W.
+            l = jj;
+            for i = n:m
+                w(i) = s(l);
+                l = l + 1;
+            end
+
+            % Rotate the vector V into a multiple of the N-th unit vector
+            % in such a way that a spike is introduced into W.
+            for j = n-1:-1:1
+                jj = jj - (m - j +1);
+                w(j) = 0.0;
+                if v(j) ~= 0.0
+                    % Determine a Givens rotation which eliminates the
+                    % J-th element of V.
+                    if abs(v(n)) < abs(v(j))                        
+                        cotan = v(n) / v(j);
+                        sn = 0.5/sqrt(0.25 + 0.25*cotan^2);
+                        cs = sn * cotan;
+                        tau = 1.0;
+                        if abs(cs)*inf > 1.0
+                            tau = 1.0/cs;
+                        end
+                    else
+                        tn = v(j)/v(n);
+                        cs = 0.5 / sqrt(0.25+0.25*tn^2);
+                        sn = cs*tn;
+                        tau = sn;
+                    end
+
+                    % Apply the transformation to V and store the 
+                    % information necessary to recover the Givens rotation
+                    v(n) = sn * v(j) + cs * v(n);
+                    v(j) = tau;
+
+                    % Apply the transformation to S and extend the spike 
+                    % in W.
+                    l = jj;
+                    for i = j:m
+                        temp = cs * s(l) - sn*w(i);
+                        w(i) = sn * s(l) + cs*w(i);
+                        s(l) = temp;
+                        l = l + 1;
+                    end
+                end
+            end
+
+            % Add the spike from the rank 1 update to W.
+            w(1:m) = w(1:m) + v(n) * u(1:m);
+
+            % Eliminate the spike.
+            sing = false;
+
+            for j = 1:n-1
+                if w(j) ~= 0.0
+                    % Determine a Givens rotation which eliminates the
+                    % J-th element of the spike.
+                    if abs(s(jj)) < abs(w(j))
+                        cotan = s(jj) / w(j);
+                        sn = 0.5 / sqrt(0.25+0.25*cotan^2);
+                        cs = sn * cotan;
+                        if 1.0 < abs(cs)*inf
+                            tau = 1.0 / cs;
+                        else
+                            tau = 1.0;
+                        end
+                    else
+                        tn = w(j) / s(jj);
+                        cs = 0.5 / sqrt(0.25+0.25*tn^2);
+                        sn = cs*tn;
+                        tau = sn;
+                    end
+
+                    % Apply the transformation to S and reduce the spike 
+                    % in W.
+                    l = jj;
+                    for i = j:m
+                        temp = cs*s(l) + sn*w(i);
+                        w(i) = -sn*s(l) + cs*w(i);
+                        s(l) = temp;
+                        l = l + 1;
+                    end
+
+                    % Store the information necessary to recover the 
+                    % Givens rotation.
+                    w(j) = tau;
+                end
+
+                % Test for zero diagonal elements in the output S
+                if s(jj) == 0.0
+                    sing = true;
+                end
+
+                jj = jj + (m-j+1);
+            end
+
+            % Move W back into the last column of the output S.
+            l = jj;
+            for i = n:m
+                s(l) = w(i);
+                l = l + 1;
+            end
+
+            if s(jj) == 0.0
+                sing = true;
+            end
+
+            % assign output
+            sout = s;
+            vout = v;
+        end
+
+        function a_out = r1mpyq(m, n, a, v, w)
+            % r1mpyq computes A*Q, where Q is the product of Householder 
+            % transformations.
+            %
+            %  Discussion:
+            %
+            %    Given an M by N matrix A, this function computes A*Q where
+            %    Q is the product of 2*(N - 1) transformations
+            %
+            %      GV(N-1)*...*GV(1)*GW(1)*...*GW(N-1)
+            %
+            %    and GV(I), GW(I) are Givens rotations in the (I,N) plane which
+            %    eliminate elements in the I-th and N-th planes, respectively.
+            %    Q itself is not given, rather the information to recover the
+            %    GV, GW rotations is supplied.
+            %
+            %  Parameters:
+            %
+            %    m, the number of rows of A.
+            %
+            %    n, the number of columns of A.
+            %
+            %    a(LDA,N), the M by N array. the matrix A to be 
+            %    postmultiplied by the orthogonal matrix Q.            
+            %            
+            %    v(N), w(N), contain the information necessary
+            %    to recover the Givens rotations GV and GW.
+            %
+            %  Output:
+            %
+            %    a_out, the value of A*Q.
+
+            % Apply the first set of Givens rotations to A.
+            for j = n-1:-1:1
+                if abs(v(j)) > 1.0
+                    c = 1.0/v(j);
+                    s = sqrt(1.0-c^2);
+                else
+                    s = v(j);
+                    c = sqrt(1.0-s^2);
+                end
+
+                for i = 1:m
+                    temp = c*a(i,j) - s*a(i,n);
+                    a(i,n) = s*a(i,j) + c*a(i,n);
+                    a(i,j) = temp;
+                end
+            end
+
+            % Apply the second set of Givens rotations to A.
+            for j = 1:n-1
+                if abs(w(j)) > 1.0
+                    c = 1.0/w(j);
+                    s = sqrt(1.0 - c^2);
+                else
+                    s = w(j);
+                    c = sqrt(1.0 - s^2);
+                end
+
+                for i = 1:m
+                    temp = c*a(i,j) + s*a(i,n);
+                    a(i,n) = -s*a(i,j) + c*a(i,n);
+                    a(i,j) = temp;
+                end
+            end
+
+            a_out = a;
+        end
+
         function out = max_like(scale, data)
             % method of maximum likelihood
             sdata = -data/scale;
