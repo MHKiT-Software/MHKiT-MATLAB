@@ -139,7 +139,7 @@ classdef gumextreme < handle
         
         function fit(obj)
             % fit
-            %   Return estimates of shape, location, and 
+            %   Return estimates of location and 
             %   scale parameters from data.
             %
             %   the fit is computed by minimizing the negative 
@@ -160,7 +160,17 @@ classdef gumextreme < handle
             end
             
             obj.paramEsts{3} = x; % scale
-            obj.paramEsts{2} = -x*; % loc
+
+            % Compute the log of the sum of exponentials of input elements
+            a = -obj.block_maxima/x;
+            a_max = max(a);
+            a_max(isinf(a_max)) = 0;
+            tmp = exp(a-a_max);
+            s = sum(tmp);
+            logsumexp = a_max + log(s);
+
+            obj.paramEsts{2} = -x*(logsumexp - ...
+                log(length(obj.block_maxima))); % loc
             obj.fit_called = true;
         end   
         
