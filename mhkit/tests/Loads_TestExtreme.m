@@ -42,7 +42,7 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             mler.conditioned_spectrum = validation.Res_Spec;
             mler.phase = validation.phase;
             wave_freq = linspace(0,1,500);
-            mler.frequency = wave_freq;
+            mler.frequency = wave_freq';
             
             k = wave_number(wave_freq, 70);
             k.values = fillmissing(k.values,'constant',0);
@@ -60,7 +60,7 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             mler.conditioned_spectrum = normed.Norm_Spec;
             mler.phase = normed.phase;
             wave_freq = linspace(0,1,500);
-            mler.frequency = wave_freq;
+            mler.frequency = wave_freq';
             RAO = normed.RAO;
             k = wave_number(wave_freq, 70);
             k.values = fillmissing(k.values,'constant',0); 

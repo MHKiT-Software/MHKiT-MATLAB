@@ -49,11 +49,11 @@ for i=1:length(sim.T)
     % conditioned wave
     wave_amp_time(i,1) = sum( ...
         sqrt(mler.conditioned_spectrum.*2*dw) .* ...
-        cos(freq'.*(sim.T(i)-sim.T0) + mler.phase - k'.*(xi-sim.X0)));
+        cos(freq.*(sim.T(i)-sim.T0) + mler.phase - k'.*(xi-sim.X0)));
     % Response calculation
     wave_amp_time(i,2) = sum( ...
         sqrt(mler.conditioned_spectrum.*2*dw) .* abs(RAO) .* ...
-        cos(freq'.*(sim.T(i)-sim.T0) - k'.*(xi-sim.X0)));
+        cos(freq.*(sim.T(i)-sim.T0) - k'.*(xi-sim.X0)));
 
 % generate outputs
 mler_ts.wave_height = wave_amp_time(:,1);

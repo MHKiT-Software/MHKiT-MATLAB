@@ -46,7 +46,7 @@ wave_amp_time = zeros(sim.maxIX, sim.maxIT);
 for x=1:length(sim.X)
     for t=1:length(sim.T)
         wave_amp_time(x,t) = sum(sqrt(mler.conditioned_spectrum'.*2*dw) .* ...
-            cos(freq.*(sim.T(t)-sim.T0) - k.*(sim.X(x)-sim.X0) + mler.phase'));
+            cos(freq'.*(sim.T(t)-sim.T0) - k.*(sim.X(x)-sim.X0) + mler.phase'));
     end
 end
 

@@ -1,4 +1,4 @@
-function sim = mler_simulation()
+function sim = mler_simulation(sim)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
