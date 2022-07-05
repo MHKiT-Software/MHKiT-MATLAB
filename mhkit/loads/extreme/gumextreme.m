@@ -40,8 +40,7 @@ classdef gumextreme < handle
             if ~obj.fit_called
                 obj.fit();
             end
-            
-            args  = obj.paramEsts{1};
+
             loc   = obj.paramEsts{2};
             scale = obj.paramEsts{3};            
             cond0 = scale > 0;
@@ -49,13 +48,8 @@ classdef gumextreme < handle
             cond = cond0 && cond1;
 
             if cond
-                x = -log(-log(q));
-                if args ~= 0
-                    out = -1*(exp(-args * x) - 1) / args;
-                else
-                    out = x;
-                end
-                out = out * scale + loc;
+                x = -log(-log(q));                
+                out = x * scale + loc;
             end
             if isempty(out)
                 out = [];
@@ -85,21 +79,38 @@ classdef gumextreme < handle
             out = zeros(size(cond));
 
             if any(cond)
-                goodargs = x(cond);
-                cx = goodargs*args;
-                logex2 = log(1 + -cx);
-                if args ~= 0
-                    logpex2 = log(1 + -args*goodargs)/args;
-                else
-                    logpex2 = -goodargs;
-                end
-                pex2 = exp(logpex2);
-
-                logpdf = zeros(size(goodargs));
-                logpdf(cx==1 | cx == -inf) = -inf;
-                logpdf(cx~=1 & cx ~= -inf) = -pex2 + logpex2 - logex2; 
+                goodargs = x(cond);                
+                logpdf = -goodargs - exp(-goodargs);                 
                 out(cond) = exp(logpdf)/scale;
             end              
+        end
+
+        function out = cdf(obj, x)
+            % Cumulative distribution function of the given RV.
+            % 
+            % Parameters
+            % ----------
+            % x : array_like
+            %     quantiles
+            %
+            % Returns
+            %    -------
+            % cdf : ndarray
+            %       Cumulative distribution function evaluated at x
+
+            loc   = obj.paramEsts{2};
+            scale = obj.paramEsts{3};
+
+            x = (x-loc)/scale;
+            cond0 = scale > 0;
+            cond1 = (-inf < x) & (x < inf);
+            cond = cond0 & cond1;
+            out = zeros(size(cond));
+            if any(cond)
+                goodargs = x(cond);
+                out = exp(-exp(-goodargs));
+            end
+
         end
 
         function out = expect(obj)
@@ -125,13 +136,12 @@ classdef gumextreme < handle
                 obj.fit();
             end
 
-            args  = obj.paramEsts{1};
+            %args  = obj.paramEsts{1};
             loc   = obj.paramEsts{2};
             scale = obj.paramEsts{3};
             
-            [a,b] = gumextreme.get_support(args);
-            lb = loc + a * scale;
-            ub = loc + b * scale;
+            lb = loc + -inf * scale;
+            ub = loc + inf * scale;
 
             out = obj.quad(lb,ub);
 
@@ -156,7 +166,33 @@ classdef gumextreme < handle
             [x, info] = obj.minpack_hybrd();  
 
             if info ~= 1
-                % error message
+                if info == 0
+                    ME = MException('MATLAB:gumextreme:minpack_hybrd',...
+                    'Improper input parameters were entered.');
+                    throw(ME);
+                elseif info == 2
+                    ME = MException('MATLAB:gumextreme:minpack_hybrd',...
+                    ['The number of calls to function has reached ' ...
+                    'maxfev = 400']);
+                    throw(ME);
+                elseif info == 3
+                    ME = MException('MATLAB:gumextreme:minpack_hybrd',...
+                    ['xtol=1e-12 is too small, no futher improvement in ' ...
+                    'the approximate solution is possible']);
+                    throw(ME);
+                elseif info == 4
+                    ME = MException('MATLAB:gumextreme:minpack_hybrd',...
+                    ['The iteration is not making good progress, as ' ...
+                    'measured by the \n  improvement from the last five ' ...
+                    'Jacobian evaluations.']);
+                    throw(ME);
+                elseif info == 5
+                    ME = MException('MATLAB:gumextreme:minpack_hybrd',...
+                    ['The iteration is not making good progress, as ' ...
+                    'measured by the \n  improvement from the last ten ' ...
+                    'iterations.']);
+                    throw(ME);
+                end
             end
             
             obj.paramEsts{3} = x; % scale
@@ -213,7 +249,7 @@ classdef gumextreme < handle
             retval = nan;
             x = obj.paramEsts{3}; % x0 initial value
             n = length(x);
-            xtol = 1e-14;
+            xtol = 1e-12;
             maxfev = 200 * (n + 1);
             ml = n-1;
             mu = n-1;
@@ -701,26 +737,12 @@ classdef gumextreme < handle
             % Integrate func from `a` to `b` (possibly infinite interval) 
             % using a technique from the Fortran library QUADPACK.
             
-            args  = obj.paramEsts{1};
-
             % check the limits of integration: \int_a^b, expect a < b
             flip = b < a;
             a = min(a, b);
             b = max(a, b);
-            infbounds = 0;
 
-            if b ~= Inf && a ~= -Inf
-                % standard integration
-            elseif b == Inf && a ~= -Inf
-                infbounds = 1;
-                bound = a;
-            elseif b == Inf && a == -Inf
-                infbounds = 2;
-                bound = 0;     % ignored
-            elseif b ~= Inf && a == -Inf
-                infbounds = -1;
-                bound = b;
-            else
+            if (a==Inf && b==Inf) || (a==-Inf && b==-Inf)
                 ME = MException('MATLAB:gumextreme:quad',"Infinity " + ...
                     "comparisons don't work with this method.");
                 throw(ME);
@@ -1326,7 +1348,10 @@ classdef gumextreme < handle
         end
 
         function out = support_mask(x, arg)
-            if arg < 0
+            if isnan(arg)
+                a = -inf;
+                b = inf;                
+            elseif arg < 0
                 a = 1.0/min(arg,-2.2250738585072014e-308);
                 b = inf;
             else

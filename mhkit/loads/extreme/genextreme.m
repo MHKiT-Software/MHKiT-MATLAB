@@ -104,6 +104,41 @@ classdef genextreme < handle
             end              
         end
 
+        function out =  cdf(obj, x)
+            % Cumulative distribution function of the given RV.
+            % 
+            % Parameters
+            % ----------
+            % x : array_like
+            %     quantiles
+            %
+            % Returns
+            %    -------
+            % cdf : ndarray
+            %       Cumulative distribution function evaluated at x
+
+            args  = obj.paramEsts{1};
+            loc   = obj.paramEsts{2};
+            scale = obj.paramEsts{3};
+
+            x = (x-loc)/scale;
+            cond0 = scale > 0;
+            cond1 = genextreme.support_mask(x, args) & scale > 0;
+            cond = cond0 & cond1;
+            out = zeros(size(cond));
+
+            if any(cond)
+                goodargs = x(cond);
+                if args ~= 0
+                    logpex2 = log(1 + -args*goodargs)/args;
+                else
+                    logpex2 = -goodargs;
+                end
+
+                out(cond) = exp(-exp(logpex2));
+            end              
+        end
+
         function out = expect(obj)
             % Calculate expected value of a function with respect to the 
             % distribution for discrete distribution by numerical summation
