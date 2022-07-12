@@ -1,6 +1,5 @@
-classdef extreme < handle
-    %EXTREME Summary of this class goes here
-    %   Detailed explanation goes here
+classdef ste_block_maxima < handle  
+
     
     properties
         block_maxima
@@ -10,12 +9,12 @@ classdef extreme < handle
     end
     
     methods
-        function obj = extreme()
+        function obj = ste_block_maxima()
             obj.method = 'None';
         end
 
-        %% Init methods for extreme class
-        function ste_block_maxima_gev(obj, block_maxima)
+        %% Init methods for ste_block_maxima class
+        function gev(obj, block_maxima)
             % Approximate the short-term extreme distribution using the 
             % block maxima method and the Generalized Extreme Value 
             % distribution.
@@ -40,13 +39,13 @@ classdef extreme < handle
             obj.paramEsts = cell([1,3]);
 
             if ~all(isfinite(obj.block_maxima))
-                ME = MException('MATLAB:extreme:ste_block_maxima_gev',...
+                ME = MException('MATLAB:extreme:ste_block_maxima:gev',...
                     'The data contains non-finite values.');
                 throw(ME);
             end
 
             % get distribution specific starting locations
-            g = extreme.skew(obj.block_maxima);
+            g = ste_block_maxima.skew(obj.block_maxima);
             if g < 0
                 a = 0.5;
             else
@@ -63,7 +62,7 @@ classdef extreme < handle
             obj.paramEsts{3} = xopt(3);
         end
 
-        function ste_block_maxima_gumbel(obj, block_maxima)
+        function gumbel(obj, block_maxima)
             % Approximate the short-term extreme distribution using the 
             % block maxima method and the Gumbel (right) distribution.
             % 
@@ -95,27 +94,27 @@ classdef extreme < handle
 
             if info ~= 1
                 if info == 0
-                    ME = MException('MATLAB:extreme:minpack_hybrd',...
+                    ME = MException('MATLAB:extreme:ste_block_maxima:minpack_hybrd',...
                     'Improper input parameters were entered.');
                     throw(ME);
                 elseif info == 2
-                    ME = MException('MATLAB:extreme:minpack_hybrd',...
+                    ME = MException('MATLAB:extreme:ste_block_maxima:minpack_hybrd',...
                     ['The number of calls to function has reached ' ...
                     'maxfev = 400']);
                     throw(ME);
                 elseif info == 3
-                    ME = MException('MATLAB:extreme:minpack_hybrd',...
+                    ME = MException('MATLAB:extreme:ste_block_maxima:minpack_hybrd',...
                     ['xtol=1e-12 is too small, no futher improvement in ' ...
                     'the approximate solution is possible']);
                     throw(ME);
                 elseif info == 4
-                    ME = MException('MATLAB:extreme:minpack_hybrd',...
+                    ME = MException('MATLAB:extreme:ste_block_maxima:minpack_hybrd',...
                     ['The iteration is not making good progress, as ' ...
                     'measured by the \n  improvement from the last five ' ...
                     'Jacobian evaluations.']);
                     throw(ME);
                 elseif info == 5
-                    ME = MException('MATLAB:extreme:minpack_hybrd',...
+                    ME = MException('MATLAB:extreme:ste_block_maxima:minpack_hybrd',...
                     ['The iteration is not making good progress, as ' ...
                     'measured by the \n  improvement from the last ten ' ...
                     'iterations.']);
@@ -153,10 +152,10 @@ classdef extreme < handle
             %     quantile corresponding to the lower tail probability q.
 
             if strcmp(obj.method, 'None')
-                ME = MException('MATLAB:extreme:ppf',...
-                    ['You must initialize the extreme class with one ' ...
-                    'of the available fit methods.\nMethods include\n\' ...
-                    'tste_block_maxima_gev\n\tste_block_maxima_gumbel\n']);
+                ME = MException('MATLAB:extreme:ste_block_maxima:ppf',...
+                    ['You must initialize the ste_block_maxima class with ' ...
+                    'one of the available fit methods.\nMethods include\n' ...
+                    '\tgev\n\tgumbel\n']);
                 throw(ME);
             end
             
@@ -195,10 +194,10 @@ classdef extreme < handle
             %     Probability density function evaluated at x
 
             if strcmp(obj.method, 'None')
-                ME = MException('MATLAB:extreme:pdf',...
-                    ['You must initialize the extreme class with one ' ...
-                    'of the available fit methods.\nMethods include\n\' ...
-                    'tste_block_maxima_gev\n\tste_block_maxima_gumbel\n']);
+                ME = MException('MATLAB:extreme:ste_block_maxima:pdf',...
+                    ['You must initialize the ste_block_maxima class with ' ...
+                    'one of the available fit methods.\nMethods include\n' ...
+                    '\tgev\n\tgumbel\n']);
                 throw(ME);
             end
 
@@ -206,7 +205,7 @@ classdef extreme < handle
 
             x = (x-loc)/scale;
             cond0 = scale > 0;
-            cond1 = extreme.support_mask(x, args) & scale > 0;
+            cond1 = ste_block_maxima.support_mask(x, args) & scale > 0;
             cond = cond0 & cond1;
             out = zeros(size(cond));
 
@@ -245,9 +244,9 @@ classdef extreme < handle
             %       Cumulative distribution function evaluated at x
 
             if strcmp(obj.method, 'None')
-                ME = MException('MATLAB:extreme:cdf',...
-                    ['You must initialize the extreme class with one ' ...
-                    'of the available fit methods.\nMethods include\n\' ...
+                ME = MException('MATLAB:extreme:ste_block_maxima:cdf',...
+                    ['You must initialize the ste_block_maxima class with ' ...
+                    'one of the available fit methods.\nMethods include\n\' ...
                     'tste_block_maxima_gev\n\tste_block_maxima_gumbel\n']);
                 throw(ME);
             end
@@ -256,7 +255,7 @@ classdef extreme < handle
 
             x = (x-loc)/scale;
             cond0 = scale > 0;
-            cond1 = extreme.support_mask(x, args) & scale > 0;
+            cond1 = ste_block_maxima.support_mask(x, args) & scale > 0;
             cond = cond0 & cond1;
             out = zeros(size(cond));
 
@@ -292,16 +291,16 @@ classdef extreme < handle
             % is  calculated within the finite range [lb, ub].
 
             if strcmp(obj.method, 'None')
-                ME = MException('MATLAB:extreme:expect',...
-                    ['You must initialize the extreme class with one ' ...
-                    'of the available fit methods.\nMethods include\n\' ...
-                    'tste_block_maxima_gev\n\tste_block_maxima_gumbel\n']);
+                ME = MException('MATLAB:extreme:ste_block_maxima:expect',...
+                    ['You must initialize the ste_block_maxima class with ' ...
+                    'one of the available fit methods.\nMethods include\n' ...
+                    '\tgev\n\tgumbel\n']);
                 throw(ME);
             end
 
             [args, loc, scale] = obj.als();
             
-            [a,b] = extreme.get_support(args);
+            [a,b] = ste_block_maxima.get_support(args);
             lb = loc + a * scale;
             ub = loc + b * scale;
 
@@ -329,7 +328,7 @@ classdef extreme < handle
 
             % Compute the support according to the shape parameters.
             [args, ~,~] = obj.als;
-            [a, b] = extreme.get_support(args);
+            [a, b] = ste_block_maxima.get_support(args);
             support_width = b - a;
 
             %If the support is empty then return the moment-based estimates
@@ -375,7 +374,7 @@ classdef extreme < handle
                 scale_hat = 1;
                 return
             else
-                ME = MException('MATLAB:extreme:fit_loc_scale_support',...
+                ME = MException('MATLAB:extreme:ste_block_maxima:fit_loc_scale_support',...
                     'Runtime Error');
                 throw(ME);
             end
@@ -549,7 +548,7 @@ classdef extreme < handle
             % return self._nnlf_and_penalty(x, args) + n_log_scale
 
             % Negative loglikelihood function
-            cond0 = ~genextreme.support_mask(x, args);
+            cond0 = ~genste_block_maxima.support_mask(x, args);
             n_bad = sum(cond0(:));
             if n_bad > 0
                 x = x(~cond0);
@@ -620,7 +619,7 @@ classdef extreme < handle
             % EPSFCN: is used in determining a suitable step length for the 
             %         forward-difference approximation.
             
-            %func = @extreme.max_like; 
+            %func = @ste_block_maxima.max_like; 
             retval = nan;
             x = obj.paramEsts{2}; % x0 initial value
             n = length(x);
@@ -637,7 +636,7 @@ classdef extreme < handle
             
             %  Evaluate the function at the starting point
             %  and calculate its norm.
-            fvec = extreme.max_like(x,obj.block_maxima);
+            fvec = ste_block_maxima.max_like(x,obj.block_maxima);
             nfev = 1;
             fnorm = sqrt(sum(n^2));
 
@@ -662,7 +661,7 @@ classdef extreme < handle
     
                 % Compute the QR factorization of the jacobian.                
                 [fjac, iwa, wa1, wa2] = ...
-                    extreme.qrfac( n, n, fjac, false, 1);
+                    ste_block_maxima.qrfac( n, n, fjac, false, 1);
 
                 %  On the first iteration, if MODE is 1, scale according
                 %  to the norms of the columns of the initial jacobian.
@@ -711,7 +710,7 @@ classdef extreme < handle
                 end
 
                 % Accumulate the orthogonal factor in FJAC.
-                fjac = extreme.qform(n, n, fjac);
+                fjac = ste_block_maxima.qform(n, n, fjac);
 
                 % Rescale if necessary.
                 if mode ~= 2
@@ -723,7 +722,7 @@ classdef extreme < handle
                 % Beginning of the inner loop.
                 while true
                     % Determine the direction P.
-                    wa1 = extreme.dogleg(n, r, diag, qtf, delta);
+                    wa1 = ste_block_maxima.dogleg(n, r, diag, qtf, delta);
 
                     % Store the direction P and X + P.
                     % Calculate the norm of P.
@@ -738,7 +737,7 @@ classdef extreme < handle
                     end
 
                     % Evaluate the function at X + P and calculate its norm
-                    wa4 = extreme.max_like(wa2,obj.block_maxima);
+                    wa4 = ste_block_maxima.max_like(wa2,obj.block_maxima);
                     nfev = nfev + 1;
                     fnorm1 = norm(wa4);
 
@@ -857,9 +856,9 @@ classdef extreme < handle
 
                     % Compute the QR factorization of the updated jacobian                    
                     [r, wa2, wa3, sing] =...
-                        extreme.r1updt(n, n, r, wa1, wa2);                    
-                    fjac = extreme.r1mpyq(n, n, fjac, wa2, wa3);
-                    qtf = extreme.r1mpyq(1, n, qtf, wa2, wa3);
+                        ste_block_maxima.r1updt(n, n, r, wa1, wa2);                    
+                    fjac = ste_block_maxima.r1mpyq(n, n, fjac, wa2, wa3);
+                    qtf = ste_block_maxima.r1mpyq(1, n, qtf, wa2, wa3);
                 
                     jeval = false; 
 
@@ -948,7 +947,7 @@ classdef extreme < handle
                     end
 
                     x(j) = temp + h;
-                    wa1 = extreme.max_like(x, obj.block_maxima);
+                    wa1 = ste_block_maxima.max_like(x, obj.block_maxima);
 
                     x(j) = temp;
                     fjac(1:n,j) = (wa1(1:n) - fvec(1:n))./h;
@@ -964,7 +963,7 @@ classdef extreme < handle
                         x(j) = wa2(j) + h;
                     end
 
-                    wa1 = extreme.max_like(x, obj.block_maxima);
+                    wa1 = ste_block_maxima.max_like(x, obj.block_maxima);
                     for j = k:msum:n
                         x(j) = wa2(j);
 
@@ -996,12 +995,12 @@ classdef extreme < handle
                     mu = 0.5772156649015329;
 	                mu2 = (pi*pi/6.0);
                 else
-                    [mu, mu2, ~, ~] = extreme.stats2(pos);
+                    [mu, mu2, ~, ~] = ste_block_maxima.stats2(pos);
                 end
                 mu = mu * scale + loc;
                 mu2 = mu2 * scale * scale;
             else
-                ME = MException('MATLAB:extreme:stats',...
+                ME = MException('MATLAB:extreme:ste_block_maxima:stats',...
                     'stats not supported for method: %s', obj.method);
                 throw(ME);
             end
@@ -1031,7 +1030,7 @@ classdef extreme < handle
             b = max(a, b);
 
             if (a==Inf && b==Inf) || (a==-Inf && b==-Inf)
-                ME = MException('MATLAB:extreme:quad',"Infinity " + ...
+                ME = MException('MATLAB:extreme:ste_block_maxima:quad',"Infinity " + ...
                     "comparisons don't work with this method.");
                 throw(ME);
             end
@@ -1723,3 +1722,4 @@ classdef extreme < handle
         end        
     end
 end
+
