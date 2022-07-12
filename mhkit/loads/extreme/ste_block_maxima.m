@@ -548,7 +548,7 @@ classdef ste_block_maxima < handle
             % return self._nnlf_and_penalty(x, args) + n_log_scale
 
             % Negative loglikelihood function
-            cond0 = ~genste_block_maxima.support_mask(x, args);
+            cond0 = ~ste_block_maxima.support_mask(x, args);
             n_bad = sum(cond0(:));
             if n_bad > 0
                 x = x(~cond0);

@@ -61,8 +61,7 @@ classdef peaks_distribution < handle
             % Both the ftol and xtol criteria must be met for convergence.
             vals = obj.minimize_neldermead();
             theta = peaks_distribution.restore([1, 1.0, 0, 1], vals);
-            obj = obj.penalize_nnlf(theta);
-
+            
             if theta(4) < 0 || any(theta(1:2) < 0) 
                 ME = MException('MATLAB:peaks_distribution:minimize_neldermead',...
                     ['Optimization converged to parameters that are ' ...
