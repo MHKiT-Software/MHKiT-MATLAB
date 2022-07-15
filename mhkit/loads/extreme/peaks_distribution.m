@@ -113,18 +113,43 @@ classdef peaks_distribution < handle
             subset_scale_params = zeros([7,1]);
             setLim = 0.6:0.05:0.9;
             for qq = 1:7
-                xset = x(F > setLim(1));
-                Fset = F(F > setLim(1));
-                [shape, scale] = obj.minpack_lmdif(xset, Fset, p0);
+                xset = x(F > setLim(qq));
+                Fset = F(F > setLim(qq));
+                [shape, scale, ierr] = obj.minpack_lmdif(xset, Fset, p0);
+                if ierr > 3
+                    switch ierr                        
+                        case 4
+                            err_msg = ['the cosine of the angle between ' ...
+                                'FVEC and any column of the jacobian is ' ...
+                                'at most GTOL in absolute value.'];
+                        case 5
+                            err_msg = ['number of calls to FCN has reached ' ...
+                                'or exceeded MAXFEV.'];
+                        case 6
+                            err_msg = ['FTOL is too small. No further ' ...
+                                'reduction in the sum of squares is ' ...
+                                'possible.'];
+                        case 7
+                            err_msg = ['XTOL is too small. No further ' ...
+                                'improvement in the approximate solution ' ...
+                                'X is possible.'];
+                        case 8
+                            err_msg = ['GTOL is too small. FVEC is ' ...
+                                'orthogonal to the columns of the jacobian ' ...
+                                'to machine precision.'];
+                    end
+                    ME = MException(['MATLAB:extreme:ste_block_maxima:' ...
+                        'minpack_lmdif'],err_msg);
+                    throw(ME);
+                end
                 subset_shape_params(qq) = shape;
                 subset_scale_params(qq) = scale;
             end
 
-
-%             obj.paramEsts{1} = theta(1); % shape 1 (a)
-%             obj.paramEsts{2} = theta(2); % shape 2 (c)
-%             obj.paramEsts{3} = theta(3); % location
-%             obj.paramEsts{4} = theta(4); % scale
+            obj.paramEsts{1} = 1;                           % shape 1 (a)
+            obj.paramEsts{2} = mean(subset_shape_params);   % shape 2 (c)
+            obj.paramEsts{3} = 0;                           % location
+            obj.paramEsts{4} = mean(subset_scale_params);   % scale
             
         end
 
@@ -683,11 +708,11 @@ classdef peaks_distribution < handle
                         wa3(j) = 0.0;
                         l = ipvt(j);
                         temp = wa1(l);
-                        wa3(1:j) = wa3(1:j) + fjac(1:j,j) * temp;
+                        wa3(1:j) = wa3(1:j) + fjac(1:j,j)' * temp;                        
                     end
 
                     temp1 = norm(wa3)/fnorm;
-                    temp2 = (sqrt(par)*pnrom)/fnorm;
+                    temp2 = (sqrt(par)*pnorm)/fnorm;
                     prered = temp1^2 + temp2^2 / 0.5;
                     dirder = -1*(temp1^2 + temp2^2);
 
@@ -722,7 +747,7 @@ classdef peaks_distribution < handle
 
                     if 0.0001 <= ratio
                         x(1:n) = wa2(1:n);
-                        wa2(1:n) = diag(1:n) * x(1:n);
+                        wa2(1:n) = diag(1:n) .* x(1:n);
                         fvec = wa4;
                         xnorm = norm(wa2);
                         fnorm = fnorm1;
@@ -755,16 +780,16 @@ classdef peaks_distribution < handle
                         info = 5;
                     end
 
-                    if abs(actred) <= epsmch && prered <= epsmch &&...
+                    if abs(actred) <= eps && prered <= eps &&...
                             0.5*ratio <= 1.0
                         info = 6;
                     end
 
-                    if delta <= epsmch*xnorm
+                    if delta <= eps*xnorm
                         info = 7;
                     end
 
-                    if gnorm <= epsmch
+                    if gnorm <= eps
                         info = 8;
                     end
 
