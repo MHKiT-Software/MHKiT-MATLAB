@@ -153,10 +153,48 @@ classdef peaks_distribution < handle
             
         end
 
-        function peaks_over_threshold(obj, qoi_peaks)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            
+        function peaks_over_threshold(obj, qoi_peaks, options)
+            arguments 
+                obj
+                qoi_peaks
+                options.thresh = mean(qoi_peaks) + 1.4*std(qoi_peaks);
+            end
+
+            if ~isfloat(options.thresh)
+                ME = MException('MATLAB:extreme:peaks_over_threshold',...
+                    'threshold must be of type float');
+                throw(ME);
+            end
+
+            thresh = options.thresh;
+            obj.method = 'pot';
+            obj.paramEsts = cell([1,3]);
+
+            % peaks over threshold
+            x = sort(qoi_peaks);
+            pot = x(x>thresh) - thresh;
+            obj.qoi_peaks = pot;
+
+            % Initial guess
+            obj.paramEsts{1} = 1.0;
+            [loc, scale] = obj.fit_loc_scale_support();
+            obj.paramEsts{2} = loc;
+            obj.paramEsts{3} = scale;          
+
+            % Fit a generalized Pareto
+            vals = obj.minimize_neldermead();
+            theta = peaks_distribution.restore([obj.paramEsts{:}], vals);
+
+            if theta(3) < 0 || ~isfinite(theta(1))
+                ME = MException('MATLAB:peaks_distribution:minimize_neldermead',...
+                    ['Optimization converged to parameters that are ' ...
+                    'outside the range allowed by the distribution.']);
+                throw(ME);
+            end
+
+            obj.paramEsts{1} = theta(1);    % shape
+            obj.paramEsts{2} = theta(2);    % location
+            obj.paramEsts{3} = theta(3);    % scale   
         end
 
         %% Statistical Methods
@@ -342,10 +380,10 @@ classdef peaks_distribution < handle
             scale_hat = sqrt(mu2hat / mu2);
             loc_hat = muhat - scale_hat*mu ;
 
-            if isinf(loc_hat)
+            if isinf(loc_hat) || isnan(loc_hat)
                 loc_hat = 0;
             end
-            if ~(~isinf(scale_hat) && 0 < scale_hat)
+            if ~(~isinf(scale_hat) && 0 < scale_hat) || isnan(scale_hat)
                 scale_hat = 1;
             end
         end
@@ -370,7 +408,8 @@ classdef peaks_distribution < handle
             nonzdelt = 0.05;
             zdelt = 0.00025;
 
-            [x0, ~, ~] = obj.als();            
+            x0 = [1.0, 1.0];   
+            args = obj.als();
             N = length(x0);
             sim = zeros([N + 1, N]);
             sim(1,:) = x0;
@@ -390,8 +429,8 @@ classdef peaks_distribution < handle
             fsim = zeros([N + 1,1]);
 
             for k = 1:N+1                
-                theta = ...
-                    peaks_distribution.restore([1, 1.0, 0, 1], sim(k,:));
+                theta = peaks_distribution.restore(...
+                    [args, 0, 1], sim(k,:));
                 fsim(k,1) = obj.penalize_nnlf(theta);
             end
 
@@ -409,14 +448,14 @@ classdef peaks_distribution < handle
                 xbar = sum(sim(1:end-1,:),1)/N;
                 xr = (1 + rho) * xbar - rho * sim(end,:);
                 theta = ...
-                    peaks_distribution.restore([1, 1.0, 0, 1], xr);
+                    peaks_distribution.restore([args, 0, 1], xr);
                 fxr = obj.penalize_nnlf(theta);
                 doshrink = false;
 
                 if fxr < fsim(1)
                     xe = (1 + rho * chi) * xbar - rho * chi * sim(end,:);
                     theta = ...
-                    peaks_distribution.restore([1, 1.0, 0, 1], xe);
+                    peaks_distribution.restore([args, 0, 1], xe);
                     fxe = obj.penalize_nnlf(theta);
 
                     if fxe < fxr
@@ -434,8 +473,8 @@ classdef peaks_distribution < handle
                         % Perform contraction
                         if fxr < fsim(end)
                             xc = (1 + psi*rho)*xbar - psi*rho*sim(end,:);
-                            theta = ...
-                            peaks_distribution.restore([1, 1.0, 0, 1], xc);
+                            theta = peaks_distribution.restore(...
+                                [args, 0, 1], xc);
                             fxc = obj.penalize_nnlf(theta);
 
                             if fxc <= fxr
@@ -448,7 +487,8 @@ classdef peaks_distribution < handle
                             % Perform an inside contraction
                             xcc = (1 - psi) * xbar + psi * sim(end,:);
                             theta = ...
-                            peaks_distribution.restore([1, 1, 0, 1], xcc);
+                            peaks_distribution.restore(...
+                            [args, 0, 1], xcc);
                             fxcc = obj.penalize_nnlf(theta);
 
                             if fxcc < fsim(end)
@@ -464,7 +504,7 @@ classdef peaks_distribution < handle
                                 sim(j,:) = sim(1,:) + sigma*(sim(j,:) - ...
                                     sim(1,:));
                                 theta = peaks_distribution.restore(...
-                                    [1, 1, 0, 1], sim(j,:));
+                                    [args, 0, 1], sim(j,:));
                                 fsim(j,:) = obj.penalize_nnlf(theta);
                             end
                         end
@@ -498,11 +538,20 @@ classdef peaks_distribution < handle
             if n_bad > 0
                 x = x(~cond0);
             end
-            negxc = -x.^args(2);
-            exm1c = -1*(exp(negxc)-1);
-            logpdf = (log(args(1)) + log(args(2)) + ...
-                (args(1)-1.0)*log(exm1c)...
-                + negxc + (args(2)-1.0)*log(x));
+            if length(args) < 2
+                if args == 0
+                    logpdf = -x;
+                else
+                    logpdf = -1*((args+1)*log(1+ args.*x))./args;
+                    logpdf(imag(logpdf)~=0) = nan;
+                end
+            else
+                negxc = -x.^args(2);
+                exm1c = -1*(exp(negxc)-1);
+                logpdf = (log(args(1)) + log(args(2)) + ...
+                    (args(1)-1.0)*log(exm1c)...
+                    + negxc + (args(2)-1.0)*log(x));
+            end
             finite_logpdf = isfinite(logpdf);
             n_bad = n_bad + nnz(~finite_logpdf);
             if n_bad > 0
@@ -815,19 +864,24 @@ classdef peaks_distribution < handle
             [pos, ~,~] = obj.als;
             loc = 0;
             scale = 1; 
-            obj.paramEsts{3} = loc;
-            obj.paramEsts{4} = scale;
-            
-            % mu is integral of ppf between 0 and 1
-            fun = @(x) obj.ppf(x); 
-            mu = integral(fun,0,1);
-            fun = @(x) obj.ppf(x).^2;
-            mu2p = integral(fun,0,1);
-             
-            mu = mu * scale + loc;
-            mu2 = mu2p - mu^2;
-            mu2 = mu2 * scale * scale;
-            
+            if length(pos) < 2
+                obj.paramEsts{2} = loc;
+                obj.paramEsts{3} = scale;
+                mu = inf;
+                mu2 = nan;
+            else
+                obj.paramEsts{3} = loc;
+                obj.paramEsts{4} = scale;
+                
+                % mu is integral of ppf between 0 and 1
+                fun = @(x) obj.ppf(x); 
+                mu = integral(fun,0,1);
+                fun = @(x) obj.ppf(x).^2;
+                mu2p = integral(fun,0,1);
+                mu = mu * scale + loc;
+                mu2 = mu2p - mu^2;
+                mu2 = mu2 * scale * scale;
+            end         
         end
 
         function [args, loc, scale] = als(obj)
@@ -835,6 +889,10 @@ classdef peaks_distribution < handle
                 args = [obj.paramEsts{1},obj.paramEsts{2}];
                 loc = obj.paramEsts{3};
                 scale = obj.paramEsts{4};
+            else
+                args = obj.paramEsts{1};
+                loc = obj.paramEsts{2};
+                scale = obj.paramEsts{3};
             end
         end
         
@@ -844,7 +902,11 @@ classdef peaks_distribution < handle
     methods(Static)
         function new_theta = restore(args, theta)
             i = 1;
-            fixedn = [1, 3];
+            if length(args) < 4
+                fixedn = [2];
+            else
+                fixedn = [1, 3];
+            end
             for qq = 1:length(args)
                 if ~ismember(qq,fixedn)
                     args(qq) = theta(i);
@@ -1392,7 +1454,6 @@ classdef peaks_distribution < handle
                 x(l) = wa(j);
             end
         end 
-
 
     end
 end
