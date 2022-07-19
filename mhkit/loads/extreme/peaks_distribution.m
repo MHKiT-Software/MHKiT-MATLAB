@@ -6,6 +6,9 @@ classdef peaks_distribution < handle
         qoi_peaks
         method
         paramEsts
+        threshold
+        npot
+        npeaks
     end
     
     methods
@@ -167,6 +170,7 @@ classdef peaks_distribution < handle
             end
 
             thresh = options.thresh;
+            obj.threshold = thresh;
             obj.method = 'pot';
             obj.paramEsts = cell([1,3]);
 
@@ -174,6 +178,8 @@ classdef peaks_distribution < handle
             x = sort(qoi_peaks);
             pot = x(x>thresh) - thresh;
             obj.qoi_peaks = pot;
+            obj.npot = length(pot);
+            obj.npeaks = length(qoi_peaks);
 
             % Initial guess
             obj.paramEsts{1} = 1.0;
@@ -213,10 +219,18 @@ classdef peaks_distribution < handle
             %     quantile corresponding to the lower tail probability q.
 
             if strcmp(obj.method, 'None')
-                ME = MException('MATLAB:extreme:ste_block_maxima:ppf',...
-                    ['You must initialize the ste_block_maxima class with ' ...
+                ME = MException('MATLAB:extreme:peaks_distribution:ppf',...
+                    ['You must initialize the peaks_distribution class with'...
                     'one of the available fit methods.\nMethods include\n' ...
-                    '\tgev\n\tgumbel\n']);
+                    '\tweibull\n\tweibull_tail_fit\n\tpeaks_over_threshold'...
+                    ' (ppf not available for this method']);
+                throw(ME);
+            end
+
+            if strcmp(obj.method, 'pot')
+                ME = MException('MATLAB:extreme:peaks_distribution:ppf',...
+                    ['Percent point function is not available for the ' ...
+                    'peaks over threshold method']);
                 throw(ME);
             end
             
@@ -228,13 +242,75 @@ classdef peaks_distribution < handle
 
             if any(cond)
                 a = args(1); c = args(2);                
-                out = -1*log(-q.^(1.0/a)+1).^(1.0/c);
+                out = (-1*log(-q.^(1.0/a)+1)).^(1.0/c);
                 out = out * scale + loc;
             end
 
             if isempty(out)
                 out = [];
             end
+        end
+
+        function out =  pdf(obj, x)
+            % Probability density function at x of the given RV.
+            % 
+            % Parameters
+            % ----------
+            % x : array_like
+            %     quantiles
+            % 
+            % Returns
+            % -------
+            % pdf : array
+            %     Probability density function evaluated at x
+
+            if strcmp(obj.method, 'None')
+                ME = MException('MATLAB:extreme:peaks_distribution:pdf',...
+                    ['You must initialize the peaks_distribution class with'...
+                    'one of the available fit methods.\nMethods include\n' ...
+                    '\tweibull\n\tweibull_tail_fit\n\t' ...
+                    'peaks_over_threshold']);
+                throw(ME);
+            end
+
+            if strcmp(obj.method, 'pot')
+                args = [];
+                loc = 0;
+                scale = 1;
+            else
+                [args, loc, scale] = obj.als();
+            end
+
+            x = (x-loc)/scale;
+            cond0 = scale > 0;
+            cond1 = 0 <= x & x <= inf & scale > 0;
+            cond = cond0 & cond1;
+            out = zeros(size(cond));
+
+            if any(cond)
+                goodargs = x(cond);
+                if length(args) < 2
+                    % Find the nth derivative of a function at a point.
+                    % Given a function, use a central difference formula 
+                    % with spacing dx to compute the nth derivative at x0.
+                    order = 5;
+                    dx = 1e-5;
+                    weights = [1,-8,0,8,-1]/12.0;
+                    val = 0;
+                    ho = bitshift(order,-1);
+                    for k = 1:order
+                        val = val + weights(k)*obj.cdf(x+(k-ho)*dx);
+                    end
+                    out = val./dx;    
+                else
+                    negxc = -goodargs.^args(2);
+                    exm1c = -1*(exp(negxc)-1);
+                    logpdf = (log(args(1)) + log(args(2)) + ...
+                        (args(1)-1.0)*log(exm1c)...
+                        + negxc + (args(2)-1.0)*log(goodargs));
+                    out(cond) = exp(logpdf)./scale;
+                end
+            end              
         end
 
         function out =  cdf(obj, x, arg)
@@ -251,35 +327,111 @@ classdef peaks_distribution < handle
             %       Cumulative distribution function evaluated at x
 
             if strcmp(obj.method, 'None')
-                ME = MException('MATLAB:extreme:ste_block_maxima:cdf',...
-                    ['You must initialize the ste_block_maxima class with ' ...
-                    'one of the available fit methods.\nMethods include\n\' ...
-                    'tste_block_maxima_gev\n\tste_block_maxima_gumbel\n']);
+                ME = MException('MATLAB:extreme:peaks_distribution:cdf',...
+                    ['You must initialize the peaks_distribution class with'...
+                    'one of the available fit methods.\nMethods include\n' ...
+                    '\tweibull\n\tweibull_tail_fit\n\t' ...
+                    'peaks_over_threshold']);
                 throw(ME);
             end
 
-            if nargin < 3 
-                [args, loc, scale] = obj.als();
+            if strcmp(obj.method, 'pot')
+                out = zeros(size(x));
+                out(x < obj.threshold) = nan;
+                xt = x(x > obj.threshold);
+                if ~isempty(xt)
+                    cdf_inp = xt - obj.threshold;
+                    %
+                    [args, loc, scale] = obj.als();
+                    cdf_inp = (cdf_inp-loc)/scale;
+                    cond0 = scale > 0;
+                    cond1 = peaks_distribution.support_mask(cdf_inp,args)...
+                        & scale > 0;
+                    cond = cond0 & cond1;
+                    pot_ccdf = ones(size(cond));        
+                    if any(cond)
+                        goodargs = -cdf_inp(cond);
+                        c = -args(1); 
+                        if c == 0
+                            bxcx = -1*(exp(goodargs)-1);
+                        else
+                            bxcx = -1*(exp((log(c.*goodargs + 1)./c))-1);
+                        end
+                        pot_ccdf(cond) = bxcx;
+                    end 
+                    %
+                    pot_ccdf = 1 - pot_ccdf;
+                    prop_pot = obj.npot/obj.npeaks;
+                    out(x >= obj.threshold) = 1.0 - (prop_pot * pot_ccdf);
+                end
             else
-                loc = arg(3);
-                scale = arg(4);
-                args = arg(1:2);
-            end
-
-            x = (x-loc)/scale;
-            cond0 = scale > 0;
-            cond1 = (0 < x) & (x < inf) & scale > 0;
-            cond = cond0 & cond1;
-            out = zeros(size(cond));
-
-            if any(cond)
-                goodargs = x(cond);
-                a = args(1); c = args(2); 
-                exm1c = -1*(exp(-goodargs.^c)-1);
-                out(cond) = exm1c.^a;
-            end              
+                if nargin < 3 
+                    [args, loc, scale] = obj.als();
+                else
+                    loc = arg(3);
+                    scale = arg(4);
+                    args = arg(1:2);
+                end
+    
+                x = (x-loc)/scale;
+                cond0 = scale > 0;
+                cond1 = (0 < x) & (x < inf) & scale > 0;
+                cond = cond0 & cond1;
+                out = zeros(size(cond));
+    
+                if any(cond)
+                    goodargs = x(cond);
+                    a = args(1); c = args(2); 
+                    exm1c = -1*(exp(-goodargs.^c)-1);
+                    out(cond) = exm1c.^a;
+                end 
+            end             
         end
 
+        function out = expect(obj)
+            % Calculate expected value of a function with respect to the 
+            % distribution for discrete distribution by numerical summation
+
+            % The expected value of a function ``f(x)`` with respect to a
+            % distribution ``dist`` is defined as::
+            % 
+            %             ub
+            %     E[f(x)] = Integral(f(x) * dist.pdf(x)),
+            %             lb
+            % 
+            % where ub and lb are arguments and x has the dist.pdf(x)
+            % distribution. If the bounds lb and ub correspond to the
+            % support of the distribution, e.g. [-inf, inf] in the default
+            % case, then the integral is the unrestricted expectation of 
+            % f(x). Also, the function f(x) may be defined such that f(x) 
+            % is 0 outside a finite interval in which case the expectation 
+            % is  calculated within the finite range [lb, ub].
+
+            if strcmp(obj.method, 'None')
+                ME = MException('MATLAB:extreme:peaks_distribution:excpect',...
+                    ['You must initialize the peaks_distribution class with'...
+                    'one of the available fit methods.\nMethods include\n' ...
+                    '\tweibull\n\tweibull_tail_fit\n\tpeaks_over_threshold'...
+                    ' (expect not available for this method']);
+                throw(ME);
+            end
+
+            if strcmp(obj.method, 'pot')
+                ME = MException('MATLAB:extreme:peaks_distribution:expect',...
+                    ['Expect function is not available for the ' ...
+                    'peaks over threshold method']);
+                throw(ME);
+            end
+
+            [args, loc, scale] = obj.als();
+            
+            a = 0.0;
+            b = inf;
+            lb = loc + a * scale;
+            ub = loc + b * scale;
+
+            out = obj.quad(lb,ub);
+        end   
 
         %% Fit methods
         function [loc_hat, scale_hat] = fit_loc_scale_support(obj)
@@ -895,7 +1047,31 @@ classdef peaks_distribution < handle
                 scale = obj.paramEsts{3};
             end
         end
-        
+                
+        function out = quad(obj, a, b)
+            % Compute a definite integral.
+            % 
+            % Integrate func from `a` to `b` (possibly infinite interval) 
+            % using a technique from the Fortran library QUADPACK.
+            
+            % check the limits of integration: \int_a^b, expect a < b
+            flip = b < a;
+            a = min(a, b);
+            b = max(a, b);
+
+            if (a==Inf && b==Inf) || (a==-Inf && b==-Inf)
+                ME = MException('MATLAB:extreme:ste_block_maxima:quad',"Infinity " + ...
+                    "comparisons don't work with this method.");
+                throw(ME);
+            end
+            
+            fun = @(x) x .*obj.pdf(x);
+            out = integral(fun,a,b);
+
+            if flip
+                out = -out;
+            end            
+        end
         
     end
 
@@ -1454,6 +1630,17 @@ classdef peaks_distribution < handle
                 x(l) = wa(j);
             end
         end 
+        
+        function out = support_mask(x, arg)
+            % This is just for the peaks over threshold method
+            if arg < 0
+                b = -1/arg;
+            else
+                b = inf;
+            end
+            a = 0;
+            out = (a < x) & (x < b);
+        end
 
     end
 end
