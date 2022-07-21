@@ -338,15 +338,16 @@ classdef peaks_distribution < handle
             if strcmp(obj.method, 'pot')
                 out = zeros(size(x));
                 out(x < obj.threshold) = nan;
-                xt = x(x > obj.threshold);
+                xt = x(x > obj.threshold);               
+                    
                 if ~isempty(xt)
                     cdf_inp = xt - obj.threshold;
                     %
                     [args, loc, scale] = obj.als();
                     cdf_inp = (cdf_inp-loc)/scale;
-                    cond0 = scale > 0;
-                    cond1 = peaks_distribution.support_mask(cdf_inp,args)...
-                        & scale > 0;
+                    cond0 = scale > 0;                    
+                    cond1 = peaks_distribution.support_mask(...
+                            cdf_inp,args) & scale > 0;                        
                     cond = cond0 & cond1;
                     pot_ccdf = ones(size(cond));        
                     if any(cond)
@@ -355,15 +356,18 @@ classdef peaks_distribution < handle
                         if c == 0
                             bxcx = -1*(exp(goodargs)-1);
                         else
-                            bxcx = -1*(exp((log(c.*goodargs + 1)./c))-1);
+                            bxcx = ...
+                                -1*(exp((log(c.*goodargs + 1)./c))-1);
                         end
                         pot_ccdf(cond) = bxcx;
                     end 
                     %
                     pot_ccdf = 1 - pot_ccdf;
                     prop_pot = obj.npot/obj.npeaks;
-                    out(x >= obj.threshold) = 1.0 - (prop_pot * pot_ccdf);
+                    out(x >= obj.threshold) = ...
+                        1.0 - (prop_pot * pot_ccdf);
                 end
+                
             else
                 if nargin < 3 
                     [args, loc, scale] = obj.als();
@@ -774,7 +778,7 @@ classdef peaks_distribution < handle
             ftol = 1.49012e-08;
             xtol = 1.49012e-08;
             gtol = 0.0;
-            maxfev = 600;
+            maxfev = 1000;
             epsfcn = 2.220446049250313e-16;
             factor = 100;
             n = length(x);
@@ -995,6 +999,8 @@ classdef peaks_distribution < handle
                     end
 
                     if info ~= 0
+                        shape = x(1);
+                        scale = x(2);
                         return;
                     end
 
