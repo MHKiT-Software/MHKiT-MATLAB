@@ -70,7 +70,12 @@ classdef ste_peaks
                     end
                 end
 
-                out = brentq(obj, left, right, q);                
+                [out, ierr] = brentq(obj, left, right, q);   
+                if ierr < 0
+                    ME = MException('MATLAB:extreme:ste_peaks:ppf', ...
+                        "Brent's method was not properly bracketed");
+                    throw(ME);
+                end
             end
 
             if isempty(out)
@@ -226,6 +231,7 @@ classdef ste_peaks
 
             maxiter = 100;
             xtol = 1e-12;
+            ierr = 0;
             f = @(x) obj.cdf(x)-args;
 
             if f(a)*f(b) >= 0
@@ -284,7 +290,6 @@ classdef ste_peaks
             end 
             out = s;
         end
-
 
     end
 end
