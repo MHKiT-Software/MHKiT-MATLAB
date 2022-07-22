@@ -779,8 +779,7 @@ classdef peaks_distribution < handle
             xtol = 1.49012e-08;
             gtol = 0.0;
             maxfev = 1000;
-            epsfcn = 2.220446049250313e-16;
-            factor = 100;
+            max_check = -1;
             n = length(x);
             mode = 1;
             info = 0;
@@ -982,7 +981,27 @@ classdef peaks_distribution < handle
 
                     % Tests for termination and stringent tolerances.
                     if nfev >= maxfev
-                        info = 5;
+                        % it may just be converging slowly so check if the
+                        % error is progressing downward and up maxfev if it
+                        % seems to be making progress
+                        if max_check < 0
+                            % first time hitting this mark
+                            if ftol/actred > 0.5
+                                maxfev = maxfev * 1.5;
+                                max_check = actred;
+                            else
+                                info = 5;
+                            end
+                        else
+                            % its been increased already. check to make
+                            % sure its still making progress
+                            if actred/max_check < 0.5
+                                maxfev = maxfev + 500;
+                                max_check = actred;
+                            else
+                                info = 5;
+                            end
+                        end
                     end
 
                     if abs(actred) <= eps && prered <= eps &&...

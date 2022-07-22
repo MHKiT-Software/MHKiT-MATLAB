@@ -151,6 +151,28 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
             assertTrue(testCase,isfile(savepath));
             delete(savepath);
         end
+
+        function test_shortterm_extreme(testCase)
+            methods = {'peaks_weibull', 'peaks_weibull_tail_fit',...
+                   'peaks_over_threshold', 'block_maxima_gev',...
+                   'block_maxima_gumbel'};
+             filename = '../../examples/data/loads/time_series_for_extremes.txt';
+             fileID = fopen(filename,'r');
+             data = fscanf(fileID, '%f %f', [2 Inf])';
+             fclose(fileID);
+             t = data(:,1);
+             data = data(:,2);
+             t_st = 1.0 * 60.0 * 60.0;
+             x = 1.6;
+             cdfs_1 = [0.006707151517989, 0.594384010130303,...
+                 0.615007863088253, 0.607580778981132, 0.903357461827988];             
+             for i = 1:numel(methods)
+                 method = methods{i};
+                 cdf_1 = cdfs_1(i);
+                 ste = short_term_extreme(t, data, t_st, method);
+                 testCase.assertLessThan(abs(ste.cdf(x)-cdf_1), 1e-6);                 
+             end
+        end
     end
 end  
 
