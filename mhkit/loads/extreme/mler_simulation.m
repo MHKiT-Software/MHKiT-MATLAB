@@ -15,10 +15,10 @@ function sim = mler_simulation(sim)
 %             'endTime': ending time [s]
 %             'dT': time-step size [s]
 %             'T0': time of maximum event [s]
-%             'startx': start of simulation space [m]
+%             'startX': start of simulation space [m]
 %             'endX': end of simulation space [m]
 %             'dX': horizontal spacing [m]
-%             'X': position of maximum event [m]
+%             'X0': position of maximum event [m]
 %         
 %      Returns
 %      -------
@@ -39,8 +39,9 @@ if nargin < 1
     sim.endX = 300.0;  % .m End of simulation space
     sim.dX = 1.0;  % .m Horiontal spacing
     sim.X0 = 0.0;  % .m Position of maximum event
-end
-
+else
+    assert(isa(sim,'struct'), 'sim needs to be of type struct!')
+end 
 
 sim.maxIT = ceil((sim.endTime - sim.startTime)/sim.dT + 1);
 sim.T = linspace(sim.startTime, sim.endTime, sim.maxIT);

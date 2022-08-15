@@ -62,7 +62,7 @@ S = wave_spectrum .* coeff_a_rn.^2 .* response_desired^2;
 S(isnan(S)) = 0; % replace nans with zero
 % if the response amplitude we ask for is negative, we will add
 % a pi phase shift to the phase information.  This is because
-% the sign of self.desiredRespAmp is lost in the squaring above.
+% the sign of response_desired is lost in the squaring above.
 % Ordinarily this would be put into the final equation, but we
 % are shaping the wave information so that it is buried in the
 % new spectral information, S. (AP)
