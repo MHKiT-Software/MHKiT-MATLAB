@@ -51,6 +51,25 @@ function out = set_coords(ds, ref_frame)
     end
     ds.attrs.coord_sys = ref_frame;
     ds.coord_sys = ref_frame;
+
+    % In xarray this is adequate. When you change ds.coords.dir it
+    % propogates that change to each field that has dir as a coordinate.
+    % Here, however, we must manaully propogate that change
+    fn = fieldnames(ds); 
+    for qq = 1:numel(fn)
+        field = fn{qq};
+        if isfield(ds.(field),'coords')
+            % This is a data field
+            if isfield(ds.(field).coords, 'dir')
+                % replace dir
+                ds.(field).coords.dir = ds.coords.dir;
+            end
+            if isfield(ds.(field).coords, 'dirIMU')
+                % replace dirIMU
+                ds.(field).coords.dirIMU = ds.coords.dirIMU;
+            end
+        end
+    end
          
     tag = {'', '_echo', '_bt'};
     for qq = 1:3
