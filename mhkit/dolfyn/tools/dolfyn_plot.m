@@ -108,8 +108,13 @@ function dolfyn_plot(ds, field, options)
         if ~isempty(options.title)
             title(options.title);
         else
-            title(strcat(ds.(field).dims{3}," = ",...
-                ds.(field).coords.(ds.(field).dims{3}){options.dim}))
+            try
+                title(strcat(ds.(field).dims{3}," = ",...
+                    ds.(field).coords.(ds.(field).dims{3}){options.dim}))
+            catch
+                title(strcat(ds.(field).dims{3}," = ", string(...
+                    ds.(field).coords.(ds.(field).dims{3})(options.dim))))
+            end
         end
         colormap(bluewhitered)
         cb = colorbar;
