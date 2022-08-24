@@ -833,7 +833,7 @@ classdef ste_block_maxima < handle
                         info = 4;
                         return
                     end
-                    if nslow1 == 10
+                    if nslow1 == 100
                         info = 5;
                         return
                     end
