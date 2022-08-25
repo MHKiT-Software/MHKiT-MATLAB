@@ -1,5 +1,4 @@
 classdef ste_block_maxima < handle  
-
     
     properties
         block_maxima
@@ -306,7 +305,10 @@ classdef ste_block_maxima < handle
 
             out = obj.quad(lb,ub);
         end        
+    
+    end
 
+    methods (Access='private')
         %% Fit methods
         function [loc_hat, scale_hat] = fit_loc_scale_support(obj)
             % Estimate loc and scale parameters from data accounting 
@@ -833,7 +835,7 @@ classdef ste_block_maxima < handle
                         info = 4;
                         return
                     end
-                    if nslow1 == 10
+                    if nslow1 == 100
                         info = 5;
                         return
                     end
@@ -1045,7 +1047,7 @@ classdef ste_block_maxima < handle
 
     end
 
-    methods(Static)
+    methods(Static, Access='private')
 
         function skewed = skew(data)
             % skew is third central moment / variance**(1.5)

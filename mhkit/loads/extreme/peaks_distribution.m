@@ -31,7 +31,7 @@ classdef peaks_distribution < handle
             % 
             % Returns
             % -------
-            % Probability distribution of the peaks.
+            % parameter estimates set for weibull method.
 
             obj.qoi_peaks = qoi_peaks;
             obj.method = 'weibull';
@@ -92,7 +92,7 @@ classdef peaks_distribution < handle
             % 
             % Returns
             % -------
-            % Probability distribution of the peaks.
+            % parameter estimates set for weibull tail fit method.
 
             % Estimate the weibull parameters 
             if isrow(qoi_peaks)
@@ -157,6 +157,30 @@ classdef peaks_distribution < handle
         end
 
         function peaks_over_threshold(obj, qoi_peaks, options)
+            % Estimate the peaks distribution using the peaks over 
+            % threshold method.
+            % 
+            % This fits a generalized Pareto distribution to all the peaks 
+            % above the specified threshold. The distribution is only 
+            % defined for values above the threshold and therefore cannot 
+            % be used to obtain integral metrics such as the expected 
+            % value. A typical choice of threshold is 1.4 standard 
+            % deviations above the mean. The peaks over threshold
+            % distribution can be accessed through the `pot` field of the 
+            % returned peaks distribution.
+            % 
+            % Parameters
+            % ----------
+            % x : array
+            %     Global peaks.
+            % threshold : float
+            %     Threshold value. Only peaks above this value will be used.
+            %     Default value calculated as: `np.mean(x) + 1.4 * np.std(x)`
+            % 
+            % Returns
+            % -------
+            % parameter estimates set for peaks over threshold method.
+
             arguments 
                 obj
                 qoi_peaks
@@ -436,7 +460,10 @@ classdef peaks_distribution < handle
 
             out = obj.quad(lb,ub);
         end   
+    
+    end
 
+    methods (Access='private')
         %% Fit methods
         function [loc_hat, scale_hat] = fit_loc_scale_support(obj)
             % Estimate loc and scale parameters from data accounting 
@@ -1100,7 +1127,7 @@ classdef peaks_distribution < handle
         
     end
 
-    methods(Static)
+    methods(Static, Access='private')
         function new_theta = restore(args, theta)
             i = 1;
             if length(args) < 4
