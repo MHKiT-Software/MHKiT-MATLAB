@@ -1458,7 +1458,7 @@ classdef ste_block_maxima < handle
                   wa2(j) = sum2;
                 end 
             
-                temp = enorm ( n, wa2 );
+                temp = norm( n, wa2 );
                 sgnorm = ( gnorm / temp ) / temp;
                 alpha = 0.0;
 
