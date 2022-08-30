@@ -82,7 +82,120 @@ x1_components = x1_x2_components(:, 1);
 x2_components = x1_x2_components(:, 2);
 
 % Apply shift to Component 2 to make all values positive
+shift = abs(min(x2_components)) + 0.1;
+x2_components = x2_components + shift;
 
+%% STEP 2: Fit Component 1 data using a Gaussian Distribution
+[x1_sorted, x1_sort_index] = sort(x1_components);
+x2_sorted = x2_components(x1_sort_index);
+
+fshape_n = mean(x1_sorted);
+x1_fit.scale = length(x1_sorted) / sum(x1_sorted.^(-1) - fshape_n^(-1));
+x1_fit.mu = fshape_n / x1_fit.scale;
+x1_fit.loc = mean_location;
+
+%% Step 3: Bin Data & find order 1 linear relation between x1 & x2 means
+N = length(x1);
+minimum_4_bins = floor(N*0.25);
+if bin_size > minimum_4_bins
+    bin_size = minimum_4_bins;
+    fprintf(['To allow for a minimum of 4 bins the bin size has been ' ...
+        'set to %d \n'], minimum_4_bins);    
+end
+
+N_multiples = floor(N / bin_size);
+max_N_multiples_index = N_multiples*bin_size;
+
+x1_integer_multiples_of_bin_size = x1_sorted(1:max_N_multiples_index);
+x2_integer_multiples_of_bin_size = x2_sorted(1:max_N_multiples_index);
+stride = length(x1_integer_multiples_of_bin_size)/N_multiples;
+
+x1_bins = zeros([stride,N_multiples]);
+x2_bins = zeros([stride,N_multiples]);
+x1_means  = zeros([N_multiples+1,1]);
+x2_means  = zeros([N_multiples+1,1]);
+x2_sigmas = zeros([N_multiples+1,1]);
+
+for kk = 1:N_multiples
+    jj = (kk-1)*stride + 1;
+    qq = (kk)*stride;
+    x1_bins(:,kk) = x1_integer_multiples_of_bin_size(jj:qq);
+    x2_bins(:,kk) = x2_integer_multiples_of_bin_size(jj:qq);
+
+    x1_means(kk) = mean(x1_bins(:,kk)); 
+    x2_means(kk) = mean(x2_bins(:,kk)); 
+    x2_sigmas(kk) = std(x2_bins(:,kk));
+end
+
+x1_last_bin = x1_sorted(max_N_multiples_index:end);
+x2_last_bin = x2_sorted(max_N_multiples_index:end);
+
+x1_means(end) = mean(x1_last_bin); 
+x2_means(end) = mean(x2_last_bin); 
+x2_sigmas(end) = std(x2_last_bin);
+
+% coeff = polyfit(x1_means, x2_means, 1);
+% mu_fit.slope = coeff(1);
+% mu_fit.intercept = coeff(2);
+
+mu_fit = linregress(x1_means, x2_means);
+
+
+%% TEP 4: Find order 2 relation between x1_mean and x2 standard deviation
+sigma_polynomial_order = 2;
+
+
+
+    function out = linregress(x,y)
+        % Calculate a linear least-squares regression for two sets of 
+        % measurements.
+
+        n = length(x);
+        xmean = mean(x);
+        ymean = mean(y);
+
+        % Average sums of square differences from the mean
+        %   ssxm = mean( (x-mean(x))^2 )
+        %   ssxym = mean( (x-mean(x)) * (y-mean(y)) )
+        dummy = cov(x,y);
+        ssxm = dummy(1,1); ssxym = dummy(1,2); ssym = dummy(2,2);
+
+        % R-value
+        %   r = ssxym / sqrt( ssxm * ssym )
+        if ssxm == 0.0 || ssym == 0.0
+            % If the denominator was going to be 0
+            r = 0.0;
+        else
+            r = ssxym / sqrt(ssxm * ssym);
+            % Test for numerical error propagation (make sure -1 < r < 1)
+            if r > 1.0
+                r = 1.0;
+            elseif r < -1.0
+                r = -1.0;
+            end
+        end
+
+        slope = ssxym / ssxm;
+        intercept = ymean - slope*xmean;
+
+        df = n - 2;  % Number of degrees of freedom
+        % n-2 degrees of freedom because 2 has been used up
+        % to estimate the mean and standard deviation       
+        slope_stderr = sqrt((1 - r^2) * ssym / ssxm / df);
+
+        % Also calculate the standard error of the intercept
+        % The following relationship is used:
+        %   ssxm = mean( (x-mean(x))^2 )
+        %        = ssx - sx*sx
+        %        = mean( x^2 ) - mean(x)^2
+        intercept_stderr = slope_stderr * sqrt(ssxm + xmean^2);
+
+        out.slope = slope;
+        out.intercept = intercept;
+        out.rvalue = r;
+        out.stderr = slope_stderr;
+        out.intercept_stderr = intercept_stderr;
+    end
 
 end
 
