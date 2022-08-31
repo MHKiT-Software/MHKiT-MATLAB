@@ -143,6 +143,16 @@ mu_fit = linregress(x1_means, x2_means);
 
 %% TEP 4: Find order 2 relation between x1_mean and x2 standard deviation
 sigma_polynomial_order = 2;
+sig_0 = 0.1 * ones([sigma_polynomial_order + 1,1]);
+obj_func = @objective;
+con1 = @y_intercept_gt_0;
+con2 = @sig_polynomial_min_gt_0;
+
+constraints = struct('con_1',struct('type', 'ineq', 'fun',con1),...
+    'con_2',struct('type', 'ineq', 'fun',con2));
+
+sigma_fit = minimize_slsqp( ...
+    obj_func, sig_0, x1_means, x2_sigmas, constraints);
 
 
 
@@ -195,6 +205,21 @@ sigma_polynomial_order = 2;
         out.rvalue = r;
         out.stderr = slope_stderr;
         out.intercept_stderr = intercept_stderr;
+    end
+
+    function error = objective(sig_p, x1_means, x2_sigmas)
+        % Polynomial evaluation
+        predicted = polyval(sig_p, x1_means);
+        % Mean square error
+        error = mean((x2_sigmas - predicted).^2);
+    end
+
+    function out = y_intercept_gt_0(sig_p)
+        out = sig_p(3);
+    end
+
+    function out = sig_polynomial_min_gt_0(sig_p)
+        out = (sig_p(3) - (sig_p(2)^2) / (4 * sig_p(1)));
     end
 
 end
