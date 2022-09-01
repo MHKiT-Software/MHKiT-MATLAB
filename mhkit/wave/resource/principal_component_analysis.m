@@ -141,7 +141,7 @@ x2_sigmas(end) = std(x2_last_bin);
 mu_fit = linregress(x1_means, x2_means);
 
 
-%% TEP 4: Find order 2 relation between x1_mean and x2 standard deviation
+%% STEP 4: Find order 2 relation between x1_mean and x2 standard deviation
 sigma_polynomial_order = 2;
 sig_0 = 0.1 * ones([sigma_polynomial_order + 1,1]);
 obj_func = @objective;
