@@ -248,6 +248,7 @@ end
         %    w      : see input description of w
 
         n = length(x);
+        n1 = n + 1;
         la = max([1, m]);
         
         r   = zeros([m+n+n+2,1]);
@@ -257,6 +258,9 @@ end
         s   = zeros([n+1,1]);
         u   = zeros([n+1,1]);
         v   = zeros([n+1,1]);
+        iw = 1 + la + n1*n/2 + 1 + n + n + n + la + n1 + n1 + n1;
+        w_  = w(iw:end);
+        goto_code = 0;
         
         if mode < 0
             % call jacobian at current x 
@@ -308,11 +312,380 @@ end
 
             ldl(n,l,u,+one/h1,v);
             ldl(n,l,v,-one/h2,u);
+            gocode = 200;
         
         elseif mode == 0
-            something
+            itermx = iter;
+            if acc >= 0.0 
+                iexact = 0;
+            else
+                iexact = 1;
+            end 
+            acc = abs(acc);
+            tol = 10*acc;
+            iter = 0;
+            ireset = 0;
+            n1 = n + 1;
+            n2 = n1*n/2;
+            n3 = n2 + 1;
+            s(1:n) = 0.0;  
+            mu(1:m) = 0.0; 
         else
             % call functions at current x
+            t = f;
+            for j = 1:m
+                if j <= meq
+                    h1 = c(j);
+                else
+                    h1 = 0.0;
+                end
+                t = t + mu(j) * max(-c(j),h1);
+            end
+            h1 = t - t0;
+            if iexact+1 == 1
+                if h1 <= h3/10.0 || line > 10
+                    goto_code = 500;
+                end
+                alpha = min(max(h3/(2.0*(h3-h1)),alphamin),alphamax);
+                goto_code = 300;
+            elseif iexact+1 == 2
+                goto_code = 400;
+            else
+                goto_code = 500;
+            end
+        end
+
+        % reset bfgs matrix
+
+        if goto_code <= 100            
+            if ireset > 5
+                mode = check_convergence( ...
+                    n,f,f0,x,x0,s,h3,tol,tolf,toldf,toldx,0,8);
+                return
+            else
+                l(1:n2) = 0.0; %<-----|
+                %l = dcopy(n2,l(1),0,l,1);
+                j = 1;
+                for i = 1:n
+                    l(j) = 1.0;
+                    j = j + n1 - i;
+                end
+            end
+        end
+
+        %  main iteration : search direction, steplength, ldl'-update
+
+        if goto_code <= 200
+            mode = 9;
+            if iter > itermx
+                return
+            end
+            % search direction as solution of qp - subproblem
+            u(1:n) = xl(1:n);
+            v(1:n) = xu(1:n);
+            %u = dcopy(n,xl,1,u,1);
+            %v = dcopy(n,xu,1,v,1);
+            u = daxpy(n,-1.0,x,1,u,1);
+            v = daxpy(n,-1.0,x,1,v,1);
+            h4 = 1.0;
+
+            lsq(m,meq,n,n3,la,l,g,a(:,1:n),c,u,v,s,r,w_,mode);
+
+        end
+
+        %
+
+
+
+    end
+
+    function lsq(m,meq,n,nl,la,l,g,a,b,xl,xu,x,y,w,mode)
+        %   MINIMIZE with respect to X
+        %
+        %             ||E*X - F||
+        %                             
+        %   WITH UPPER TRIANGULAR MATRIX E = +D^.5   *L^T 
+        %                     AND VECTOR F = -D^-1/2 *L^-1  *G
+        %
+        %  WHERE THE UNIT LOWER TRIDIANGULAR MATRIX L IS STORED COLUMNWISE
+        %  DENSE IN THE N*(N+1)/2 ARRAY L WITH VECTOR D STORED IN ITS
+        % 'DIAGONAL' THUS SUBSTITUTING THE ONE-ELEMENTS OF L
+        %
+        %   SUBJECT TO
+        %
+        %             A(J)*X - B(J) = 0 ,         J=1,...,MEQ,
+        %             A(J)*X - B(J) >=0,          J=MEQ+1,...,M,
+        %             XL(I) <= X(I) <= XU(I),     I=1,...,N,
+        %     ON ENTRY, THE USER HAS TO PROVIDE THE ARRAYS L, G, A, B, XL, 
+        %     XU. WITH DIMENSIONS: L(N*(N+1)/2), G(N), A(LA,N), B(M), 
+        %     XL(N), XU(N). THE WORKING ARRAY W MUST HAVE AT LEAST THE 
+        %     FOLLOWING DIMENSION:
+        %     DIM(W) =        (3*N+M)*(N+1)                        for LSQ
+        %                    +(N-MEQ+1)*(MINEQ+2) + 2*MINEQ        for LSI
+        %                    +(N+MINEQ)*(N-MEQ) + 2*MEQ + N        for LSEI
+        %                      with MINEQ = M - MEQ + 2*N
+        %     ON RETURN, NO ARRAY WILL BE CHANGED BY THE SUBROUTINE.
+        %     X     STORES THE N-DIMENSIONAL SOLUTION VECTOR
+        %     Y     STORES THE VECTOR OF LAGRANGE MULTIPLIERS OF DIMENSION
+        %           M+N+N (CONSTRAINTS+LOWER+UPPER BOUNDS)
+        %     MODE  IS A SUCCESS-FAILURE FLAG WITH THE FOLLOWING MEANINGS:
+        %          MODE=1: SUCCESSFUL COMPUTATION
+        %               2: ERROR RETURN BECAUSE OF WRONG DIMENSIONS (N<1)
+        %               3: ITERATION COUNT EXCEEDED BY NNLS
+        %               4: INEQUALITY CONSTRAINTS INCOMPATIBLE
+        %               5: MATRIX E IS NOT OF FULL RANK
+        %               6: MATRIX C IS NOT OF FULL RANK
+        %               7: RANK DEFECT IN HFTI
+        n1 = n + 1;
+        mineq = m - meq;
+        m1 = mineq + n + n;
+
+        %  determine whether to solve problem
+        %  with inconsistent linerarization (n2=1) or not (n2=0)
+        n2 = n1*n/2 + 1;
+        if n2 == nl
+            n2 = 0;
+        else
+            n2 = 1;
+        end
+        n3 = n - n2;
+
+        % recover matrix e and vector f from l and g
+        i2 = 1;
+        i3 = 1;
+        i4 = 1;
+        ie = 1;
+        i_f = n*n + 1;
+        for i = 1:n3
+            i1 = n1 - i;
+            diagnal = sqrt(l(i2));
+            w(i3) = 0.0;
+            w(i3:i1) = w(i3);
+            w(i3:end) = dcopy(i1-n2,l(i2:end),1,w(i3:end),n);
+            w(i3:end) = dscal(i1-n2,diagnal,w(i3:end),n);
+            w(i3) = diagnal;
+            w(i_f-1+i) = (g(i)-...
+                fort_dot(i-1,w(i4:end),1,w(i_f:end),1))/diagnal;
+            i2 = i2 + i1 - n2;
+            i3 = i3 + n1;
+            i4 = i4 + n;
+        end
+        if n2 == 1
+            w(i3) = l(nl);
+            w(i4) = 0.0;
+            w(i4:end) = dcopy(n3,w(i4:end),0,w(i4:end),1);
+            w(i_f-1+n) = 0.0;
+        end
+        w(i_f:end) = dscal(n, -1.0, w(i_f:end), 1);
+
+        ic = i_f + n;
+        id = ic + meq*n;
+
+        if meq > 0
+            % recover matrix c from upper part of a
+            for i = 1:meq
+                w(ic-1+i:end) = dcopy(n,a(i,:),la,w(ic-1+i:end),meq);
+            end
+
+            %  recover vector d from upper part of b
+
+            w(id:end) = dcopy(meq,b,1,w(id:end),1);
+            w(id:end) = dscal(meq,-1.0,w(id:end),1);
+        end
+
+        ig = id + meq;
+
+        if mineq > 0
+            % recover matrix g from lower part of a
+            dummy_a = a(:);
+            for i = 1:mineq
+                w(ig-1+i:end) = ...
+                    dcopy(n,dummy_a(meq+i:end),la,w(ig-1+i:end),m1);
+            end
+        end
+
+        % augment matrix g by +i and -i
+        ip = ig + mineq;
+        for i = 1:n
+            w(ip-1+i) = 0.0;
+            w(ip-1+i:end) = dcopy(n,w(ip-1+i:end),0,w(ip-1+i:end),m1);
+        end
+        w(ip) = 1.0;
+        w(ip:end) = dcopy(n,w(ip),0,w(ip:end),m1+1);
+
+        im = ip + n;
+        for i = 1:n
+           w(im-1+i) = 0.0;
+           w(im-1+i:end) = dcopy(n,w(im-1+i:end),0,w(im-1+i:end),m1);
+        end 
+        w(im) = -1;
+        w(im:end) = dcopy(n,w(im:end),0,w(im:end),m1+1);
+  
+        ih = ig + m1*n;
+  
+        if  mineq > 0 
+           % recover h from lower part of b
+           w(ih:end) = dcopy(mineq,b(meq+1:end),1,w(ih:end),1);
+           w(ih:end) = dscal(mineq,-1,w(ih:end),1);
+        end
+  
+        % augment vector h by xl and xu
+  
+        il = ih + mineq;
+        w(il:end) = dcopy(n,xl,1,w(il:end),1);
+        iu = il + n;
+        w(iu:end) = dcopy(n,xu,1,w(iu:end),1);
+        w(iu:end) = dscal(n,-1,w(iu:end),1);
+  
+        iw = iu + n;
+
+        [w(ic:ic+(meq*n)-1), w(id:id+meq-1), w(ie:ie+(n*n)-1),...
+         w(i_f:i_f+n-1), w(ig:ig+(m1*n)-1), w(ih:ih+m1-1), w(iw:end),...
+         x, xnorm, mode] = ...
+            lsei(w(ic:ic+(meq*n)-1),... % c
+                 w(id:id+meq-1), ...    % d
+                 w(ie:ie+(n*n)-1),...   % e
+                 w(i_f:i_f+n-1),...     % f
+                 w(ig:ig+(m1*n)-1),...  % g
+                 w(ih:ih+m1-1),...      % h
+                 max(1,meq),meq,n, n, m1,m1,n,w(iw:end),x);
+        %           lc      mc, le,me,lg,mg,n, w,       x
+  
+    end
+  
+    function [c,d,e,f,g,h,w,x,xnrm,mode] = ...
+            lsei(c,d,e,f,g,h,lc,mc,le,me,lg,mg,n,w,x)
+        % dim(c) :   formal (lc,n),    actual (mc,n)
+        % dim(d) :   formal (lc  ),    actual (mc  )
+        % dim(e) :   formal (le,n),    actual (me,n)
+        % dim(f) :   formal (le  ),    actual (me  )
+        % dim(g) :   formal (lg,n),    actual (mg,n)
+        % dim(h) :   formal (lg  ),    actual (mg  )
+        % dim(x) :   formal (n   ),    actual (n   )
+        % dim(w) :   2*mc+me+(me+mg)*(n-mc)  for lsei
+        %          +(n-mc+1)*(mg+2)+2*mg     for lsi
+        % dim(jw):   max(mg,l)
+
+        %c,d,e,f,g,h        
+%         c = reshape(w(ic:ic+(mc*n)-1),[mc,n]);
+%         d = w(id:id+mc-1);
+%         e = reshape(w(ie:ie+(me*n)-1),[me,n]);
+%         f = w(i_f:i_f+me-1);
+%         g = reshape(w(ig:ig+(mg*n)-1),[mg,n]);
+%         h = w(ih:ih+mg-1);
+
+%         iw = ih + mineq + 2*n;
+%         w_ = w(iw:end);
+
+        mode = 2;
+
+        if mc <= n
+            l = n - mc;
+            mc1 = mc + 1;
+            iw = (l+1)*(mg+2) + 2*mg + mc;
+            ie = iw + mc + 1;
+            i_f = ie + me*l;
+            ig = i_f + me;
+    
+            % triangularize c and apply factors to e and g
+
+            for i = 1:mc
+                j = min(i+1,lc);
+                [c(i,1), w(iw+i), c(j,1)] = ...
+                h12(1,    i,  i+1,n,c(i,1),lc,w(iw+i),c(j,1),lc, 1, mc-i);
+                [c(i,1), w(iw+i), e] = ...
+                h12(2,i,i+1,n,c(i,1),lc,w(iw+i),e,le,1,me);
+                [c(i,1), w(iw+i), g] = ...
+                h12(2,i,i+1,n,c(i,1),lc,w(iw+i),g,lg,1,mg);
+            end
+
+            % solve c*x=d and modify f
+            mode = 6;
+            for i = 1:mc
+                if ( abs(c(i,i))<epmach ) 
+                    return
+                end
+                x(i) = (d(i)-fort_dot(i-1,c(i,1),lc,x,1))/c(i,i);
+            end
+
+            mode = 1;
+            w(mc1) = 0.0;
+            w(mc1:end) = dcopy(mg,w(mc1),0,w(mc1:end),1);
+
+            if mc ~= n
+                for i = 1:me
+                    w(i_f-1+i) = f(i) - fort_dot(mc,e(i:end),le,x,1);
+                end
+
+                % store transformed e & g
+                for i = 1:me
+                    w(ie-1+i:end) = ...
+                        dcopy(l,e(i:end),le,w(ie-1+i:end),me);
+                end
+                for i = 1:mg
+                    w(ig-1+i:end) = ...
+                        dcopy(l,g(i:end),lg,w(ig-1+i:end),mg);
+                end
+
+                if mg > 0
+                    % modify h and solve inequality constrained ls problem
+                    for i = 1:mg
+                        h(i) = h(i) - fort_dot(mc,g(i:end),lg,x,1);
+                    end
+                    [w(ie:ie+(me*n)-1),w(i_f:i_f+me-1),w(ig:ig+(mg*n)-1),...
+                        h, w(mc1:end), x, xnrm, mode] = ...
+                        lsi(w(ie:ie+(me*n)-1),...   e
+                            w(i_f:i_f+me-1),...     f
+                            w(ig:ig+(mg*n)-1),...   g
+                            h,me,me,mg,mg,l,w(mc1:end));
+                          % h,le,me,lg,mg,n,w
+                    if mc == 0
+                        return
+                    end
+                    t = dnrm2(mc,x,1);
+                    xnrm = sqrt(xnrm*xnrm+t*t);
+                    if mode ~= 1
+                        return
+                    end
+                else
+                    % solve ls without inequality constraints
+                    mode = 7;
+                    k = max(le,n);
+                    t = sqrt(epmach);
+                    %call hfti(w(ie),me,me,l,w(if),k,1,t,krank,dum,w,w(l+1))
+                    xnrm = dum(1);
+                    x(mc1:end) = dcopy(l,w(i_f:end),1,x(mc1:end),1);
+                    if krank ~= l
+                        return
+                    end
+                    mode = 1;
+                end
+
+
+            end
+        end
+    end
+
+    function [e,f,g,h,w,x,xnorm,mode] = lsi(e,f,g,h,le,me,lg,mg,n,w)
+        % qr-factors of e and application to f
+        e = reshape(e,[le,n]);
+        g = reshape(g,[lg,n]);
+        for i = 1:n
+            j = min(i+1,n);
+            [e(i:end),t,~] = h12(1,i,i+1,me,e(i:end),1,t,e(j:end),1,le,n-i);
+            [e(i:end),t,f] = h12(2,i,i+1,me,e(i:end),1,t,f,1,1,1);
+        end
+
+        % transform g and h to get least distance problem
+        mode = 5;
+        for i = 1:mg
+            for j = 1:n
+                if abs(e(j,j)) < 2.22e-16 
+                    return
+                end
+                g(i,j) = (g(i,j)-fort_dot(j-1,g(i:end),lg,e(j:end),1))/e(j,j);
+            end
+            h(i) = h(i) - fort_dot(n, g(i:end),lg,f,1);
         end
     end
 
@@ -342,22 +715,22 @@ end
 
     function out = eval_con_normals(x, cons, la, n, m, meq, mieq)
         % Compute the normals of the constraints
-        a_eq = zeros([meq,n]);
-        a_ieq = zeros([mieq,n]);
+        a_eq = zeros([meq,n+1]);
+        a_ieq = zeros([mieq,n+1]);
         if ~isempty(cons{1})
             for jj = 1:numel(cons{1})
-                a_eq(jj,:) = approx_derivative(cons{1}{jj}, x);                
+                a_eq(jj,1:n) = approx_derivative(cons{1}{jj}, x);                
             end
         end
         if ~isempty(cons{2})
             for jj = 1:numel(cons{2})
-                a_ieq(jj,:) = approx_derivative(cons{2}{jj}, x);                
+                a_ieq(jj,1:n) = approx_derivative(cons{2}{jj}, x);                
             end
         end
 
         % Now combine a_eq and a_ieq into a single a matrix
         if m == 0
-            out = zeros([la,n]);
+            out = zeros([la,n+1]);
         else
             if meq > 0 && mieq > 0
                 out = [a_eq a_ieq];
@@ -462,6 +835,7 @@ end
                     dx(i) = da*dx(i);
                 end
                 if n < 5 
+                    dx_out = dx;
                     return; 
                 end
             end
@@ -527,6 +901,166 @@ end
         end
 
         dy_out = dy;
+    end
+
+    function dy_out = dcopy(n,dx,incx,dy,incy)
+        if n <= 0 
+            return
+        end
+        
+        if incx == 1 && incy == 1
+            m = rem(n, 7);
+            if m ~= 0
+                for i = 1:m
+                    dy(i) = dx(i);
+                end
+                if n < 7
+                    dy_out = dy;
+                    return
+                end
+            end
+            mp1 = m + 1;
+            for i = mp1:7:n
+                dy(i) = dx(i);
+                dy(i+1) = dx(i+1);
+                dy(i+2) = dx(i+2);
+                dy(i+3) = dx(i+3);
+                dy(i+4) = dx(i+4);
+                dy(i+5) = dx(i+5);
+                dy(i+6) = dx(i+6);
+            end
+        else
+            ix = 1;
+            iy = 1;
+            if incx < 0
+                ix = (-n+1)*incx + 1;
+            end
+            if incy < 0
+                iy = (-n+1)*incy + 1;
+            end
+            for i = 1:n
+                dy(iy) = dx(ix);
+                ix = ix + incx;
+                iy = iy + incy;
+            end
+        end
+
+        dy_out = dy;
+    end
+
+    function mode = check_convergence(n,f,f0,x,x0,s,h3,acc,tolf,toldf,...
+        toldx,converged,not_converged)
+        
+        if h3 < acc
+            mode = not_converged;
+        else
+            % if an are ok then it has converged
+            ok = abs(f-f0) < acc;
+            if ~ok
+                ok = dnrm2(n,s,1) < acc;
+            end
+            % note that these can be ignored if they are < 0
+            if ~ok && tolf >= 0.0
+                ok = abs(f) < tolf;
+            end
+            if ~ok && toldf >= 0.0
+                ok = abs(f-f0) < toldf;
+            end
+            if ~ok && toldx >= 0.0
+                xmx0 = x - x0;
+                ok = dnrm2(n,xmx0,1) < toldx;
+            end
+
+            if ok
+                mode = converged;
+            else
+                mode = not_converged;
+            end
+        end
+    end
+
+    function norm = dnrm2(n,x,incx)
+        if n<1 || incx <1
+            norm = 0.0;
+        elseif n == 1
+            norm = abs(x(1));
+        else
+            scale = 0.0;
+            ssq = 1.0;
+            % the following loop is equivalent to this call to the lapack
+            % auxiliary routine:
+            % call dlassq( n, x, incx, scale, ssq )
+            for ix = 1:incx:1 + (n-1)*incx
+                if abs(x(ix)) > 0.0
+                    absxi = abs(x(ix));
+                    if scale < absxi
+                        ssq = 1.0 + ssq*(scale/absxi)^2;
+                        scale = absxi;
+                    else
+                        ssq = ssq + (absxi/scale)^2;
+                    end
+                end
+            end
+            norm = scale*sqrt(ssq);
+        end
+    end
+    
+    function [u, up, c] = h12(mode,lpivot,l1,m,u,~,up,c,ice,icv,ncv)        
+        if 0 >= lpivot || lpivot >= l1 || l1 > m
+            return
+        end
+        cl = abs(u(lpivot));
+        if mode ~= 2
+            % construct the transformation.
+            for j = l1:m
+                cl = max(abs(u(j)),cl);
+            end
+            if cl <= 0
+                return
+            end
+            clinv = 1.0/cl;
+            sm = (u(lpivot)*clinv)^2;
+            for j = l1:m
+                sm = sm + (u(j)*clinv)^2;
+            end
+            cl = cl*sqrt(sm);
+            if u(lpivot) > 0
+                cl = -cl;
+            end
+            up = u(lpivot) - cl;
+            u(lpivot) = cl;
+        elseif cl < 0.0
+            return
+        end
+
+        if ncv > 0
+            % apply the transformation i+u*(u**t)/b to c.
+            b = up*u(lpivot);
+            % b must be nonpositive here
+            if b < 0.0
+                b = 1/b;
+                i2 = 1 - icv + ice*(lpivot-1);
+                incr = ice*(l1-lpivot);
+                for j = 1:ncv
+                    i2 = i2 + icv;
+                    i3 = i2 + incr;
+                    i4 = i3;
+                    sm = c(i2)*up;
+                    for i = l1:m
+                        sm = sm + c(i3)*u(i);
+                        i3 = i3 + ice;
+                    end
+                    if abs(sm) > 0
+                        sm = sm*b;
+                        c(i2) =c(i2) + sm*up;
+                        for i = l1:m
+                            c(i4) = c(i4) + sm*u(i);
+                            i4 = i4 + ice;
+                        end
+                    end
+                end
+            end
+        end
     end
 
 %% End Helper Functions
