@@ -687,7 +687,355 @@ end
             end
             h(i) = h(i) - fort_dot(n, g(i:end),lg,f,1);
         end
+
+        % solve least distance problem
+        [x,xnorm,w,mode] = ldp(g,lg,mg,n,h,w);
+
     end
+
+    function [x,xnorm,w,mode] = ldp(g,mg,m,n,h,w)
+        % Least distance programming routine.
+        if n <= 0
+            mode = 2;
+        else
+            % state dual problem
+            mode = 1;
+            x = 0.0;
+            xnorm = 0.0;
+            if m ~= 0
+                iw = 0;
+                for j =1:m
+                    for i = 1:n
+                        iw = iw + 1;
+                        w(iw) = g(j,i);
+                    end
+                    iw = iw + 1;
+                    w(iw) = h(j);
+                end
+                jf = iw + 1;
+                for i = 1:n
+                    iw = iw+1;
+                    w(iw) = 0.0;
+                end
+                w(iw+1) = 1.0;
+                n1 = n + 1;
+                iz = iw + 2;
+                iy = iz + n1;
+                iwdual = iy + m;
+                % solve dual problem
+                [w(1:n1*m), w(jf:jf+n1-1), w(iy:iy+m-1), ...
+                    rnorm, w(iwdual:iwdual+m-1), w(iz:iz+n1-1), mode] = ...
+                    nnls(w(1:n1*m),n1,n1,m,...
+                    w(jf:jf+n1-1),w(iwdual:iwdual+m-1),w(iz:iz+n1-1));
+                if mode == 1
+                    mode = 4;
+                    if rnorm > 0.0
+                        % compute solution of primal problem
+                        fac = 1 - fort_dot(m,h,1,w(iy:end),1);
+                        if fac > 0
+                            mode = 1;
+                            fac = 1/fac;
+                            for j = 1:n
+                                x(j) = fac*fort_dot(...
+                                    m,g(j:end),1,w(iy:end),1);
+                            end
+                            xnorm = dnrm2(n,x,1);
+                            % compute lagrange multipliers for primal 
+                            % problem
+                            w(1) = 0.0;
+                            w = dcopy(m,w(1),0,w,1);
+                            w = daxpy(m,fac,w(iy),1,w,1);
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    function [a, b, x, rnorm, w, zz, mode] = nnls(a,mda,m,n,b,w,zz)
+        % Nonnegative least squares algorithm.
+        %  Given an m by n matrix, {A}, and an m-vector, {b},
+        %  compute an n-vector, {x}, that solves the least squares problem:
+        %
+        %  {A}{x} = {b} subject to {x} >= 0 
+
+        factor = 0.01;
+        goto_code = 100;
+        mode = 1;
+        a = reshape(a,[mda,n]);
+
+        if m <= 0 || n <= 0
+            mode = 2;
+            return
+        end
+        iter = 0;
+        itmax = 3*n;
+
+        % initialize the arrays index(1:n) and x(1:n)
+        x = 0.0;
+        index = 1:n;
+        iz2 = n;
+        iz1 = 1;
+        nsetp = 0;
+        npp1 = 1;
+
+        while goto_code > 0
+            % ******  main loop begins here  ******
+            % quit if all coefficients are already in the solution.
+            % or if m cols of a have been triangularized.
+            if goto_code <= 100
+                if iz1 <= iz2 && nsetp < m
+                    % compute components of the dual (negative gradient) 
+                    % vector w()
+                    for iz = iz1:iz2
+                        j = index(iz);
+                        sm = 0.0;
+                        for l = npp1:m
+                            sm = sm + a(l,j) * b(l);
+                        end
+                        w(j) = sm;
+                    end
+                    goto_code = 150;
+                    if goto_code <= 150
+                        % find largest positive w(j)
+                        wmax = 0.0;
+                        for iz = iz1:iz2
+                            j = index(iz);
+                            if w(j) > wmax
+                                wmax = w(j);
+                                izmax = iz;
+                            end
+                        end
+                        % if wmax <= 0. go to termination. this indicates 
+                        % satisfaction of the kuhn-tucker conditions.
+                        if wmax > 0.0
+                            iz = izmax;
+                            j = index(iz);
+    
+                            % the sign of w(j) is ok for j to be moved to 
+                            % set p begin the transformation and check new 
+                            % diagonal element to avoid near linear 
+                            % dependence.
+    
+                            asave = a(npp1,j);
+                            [a(j:end),up,~] = ...
+                                h12(1,npp1,npp1+1,m,a(j:end),1,0,0,1,1,0);
+                            %                       u         up,c  
+                            unorm = 0.0;
+                            if nsetp ~= 0
+                                for l = 1:nsetp
+                                    unorm = unorm + a(l,j)^2;
+                                end
+                            end
+                            unorm = sqrt(unorm);
+                            if (unorm+abs(a(npp1,j))*factor) - unorm > 0
+                                % col j is sufficiently independent.  
+                                % copy b into zz, update zz and solve for 
+                                % ztest ( = proposed new value for x(j) ).
+                                for l = 1:m
+                                    zz(l) = b(l);
+                                end
+                                [a(j:end),up,zz] = h12(2,npp1,npp1+1,m,...
+                                    a(j:end),1,up,zz,1,1,1);
+                                ztest = zz(npp1)/a(npp1,j);
+
+                                % Check if ztest is positive
+                                if ztest > 0
+                                    % the index j=index(iz) has been 
+                                    % selected to be moved from set z to 
+                                    % set p. update b, update indices, 
+                                    % apply householder transformations to 
+                                    % cols in new set z, zero subdiagonal 
+                                    % elts in col j, set w(j)=0.
+                                    for l = 1:m
+                                        b(l) = zz(l);
+                                    end
+                                    index(iz) = index(iz1);
+                                    index(iz1) = j;
+                                    iz1 = iz1 + 1;
+                                    nsetp = npp1;
+                                    npp1 = npp1 + 1;
+
+                                    if iz1 <= iz2
+                                        for jz = iz1:iz2
+                                            jj = index(jz);
+                                            [a(j:end),up,~] = ...
+                                                h12(2,nsetp,npp1,m,...
+                                                a(j:end),1,up,a(jj:end),...
+                                                1,mda,1);
+                                        end
+                                    end
+
+                                    if nsetp ~= m
+                                        for l = npp1:m
+                                            a(l,j) = 0.0;
+                                        end
+                                    end
+
+                                    w(j) = 0.0;
+                                    % solve the triangular system.
+                                    % store the solution temporarily in zz
+                                    rtnkey = 1;
+                                    goto_code = 300;
+                                    continue
+                                end % if ztest>0
+                            end % if x-unorm > 0
+
+                            % reject j as a candidate to be moved from set 
+                            % z to set p. restore a(npp1,j), set w(j)=0., 
+                            % and loop back to test dual coeffs again.
+                            a(npp1,j) = asave;
+                            w(j) = 0.0;
+                            goto_code = 150;
+                            continue
+                        else
+                            goto_code = 200;
+                            continue
+                        end % if wmax > 0
+                    end % if code <= 150
+                end % if iz1<=iz2 and nsetp<m 
+            end % if code <= 100
+
+            % ******  end of main loop  ******
+            %
+            % come to here for termination.
+            % compute the norm of the final residual vector.
+            if goto_code <= 200
+                sm = 0;
+                if npp1 <= m
+                    for i = npp1:m
+                        sm = sm + b(i)^2;
+                    end
+                else
+                    for j = 1:n
+                        w(j) = 0.0;
+                    end
+                end
+                rnorm = sqrt(sm);
+                return;
+            end % code 200
+
+            % the following block of code is used as an internal subroutine
+            % to solve the triangular system, putting the solution in zz()
+            if goto_code <= 300
+                for l = 1:nsetp
+                    ip = nsetp + 1 - l;
+                    if l ~= 1
+                        for ii = 1:ip
+                            zz(ii) = zz(ii) - a(ii,jj)*zz(ip+1);
+                        end
+                    end
+                    jj = index(ip);
+                    zz(ip) = zz(ip)/a(ip,jj);
+                end
+
+                if rtnkey ~= 1 && rtnkey ~= 2
+                    return;
+                end
+                % ******  secondary loop begins here ******
+                %
+                % iteration counter.
+            
+                iter = iter + 1;
+                if iter > itmax
+                    mode = 3;
+                    goto_code = 200;
+                    continue
+                end
+
+                % see if all new constrained coeffs are feasible.
+                % if not compute alpha
+                alpha = 2.0;
+                for ip = 1:nsetp
+                    l = index(ip);
+                    if zz(ip) <= 0.0 
+                        t = -x(l)/(zz(ip)-x(l));
+                        if alpha > t
+                            alpha = t;
+                            jj = ip;
+                        end
+                    end
+                end
+                % if all new constrained coeffs are feasible then 
+                % alpha will still = 2.    
+                % if so exit from secondary loop to main loop
+                if abs(alpha-2) <= 0
+                    % ******  end of secondary loop  ******
+                    for ip = 1:nsetp
+                        i = index(ip);
+                        x(i) = zz(ip);
+                    end
+                    % all new coeffs are positive. 
+                    % loop back to beginning.
+                    goto_code = 100;
+                    continue
+                else
+                    % otherwise use alpha which will be between 0 and 1
+                    % to interpolate between the old x and the new zz.
+                    for ip = 1:nsetp
+                        l = index(ip);
+                        x(l) = x(l) + alpha*(zz(ip)-x(l));
+                    end
+
+                    % modify a and b and the index arrays to move 
+                    % coefficient i from set p to set z.
+                    i = index(jj);
+                    while any(x <= 0)
+                        x(i) = 0.0;
+                        if jj ~= nsetp
+                            jj = jj + 1;
+                            for j = jj:nsetp
+                                ii = index(j);
+                                index(j-1) = ii;
+                                [cc,ss,a(j-1,ii)] = g1(a(j-1,ii),a(j,ii));
+                                a(j,ii) = 0.0;
+                                for l = 1:n
+                                    if l ~= ii
+                                        % apply procedure g2 
+                                        temp = a(j-1,l);
+                                        a(j-1,l) = cc*temp + ss*a(j,l);
+                                        a(j,l) = -ss*temp + cc*a(j,l);
+                                    end
+                                end
+                                % apply procedure g2 (cc,ss,b(j-1),b(j))
+                                temp = b(j-1);
+                                b(j-1) = cc*temp + ss*b(j);
+                                b(j) = -ss*temp + cc*a(j,l);
+                            end
+                        end
+
+                        npp1 = nsetp;
+                        nsetp = nsetp - 1;
+                        iz1 = iz1 - 1;
+                        index(iz1) = i;
+
+                        % see if the remaining coeffs in set p are feasible
+                        % They should be because of the way alpha was 
+                        % determined. if any are infeasible it is due to 
+                        % round-off error.  any that are nonpositive will 
+                        % be set to zero and moved from set p to set z.
+                        for jj = 1:nsetp
+                            i = index(jj);
+                            if x(i) <= 0.0
+                                continue
+                            end
+                        end
+
+                        % copy b( ) into zz( ).  then solve again and 
+                        % loop back
+                        for i = 1:m
+                            zz(i) = b(i);
+                        end
+                        rtnkey = 2;
+                        goto_code = 300;
+                        break
+                    end % while (350 loop)
+                end % abs(alpha-2) <= 0
+            end % code 300
+
+        end % outer while
+    end
+  
 
     function out = ldl(n,a,z,sigma,w)
         ME = MException('MATLAB:wave.resource:minimize_slsqp',...
@@ -1059,6 +1407,29 @@ end
                         end
                     end
                 end
+            end
+        end
+    end
+
+    function [c,s,sig] = g1(a,b)
+        % Compute orthogonal rotation matrix.
+        if abs(a) > abs(b)
+            xr = b/a;
+            yr = sqrt(1+xr^2);
+            c = sign(a)*(1.0/yr);
+            s = c*xr;
+            sig = abs(a)*yr;
+        else
+            if abs(b) > 0
+                xr = a/b;
+                yr = sqrt(1+xr^2);
+                s = sign(b)*(1.0/yr);
+                c = s*xr;
+                sig = abs(b)*yr;
+            else
+                sig = 0.0;
+                c = 0.0;
+                s = 0.0;
             end
         end
     end
