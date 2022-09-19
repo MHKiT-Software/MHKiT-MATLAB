@@ -1,5 +1,5 @@
 function solution = minimize_slsqp(obj_func, x0, inp1, inp2, constraints)
-%MINIMIZE_SLSQP Minimize a scalar function of one or more variables using 
+% MINIMIZE_SLSQP Minimize a scalar function of one or more variables using 
 % Sequential Least Squares Programming (SLSQP).
 %
 %  a nonlinear programming method with quadratic programming subproblems
@@ -120,8 +120,10 @@ len_w = (3*n1+m)*(n1+1)+(n1-meq+1)*(mineq+2) + 2*mineq+(n1+mineq)*(n1-meq) ...
 w = zeros([len_w,1]);
 
 % Bounds
-xl = NaN([n,1]);
-xu = NaN([n,1]);
+xl = (-1e6)*ones([n,1]);
+xu = (1e6)*ones([n,1]);
+% xl = NaN([n,1]);
+% xu = NaN([n,1]);
 
 g = wrapped_grad(x0);
 g(end+1) = 0.0;
@@ -130,6 +132,7 @@ a = eval_con_normals(x0, cons, la, n, m, meq, mieq);
 fx = obj_func(x0, inp1, inp2);
 
 % Initialize internal SLSQP state variables
+x = x0;
 iter    = 1;
 mode    = 0;
 alpha   = 0;
@@ -150,17 +153,36 @@ line    = 0;
 n1      = 0;
 n2      = 0;
 n3      = 0;
+lin_dat = struct('a',0, 'b',0, 'd',0, 'e',0, 'p',0, 'q',0, 'r',0, 'u',0,...
+                 'v',0, 'w',0, 'x',0, 'm',0, 'fu',0, 'fv',0, 'fw',0,...
+                 'fx',0, 'tol1',0, 'tol2',0);
 
 while true
 
-    solution = slsqp(m, meq, x0, xl, xu, fx, c, g, a, acc, ...
+    [solution, lin_dat] = slsqp(m, meq, x, xl, xu, fx, c, g, a, acc, ...
               iter, mode, len_w, w, alpha, f0, gs, h1, h2, h3, h4, t, t0, ...
-              tol, iexact, incons, ireset, itermx, line, n1, n2, n3 );
+              tol, iexact, incons, ireset, itermx, line, n1, n2, n3, ...
+              lin_dat );
+    %**********************************************************************
+    mode = solution.mode;
+    x = solution.x; c = solution.c; g = solution.g; a = solution.a;
+    iter = solution.iter; w = solution.w; f0 = solution.f0; 
+    gs = solution.gs; h1 = solution.h1; h2 = solution.h2; h3 = solution.h3; 
+    h4 = solution.h4; t = solution.t; t0 = solution.t0;
+    iexact = solution.iexact; incons = solution.incons; 
+    ireset = solution.ireset; line = solution.line; n1 = solution.n1; 
+    n2 = solution.n2; n3 = solution.n3;
+    %**********************************************************************
 
-    if solution.mode == 1
+    if mode == 1   % objective and constraint evaluation required
+        fx = obj_func(x, inp1, inp2);
+        c = eval_constraints(x, cons);
     end
 
-    if solution.mode == -1
+    if solution.mode == -1  % gradient evaluation required
+         g = wrapped_grad(x);
+         g(end+1) = 0.0;
+         a = eval_con_normals(x, cons, la, n, m, meq, mieq);
     end
 
     if abs(solution.mode) ~= 1
@@ -169,9 +191,10 @@ while true
 end
 
 %% SLSQP Routine
-    function out = slsqp(m, meq, x, xl, xu, f, c, g, a, acc, ...
+    function [out, lin_dat] = slsqp(m, meq, x, xl, xu, f, c, g, a, acc, ...
               iter, mode, l_w, w, alpha, f0, gs, h1, h2, h3, h4, t, t0, ...
-              tol, iexact, incons, ireset, itermx, line, n1, n2, n3 )
+              tol, iexact, incons, ireset, itermx, line, n1, n2, n3, ...
+              lin_dat)
 
         % Parameters
         % ----------
@@ -246,160 +269,343 @@ end
         %    acc    : final accuracy
         %    mode   : error codes
         %    w      : see input description of w
-
+        
         n = length(x);
         n1 = n + 1;
         la = max([1, m]);
         
-        r   = zeros([m+n+n+2,1]);
-        l   = zeros([(n+1)*(n+2)/2,1]);
-        x0_ = zeros([n,1]);
-        mu  = zeros([la,1]);
-        s   = zeros([n+1,1]);
-        u   = zeros([n+1,1]);
-        v   = zeros([n+1,1]);
-        iw = 1 + la + n1*n/2 + 1 + n + n + n + la + n1 + n1 + n1;
-        w_  = w(iw:end);
+%         r   = zeros([m+n+n+2,1]);
+%         l   = zeros([(n+1)*(n+2)/2,1]);
+%         x0_ = zeros([n,1]);
+%         mu  = zeros([la,1]);
+%         s   = zeros([n+1,1]);
+%         u   = zeros([n+1,1]);
+%         v   = zeros([n+1,1]);
+        im = 1;
+        il = im + max(1,m);
+        il = im + la;
+        ix = il + n1*n/2 + 1;
+        ir = ix + n;
+        is = ir + n + n + max(1,m);
+        is = ir + n + n + la;
+        iu = is + n1;
+        iv = iu + n1;
+        iw = iv + n1;
+        
+        r   = w(ir:ir + m+n+n+2 - 1);
+        l   = w(il:il +im+la - 1);
+        x0_ = w(ix:ix + n - 1);
+        mu  = w(im:im + la - 1);
+        s   = w(is:is + n+1 - 1);
+        u   = w(iu:iu + n+1 - 1);
+        v   = w(iv:iv + n+1 - 1);
+        w   = w(iw:end);
+        
         goto_code = 0;
-        
-        if mode < 0
-            % call jacobian at current x 
-            % update cholesky-factors of hessian matrix by modified bfgs 
-            % formula
-            for i = 1:n
-               u(i,1) = g(i,1) - fort_dot(m,a(:,i),1,r,1) - v(i);
-            end
-            
-            % l'*s
-            k = 0;
-            for i = 1:n
-               h1 = 0;
-               k = k + 1;
-               for j = i+1:n
-                   k = k + 1;
-                   h1 = h1 + l(k)*s(j);
-               end
-               v(i) = s(i) + h1;
-            end
-            
-            % d*l'*s
-            k = 1;
-            for i = 1:n
-                v(i) = l(k)*v(i);
-                k = k + n1 - i;
-            end 
-            
-            % l*d*l'*s
-            for i = n:-1:1
-               h1 = 0;
-               k = i;
-               for j = 1:i-1
-                   h1 = h1 + l(k)*v(j);
-                   k = k + n - j;
-               end
-               v(i) = v(i) + h1;
-            end
-            
-            h1 = fort_dot(n,s,1,u,1);
-            h2 = fort_dot(n,s,1,v,1);
-            h3 = 0.2*h2;
-            if h1 < h3
-                h4 = (h2-h3)/(h2-h1);
-                h1 = h3;
-                u = dscal(n,h4,u,1);
-                u = daxpy(n,1-h4,v,1,u,1);
-            end
 
-            ldl(n,l,u,+one/h1,v);
-            ldl(n,l,v,-one/h2,u);
-            gocode = 200;
+        while goto_code >= 0
+            if goto_code <= 0
+                if mode < 0
+                    % call jacobian at current x 
+                    % update cholesky-factors of hessian matrix by modified 
+                    % bfgs formula
+                    for i = 1:n
+                       u(i,1) = g(i,1) - fort_dot(m,a(:,i),1,r,1) - v(i);
+                    end
+                    
+                    % l'*s
+                    k = 0;
+                    for i = 1:n
+                       h1 = 0;
+                       k = k + 1;
+                       for j = i+1:n
+                           k = k + 1;
+                           h1 = h1 + l(k)*s(j);
+                       end
+                       v(i) = s(i) + h1;
+                    end
+                    
+                    % d*l'*s
+                    k = 1;
+                    for i = 1:n
+                        v(i) = l(k)*v(i);
+                        k = k + n1 - i;
+                    end 
+                    
+                    % l*d*l'*s
+                    for i = n:-1:1
+                       h1 = 0;
+                       k = i;
+                       for j = 1:i-1
+                           h1 = h1 + l(k)*v(j);
+                           k = k + n - j;
+                       end
+                       v(i) = v(i) + h1;
+                    end
+                    
+                    h1 = fort_dot(n,s,1,u,1);
+                    h2 = fort_dot(n,s,1,v,1);
+                    h3 = 0.2*h2;
+                    if h1 < h3
+                        h4 = (h2-h3)/(h2-h1);
+                        h1 = h3;
+                        u = dscal(n,h4,u,1);
+                        u = daxpy(n,1-h4,v,1,u,1);
+                    end
         
-        elseif mode == 0
-            itermx = iter;
-            if acc >= 0.0 
-                iexact = 0;
-            else
-                iexact = 1;
-            end 
-            acc = abs(acc);
-            tol = 10*acc;
-            iter = 0;
-            ireset = 0;
-            n1 = n + 1;
-            n2 = n1*n/2;
-            n3 = n2 + 1;
-            s(1:n) = 0.0;  
-            mu(1:m) = 0.0; 
-        else
-            % call functions at current x
-            t = f;
-            for j = 1:m
-                if j <= meq
-                    h1 = c(j);
+                    ldl(n,l,u,+one/h1,v);
+                    ldl(n,l,v,-one/h2,u);
+                    goto_code = 200;
+                    continue
+                
+                elseif mode == 0
+                    itermx = iter;
+                    if acc >= 0.0 
+                        iexact = 0;
+                    else
+                        iexact = 1;
+                    end 
+                    acc = abs(acc);
+                    tol = 10*acc;
+                    iter = 0;
+                    ireset = 0;
+                    n1 = n + 1;
+                    n2 = n1*n/2;
+                    n3 = n2 + 1;
+                    s(1:n) = 0.0;  
+                    mu(1:m) = 0.0; 
                 else
-                    h1 = 0.0;
+                    % call functions at current x
+                    t = f;
+                    for j = 1:m
+                        if j <= meq
+                            h1 = c(j);
+                        else
+                            h1 = 0.0;
+                        end
+                        t = t + mu(j) * max(-c(j),h1);
+                    end
+                    h1 = t - t0;
+                    if iexact+1 == 1
+                        if h1 <= h3/10.0 || line > 10
+                            goto_code = 500;
+                            continue
+                        end
+                        alpha = min(max(h3/(2.0*(h3-h1)),0.1),1.0);
+                        goto_code = 300;
+                        continue
+                    elseif iexact+1 == 2
+                        goto_code = 400;
+                        continue
+                    else
+                        goto_code = 500;
+                        continue
+                    end
                 end
-                t = t + mu(j) * max(-c(j),h1);
             end
-            h1 = t - t0;
-            if iexact+1 == 1
-                if h1 <= h3/10.0 || line > 10
-                    goto_code = 500;
+    
+            % reset bfgs matrix
+    
+            if goto_code <= 100            
+                if ireset > 5
+                    mode = check_convergence( ...
+                        n,f,f0,x,x0_,s,h3,tol,tolf,toldf,toldx,0,8);
+                    %return
+                    goto_code = -1; continue
+                else
+                    l(1:n2) = 0.0; %<-----|
+                    %l = dcopy(n2,l(1),0,l,1);
+                    j = 1;
+                    for i = 1:n
+                        l(j) = 1.0;
+                        j = j + n1 - i;
+                    end
                 end
-                alpha = min(max(h3/(2.0*(h3-h1)),alphamin),alphamax);
-                goto_code = 300;
-            elseif iexact+1 == 2
-                goto_code = 400;
-            else
-                goto_code = 500;
             end
-        end
-
-        % reset bfgs matrix
-
-        if goto_code <= 100            
-            if ireset > 5
-                mode = check_convergence( ...
-                    n,f,f0,x,x0,s,h3,tol,tolf,toldf,toldx,0,8);
-                return
-            else
-                l(1:n2) = 0.0; %<-----|
-                %l = dcopy(n2,l(1),0,l,1);
-                j = 1;
+    
+            %  main iteration : search direction, steplength, ldl'-update
+    
+            if goto_code <= 200
+                mode = 9;
+                if iter > itermx
+                    %return
+                    goto_code = -1; continue
+                end
+                % search direction as solution of qp - subproblem
+                u(1:n) = xl(1:n);
+                v(1:n) = xu(1:n);
+                %u = dcopy(n,xl,1,u,1);
+                %v = dcopy(n,xu,1,v,1);
+                u = daxpy(n,-1.0,x,1,u,1);
+                v = daxpy(n,-1.0,x,1,v,1);
+                h4 = 1.0;
+    
+                [l,g,a(:,1:n),c,s,r,w(iw:end),mode] = ...
+                    lsq(m,meq,n,n3,la,l,g,a(:,1:n),c,u,v,s,r,w(iw:end));
+    
+                % augmented problem for inconsistent linearization
+                if mode == 6 
+                    mode = 4;
+                end
+                if mode == 4
+                    for j = 1:m
+                        if j <= meq 
+                            a(j,n1) = -c(j);
+                        else
+                            a(j,n1) = max(-c(j),0.0);
+                        end
+                    end
+                    s(1:n) = 0.0;
+                    h3 = 0.0;
+                    g(n1) = 0.0;
+                    l(n3) = 100.0;
+                    s(n1) = 1.0;
+                    u(n1) = 0.0;
+                    v(n1) = 1.0;
+                    incons = 0;
+                    while incons <= 5 && mode == 4
+                        [l,g,a(:,1:n1),c,s,r,w(iw:end),mode] = ...
+                            lsq(m,meq,n1,n3,la,l,g,a(:,1:n1),...
+                            c,u,v,s,r,w(iw:end));
+                        %
+                        h4 = 1.0 - s(n1);
+                        if mode == 4
+                            l(n3) = 10.0*l(n3);
+                            incons = incons + 1;
+                        elseif mode ~= 1
+                            %return
+                            goto_code = -1; continue
+                        end
+                    end
+                elseif mode ~= 1
+                    %return
+                    goto_code = -1; continue
+                end 
+    
+                % mode = 1
+                % update multipliers for l1-test
                 for i = 1:n
-                    l(j) = 1.0;
-                    j = j + n1 - i;
+                    v(i) = g(i) - fort_dot(m,a(i:end),1,r,1);
+                end
+                f0 = f;
+                x0_ = dcopy(n,x,1,x0_,1);
+                gs = fort_dot(n,g,1,s,1);
+                h1 = abs(gs);
+                h2 = 0.0;
+                for j = 1:m
+                    if j <= meq
+                        h3 = c(j);
+                    else
+                        h3 = 0.0;
+                    end
+                    h2 = h2 + max(-c(j),h3);
+                    h3 = abs(r(j));
+                    mu(j) = max(h3,(mu(j)+h3)/2.0);
+                    h1 = h1 + h3*abs(c(j));
+                end
+    
+                % check convergence
+                mode = 0;
+                if h1 < acc && h2 < acc
+                    %return
+                    goto_code = -1; continue
+                end
+                h1 = 0.0;
+    
+                for j = 1:m
+                    if j <= meq
+                        h3 = c(j);
+                    else
+                        h3 = 0;
+                    end
+                    h1 = h1 + mu(j)*max(-c(j),h3);
+                end
+                t0 = f + h1;
+                h3 = gs - h1*h4;
+                mode = 8;
+                if h3 >= 0
+                    goto_code = 100;
+                    continue
+                end
+
+                % line search with an l1-testfunction
+                line = 0;
+                alpha = 0.5;
+                if iexact == 1
+                    goto_code = 400;
+                    continue
+                end
+                goto_code = 300;    
+            end
+
+            if goto_code <= 300
+                % inexact linesearch
+                line = line + 1;
+                h3 = alpha*h3;
+                s = dscal(n,alpha,s,1);
+                x = dcopy(n,x0_,1,x,1);
+                x = daxpy(n,1,s,1,x,1);
+
+                x = enforce_bounds(x,xl,xu);
+                mode = 1;                
+                %return
+                goto_code = -1; continue
+            end
+
+            if goto_code <= 400
+                if line ~= 3
+                    [min_val,lin_dat] = linmin(line,t,tol,lin_dat);
+                    mode = 1;
+                    %return
+                    goto_code = -1; continue
+                else
+                    s = dscal(n,alpha,s,1);
+                    goto_code = 500;
+                    continue
                 end
             end
-        end
 
-        %  main iteration : search direction, steplength, ldl'-update
-
-        if goto_code <= 200
-            mode = 9;
-            if iter > itermx
-                return
+            if goto_code <= 500
+                h3 = 0.0;
+                for j = 1:m
+                    if j <= meq
+                        h1 = c(j);
+                    else
+                        h1 = 0.0;
+                    end
+                    h3 = h3 + max(-c(j), h1);
+                end
+                mode = check_convergence(...
+                    n,f,f0,x,x0_,s,h3,acc,tolf,toldf,toldx,0,-1);
+                %return
+                goto_code = -1; continue
             end
-            % search direction as solution of qp - subproblem
-            u(1:n) = xl(1:n);
-            v(1:n) = xu(1:n);
-            %u = dcopy(n,xl,1,u,1);
-            %v = dcopy(n,xu,1,v,1);
-            u = daxpy(n,-1.0,x,1,u,1);
-            v = daxpy(n,-1.0,x,1,v,1);
-            h4 = 1.0;
-
-            lsq(m,meq,n,n3,la,l,g,a(:,1:n),c,u,v,s,r,w_,mode);
-
+            %
         end
 
-        %
+        %********************Re-assemble W*********************************
+        w = zeros([l_w,1]);
+        w(ir:ir + m+n+n+2 - 1) = r;
+        w(il:il +im+la - 1) = l;
+        w(ix:ix + n - 1) = x0_;
+        w(im:im + la - 1) = mu;
+        w(is:is + n+1 - 1) = s;
+        w(iu:iu + n+1 - 1) = u;
+        w(iv:iv + n+1 - 1) = v;
+        w(iw:end) = w;
+        %******************************************************************
 
-
-
+        %***********************Return Values******************************
+        out.mode = mode; out.x = x; out.c = c; out.g = g; out.a = a; 
+        out.iter = iter; out.w = w; out.f0 = f0; out.gs = gs; out.h1 = h1; 
+        out.h2 = h2; out.h3 = h3; out.h4 = h4; out.t = t; out.t0 = t0;
+        out.iexact = iexact; out.incons = incons; out.ireset = ireset; 
+        out.line = line; out.n1 = n1; out.n2 = n2; out.n3 = n3;
+        %******************************************************************
     end
 
-    function lsq(m,meq,n,nl,la,l,g,a,b,xl,xu,x,y,w,mode)
+    function [l,g,a,b,x,y,w,mode] = lsq(...
+            m,meq,n,nl,la,l,g,a,b,xl,xu,x,y,w)
         %   MINIMIZE with respect to X
         %
         %             ||E*X - F||
@@ -550,6 +756,15 @@ end
                  w(ih:ih+m1-1),...      % h
                  max(1,meq),meq,n, n, m1,m1,n,w(iw:end),x);
         %           lc      mc, le,me,lg,mg,n, w,       x
+        
+        if mode == 1
+            % restore lagrange multipliers
+            y = dcopy(m,w(iw:end),1,y,1);
+            y(m+1:end) = dcopy(n3,w(iw+m:end),1,y(m+1:end),1);
+            y(m+n3+1:end) = dcopy(n3,w(iw+m+n:end),1,y(m+n3+1:end),1);
+            % to ensure that bounds are not violated            
+            x = enforce_bounds(x,xl,xu);  
+        end
   
     end
   
@@ -691,6 +906,21 @@ end
         % solve least distance problem
         [x,xnorm,w,mode] = ldp(g,lg,mg,n,h,w);
 
+        if mode == 1
+            % solution of original problem
+            x = daxpy(n,1.0,f,1,x,1);
+
+            for i = n:-1:1
+                j = min(i+1,n);
+                x(i) = (x(i)-fort_dot(n-i,e(i*j:end),le,x(j:end),1))...
+                    /e(i,i);
+            end
+
+            j = min(n+1,me);
+            t = dnrm2(me-n,f(j),1);
+            xnorm = sqrt(xnorm*xnorm+t*t);
+        end
+
     end
 
     function [x,xnorm,w,mode] = ldp(g,mg,m,n,h,w)
@@ -700,7 +930,7 @@ end
         else
             % state dual problem
             mode = 1;
-            x = 0.0;
+            x = zeros([n,1]);
             xnorm = 0.0;
             if m ~= 0
                 iw = 0;
@@ -725,8 +955,8 @@ end
                 % solve dual problem
                 [w(1:n1*m), w(jf:jf+n1-1), w(iy:iy+m-1), ...
                     rnorm, w(iwdual:iwdual+m-1), w(iz:iz+n1-1), mode] = ...
-                    nnls(w(1:n1*m),n1,n1,m,...
-                    w(jf:jf+n1-1),w(iwdual:iwdual+m-1),w(iz:iz+n1-1));
+                    nnls(w(1:n1*m),n1,n1,m,w(jf:jf+n1-1), ...
+                    w(iy:iy+m-1),w(iwdual:iwdual+m-1),w(iz:iz+n1-1));
                 if mode == 1
                     mode = 4;
                     if rnorm > 0.0
@@ -744,7 +974,7 @@ end
                             % problem
                             w(1) = 0.0;
                             w = dcopy(m,w(1),0,w,1);
-                            w = daxpy(m,fac,w(iy),1,w,1);
+                            w = daxpy(m,fac,w(iy:end),1,w,1);
                         end
                     end
                 end
@@ -752,7 +982,7 @@ end
         end
     end
 
-    function [a, b, x, rnorm, w, zz, mode] = nnls(a,mda,m,n,b,w,zz)
+    function [a, b, x, rnorm, w, zz, mode] = nnls(a,mda,m,n,b,x,w,zz)
         % Nonnegative least squares algorithm.
         %  Given an m by n matrix, {A}, and an m-vector, {b},
         %  compute an n-vector, {x}, that solves the least squares problem:
@@ -762,17 +992,17 @@ end
         factor = 0.01;
         goto_code = 100;
         mode = 1;
-        a = reshape(a,[mda,n]);
 
         if m <= 0 || n <= 0
             mode = 2;
             return
         end
+
+        a = reshape(a,[mda,n]);
         iter = 0;
         itmax = 3*n;
 
-        % initialize the arrays index(1:n) and x(1:n)
-        x = 0.0;
+        % initialize the arrays index(1:n) and x(1:n)        
         index = 1:n;
         iz2 = n;
         iz1 = 1;
@@ -912,6 +1142,8 @@ end
                     end
                 end
                 rnorm = sqrt(sm);
+                % reshape a back to 1d 
+                a = a(:);
                 return;
             end % code 200
 
@@ -1035,12 +1267,135 @@ end
 
         end % outer while
     end
-  
-
+ 
     function out = ldl(n,a,z,sigma,w)
         ME = MException('MATLAB:wave.resource:minimize_slsqp',...
         "LDL not implemented");
         throwAsCaller(ME);
+    end
+
+    function [min_val,lin_dat] = linmin(mode,f,tol,lin_dat)
+
+        c = (3.0 - sqrt(5.0))/2.0;      
+        ax = 0.1;
+        bx = 1.0;
+        
+        switch mode
+            case 1
+                lin_dat.fx = f;
+                lin_dat.fv = lin_dat.fx;
+                lin_dat.fw = lin_dat.fv;
+            case 2
+                lin_dat.fu = f;
+                % update a, b, v, w, and x
+                if lin_dat.fu > lin_dat.fx
+                    if lin_dat.u < lin_dat.x
+                        lin_dat.a = lin_dat.u;
+                    end
+                    if lin_dat.u >= lin_dat.x
+                        lin_dat.b = lin_dat.u;
+                    end
+                    if lin_dat.fu <= lin_dat.fw || ...
+                            abs(lin_dat.w-lin_dat.x) <= 0.0
+                        lin_dat.v = lin_dat.w;
+                        lin_dat.fv = lin_dat.fw;
+                        lin_dat.w = lin_dat.u;
+                        lin_dat.fw = lin_dat.fu;
+                    elseif lin_dat.fu <= lin_dat.fv || ...
+                            abs(lin_dat.v-lin_dat.x) <= 0 || ...
+                            abs(lin_dat.v-lin_dat.w) <= 0
+                        lin_dat.v = lin_dat.u;
+                        lin_dat.fv = lin_dat.fu;
+                    end
+                else
+                    if lin_dat.u >= lin_dat.x
+                        lin_dat.a = lin_dat.x;
+                    end
+                    if lin_dat.u < lin_dat.x 
+                        lin_dat.b = lin_dat.x;
+                    end
+                    lin_dat.v = lin_dat.w;
+                    lin_dat.fv = lin_dat.fw;
+                    lin_dat.w = lin_dat.x;
+                    lin_dat.fw = lin_dat.fx;
+                    lin_dat.x = lin_dat.u;
+                    lin_dat.fx = lin_dat.fu;
+                end
+
+            otherwise 
+                % initialize
+                lin_dat.a = ax;
+                lin_dat.b = bx;
+                lin_dat.v = lin_dat.a + lin_dat.c*(lin_dat.b-lin_dat.a);
+                lin_dat.w = lin_dat.v;
+                lin_dat.x = lin_dat.w;
+                min_val = lin_dat.x;
+                return
+        end
+
+        lin_dat.m = 0.5*(lin_dat.a+lin_dat.b);
+        lin_dat.tol1 = eps*abs(lin_dat.x) + tol;
+        lin_dat.tol2 = 2*lin_dat.tol1;
+
+        % test convergence
+        if abs(lin_dat.x-lin_dat.m) <= ...
+                lin_dat.tol2-0.5*(lin_dat.b-lin_dat.a)
+            min_val = x;
+            mode = 3;
+        else
+            lin_dat.r = 0;
+            lin_dat.q = lin_dat.r;
+            lin_dat.p = lin_dat.q;
+            if  abs(lin_dat.e) > lin_dat.tol1 
+                % fit parabola
+                lin_dat.r = (lin_dat.x-lin_dat.w)*(lin_dat.fx-lin_dat.fv);
+                lin_dat.q = (lin_dat.x-lin_dat.v)*(lin_dat.fx-lin_dat.fw);
+                lin_dat.p = (lin_dat.x-lin_dat.v)*lin_dat.q - ...
+                    (lin_dat.x-lin_dat.w)*lin_dat.r;
+                lin_dat.q = lin_dat.q - lin_dat.r;
+                lin_dat.q = 2*lin_dat.q;
+                if lin_dat.q > 0 
+                    lin_dat.p = -lin_dat.p;
+                end
+                if lin_dat.q < 0.0
+                    lin_dat.q = -lin_dat.q;
+                end
+                lin_dat.r = lin_dat.e;
+                lin_dat.e = lin_dat.d;
+            end 
+
+            % is parabola acceptable
+            if abs(lin_dat.p) >= 0.5*abs(lin_dat.q*lin_dat.r) ||...
+                    lin_dat.p <= lin_dat.q*(lin_dat.a-lin_dat.x) ||...
+                    lin_dat.p >= lin_dat.q*(lin_dat.b-lin_dat.x)
+                % golden section step
+                if lin_dat.x >= lin_dat.m 
+                    lin_dat.e = lin_dat.a-lin_dat.x;
+                end
+                if lin_dat.x < lin_dat.m
+                    lin_dat.e = lin_dat.b-lin_dat.x;
+                end
+                lin_dat.d = lin_dat.c*lin_dat.e;
+            else
+                % parabolic interpolation step
+                lin_dat.d = lin_dat.p/lin_dat.q;
+                % f must not be evaluated too close to a or b
+                if lin_dat.u-lin_dat.a < lin_dat.tol2
+                    lin_dat.d = sign(lin_dat.m-lin_dat.x)*lin_dat.tol1;
+                end
+                if lin_dat.b-lin_dat.u < lin_dat.tol2
+                    lin_dat.d = sign(lin_dat.m-lin_dat.x)*lin_dat.tol1;
+                end
+            end
+
+            % f must not be evaluated too close to x
+            if abs(lin_dat.d) < lin_dat.tol1
+                lin_dat.d = sign(lin_dat.d) * lin_dat.tol1;
+            end
+            lin_dat.u = lin_dat.x + lin_dat.d;
+            min_val = lin_dat.u;
+            mode = 2;
+        end
     end
 
 %% Helper Functions
@@ -1139,17 +1494,17 @@ end
     function out = fort_dot(n, dx, incx, dy, incy)        
         dtemp = 0;
         if incx == 1 && incy == 1
-            m = rem(n,5);
-            if m ~= 0
-                for i = 1:m
-                    dtempt = dtemp + dx(i)*dy(i);
+            rm = rem(n,5);
+            if rm ~= 0
+                for i = 1:rm
+                    dtemp = dtemp + dx(i)*dy(i);
                 end
                 if n < 5
                     out = dtemp;
                     return
                 end            
             end
-            mp1 = m + 1;
+            mp1 = rm + 1;
             for i = mp1:5:n
                 dtemp = dtemp + dx(i)*dy(i) + dx(i+1)*dy(i+1) + ...
                         dx(i+2)*dy(i+2) + dx(i+3)*dy(i+3) + dx(i+4)*dy(i+4);
@@ -1177,9 +1532,9 @@ end
 
     function dx_out = dscal(n, da, dx, incx)        
         if incx == 1
-            m = rem(n,5);
-            if m ~= 0
-                for i = 1:m
+            rm = rem(n,5);
+            if rm ~= 0
+                for i = 1:rm
                     dx(i) = da*dx(i);
                 end
                 if n < 5 
@@ -1187,7 +1542,7 @@ end
                     return; 
                 end
             end
-            mp1 = m + 1;
+            mp1 = rm + 1;
             for i = mp1:5:n
                 dx(i) = da*dx(i);
                 dx(i+1) = da*dx(i+1);
@@ -1215,9 +1570,9 @@ end
         end
 
         if incx == 1 && incy == 1
-            m = rem(n, 4);
-            if m ~= 0
-                for i = 1:m
+            rm = rem(n, 4);
+            if rm ~= 0
+                for i = 1:rm
                     dy(i) = dy(i) + da*dx(i);
                 end
                 if n < 4
@@ -1225,7 +1580,7 @@ end
                     return
                 end
             end
-            mp1 = m + 1;
+            mp1 = rm + 1;
             for i = mp1:4:n
                 dy(i) = dy(i) + da*dx(i);
                 dy(i+1) = dy(i+1) + da*dx(i+1);
@@ -1257,9 +1612,9 @@ end
         end
         
         if incx == 1 && incy == 1
-            m = rem(n, 7);
-            if m ~= 0
-                for i = 1:m
+            rm = rem(n, 7);
+            if rm ~= 0
+                for i = 1:rm
                     dy(i) = dx(i);
                 end
                 if n < 7
@@ -1267,7 +1622,7 @@ end
                     return
                 end
             end
-            mp1 = m + 1;
+            mp1 = rm + 1;
             for i = mp1:7:n
                 dy(i) = dx(i);
                 dy(i+1) = dx(i+1);
@@ -1430,6 +1785,17 @@ end
                 sig = 0.0;
                 c = 0.0;
                 s = 0.0;
+            end
+        end
+    end
+
+    function x = enforce_bounds(x,xl,xu) 
+        for i = 1:numel(x)
+            if x(i) > xu(i)
+                x(i) = xu(i);
+            end
+            if x(i) < xl(i)
+                x(i) = xl(i);
             end
         end
     end
