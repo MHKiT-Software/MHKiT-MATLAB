@@ -120,16 +120,23 @@ len_w = (3*n1+m)*(n1+1)+(n1-meq+1)*(mineq+2) + 2*mineq+(n1+mineq)*(n1-meq) ...
 w = zeros([len_w,1]);
 
 % Bounds
-xl = (-1e6)*ones([n,1]);
-xu = (1e6)*ones([n,1]);
+xl = (-1)*ones([n,1]);
+xu = (1)*ones([n,1]);
 % xl = NaN([n,1]);
 % xu = NaN([n,1]);
 
-g = wrapped_grad(x0);
-g(end+1) = 0.0;
-c = eval_constraints(x0, cons);
-a = eval_con_normals(x0, cons, la, n, m, meq, mieq);
-fx = obj_func(x0, inp1, inp2);
+% resenbrock test
+[fx,c] = obj_func(x0);
+[g,a] = constraints.con_1.fun(x0);
+
+
+%%%%%%%%% Real code %%%%%%%%%%%%%%%%
+% g = wrapped_grad(x0);
+% g(end+1) = 0.0;
+% c = eval_constraints(x0, cons);
+% a = eval_con_normals(x0, cons, la, n, m, meq, mieq);
+% fx = obj_func(x0, inp1, inp2);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Initialize internal SLSQP state variables
 x = x0;
@@ -148,7 +155,7 @@ tol     = 0;
 iexact  = 0;
 incons  = 0;
 ireset  = 0;
-itermx  = 0;
+itermx  = 300;
 line    = 0;
 n1      = 0;
 n2      = 0;
@@ -171,7 +178,7 @@ while true
     h4 = solution.h4; t = solution.t; t0 = solution.t0;
     iexact = solution.iexact; incons = solution.incons; 
     ireset = solution.ireset; line = solution.line; n1 = solution.n1; 
-    n2 = solution.n2; n3 = solution.n3;
+    n2 = solution.n2; n3 = solution.n3; iter = solution.iter;
     %**********************************************************************
 
     if mode == 1   % objective and constraint evaluation required
@@ -179,13 +186,13 @@ while true
         c = eval_constraints(x, cons);
     end
 
-    if solution.mode == -1  % gradient evaluation required
+    if mode == -1  % gradient evaluation required
          g = wrapped_grad(x);
          g(end+1) = 0.0;
          a = eval_con_normals(x, cons, la, n, m, meq, mieq);
     end
 
-    if abs(solution.mode) ~= 1
+    if abs(mode) ~= 1
         break
     end
 end
@@ -293,7 +300,7 @@ end
         iw = iv + n1;
         
         r   = w(ir:ir + m+n+n+2 - 1);
-        l   = w(il:il +im+la - 1);
+        l   = w(il:il +(n+1)*(n+2)/2 - 1);
         x0_ = w(ix:ix + n - 1);
         mu  = w(im:im + la - 1);
         s   = w(is:is + n+1 - 1);
@@ -353,8 +360,8 @@ end
                         u = daxpy(n,1-h4,v,1,u,1);
                     end
         
-                    ldl(n,l,u,+one/h1,v);
-                    ldl(n,l,v,-one/h2,u);
+                    [l,u,v] =ldl(n,l,u,+1/h1,v);
+                    [l,v,u] = ldl(n,l,v,-1/h2,u);
                     goto_code = 200;
                     continue
                 
@@ -440,8 +447,8 @@ end
                 v = daxpy(n,-1.0,x,1,v,1);
                 h4 = 1.0;
     
-                [l,g,a(:,1:n),c,s,r,w(iw:end),mode] = ...
-                    lsq(m,meq,n,n3,la,l,g,a(:,1:n),c,u,v,s,r,w(iw:end));
+                [l,g,a(:,1:n),c,s,r,w,mode] = ...
+                    lsq(m,meq,n,n3,la,l,g,a(:,1:n),c,u,v,s,r,w);
     
                 % augmented problem for inconsistent linearization
                 if mode == 6 
@@ -461,12 +468,13 @@ end
                     l(n3) = 100.0;
                     s(n1) = 1.0;
                     u(n1) = 0.0;
+
                     v(n1) = 1.0;
                     incons = 0;
                     while incons <= 5 && mode == 4
-                        [l,g,a(:,1:n1),c,s,r,w(iw:end),mode] = ...
+                        [l,g,a(:,1:n1),c,s,r,w,mode] = ...
                             lsq(m,meq,n1,n3,la,l,g,a(:,1:n1),...
-                            c,u,v,s,r,w(iw:end));
+                            c,u,v,s,r,w);
                         %
                         h4 = 1.0 - s(n1);
                         if mode == 4
@@ -576,7 +584,7 @@ end
                     h3 = h3 + max(-c(j), h1);
                 end
                 mode = check_convergence(...
-                    n,f,f0,x,x0_,s,h3,acc,tolf,toldf,toldx,0,-1);
+                    n,f,f0,x,x0_,s,h3,acc,-1,-1,-1,0,-1);
                 %return
                 goto_code = -1; continue
             end
@@ -584,23 +592,25 @@ end
         end
 
         %********************Re-assemble W*********************************
+        w_ = w;
         w = zeros([l_w,1]);
         w(ir:ir + m+n+n+2 - 1) = r;
-        w(il:il +im+la - 1) = l;
+        w(il:il +(n+1)*(n+2)/2 - 1) = l;
         w(ix:ix + n - 1) = x0_;
         w(im:im + la - 1) = mu;
         w(is:is + n+1 - 1) = s;
         w(iu:iu + n+1 - 1) = u;
         w(iv:iv + n+1 - 1) = v;
-        w(iw:end) = w;
+        w(iw:end) = w_;
         %******************************************************************
-
+        
         %***********************Return Values******************************
         out.mode = mode; out.x = x; out.c = c; out.g = g; out.a = a; 
         out.iter = iter; out.w = w; out.f0 = f0; out.gs = gs; out.h1 = h1; 
         out.h2 = h2; out.h3 = h3; out.h4 = h4; out.t = t; out.t0 = t0;
         out.iexact = iexact; out.incons = incons; out.ireset = ireset; 
-        out.line = line; out.n1 = n1; out.n2 = n2; out.n3 = n3;
+        out.line = line; out.n1 = n1; out.n2 = n2; out.n3 = n3; 
+        out.iter = iter + 1;
         %******************************************************************
     end
 
@@ -768,8 +778,8 @@ end
   
     end
   
-    function [c,d,e,f,g,h,w,x,xnrm,mode] = ...
-            lsei(c,d,e,f,g,h,lc,mc,le,me,lg,mg,n,w,x)
+    function [c,d,e,f,g,h,w,x,xnrm,mode] = lsei(...
+            c,d,e,f,g,h,lc,mc,le,me,lg,mg,n,w,x)
         % dim(c) :   formal (lc,n),    actual (mc,n)
         % dim(d) :   formal (lc  ),    actual (mc  )
         % dim(e) :   formal (le,n),    actual (me,n)
@@ -807,17 +817,17 @@ end
             for i = 1:mc
                 j = min(i+1,lc);
                 [c(i,1), w(iw+i), c(j,1)] = ...
-                h12(1,    i,  i+1,n,c(i,1),lc,w(iw+i),c(j,1),lc, 1, mc-i);
+                  h12(1,i,i+1,n,c(i,1),lc,w(iw+i),c(j,1),lc, 1, mc-i);
                 [c(i,1), w(iw+i), e] = ...
-                h12(2,i,i+1,n,c(i,1),lc,w(iw+i),e,le,1,me);
+                  h12(2,i,i+1,n,c(i,1),lc,w(iw+i),e,le,1,me);
                 [c(i,1), w(iw+i), g] = ...
-                h12(2,i,i+1,n,c(i,1),lc,w(iw+i),g,lg,1,mg);
+                  h12(2,i,i+1,n,c(i,1),lc,w(iw+i),g,lg,1,mg);
             end
 
             % solve c*x=d and modify f
             mode = 6;
             for i = 1:mc
-                if ( abs(c(i,i))<epmach ) 
+                if ( abs(c(i,i))<eps(1.0) ) 
                     return
                 end
                 x(i) = (d(i)-fort_dot(i-1,c(i,1),lc,x,1))/c(i,i);
@@ -848,11 +858,11 @@ end
                         h(i) = h(i) - fort_dot(mc,g(i:end),lg,x,1);
                     end
                     [w(ie:ie+(me*n)-1),w(i_f:i_f+me-1),w(ig:ig+(mg*n)-1),...
-                        h, w(mc1:end), x, xnrm, mode] = ...
+                        h, w(mc1:iw), x, xnrm, mode] = ...
                         lsi(w(ie:ie+(me*n)-1),...   e
                             w(i_f:i_f+me-1),...     f
                             w(ig:ig+(mg*n)-1),...   g
-                            h,me,me,mg,mg,l,w(mc1:end));
+                            h,me,me,mg,mg,l,w(mc1:iw));
                           % h,le,me,lg,mg,n,w
                     if mc == 0
                         return
@@ -866,7 +876,7 @@ end
                     % solve ls without inequality constraints
                     mode = 7;
                     k = max(le,n);
-                    t = sqrt(epmach);
+                    t = sqrt(eps(1.0));
                     %call hfti(w(ie),me,me,l,w(if),k,1,t,krank,dum,w,w(l+1))
                     xnrm = dum(1);
                     x(mc1:end) = dcopy(l,w(i_f:end),1,x(mc1:end),1);
@@ -886,9 +896,10 @@ end
         e = reshape(e,[le,n]);
         g = reshape(g,[lg,n]);
         for i = 1:n
-            j = min(i+1,n);
-            [e(i:end),t,~] = h12(1,i,i+1,me,e(i:end),1,t,e(j:end),1,le,n-i);
-            [e(i:end),t,f] = h12(2,i,i+1,me,e(i:end),1,t,f,1,1,1);
+            j = min(i+1,n);  
+            [e(:,i:end),t,~] = ...
+                h12(1,i,i+1,me,e(:,i:end),1,t,e(j:end),1,le,n-i);
+            [e(:,i:end),t,f] = h12(2,i,i+1,me,e(:,i:end),1,t,f,1,1,1);
         end
 
         % transform g and h to get least distance problem
@@ -1047,10 +1058,10 @@ end
                             % diagonal element to avoid near linear 
                             % dependence.
     
-                            asave = a(npp1,j);
-                            [a(j:end),up,~] = ...
-                                h12(1,npp1,npp1+1,m,a(j:end),1,0,0,1,1,0);
-                            %                       u         up,c  
+                            asave = a(npp1,j);                            
+                            [a(:,j:end),up,~] = ...
+                            h12(1,npp1,npp1+1,m,a(:,j:end),1,0,0,1,1,0);
+                                                       
                             unorm = 0.0;
                             if nsetp ~= 0
                                 for l = 1:nsetp
@@ -1065,8 +1076,8 @@ end
                                 for l = 1:m
                                     zz(l) = b(l);
                                 end
-                                [a(j:end),up,zz] = h12(2,npp1,npp1+1,m,...
-                                    a(j:end),1,up,zz,1,1,1);
+                                [a(:,j:end),up,zz] = h12(2,npp1,npp1+1,m,...
+                                    a(:,j:end),1,up,zz,1,1,1);
                                 ztest = zz(npp1)/a(npp1,j);
 
                                 % Check if ztest is positive
@@ -1089,9 +1100,9 @@ end
                                     if iz1 <= iz2
                                         for jz = iz1:iz2
                                             jj = index(jz);
-                                            [a(j:end),up,~] = ...
+                                            [a(:,j:end),up,~] = ...
                                                 h12(2,nsetp,npp1,m,...
-                                                a(j:end),1,up,a(jj:end),...
+                                                a(:,j:end),1,up,a(:,jj),...
                                                 1,mda,1);
                                         end
                                     end
@@ -1268,10 +1279,66 @@ end
         end % outer while
     end
  
-    function out = ldl(n,a,z,sigma,w)
-        ME = MException('MATLAB:wave.resource:minimize_slsqp',...
-        "LDL not implemented");
-        throwAsCaller(ME);
+    function [a,z,w] = ldl(n,a,z,sigma,w)
+        if abs(sigma) > 0.0
+            ij = 1;
+            t= 1/sigma;
+            if sigma <= 0
+                % prepare negative update
+                for i = 1:n
+                    w(i) = z(i);
+                end
+                for i = 1:n
+                    v = w(i);
+                    t = t + v*v/a(ij);
+                    for j = i+1:n
+                        ij = ij + 1;
+                        w(j) = w(j) - v*a(ij);
+                    end
+                    ij = ij + 1;
+                end
+                if t >= 0
+                    t = eps(1.0)/sigma;
+                end
+                for i = 1:n
+                    j = n+1-i;
+                    ij = ij - i;
+                    u = w(j);
+                    w(j) = t;
+                    t = t - u*u/a(ij);
+                end
+            end
+            % updating begins here
+            for i = 1:n
+                v = z(i);
+                delta = v/a(ij);
+                if sigma < 0; tp = w(i); end
+                if sigma > 0; tp = t + delta*v; end
+                alpha = tp/t;
+                a(ij) = alpha*a(ij);
+                if i == n
+                    return
+                end
+                beta = delta/tp;
+                if alpha > 4
+                    gamma = t/tp;
+                    for j = i+1:n
+                        ij = ij + 1;
+                        u = a(ij);
+                        a(ij) = gamma*u + beta*z(j);
+                        z(j) = z(j) - v*u;
+                    end
+                else
+                    for j = i+1:n
+                        ij = ij + 1;
+                        z(j) = z(j) - v*a(ij);
+                        a(ij) = a(ij) + beta*z(j);
+                    end
+                end
+                ij = ij + 1;
+                t = tp;
+            end
+        end
     end
 
     function [min_val,lin_dat] = linmin(mode,f,tol,lin_dat)
@@ -1657,7 +1724,7 @@ end
         if h3 < acc
             mode = not_converged;
         else
-            % if an are ok then it has converged
+            % if any are ok then it has converged
             ok = abs(f-f0) < acc;
             if ~ok
                 ok = dnrm2(n,s,1) < acc;
@@ -1712,33 +1779,33 @@ end
         if 0 >= lpivot || lpivot >= l1 || l1 > m
             return
         end
-        cl = abs(u(lpivot));
+        cl = abs(u(lpivot,1));
         if mode ~= 2
             % construct the transformation.
             for j = l1:m
-                cl = max(abs(u(j)),cl);
+                cl = max(abs(u(j,1)),cl);
             end
             if cl <= 0
                 return
             end
             clinv = 1.0/cl;
-            sm = (u(lpivot)*clinv)^2;
+            sm = (u(lpivot,1)*clinv)^2;
             for j = l1:m
-                sm = sm + (u(j)*clinv)^2;
+                sm = sm + (u(j,1)*clinv)^2;
             end
             cl = cl*sqrt(sm);
-            if u(lpivot) > 0
+            if u(lpivot,1) > 0
                 cl = -cl;
             end
-            up = u(lpivot) - cl;
-            u(lpivot) = cl;
+            up = u(lpivot,1) - cl;
+            u(lpivot,1) = cl;
         elseif cl < 0.0
             return
         end
 
         if ncv > 0
             % apply the transformation i+u*(u**t)/b to c.
-            b = up*u(lpivot);
+            b = up*u(lpivot,1);
             % b must be nonpositive here
             if b < 0.0
                 b = 1/b;
@@ -1750,14 +1817,14 @@ end
                     i4 = i3;
                     sm = c(i2)*up;
                     for i = l1:m
-                        sm = sm + c(i3)*u(i);
+                        sm = sm + c(i3)*u(i,1);
                         i3 = i3 + ice;
                     end
                     if abs(sm) > 0
                         sm = sm*b;
                         c(i2) =c(i2) + sm*up;
                         for i = l1:m
-                            c(i4) = c(i4) + sm*u(i);
+                            c(i4) = c(i4) + sm*u(i,1);
                             i4 = i4 + ice;
                         end
                     end
