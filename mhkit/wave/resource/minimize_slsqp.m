@@ -1,4 +1,4 @@
-function solution = minimize_slsqp(obj_func, x0, inp1, inp2, constraints)
+function out = minimize_slsqp(obj_func, x0, inp1, inp2, constraints)
 % MINIMIZE_SLSQP Minimize a scalar function of one or more variables using 
 % Sequential Least Squares Programming (SLSQP).
 %
@@ -46,14 +46,15 @@ function solution = minimize_slsqp(obj_func, x0, inp1, inp2, constraints)
 % 
 % Returns
 % -------
-% solution: structure
+% out: structure
 %    Fields:
 %    -----
-%    principal_axes : sign corrected PCA axes
-%    shift          : The shift applied to x2
-%    x1_fit         : gaussian fit of x1 data
-%    mu_param       : fit to _mu_fcn
-%    sigma_param    : fit to _sig_fits
+%    x          : final curve parameters
+%    fun        : final function evaluatioin
+%    jac        : final jacobian
+%    iter       : iterations to converge (or failure)
+%    message    : details regarding failure 
+%    success    : boolean for converged
 %
 % Reference
 % ----------
@@ -120,22 +121,24 @@ len_w = (3*n1+m)*(n1+1)+(n1-meq+1)*(mineq+2) + 2*mineq+(n1+mineq)*(n1-meq) ...
 w = zeros([len_w,1]);
 
 % Bounds
-xl = (-1)*ones([n,1]);
-xu = (1)*ones([n,1]);
+xl = (-1e6)*ones([n,1]);
+xu = (1e6)*ones([n,1]);
 % xl = NaN([n,1]);
 % xu = NaN([n,1]);
 
 % resenbrock test
-[fx,c] = obj_func(x0);
-[g,a] = constraints.con_1.fun(x0);
+% xl = (-1)*ones([n,1]);
+% xu = (1)*ones([n,1]);
+% [fx,c] = obj_func(x0);
+% [g,a] = constraints.con_1.fun(x0);
 
 
 %%%%%%%%% Real code %%%%%%%%%%%%%%%%
-% g = wrapped_grad(x0);
-% g(end+1) = 0.0;
-% c = eval_constraints(x0, cons);
-% a = eval_con_normals(x0, cons, la, n, m, meq, mieq);
-% fx = obj_func(x0, inp1, inp2);
+g = wrapped_grad(x0);
+g(end+1) = 0.0;
+c = eval_constraints(x0, cons);
+a = eval_con_normals(x0, cons, la, n, m, meq, mieq);
+fx = obj_func(x0, inp1, inp2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Initialize internal SLSQP state variables
@@ -182,19 +185,51 @@ while true
     %**********************************************************************
 
     if mode == 1   % objective and constraint evaluation required
-%         fx = obj_func(x, inp1, inp2);
-%         c = eval_constraints(x, cons);
-        [fx,c] = obj_func(x);
+        fx = obj_func(x, inp1, inp2);
+        c = eval_constraints(x, cons);
+%          [fx,c] = obj_func(x);  % resenbrock test
     end
 
     if mode == -1  % gradient evaluation required
-%          g = wrapped_grad(x);
-%          g(end+1) = 0.0;
-%          a = eval_con_normals(x, cons, la, n, m, meq, mieq);
-        [g,a] = constraints.con_1.fun(x);
+         g = wrapped_grad(x);
+         g(end+1) = 0.0;
+         a = eval_con_normals(x, cons, la, n, m, meq, mieq);
+%         [g,a] = constraints.con_1.fun(x);  % resenbrock test
     end
 
     if abs(mode) ~= 1
+        switch mode
+            case -1
+                message = "Gradient evaluation required (g & a)";
+            case 0
+                message = "Optimization terminated successfully";
+            case 1
+                message = "Function evaluation required (f & c)";
+            case 2
+                message = "More equality constraints than independent variables";
+            case 3
+                message = "More than 3*n iterations in LSQ subproblem";
+            case 4
+                message = "Inequality constraints incompatible";
+            case 5
+                message = "Singular matrix E in LSQ subproblem";
+            case 6
+                message = "Singular matrix C in LSQ subproblem";
+            case 7
+                message = "Rank-deficient equality constraint subproblem HFTI";
+            case 8 
+                message = "Positive directional derivative for linesearch";
+            case 9 
+                message = "Iteration limit reached";
+            otherwise
+                message = "Uknown issue occured";
+        end
+        out.x = x;
+        out.fun = fx;
+        out.jac = g(1:end-1);
+        out.iter = iter;
+        out.message = message;
+        out.success = mode == 0;
         break
     end
 end
@@ -436,6 +471,7 @@ end
             %  main iteration : search direction, steplength, ldl'-update
     
             if goto_code <= 200
+                iter = iter + 1;
                 mode = 9;
                 if iter > itermx
                     %return
@@ -613,7 +649,7 @@ end
         out.h2 = h2; out.h3 = h3; out.h4 = h4; out.t = t; out.t0 = t0;
         out.iexact = iexact; out.incons = incons; out.ireset = ireset; 
         out.line = line; out.n1 = n1; out.n2 = n2; out.n3 = n3; 
-        out.iter = iter + 1;
+        out.iter = iter;
         %******************************************************************
     end
 
@@ -904,9 +940,9 @@ end
             dummy = e(:,i:end);
             sv_sz = size(dummy);
             [dummy(:),t,dummy2] = ...
-                h12(1,i,i+1,me,dummy(:),1,t,e(:,j),1,le,n-i);
+                h12(1,i,i+1,me,dummy(:),1,t,e(:,j:end),1,le,n-i);
             e(:,i:end) = reshape(dummy,sv_sz);
-            e(:,j) = dummy2;
+            e(:,j:end) = dummy2;
 
             dummy = e(:,i:end);
             sv_sz = size(dummy);
@@ -923,7 +959,10 @@ end
                 end
                 % old version that doesn't work
                 % g(i,j) = (g(i,j)-fort_dot(j-1,g(i:end),lg,e(j:end),1))/e(j,j);
-                g(i,j) = (g(i,j)-fort_dot(j-1,g(i,:),lg,e(:,j),1))...
+                % resenbrock test success 
+                % g(i,j) = (g(i,j)-fort_dot(j-1,g(i,:),lg,e(:,j),1))...
+                %     /e(j,j);
+                g(i,j) = (g(i,j)-fort_dot(j-1,g(i:end),lg,e(:,j),1))...
                     /e(j,j);
             end
             h(i) = h(i) - fort_dot(n, g(i:end),lg,f,1);
@@ -938,8 +977,12 @@ end
 
             for i = n:-1:1
                 j = min(i+1,n);
-                x(i) = (x(i)-fort_dot(n-i,e(i,j),le,x(j:end),1))...
+                dummy = e(i:end,j:end);
+                x(i) = (x(i)-fort_dot(n-i,dummy(:),le,x(j:end),1))...
                     /e(i,i);
+                % resenbrock test success 
+%                 x(i) = (x(i)-fort_dot(n-i,e(i,j),le,x(j:end),1))...
+%                     /e(i,i);
             end
 
             j = min(n+1,me);

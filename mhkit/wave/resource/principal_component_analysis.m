@@ -154,7 +154,12 @@ constraints = struct('con_1',struct('type', 'ineq', 'fun',con1),...
 sigma_fit = minimize_slsqp( ...
     obj_func, sig_0, x1_means, x2_sigmas, constraints);
 
-
+if ~sigma_fit.success
+    ME = MException('MATLAB:wave.resource:principal_component_analysis',...
+        "minimize_slsqp failed to converge: error message\n%s", ...
+        sigma_fit.message);
+    throwAsCaller(ME);
+end
 
     function out = linregress(x,y)
         % Calculate a linear least-squares regression for two sets of 
