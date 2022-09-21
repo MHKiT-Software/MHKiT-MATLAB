@@ -182,14 +182,16 @@ while true
     %**********************************************************************
 
     if mode == 1   % objective and constraint evaluation required
-        fx = obj_func(x, inp1, inp2);
-        c = eval_constraints(x, cons);
+%         fx = obj_func(x, inp1, inp2);
+%         c = eval_constraints(x, cons);
+        [fx,c] = obj_func(x);
     end
 
     if mode == -1  % gradient evaluation required
-         g = wrapped_grad(x);
-         g(end+1) = 0.0;
-         a = eval_con_normals(x, cons, la, n, m, meq, mieq);
+%          g = wrapped_grad(x);
+%          g(end+1) = 0.0;
+%          a = eval_con_normals(x, cons, la, n, m, meq, mieq);
+        [g,a] = constraints.con_1.fun(x);
     end
 
     if abs(mode) ~= 1
@@ -413,10 +415,11 @@ end
     
             % reset bfgs matrix
     
-            if goto_code <= 100            
+            if goto_code <= 100  
+                ireset = ireset + 1;
                 if ireset > 5
                     mode = check_convergence( ...
-                        n,f,f0,x,x0_,s,h3,tol,tolf,toldf,toldx,0,8);
+                        n,f,f0,x,x0_,s,h3,tol,-1,-1,-1,0,8);
                     %return
                     goto_code = -1; continue
                 else
@@ -538,7 +541,7 @@ end
 
                 % line search with an l1-testfunction
                 line = 0;
-                alpha = 0.5;
+                alpha = 1.0; %0.5;
                 if iexact == 1
                     goto_code = 400;
                     continue
@@ -896,10 +899,19 @@ end
         e = reshape(e,[le,n]);
         g = reshape(g,[lg,n]);
         for i = 1:n
-            j = min(i+1,n);  
-            [e(:,i:end),t,~] = ...
-                h12(1,i,i+1,me,e(:,i:end),1,t,e(j:end),1,le,n-i);
-            [e(:,i:end),t,f] = h12(2,i,i+1,me,e(:,i:end),1,t,f,1,1,1);
+            j = min(i+1,n); 
+
+            dummy = e(:,i:end);
+            sv_sz = size(dummy);
+            [dummy(:),t,dummy2] = ...
+                h12(1,i,i+1,me,dummy(:),1,t,e(:,j),1,le,n-i);
+            e(:,i:end) = reshape(dummy,sv_sz);
+            e(:,j) = dummy2;
+
+            dummy = e(:,i:end);
+            sv_sz = size(dummy);
+            [dummy(:),t,f] = h12(2,i,i+1,me,dummy(:),1,t,f,1,1,1);
+            e(:,i:end) = reshape(dummy,sv_sz);
         end
 
         % transform g and h to get least distance problem
@@ -909,7 +921,10 @@ end
                 if abs(e(j,j)) < 2.22e-16 
                     return
                 end
-                g(i,j) = (g(i,j)-fort_dot(j-1,g(i:end),lg,e(j:end),1))/e(j,j);
+                % old version that doesn't work
+                % g(i,j) = (g(i,j)-fort_dot(j-1,g(i:end),lg,e(j:end),1))/e(j,j);
+                g(i,j) = (g(i,j)-fort_dot(j-1,g(i,:),lg,e(:,j),1))...
+                    /e(j,j);
             end
             h(i) = h(i) - fort_dot(n, g(i:end),lg,f,1);
         end
@@ -923,7 +938,7 @@ end
 
             for i = n:-1:1
                 j = min(i+1,n);
-                x(i) = (x(i)-fort_dot(n-i,e(i*j:end),le,x(j:end),1))...
+                x(i) = (x(i)-fort_dot(n-i,e(i,j),le,x(j:end),1))...
                     /e(i,i);
             end
 
@@ -941,7 +956,7 @@ end
         else
             % state dual problem
             mode = 1;
-            x = zeros([n,1]);
+            x = zeros([n+1,1]);
             xnorm = 0.0;
             if m ~= 0
                 iw = 0;
@@ -978,7 +993,7 @@ end
                             fac = 1/fac;
                             for j = 1:n
                                 x(j) = fac*fort_dot(...
-                                    m,g(j:end),1,w(iy:end),1);
+                                    m,g(:,j),1,w(iy:end),1);
                             end
                             xnorm = dnrm2(n,x,1);
                             % compute lagrange multipliers for primal 
@@ -1003,6 +1018,7 @@ end
         factor = 0.01;
         goto_code = 100;
         mode = 1;
+        x = zeros(size(x));
 
         if m <= 0 || n <= 0
             mode = 2;
@@ -1058,10 +1074,12 @@ end
                             % diagonal element to avoid near linear 
                             % dependence.
     
-                            asave = a(npp1,j);                            
-                            [a(:,j:end),up,~] = ...
-                            h12(1,npp1,npp1+1,m,a(:,j:end),1,0,0,1,1,0);
-                                                       
+                            asave = a(npp1,j); 
+                            dummy = a(:,j:end);
+                            sv_sz = size(dummy);
+                            [dummy(:),up,~] = ...
+                            h12(1,npp1,npp1+1,m,dummy(:),1,0,0,1,1,0);
+                            a(:,j:end) = reshape(dummy,sv_sz);                           
                             unorm = 0.0;
                             if nsetp ~= 0
                                 for l = 1:nsetp
@@ -1076,8 +1094,11 @@ end
                                 for l = 1:m
                                     zz(l) = b(l);
                                 end
-                                [a(:,j:end),up,zz] = h12(2,npp1,npp1+1,m,...
-                                    a(:,j:end),1,up,zz,1,1,1);
+                                dummy = a(:,j:end);
+                                sv_sz = size(dummy);
+                                [dummy(:),up,zz] = h12(2,npp1,npp1+1,m,...
+                                    dummy(:),1,up,zz,1,1,1);
+                                a(:,j:end) = reshape(dummy,sv_sz);
                                 ztest = zz(npp1)/a(npp1,j);
 
                                 % Check if ztest is positive
@@ -1100,9 +1121,10 @@ end
                                     if iz1 <= iz2
                                         for jz = iz1:iz2
                                             jj = index(jz);
-                                            [a(:,j:end),up,~] = ...
+                                            dummy = a(:,j:end);                                            
+                                            [~,up,a(:,jj)] = ...
                                                 h12(2,nsetp,npp1,m,...
-                                                a(:,j:end),1,up,a(:,jj),...
+                                                dummy(:),1,up,a(:,jj),...
                                                 1,mda,1);
                                         end
                                     end
@@ -1779,33 +1801,33 @@ end
         if 0 >= lpivot || lpivot >= l1 || l1 > m
             return
         end
-        cl = abs(u(lpivot,1));
+        cl = abs(u(lpivot));
         if mode ~= 2
             % construct the transformation.
             for j = l1:m
-                cl = max(abs(u(j,1)),cl);
+                cl = max(abs(u(j)),cl);
             end
             if cl <= 0
                 return
             end
             clinv = 1.0/cl;
-            sm = (u(lpivot,1)*clinv)^2;
+            sm = (u(lpivot)*clinv)^2;
             for j = l1:m
                 sm = sm + (u(j,1)*clinv)^2;
             end
             cl = cl*sqrt(sm);
-            if u(lpivot,1) > 0
+            if u(lpivot) > 0
                 cl = -cl;
             end
-            up = u(lpivot,1) - cl;
-            u(lpivot,1) = cl;
+            up = u(lpivot) - cl;
+            u(lpivot) = cl;
         elseif cl < 0.0
             return
         end
 
         if ncv > 0
             % apply the transformation i+u*(u**t)/b to c.
-            b = up*u(lpivot,1);
+            b = up*u(lpivot);
             % b must be nonpositive here
             if b < 0.0
                 b = 1/b;
@@ -1817,14 +1839,14 @@ end
                     i4 = i3;
                     sm = c(i2)*up;
                     for i = l1:m
-                        sm = sm + c(i3)*u(i,1);
+                        sm = sm + c(i3)*u(i);
                         i3 = i3 + ice;
                     end
                     if abs(sm) > 0
                         sm = sm*b;
                         c(i2) =c(i2) + sm*up;
                         for i = l1:m
-                            c(i4) = c(i4) + sm*u(i,1);
+                            c(i4) = c(i4) + sm*u(i);
                             i4 = i4 + ice;
                         end
                     end
