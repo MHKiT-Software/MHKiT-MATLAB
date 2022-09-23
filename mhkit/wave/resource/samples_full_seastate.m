@@ -135,11 +135,25 @@ theta_zeroline(theta_zeroline < 0) = theta_zeroline(...
         beta_lines, rho_zeroline, theta_zeroline, points_per_interval,...
         contour_probs);
 
+% Sample transformation to principal component space
+sample_u1 = sample_beta .* cos(sample_alpha);
+sample_u2 = sample_beta .* sin(sample_alpha);
 
-h_sample = 0;
-t_sample = 0;
-weight_points = 0;
+comp1_sample = invgauss_ppf(cdf(sample_u1,0,1),...
+    comp1.mu, 0, comp1.scale);
+mu_sample = mu_slope * comp1_sample + mu_intercept;
 
+% Calculate sigma values at each point on the circle
+sigma_sample = polyval(sigma_polynomial_coeffcients, comp1_sample);
+
+% Use calculated mu and sigma values to calculate C2 along the contour
+comp2_sample = ppf(cdf(sample_u2, 0, 1), mu_sample, sigma_sample);
+
+% Sample transformation into Hs-T space
+[h_sample, t_sample] = princomp_inv(...
+        comp1_sample, comp2_sample, coeff, shift);
+
+%% Helper functions
 
     function out = invgauss_cdf(x, mu, loc, scale)
         % Cumulative distribution function of the given RV.
@@ -172,6 +186,60 @@ weight_points = 0;
         % Percent point function (inverse of `cdf`) at q of the given RV.
         out = (-sqrt(2)*erfcinv(2*q));
         out = out .* scale + loc;
+    end
+
+    function out = invgauss_ppf(x, mu, loc, scale)
+        % Percent point function (inverse of cdf) at q of the given 
+        % RV.
+        % 
+        % Parameters
+        % ----------
+        % x : array_like
+        %     lower tail probability
+        % 
+        % Returns
+        % -------
+        % out : array_like
+        %     quantile corresponding to the lower tail probability q.
+
+        out = zeros(size(x));                
+        cond0 = scale > 0;        
+
+        for qq = 1:numel(x)
+            q = x(qq);
+            cond1 = (0 < q) & (q < 1);
+            cond = cond0 & cond1;
+    
+            if any(cond)                
+                factor = 10;
+                left = 0;
+                right = inf;
+                while (invgauss_cdf(left, mu, loc, scale) - q) > 0
+                    right = left;
+                    left = left*factor;                    
+                end
+    
+                if isinf(right)
+                    right = max(factor, left);
+                    while (invgauss_cdf(right, mu, loc, scale) - q) < 0
+                        left = right;
+                        right = right * factor;
+                    end
+                end
+    
+                [out(qq), ierr] = brentq(left, right, ...
+                    [q,mu, loc, scale]);   
+                if ierr < 0
+                    ME = MException('MATLAB:wave:resource:samples_full_seastate', ...
+                        "Brent's method was not properly bracketed");
+                    throw(ME);
+                end
+            end
+        end
+
+        if isempty(out)
+            out = [];
+        end
     end
 
     function [sample_alpha, sample_beta, weight_points] = ...
@@ -229,11 +297,154 @@ weight_points = 0;
             angular_ratio(i) = angular_dist(i) / (2*pi);
             % Discretize the remaining portion of the disc into 10 equally 
             % spaced areas to be sampled
-            
+            alpha(i,:) = min(alpha_bounds(i,:)):...
+                (angular_dist(i)/points_per_interval):...
+                max(alpha_bounds(i,:));
+            % Calculate the weight of each point sampled per contour
+            weight(i) = ((contour_probs(i) - contour_probs(i + 1)) * ...
+                     angular_ratio(i) / points_per_interval);
+            for j = 1:points_per_interval
+                % Generate sample radius by adding a randomly sampled 
+                % distance to the 'disc' lower bound
+                sample_beta((i-1)*points_per_interval + j) = beta_lines(i)+ ...
+                    rand(1) * (beta_lines(i+1) - beta_lines(i));
+                % Generate sample angle by adding a randomly sampled 
+                % distance to the lower bound of the angle defining a 
+                % discrete portion of the 'disc'
+                sample_alpha((i-1)*points_per_interval + j) = alpha(i,j) +...
+                    rand(1) * (alpha(i,j+1) - alpha(i,j));
+                % Save the weight for each sample point
+                weight_points((i-1)*points_per_interval + j) = weight(i);
+            end
 
         end
     
     end 
 
+    function [out, ierr] = brentq(a, b, args)
+        % Find a root of a function in a bracketing interval using 
+        % Brent's method.
+        %
+        % Uses the classic Brent's method to find a zero of the 
+        % function f on the sign changing interval [a , b]. 
+        % Generally considered the best of the rootfinding routines 
+        % here. It is a safe version of the secant method that
+        % uses inverse quadratic extrapolation. Brent's method 
+        % combines root bracketing, interval bisection, and inverse 
+        % quadratic interpolation. It is sometimes known as the 
+        % van Wijngaarden-Dekker-Brent method. Brent (1973)
+        % claims convergence is guaranteed for functions computable
+        % within [a,b].
+        % 
+        % Notes
+        % -----
+        % f must be continuous. f(a) and f(b) must have opposite signs.
+        %
+        % Source:
+        %   https://mathworld.wolfram.com/BrentsMethod.html
+        % or
+        % http://phys.uri.edu/nigh/NumRec/bookfpdf/f9-3.pdf for the
+        % numerical recipes source
+
+        maxiter = 100;
+        xtol = 1e-12;
+        ierr = 0;
+        q = args(1);
+        mu = args(2);
+        loc = args(3);
+        scale = args(4);
+        f = @(x) invgauss_cdf(x,mu,loc,scale)-q;
+
+        if f(a)*f(b) >= 0
+            % Problem is not correctly bracketed 
+            ierr = -1;
+            return
+        end
+
+        %Swapping a and b Contents
+        if abs(f(a)) < abs(f(b))
+            L=a; a=b; b=L;
+        end
+        c = a;  
+        flag = true;
+        iter = 0;
+
+        while abs(b-a) > xtol
+            if f(a)~=f(c) && f(b)~=f(c)
+                %Inverse Quadratic Interpolation
+                s = (a*f(b)*f(c))/((f(a)-f(b))*(f(a)-f(c))) + ...
+                    (b*f(a)*f(c))/((f(b)-f(a))*(f(b)-f(c))) + ...
+                    (c*f(a)*f(b))/((f(c)-f(a))*(f(c)-f(b)));                    
+            else
+                s = b-f(b)*(b-a)/(f(b)-f(a));  %Secant method
+            end
+
+            if ~((3*a + b)/4 < s && s < b)          ||...
+                (flag && abs(s-b) >= abs(b-c)/2)    ||...
+                (~flag && abs(s-b) >= abs(c-d)/2)   ||...
+                (flag && abs(b-c) < xtol)           ||...
+                (~flag && abs(c-d) < xtol)
+                % Bisection method
+                s = (a+b)/2;
+                flag = true;
+            else
+                flag = false;
+            end
+
+            % calculate f(s)
+            d = c; c = b;
+            if f(a)*f(s) < 0
+                b = s;
+            else
+                a = s;
+            end
+
+            if abs(f(a)) < abs(f(b))
+                L=a; a=b; b=L;
+            end
+
+            % break for max iterations
+            iter = iter + 1;
+            if iter > maxiter
+                break
+            end
+        end 
+        out = s;
+    end
+
+    function [original1, original2] = princomp_inv(...
+            princip_data1, princip_data2, coeff, shift)
+        % Take the inverse of the principal component rotation given data,
+        % coefficients, and shift.
+        % 
+        % Parameters
+        % ----------
+        % princip_data1: array
+        %     Array of Component 1 values.
+        % princip_data2: array
+        %     Array of Component 2 values.
+        % coeff: array
+        %     Array of principal component coefficients.
+        % shift: float
+        %     Shift applied to Component 2 to make all values positive.
+        % 
+        % Returns
+        % -------
+        % original1: array
+        %     Hs values following rotation from principal component space.
+        % original2: array
+        %     T values following rotation from principal component space.
+
+        original1 = zeros([length(princip_data1),1]);
+        original2 = zeros([length(princip_data1),1]);
+        for i = 1:length(princip_data2)
+            original1(i) = (((coeff(1, 2) * (princip_data2(i) - shift)) +...
+                        (coeff(1, 1) * princip_data1(i))) / ...
+                        (coeff(1, 2)^2 + coeff(1, 1)^2));
+            original2(i) = (((coeff(1, 2) * princip_data1(i)) - ...
+                        (coeff(1, 1) * (princip_data2(i) - shift))) / ...
+                        (coeff(1, 2)^2 + coeff(1, 1)^2));
+        end
+    end
 end
 
