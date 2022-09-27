@@ -255,8 +255,11 @@ classdef ste_block_maxima < handle
             x = (x-loc)/scale;
             cond0 = scale > 0;
             cond1 = ste_block_maxima.support_mask(x, args) & scale > 0;
+            [~,b] = ste_block_maxima.get_support(args);
+            cond2 = (x > b) & cond0;
             cond = cond0 & cond1;
             out = zeros(size(cond));
+            out(cond2) = 1.0;
 
             if any(cond)
                 goodargs = x(cond);

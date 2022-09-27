@@ -805,7 +805,7 @@ classdef peaks_distribution < handle
             ftol = 1.49012e-08;
             xtol = 1.49012e-08;
             gtol = 0.0;
-            maxfev = 1000;
+            maxfev = 5000;
             max_check = -1;
             n = length(x);
             mode = 1;
