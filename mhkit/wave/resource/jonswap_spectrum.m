@@ -36,21 +36,42 @@ function S=jonswap_spectrum(frequency,Tp,Hs,varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
-
-if (isa(frequency,'py.numpy.ndarray') ~= 1)
-    frequency = py.numpy.array(frequency);
+if isrow(frequency)
+    f = sort(frequency');
+else
+    f = sort(frequency);
 end
+
+B_PM = (5/4)*(1/Tp)^4;
+A_PM = B_PM*(Hs/2)^2;
+S_f  = A_PM.*f.^(-5).*exp(-B_PM.*f.^(-4));
 
 if nargin == 3
-        S_py=py.mhkit.wave.resource.jonswap_spectrum(frequency,Tp,Hs);
-elseif nargin == 4 
-        S_py=py.mhkit.wave.resource.jonswap_spectrum(frequency,Tp,varargin{1},pyargs('gamma',varargin{1}));
+    TpsqrtHs = Tp/np.sqrt(Hs);
+    if TpsqrtHs <= 3.6
+            gamma = 5;
+    elseif TpsqrtHs > 5
+        gamma = 1;
+    else
+        gamma = np.exp(5.75 - 1.15*TpsqrtHs);
+    end
+else
+    gamma = varargin{1};
 end
 
-S.spectrum=double(py.array.array('d',py.numpy.nditer(S_py.values))).';
-char_arr=char(S_py.index.values);
-S.frequency=double(py.array.array('d',py.numpy.nditer(S_py.index))).';
-S.Tp=Tp;
+% Cutoff frequencies for gamma function
+siga = 0.07;
+sigb = 0.09;
+
+fp = 1/Tp; % peak frequency
+lind = f<=fp;
+hind = f>fp;
+Gf = zeros(size(f));
+Gf(lind) = gamma.^exp(-(f(lind)-fp).^2/(2*siga^2*fp.^2));
+Gf(hind) = gamma.^exp(-(f(hind)-fp).^2/(2*sigb^2*fp.^2));
+C = 1- 0.287*log(gamma);
+Sf = C.*S_f.*Gf;
+
+S.spectrum = Sf;
+S.frequency = f;
+S.Tp = Tp;
