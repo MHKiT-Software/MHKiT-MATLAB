@@ -1,6 +1,6 @@
-function out = fillgaps_time(var, options)
-% Fill gaps (NaN values) in var across time using the specified method in
-% options.method
+function out = fillgaps_depth(var, options)
+% Fill gaps (NaN values) in var along depth profile using the specified
+% method in options.method
 % 
 % Parameters
 % ----------
@@ -12,7 +12,7 @@ function out = fillgaps_time(var, options)
 % Returns
 % -------
 % out : struct (from a fieldname in dataset in create_dataset function)
-%  The input struct 'var' with gaps in 'var' interpolated across time
+%  The input struct 'var' with gaps in 'var' interpolated across depth
 %
 % See Also
 % --------
@@ -27,19 +27,19 @@ function out = fillgaps_time(var, options)
         options.method char = 'spline';
     end
 
-    time_dim = 0;
-    % find first time dim in var.dims
+    range_dim = 0;
+    % find first range dim in var.dims
     for k=1:numel(var.dims) 
-       if contains(var.dims{k}, 'time')
-           % as soon as time_dim is set once, break out of loop
-           time_dim = k;
+       if contains(var.dims{k}, 'range')
+           % as soon as range_dim is set once, break out of loop
+           range_dim = k;
            break
        end
     end
 
-    if time_dim == 0
-        % this means prev loop didnt find 'time' in any dims -> throw error
-        error('No time dimension found')
+    if range_dim == 0
+        % this means prev loop didnt find 'range' in any dims -> throw error
+        error('No range dimension found')
     end
 
     % now interpolate the nans away
@@ -54,6 +54,6 @@ function out = fillgaps_time(var, options)
     out = var;
     % reassign any nans in out.data to be interpolated values at the nan
     % positions
-    % TODO: interpolate over just time_dim
+    % TODO: interploate over just range dim
     out.data(nans) = interp1(t(not_nans), var.data(not_nans), t(nans), options.method);
 end
