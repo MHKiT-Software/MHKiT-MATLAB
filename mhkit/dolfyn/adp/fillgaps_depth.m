@@ -22,12 +22,23 @@ function out = fillgaps_depth(var, options)
 % --------
 % create_dataset.m function
 
-% TODO: need to assert that var is data struct from create_dataset here
 % set default value for options.method to 'spline'
     arguments
         var;
         options.method char = 'spline';
         options.maxgap double = NaN;
+    end
+    % Make sure that var is a structure
+    if ~isstruct(var)
+        ME = MException('MATLAB:fillgaps_depth','var must be a structure');
+        throw(ME);
+    end
+
+    % Make sure that var contains the dolyn fields
+    if ~isfield(var,'coords') || ~isfield(var,'data') 
+        ME = MException('MATLAB:fillgaps_depth',['The provided data ' ...
+            'structure does not appear to have been created by dolfyn']);
+        throw(ME);
     end
 
     range_dim = 0;
@@ -41,8 +52,8 @@ function out = fillgaps_depth(var, options)
     end
 
     if range_dim == 0
-        % this means prev loop didnt find 'range' in any dims -> throw error
-        error('No range dimension found')
+        ME = MException('MATLAB:fillgaps_depth',['No range dimension found']);
+        throw(ME);
     end
 
     % now interpolate the nans away, note fillmissing will look for NaNs in

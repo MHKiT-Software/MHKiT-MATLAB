@@ -34,7 +34,7 @@ function out = fillgaps_time(var, options)
         throw(ME);
     end
 
-    % Make sure that ds contains the dolyn fields
+    % Make sure that var contains the dolyn fields
     if ~isfield(var,'coords') || ~isfield(var,'data') 
         ME = MException('MATLAB:fillgaps_time',['The provided data ' ...
             'structure does not appear to have been created by dolfyn']);
