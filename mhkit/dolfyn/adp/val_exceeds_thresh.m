@@ -25,6 +25,19 @@ function out = val_exceeds_thresh(var, options)
         options.val double = NaN;
     end
     
+    % Make sure that var is a structure
+    if ~isstruct(var)
+        ME = MException('MATLAB:val_exceeds_thresh','var must be a structure');
+        throw(ME);
+    end
+
+    % Make sure that var contains the dolyn fields
+    if ~isfield(var,'data')
+        ME = MException('MATLAB:val_exceeds_thresh',['The provided data ' ...
+            'structure does not appear to have been created by dolfyn']);
+        throw(ME);
+    end
+
     % copy var.data for output
     out = var;
     % make logical matrix for if elmnt is beyond options.thresh
