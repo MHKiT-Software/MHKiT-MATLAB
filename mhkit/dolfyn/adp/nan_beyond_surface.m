@@ -6,8 +6,8 @@ function out = nan_beyond_surface(ds, options)
 % ----------
 % ds : Dataset
 %   The adcp dataset to clean
-% val : nan or numeric
-%   Specifies the value to set the bad values to (default np.nan).
+% val : NaN or numeric
+%   Specifies the value to set the bad values to (default NaN).
 % 
 % Returns
 % -------
@@ -22,7 +22,7 @@ function out = nan_beyond_surface(ds, options)
 
     arguments
         ds         
-        options.val = nan;
+        options.val = NaN;
     end
 
     fn = fieldnames(ds);
