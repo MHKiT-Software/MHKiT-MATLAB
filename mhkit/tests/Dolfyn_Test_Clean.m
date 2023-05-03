@@ -3,7 +3,7 @@ classdef Dolfyn_Test_Clean < matlab.unittest.TestCase
     methods (Test)
         function test_GN2002(testCase)
             td = dolfyn_read('../../examples/data/dolfyn/vector_data01.VEC');
-            td_imu = dolfyn_read('../../examples/data/dolfyn/vector_dataimu01.VEC');
+            td_imu = dolfyn_read('../../examples/data/dolfyn/vector_data_imu01.VEC');
 
             %TODO make GN2002, clean_fill, fill_nan_ensemble_mean
             %mask = GN2002(td.vel, npt=20);
@@ -23,19 +23,19 @@ classdef Dolfyn_Test_Clean < matlab.unittest.TestCase
             %return
 
             %TODO compare to clean data instead of same data
-            td_cntrl = td;
-            %td_cntrl = dolfyn_read('vector_data01_GN.nc');
+            %td_cntrl = td;
+            td_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/vector_data01_GN.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td, td_cntrl);
             testCase.assertLessThan(diff, 1e-6);
 
-            td_imu_cntrl = td_imu;
-            %td_imu_cntrl = dolfyn_read('vector_data_imu01_GN.nc');
+            %td_imu_cntrl = td_imu;
+            td_imu_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/vector_data_imu01_GN.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td_imu, td_imu_cntrl);
             testCase.assertLessThan(diff, 1e-6);
         end
 
         function test_spike_thresh(testCase)
-            td = dolfyn_read('../../examples/data/dolfyn/vector_dataimu01.VEC');
+            td = dolfyn_read('../../examples/data/dolfyn/vector_data_imu01.VEC');
 
             %TODO spike_thresh, clean_fill
             %mask = spike_thresh(td.vel, thresh=10);
@@ -46,26 +46,26 @@ classdef Dolfyn_Test_Clean < matlab.unittest.TestCase
             %return
 
             %TODO compare to clean data instead of same data
-            td_cntrl = td;
-            %td_cntrl = dolfyn_read('vector_data01_sclean.nc');
+            %td_cntrl = td;
+            td_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/vector_data01_sclean.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td, td_cntrl);
             testCase.assertLessThan(diff, 1e-6);
         end
 
         function test_range_limit(testCase)
-            td = dolfyn_read('../../examples/data/dolfyn/vector_dataimu01.VEC');
+            td = dolfyn_read('../../examples/data/dolfyn/vector_data_imu01.VEC');
 
             %TODO range_limit
-            mask = range_limit(td.vel);
-            td.vel = clean_fill(td.vel, mask, method='cubic', maxgap=6);
+            %mask = range_limit(td.vel);
+            %td.vel = clean_fill(td.vel, mask, method='cubic', maxgap=6);
 
             %if make_data:
                 %save(td, 'vector_data01_rclean.nc')
             %return
 
             %TODO compare to clean data instead of same data
-            td_cntrl = td;
-            %td_cntrl = dolfyn_read('vector_data01_rclean.nc');
+            %td_cntrl = td;
+            td_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/vector_data01_rclean.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td, td_cntrl);
             testCase.assertLessThan(diff, 1e-6);
         end
@@ -88,13 +88,11 @@ classdef Dolfyn_Test_Clean < matlab.unittest.TestCase
             %    return
             
             %TODO compare to cleaned data instead of same data
-            td_sig_cntrl = td_sig;
-            %td_sig_cntrl = dolfyn_read('Sig1000_tidal_clean.nc');
+            td_sig_cntrl = read_netcdf('../../examples/data/dolfyn/test_data/Sig1000_tidal_clean.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td_sig, td_sig_cntrl);
             testCase.assertLessThan(diff, 1e-6);
 
-            td_awac_cntrl = td_awac;
-            %td_awac_cntrl = dolfyn_read('AWAC_test01_clean.nc');
+            td_awac_cntrl = read_netcdf('../../examples/data/dolfyn/test_data/AWAC_test01_clean.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td_awac, td_awac_cntrl);
             testCase.assertLessThan(diff, 1e-6);
         end
@@ -119,7 +117,8 @@ classdef Dolfyn_Test_Clean < matlab.unittest.TestCase
 
             % now load python comp file and compare
             %TODO compare to cleaned data instead of same data
-            ds_cntrl = ds;
+            %ds_cntrl = ds;
+            ds_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/Sig500_Echo_clean.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(ds, ds_cntrl);
             testCase.assertLessThan(diff, 1e-6);
         end
@@ -127,11 +126,11 @@ classdef Dolfyn_Test_Clean < matlab.unittest.TestCase
         function test_orient_filter(testCase)
             td_sig = dolfyn_read('../../examples/data/dolfyn/Sig1000_IMU.ad2cp');
             %td_sig = medfilt_orient(td_sig); % TODO make this function
-            td_sig = rotate2(td_sig, 'earth', inplace=True);
+            %td_sig = rotate2(td_sig, 'earth', inplace=True);
 
             td_rdi = dolfyn_read('../../examples/data/dolfyn/RDI_test01.000');
             %td_rdi = medfilt_orient(td_rdi); % TODO make this function
-            td_rdi = rotate2(td_rdi, 'earth', inplace=True);
+            %td_rdi = rotate2(td_rdi, 'earth', inplace=True);
 
             %if make_data:
             %    save(td_sig, 'Sig1000_IMU_ofilt.nc')
@@ -139,13 +138,13 @@ classdef Dolfyn_Test_Clean < matlab.unittest.TestCase
             %return
             
             %TODO compare to cleaned data instead of same data
-            td_sig_cntrl = td_sig;
-            %td_sig_cntrl = dolfyn_read('Sig1000_IMU_ofilt.nc');
+            %td_sig_cntrl = td_sig;
+            td_sig_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/Sig1000_IMU_ofilt.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td_sig, td_sig_cntrl);
             testCase.assertLessThan(diff, 1e-6);
 
-            td_rdi_cntrl = td_rdi;
-            %td_rdi_cntrl = dolfyn_read('RDI_test01_ofilt.nc');
+            %td_rdi_cntrl = td_rdi;
+            td_rdi_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/RDI_test01_ofilt.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td_rdi, td_rdi_cntrl);
             testCase.assertLessThan(diff, 1e-6);
         end
