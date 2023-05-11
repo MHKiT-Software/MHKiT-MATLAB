@@ -24,12 +24,12 @@ classdef Dolfyn_Test_Clean < matlab.unittest.TestCase
 
             %TODO compare to clean data instead of same data
             %td_cntrl = td;
-            td_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/vector_data01_GN.nc');
+            td_cntrl = read_netcdf('../../examples/data/dolfyn/test_data/vector_data01_GN.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td, td_cntrl);
             testCase.assertLessThan(diff, 1e-6);
 
             %td_imu_cntrl = td_imu;
-            td_imu_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/vector_data_imu01_GN.nc');
+            td_imu_cntrl = read_netcdf('../../examples/data/dolfyn/test_data/vector_data_imu01_GN.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td_imu, td_imu_cntrl);
             testCase.assertLessThan(diff, 1e-6);
         end
@@ -47,7 +47,7 @@ classdef Dolfyn_Test_Clean < matlab.unittest.TestCase
 
             %TODO compare to clean data instead of same data
             %td_cntrl = td;
-            td_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/vector_data01_sclean.nc');
+            td_cntrl = read_netcdf('../../examples/data/dolfyn/test_data/vector_data01_sclean.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td, td_cntrl);
             testCase.assertLessThan(diff, 1e-6);
         end
@@ -65,7 +65,7 @@ classdef Dolfyn_Test_Clean < matlab.unittest.TestCase
 
             %TODO compare to clean data instead of same data
             %td_cntrl = td;
-            td_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/vector_data01_rclean.nc');
+            td_cntrl = read_netcdf('../../examples/data/dolfyn/test_data/vector_data01_rclean.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td, td_cntrl);
             testCase.assertLessThan(diff, 1e-6);
         end
@@ -118,7 +118,7 @@ classdef Dolfyn_Test_Clean < matlab.unittest.TestCase
             % now load python comp file and compare
             %TODO compare to cleaned data instead of same data
             %ds_cntrl = ds;
-            ds_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/Sig500_Echo_clean.nc');
+            ds_cntrl = read_netcdf('../../examples/data/dolfyn/test_data/Sig500_Echo_clean.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(ds, ds_cntrl);
             testCase.assertLessThan(diff, 1e-6);
         end
@@ -139,12 +139,12 @@ classdef Dolfyn_Test_Clean < matlab.unittest.TestCase
             
             %TODO compare to cleaned data instead of same data
             %td_sig_cntrl = td_sig;
-            td_sig_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/Sig1000_IMU_ofilt.nc');
+            td_sig_cntrl = read_netcdf('../../examples/data/dolfyn/test_data/Sig1000_IMU_ofilt.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td_sig, td_sig_cntrl);
             testCase.assertLessThan(diff, 1e-6);
 
             %td_rdi_cntrl = td_rdi;
-            td_rdi_cntrl = dolfyn_read('../../examples/data/dolfyn/test_data/RDI_test01_ofilt.nc');
+            td_rdi_cntrl = read_netcdf('../../examples/data/dolfyn/test_data/RDI_test01_ofilt.nc');
             diff = Dolfyn_Test_Rotate.compare_structures(td_rdi, td_rdi_cntrl);
             testCase.assertLessThan(diff, 1e-6);
         end
