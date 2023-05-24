@@ -68,6 +68,6 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     end
 end
 
-% calculate enegery_period
+% calculate enegery_period here
 Te=py.mhkit.wave.resource.energy_period(S,pyargs('frequency_bins',freq_bins));
 Te=double(Te.values);
