@@ -36,6 +36,7 @@ py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit');
 py.importlib.import_module('mhkit_python_utils');
 
+% assign feq_bin
 if nargin == 2
     freq_bins = py.numpy.array(varargin{1});
 elseif nargin == 1
@@ -45,6 +46,7 @@ else
         throw(ME);
 end
 
+% convert matlab structure to pandas.dataframe
 if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(S)==1)
         x=size(S.spectrum);
@@ -66,5 +68,6 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     end
 end
 
+% calculate enegery_period
 Te=py.mhkit.wave.resource.energy_period(S,pyargs('frequency_bins',freq_bins));
 Te=double(Te.values);
