@@ -55,6 +55,8 @@ Hm0_bins=py.numpy.array(Hm0_bins);
 Te_bins=py.numpy.array(Te_bins);
 
 LM=py.mhkit.wave.performance.capture_length_matrix(Hm0,Te,L,statistic,Hm0_bins,Te_bins);
+
+% convert vals1d to original shape
 vals=double(py.array.array('d',py.numpy.nditer(LM.values)));
 sha=cell(LM.values.shape);
 x=int64(sha{1,1});
