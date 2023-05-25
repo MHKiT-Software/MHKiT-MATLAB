@@ -13,6 +13,10 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         python-version: [3.8, 3.9]
+        mat_release: [latest]
+        include:
+          - os: ubuntu-latest
+            mat_release: R2020b
     runs-on: ${{ matrix.os }}
     env:
       mhkit-python-dir: 'MHKiT-Python'
@@ -26,6 +30,8 @@ jobs:
           path: ${{env.mhkit-python-dir}}
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
+        with:
+          release: ${{ matrix.mat_release }}
       - name: Set up Python
         uses: actions/setup-python@v2
         with:

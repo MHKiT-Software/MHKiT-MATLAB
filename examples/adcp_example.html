@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,IE=9,chrome=1"><meta name="generator" content="MATLAB 2021b"><title>Example: Reading ADCP Data with MHKiT</title><style type="text/css">.rtcContent { padding: 30px; } .S0 { margin: 3px 10px 5px 4px; padding: 0px; line-height: 28.8px; min-height: 0px; white-space: pre-wrap; color: rgb(213, 80, 0); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 24px; font-weight: 400; text-align: left;  }
+.S1 { margin: 2px 10px 9px 4px; padding: 0px; line-height: 21px; min-height: 0px; white-space: pre-wrap; color: rgb(0, 0, 0); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 14px; font-weight: 400; text-align: left;  }
+.S2 { margin: 10px 0px 20px; padding-left: 0px; font-family: Helvetica, Arial, sans-serif; font-size: 14px;  }
+.S3 { margin-left: 56px; line-height: 21px; min-height: 0px; text-align: left; white-space: pre-wrap;  }
+.S4 { margin: 20px 10px 5px 4px; padding: 0px; line-height: 20px; min-height: 0px; white-space: pre-wrap; color: rgb(60, 60, 60); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 20px; font-weight: 700; text-align: left;  }
+.CodeBlock { background-color: #F7F7F7; margin: 10px 0 10px 0;}
+.S5 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 1px solid rgb(233, 233, 233); border-bottom: 1px solid rgb(233, 233, 233); border-radius: 4px 4px 0px 0px; padding: 6px 45px 4px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S6 { color: rgb(64, 64, 64); padding: 10px 0px 6px 17px; background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box; font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px; overflow-x: hidden; line-height: 17.234px;  }
+/* Styling that is common to warnings and errors is in diagnosticOutput.css */.embeddedOutputsErrorElement {    min-height: 18px;    max-height: 550px;}
+.embeddedOutputsErrorElement .diagnosticMessage-errorType {    overflow: auto;}
+.embeddedOutputsErrorElement.inlineElement {}
+.embeddedOutputsErrorElement.rightPaneElement {}
+/* Styling that is common to warnings and errors is in diagnosticOutput.css */.embeddedOutputsWarningElement {    min-height: 18px;    max-height: 550px;}
+.embeddedOutputsWarningElement .diagnosticMessage-warningType {    overflow: auto;}
+.embeddedOutputsWarningElement.inlineElement {}
+.embeddedOutputsWarningElement.rightPaneElement {}
+/* Copyright 2015-2019 The MathWorks, Inc. *//* In this file, styles are not scoped to rtcContainer since they could be in the Dojo Tooltip */.diagnosticMessage-wrapper {    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;    font-size: 12px;}
+.diagnosticMessage-wrapper.diagnosticMessage-warningType {    color: rgb(255,100,0);}
+.diagnosticMessage-wrapper.diagnosticMessage-warningType a {    color: rgb(255,100,0);    text-decoration: underline;}
+.diagnosticMessage-wrapper.diagnosticMessage-errorType {    color: rgb(230,0,0);}
+.diagnosticMessage-wrapper.diagnosticMessage-errorType a {    color: rgb(230,0,0);    text-decoration: underline;}
+.diagnosticMessage-wrapper .diagnosticMessage-messagePart,.diagnosticMessage-wrapper .diagnosticMessage-causePart {    white-space: pre-wrap;}
+.diagnosticMessage-wrapper .diagnosticMessage-stackPart {    white-space: pre;}
+.embeddedOutputsTextElement,.embeddedOutputsVariableStringElement {    white-space: pre;    word-wrap:  initial;    min-height: 18px;    max-height: 550px;}
+.embeddedOutputsTextElement .textElement,.embeddedOutputsVariableStringElement .textElement {    overflow: auto;}
+.textElement,.rtcDataTipElement .textElement {    padding-top: 3px;}
+.embeddedOutputsTextElement.inlineElement,.embeddedOutputsVariableStringElement.inlineElement {}
+.inlineElement .textElement {}
+.embeddedOutputsTextElement.rightPaneElement,.embeddedOutputsVariableStringElement.rightPaneElement {    min-height: 16px;}
+.rightPaneElement .textElement {    padding-top: 2px;    padding-left: 9px;}
+.S7 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 1px solid rgb(233, 233, 233); border-bottom: 1px solid rgb(233, 233, 233); border-radius: 0px 0px 4px 4px; padding: 6px 45px 4px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S8 { margin: 10px 10px 9px 4px; padding: 0px; line-height: 21px; min-height: 0px; white-space: pre-wrap; color: rgb(0, 0, 0); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 14px; font-weight: 400; text-align: left;  }
+.S9 { margin: 3px 10px 5px 4px; padding: 0px; line-height: 20px; min-height: 0px; white-space: pre-wrap; color: rgb(60, 60, 60); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 20px; font-weight: 700; text-align: left;  }
+.S10 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 1px solid rgb(233, 233, 233); border-bottom: 0px none rgb(0, 0, 0); border-radius: 4px 4px 0px 0px; padding: 6px 45px 0px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S11 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 0px none rgb(0, 0, 0); border-bottom: 1px solid rgb(233, 233, 233); border-radius: 0px; padding: 0px 45px 4px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S12 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 1px solid rgb(233, 233, 233); border-bottom: 1px solid rgb(233, 233, 233); border-radius: 4px; padding: 6px 45px 4px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.embeddedOutputsMatrixElement,.eoOutputWrapper .matrixElement {    min-height: 18px;    box-sizing: border-box;}
+.embeddedOutputsMatrixElement .matrixElement,.eoOutputWrapper  .matrixElement,.rtcDataTipElement .matrixElement {    position: relative;}
+.matrixElement .variableValue,.rtcDataTipElement .matrixElement .variableValue {    white-space: pre;    display: inline-block;    vertical-align: top;    overflow: hidden;}
+.embeddedOutputsMatrixElement.inlineElement {}
+.embeddedOutputsMatrixElement.inlineElement .topHeaderWrapper {    display: none;}
+.embeddedOutputsMatrixElement.inlineElement .veTable .body {    padding-top: 0 !important;    max-height: 100px;}
+.inlineElement .matrixElement {    max-height: 300px;}
+.embeddedOutputsMatrixElement.rightPaneElement {}
+.rightPaneElement .matrixElement,.rtcDataTipElement .matrixElement {    overflow: hidden;    padding-left: 9px;}
+.rightPaneElement .matrixElement {    margin-bottom: -1px;}
+.embeddedOutputsMatrixElement .matrixElement .valueContainer,.eoOutputWrapper .matrixElement .valueContainer,.rtcDataTipElement .matrixElement .valueContainer {    white-space: nowrap;    margin-bottom: 3px;}
+.embeddedOutputsMatrixElement .matrixElement .valueContainer .horizontalEllipsis.hide,.embeddedOutputsMatrixElement .matrixElement .verticalEllipsis.hide,.eoOutputWrapper .matrixElement .valueContainer .horizontalEllipsis.hide,.eoOutputWrapper .matrixElement .verticalEllipsis.hide,.rtcDataTipElement .matrixElement .valueContainer .horizontalEllipsis.hide,.rtcDataTipElement .matrixElement .verticalEllipsis.hide {    display: none;}
+.embeddedOutputsVariableMatrixElement .matrixElement .valueContainer.hideEllipses .verticalEllipsis, .embeddedOutputsVariableMatrixElement .matrixElement .valueContainer.hideEllipses .horizontalEllipsis {    display:none;}
+.embeddedOutputsMatrixElement .matrixElement .valueContainer .horizontalEllipsis,.eoOutputWrapper .matrixElement .valueContainer .horizontalEllipsis {    margin-bottom: -3px;}
+.eoOutputWrapper .embeddedOutputsVariableMatrixElement .matrixElement .valueContainer {    cursor: default !important;}
+.embeddedOutputsVariableElement {    white-space: pre-wrap;    word-wrap: break-word;    min-height: 18px;    max-height: 250px;    overflow: auto;}
+.variableElement {}
+.embeddedOutputsVariableElement.inlineElement {}
+.inlineElement .variableElement {}
+.embeddedOutputsVariableElement.rightPaneElement {    min-height: 16px;}
+.rightPaneElement .variableElement {    padding-top: 2px;    padding-left: 9px;}
+.variableNameElement {    margin-bottom: 3px;    display: inline-block;}
+/* * Ellipses as base64 for HTML export. */.matrixElement .horizontalEllipsis,.rtcDataTipElement .matrixElement .horizontalEllipsis {    display: inline-block;    margin-top: 3px;    /* base64 encoded version of images-liveeditor/HEllipsis.png */    width: 30px;    height: 12px;    background-repeat: no-repeat;    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB0AAAAJCAYAAADO1CeCAAAAJUlEQVR42mP4//8/A70xw0i29BUDFPxnAEtTW37wWDqakIa4pQDvOOG89lHX2gAAAABJRU5ErkJggg==");}
+.matrixElement .verticalEllipsis,.textElement .verticalEllipsis,.rtcDataTipElement .matrixElement .verticalEllipsis,.rtcDataTipElement .textElement .verticalEllipsis {    margin-left: 35px;    /* base64 encoded version of images-liveeditor/VEllipsis.png */    width: 12px;    height: 30px;    background-repeat: no-repeat;    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAZCAYAAAAIcL+IAAAALklEQVR42mP4//8/AzGYgWyFMECMwv8QddRS+P//KyimlmcGUOFoOI6GI/UVAgDnd8Dd4+NCwgAAAABJRU5ErkJggg==");}
+.S13 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 1px solid rgb(233, 233, 233); border-bottom: 0px none rgb(0, 0, 0); border-radius: 0px; padding: 6px 45px 0px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S14 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 0px none rgb(0, 0, 0); border-bottom: 1px solid rgb(233, 233, 233); border-radius: 0px 0px 4px 4px; padding: 0px 45px 4px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S15 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 0px none rgb(0, 0, 0); border-bottom: 0px none rgb(0, 0, 0); border-radius: 0px; padding: 0px 45px 0px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }</style></head><body><div class = rtcContent><h1  class = 'S0'><span>Example: Reading ADCP Data with MHKiT</span></h1><div  class = 'S1'><span>The following example demonstrates a simple workflow for analyzing Acoustic Doppler Current Profiler (ADCP) data using MHKiT. MHKiT has brought the DOLfYN codebase in as an MHKiT module for working with ADCP and Acoustic Doppler Velocimeter (ADV) data. The DOLfYN MHKiT module is transferring functionality in two parts. In phase 1 the basic IO and core functions of DOLfYN are brought in. These functions include reading instrument data and rotating thru coordinate systems. In phase 2 DOLfYN analysis functions will be brought in. As phase 2 is still in progress, the analysis tools from the</span><span> </span><a href = "https://github.com/lkilcher/dolfyn"><span>DOLfYN</span></a><span> </span><span>package are only available in python.</span></div><div  class = 'S1'><span>A typical ADCP data workflow is broken down into</span></div><ol  class = 'S2'><li  class = 'S3'><span>Review the raw data (Check timestamps, Calculate/check that the depth bin locations are correct, Look at velocity, beam amplitude and/or beam correlation data quality)</span></li><li  class = 'S3'><span>Remove data located above the water surface or below the seafloor</span></li><li  class = 'S3'><span>Check for spurious datapoints and remove if necessary</span></li><li  class = 'S3'><span>If not already done within the instrument, average the data into time bins of a set time length (normally 5 to 10 min)</span></li><li  class = 'S3'><span>Conduct further analysis as required</span></li></ol><h2  class = 'S4'><span>Read Raw Instrument Data</span></h2><div  class = 'S1'><span>The core benefit of DOLfYN is that it can read in raw data directly after transferring it off of the ADCP. The ADCP used here is a Nortek Signature1000, with the file extension '.ad2cp'. This specific dataset contains several hours worth of velocity data collected at 1 Hz from the ADCP mounted on a bottom lander in a tidal inlet. The instruments that DOLfYN supports are listed in the</span><span> </span><a href = "https://dolfyn.readthedocs.io/en/latest/about.html"><span>docs</span></a><span>.</span></div><div  class = 'S1'><span>Start by reading in the raw datafile downloaded from the instrument. The</span><span> </span><span>read</span><span> </span><span>function reads the raw file and dumps the information into an matlab structure, which contains a few groups of variables:</span></div><ol  class = 'S2'><li  class = 'S3'><span>Velocity in the instrument-saved coordinate system (beam, XYZ, ENU)</span></li><li  class = 'S3'><span>Beam amplitude and correlation data</span></li><li  class = 'S3'><span>Measurements of the instrument's bearing and environment</span></li><li  class = 'S3'><span>Orientation matrices DOLfYN uses for rotating through coordinate frames.</span></li></ol><div  class = 'S1'><span>Matlab's binary read takes a while to complete (usually around 3 minutes for this file). Using the optional nens keyword, it is possible to only read part of the data. Reading the first 5,000 pings could be accomplished with the command below that is commented out. </span></div><div class="CodeBlock"><div class="inlineWrapper outputs"><div  class = 'S5'><span style="white-space: pre"><span >ds = dolfyn_read(</span><span style="color: rgb(170, 4, 249);">'data/dolfyn/Sig1000_tidal.ad2cp'</span><span >);</span></span></div><div  class = 'S6'><div class="inlineElement eoOutputWrapper embeddedOutputsTextElement" uid="3571E83E" data-scroll-top="null" data-scroll-left="null" data-testid="output_0" style="width: 661px; white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="textElement eoOutputContent" data-width="631" data-height="18" data-hashorizontaloverflow="false" style="max-height: 261px; white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">Reading file data/dolfyn/Sig1000_tidal.ad2cp</div></div></div></div><div class="inlineWrapper"><div  class = 'S7'><span style="white-space: pre"><span style="color: rgb(2, 128, 9);">%ds = dolfyn_read('data/dolfyn/Sig1000_tidal.ad2cp','nens',5000);</span></span></div></div></div><div  class = 'S8'><span>To see whats in the dataset, it is recommended that users open the ds variable in the workspace. Alternatively, removing the semicolon in the above line will print the connents of ds. </span></div><h2  class = 'S9'><span>First Steps and QC'ing Data</span></h2><div  class = 'S1'><span></span></div><div  class = 'S1'><span>In future updates to MHKiT-Matlab's Dolfyn functionality users will be able to QC data and set certain helpful parameters such as deployment height.</span></div><h2  class = 'S9'><span>Review the Data</span></h2><div  class = 'S1'><span></span></div><div  class = 'S1'><span>Now that the data has been cleaned, the next step is to rotate the velocity data into true East, North, Up coordinates. </span></div><div  class = 'S1'><span>ADCPs use an internal compass or magnetometer to determine magnetic ENU directions. The set_declination function takes the user supplied magnetic declination (which can be looked up online for specific coordinates) and adjusts the velocity data accordingly.</span></div><div  class = 'S1'><span>Instruments save vector data in the coordinate system specified in the deployment configuration file. To make the data useful, it must be rotated through coordinate systems ("beam"&lt;-&gt;"inst"&lt;-&gt;"earth"&lt;-&gt;"principal"), done through the `rotate2` function. If the "earth" (ENU) coordinate system is specified, DOLfYN will automatically rotate the dataset through the necessary coordinate systems to get there. </span></div><div  class = 'S1'><span>Because this ADCP data was already in the "earth" coordinate system, `rotate2` will return the input dataset. `set_declination` will run correctly no matter the coordinate system.</span></div><div  class = 'S1'><span> </span></div><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S10'><span style="white-space: pre"><span >ds = set_declination(ds, 15.8);</span></span></div></div><div class="inlineWrapper outputs"><div  class = 'S11'><span style="white-space: pre"><span >ds = rotate2(ds, </span><span style="color: rgb(170, 4, 249);">'earth'</span><span >);</span></span></div><div  class = 'S6'><div class="inlineElement eoOutputWrapper embeddedOutputsTextElement" uid="16886E08" data-scroll-top="null" data-scroll-left="null" data-testid="output_1" style="width: 661px; white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="textElement eoOutputContent" data-width="631" data-height="18" data-hashorizontaloverflow="false" style="max-height: 261px; white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">Data is already in the earth coordinate system</div></div></div></div></div><div  class = 'S8'><span>To rotate into the principal frame of reference (streamwise, cross-stream, vertical), if desired, we must first calculate the depth-averaged principal flow heading and add it to the dataset attributes. Then the dataset can be rotated using the same `rotate2` function. </span></div><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S12'><span style="white-space: pre"><span >depth_averaged_velocity = mean(squeeze(ds.vel.data), 2);</span></span></div></div></div><div  class = 'S8'><span>Here we average the data over the depth or 'range'. To determine what each dimension represents, users can look at the dims field of each variable. </span></div><div class="CodeBlock"><div class="inlineWrapper outputs"><div  class = 'S5'><span style="white-space: pre"><span >ds.vel.dims</span></span></div><div  class = 'S6'><div class="inlineElement eoOutputWrapper embeddedOutputsTextMatrixElement embeddedOutputsVariableMatrixElement" uid="80D068ED" data-testid="output_2" data-width="632" style="width: 661px; white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="matrixElement veSpecifier eoOutputContent" style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="veVariableName variableNameElement" style="width: 632px; white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="headerElementClickToInteract" style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><span style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">ans = </span><span class="veVariableValueSummary headerElement" style="white-space: normal; font-style: normal; color: rgb(179, 179, 179); font-size: 12px;">1×3 cell</span></div></div><div class="valueContainer" data-layout="{&quot;totalRows&quot;:1,&quot;totalColumns&quot;:3}" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="variableValue" style="width: 246px; white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">'time'       'range'      'dir'        <br></div><div class="horizontalEllipsis hide" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"></div><div class="verticalEllipsis hide" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"></div></div></div></div></div></div><div class="inlineWrapper"><div  class = 'S13'><span style="white-space: pre"><span >ds.attrs.principal_heading = calc_principal_heading(depth_averaged_velocity, true);</span></span></div></div><div class="inlineWrapper"><div  class = 'S14'><span style="white-space: pre"><span >ds_streamwise = rotate2(ds, </span><span style="color: rgb(170, 4, 249);">'principal'</span><span >);</span></span></div></div></div><div  class = 'S8'><span></span></div><div  class = 'S1'><span>Because this deployment was set up in "burst mode", the next standard step in this analysis is to average the velocity data into time bins. This and other features (such as the QC mentioned above will be in the next stage of Dolfyn development). </span></div><h2  class = 'S9'><span>Saving and Loading Dolfyn datasets</span></h2><div  class = 'S1'><span></span></div><div  class = 'S1'><span>Datasets can be saved and loaded using the write_netcdf and read_netcdf functions, respectively. </span></div><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S10'><span style="white-space: pre"><span style="color: rgb(2, 128, 9);">% Uncomment these lines to save and load to your current working directory</span></span></div></div><div class="inlineWrapper"><div  class = 'S15'><span style="white-space: pre"><span style="color: rgb(2, 128, 9);">% write_netcdf(ds, 'your_data.nc');</span></span></div></div><div class="inlineWrapper"><div  class = 'S14'><span style="white-space: pre"><span style="color: rgb(2, 128, 9);">% ds_saved = read_netcdf('your_data.nc');</span></span></div></div></div>
+<br>
+<!-- 
+##### SOURCE BEGIN #####
+%% Example: Reading ADCP Data with MHKiT
+% The following example demonstrates a simple workflow for analyzing Acoustic 
+% Doppler Current Profiler (ADCP) data using MHKiT. MHKiT has brought the DOLfYN 
+% codebase in as an MHKiT module for working with ADCP and Acoustic Doppler Velocimeter 
+% (ADV) data. The DOLfYN MHKiT module is transferring functionality in two parts. 
+% In phase 1 the basic IO and core functions of DOLfYN are brought in. These functions 
+% include reading instrument data and rotating thru coordinate systems. In phase 
+% 2 DOLfYN analysis functions will be brought in. As phase 2 is still in progress, 
+% the analysis tools from the <https://github.com/lkilcher/dolfyn DOLfYN> package 
+% are only available in python.
+% 
+% A typical ADCP data workflow is broken down into
+%% 
+% # Review the raw data (Check timestamps, Calculate/check that the depth bin 
+% locations are correct, Look at velocity, beam amplitude and/or beam correlation 
+% data quality)
+% # Remove data located above the water surface or below the seafloor
+% # Check for spurious datapoints and remove if necessary
+% # If not already done within the instrument, average the data into time bins 
+% of a set time length (normally 5 to 10 min)
+% # Conduct further analysis as required
+%% Read Raw Instrument Data
+% The core benefit of DOLfYN is that it can read in raw data directly after 
+% transferring it off of the ADCP. The ADCP used here is a Nortek Signature1000, 
+% with the file extension '.ad2cp'. This specific dataset contains several hours 
+% worth of velocity data collected at 1 Hz from the ADCP mounted on a bottom lander 
+% in a tidal inlet. The instruments that DOLfYN supports are listed in the <https://dolfyn.readthedocs.io/en/latest/about.html 
+% docs>.
+% 
+% Start by reading in the raw datafile downloaded from the instrument. The read 
+% function reads the raw file and dumps the information into an matlab structure, 
+% which contains a few groups of variables:
+%% 
+% # Velocity in the instrument-saved coordinate system (beam, XYZ, ENU)
+% # Beam amplitude and correlation data
+% # Measurements of the instrument's bearing and environment
+% # Orientation matrices DOLfYN uses for rotating through coordinate frames.
+%% 
+% Matlab's binary read takes a while to complete (usually around 3 minutes for 
+% this file). Using the optional nens keyword, it is possible to only read part 
+% of the data. Reading the first 5,000 pings could be accomplished with the command 
+% below that is commented out. 
+
+ds = dolfyn_read('data/dolfyn/Sig1000_tidal.ad2cp');
+%ds = dolfyn_read('data/dolfyn/Sig1000_tidal.ad2cp','nens',5000);
+%% 
+% To see whats in the dataset, it is recommended that users open the ds variable 
+% in the workspace. Alternatively, removing the semicolon in the above line will 
+% print the connents of ds. 
+%% First Steps and QC'ing Data
+% 
+% 
+% In future updates to MHKiT-Matlab's Dolfyn functionality users will be able 
+% to QC data and set certain helpful parameters such as deployment height.
+%% Review the Data
+% 
+% 
+% Now that the data has been cleaned, the next step is to rotate the velocity 
+% data into true East, North, Up coordinates. 
+% 
+% ADCPs use an internal compass or magnetometer to determine magnetic ENU directions. 
+% The set_declination function takes the user supplied magnetic declination (which 
+% can be looked up online for specific coordinates) and adjusts the velocity data 
+% accordingly.
+% 
+% Instruments save vector data in the coordinate system specified in the deployment 
+% configuration file. To make the data useful, it must be rotated through coordinate 
+% systems ("beam"<->"inst"<->"earth"<->"principal"), done through the `rotate2` 
+% function. If the "earth" (ENU) coordinate system is specified, DOLfYN will automatically 
+% rotate the dataset through the necessary coordinate systems to get there. 
+% 
+% Because this ADCP data was already in the "earth" coordinate system, `rotate2` 
+% will return the input dataset. `set_declination` will run correctly no matter 
+% the coordinate system.
+% 
+% 
+
+ds = set_declination(ds, 15.8);
+ds = rotate2(ds, 'earth');
+%% 
+% To rotate into the principal frame of reference (streamwise, cross-stream, 
+% vertical), if desired, we must first calculate the depth-averaged principal 
+% flow heading and add it to the dataset attributes. Then the dataset can be rotated 
+% using the same `rotate2` function. 
+
+depth_averaged_velocity = mean(squeeze(ds.vel.data), 2);
+%% 
+% Here we average the data over the depth or 'range'. To determine what each 
+% dimension represents, users can look at the dims field of each variable. 
+
+ds.vel.dims
+ds.attrs.principal_heading = calc_principal_heading(depth_averaged_velocity, true);
+ds_streamwise = rotate2(ds, 'principal');
+%% 
+% 
+% 
+% Because this deployment was set up in "burst mode", the next standard step 
+% in this analysis is to average the velocity data into time bins. This and other 
+% features (such as the QC mentioned above will be in the next stage of Dolfyn 
+% development). 
+%% Saving and Loading Dolfyn datasets
+% 
+% 
+% Datasets can be saved and loaded using the write_netcdf and read_netcdf functions, 
+% respectively. 
+
+% Uncomment these lines to save and load to your current working directory
+% write_netcdf(ds, 'your_data.nc');
+% ds_saved = read_netcdf('your_data.nc');
+##### SOURCE END #####
+-->
+</div></body></html>
