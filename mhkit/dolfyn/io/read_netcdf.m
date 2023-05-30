@@ -109,8 +109,8 @@ function ds = read_netcdf(filename)
                 else
                     ds.(name).dims{kk} = dimensions(kk).Name;
                 end
-                ds.(name).coords.(dimensions(kk).Name) = ...
-                    ds.coords.(dimensions(kk).Name);
+                ds.(name).coords.(ds.(name).dims{kk}) = ...
+                    ds.coords.(ds.(name).dims{kk});
             end 
             if ~isempty(attrs)
                 for ii = 1:numel(attrs)
