@@ -1,4 +1,4 @@
-function ds = read_nc_file_var(filename,varargin)
+function ds = read_nc_file_var(filename,vnms,out_opt)
 %%%%%%%%%%%%%%%%%%%%
 %     Read NetCDF data structure.
 %     
@@ -7,105 +7,66 @@ function ds = read_nc_file_var(filename,varargin)
 %     filename: string
 %         Filename of NetCDF file to read.
 %
-%     vnms: cell array of characters (optional)
+%     vnms: cell array of characters
 %         variable names to read.
 %         if the variable is in a group, make sure to include group name,
 %         i.e., {'GROUP_NAME1/VAR_NAME1','GROUP_NAME2/VAR_NAME2',...}
-%         read all variables under '/' if vnms not given.
+%
+%     out_opt: 0 if output as structure, ds.(vname) & ds.attrs.
+%              1 if output as structure array, ds(N).
 %
 % Returns
 % ---------
-%     ds: structure 
-%         Structure from the binary instrument data
+%     ds: structure or structure array
+%       1. structure that has fields:
+%          1.1 variable names from nc file 
+%       e.g., res.(varname1), res.(varname2), ...
+%       res.(varname) includes fields: 
+%           res.(varname).Name: full name of the variable
+%           res.(varname).FillValue: V.FillValue or 
+%               V.Attributes{'_FillValue'} if
+%               the former is not given.
+%           res.(varname).Data: metadata 
+%           res.(varname).Dims: dimension names
+%           res.(varname).Attrs: V.Attributes except for 
+%               V.Attributes{'_FillValue'}
+%           1.2 global attributes from nc file
+%       
+%       2. structure array, and each structure has the same fields as
+%       res.(varname) stated above.
 %        
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    % check to see if the filename input is a string
-    if ~ischar(filename) && ~isstring(filename)
-        ME = MException('MATLAB:read_nc_file_var',['filename must be a ' ...
-            'character string']);
-        throw(ME);
-    % check to see if the file exists
-    elseif ~isfile(filename)
-        ME = MException('MATLAB:read_netcdf','file does not exist');
-        throw(ME);
-    % check MATLAB version & if it is h5 file
-    elseif isMATLABReleaseOlderThan("R2021b") || ...
-            endsWith(filename, ".h5")
-        ds = read_h5(filename); 
-        return
-    end
+
+    % precheck:
+    nc_file_precheck(filename);
 
     finfo = ncinfo(filename);
-    % assign variable names to vnms
-    if nargin > 1
-        % use user specified input
-        vnms = varargin{1};
-    elseif ~isempty(finfo.Variables)
-        % read all variables under '/' 
-        vnms = {finfo.Variables.Name};
-    else
-        % return ERROR if 
-        % no variable specified and no Variables under '/'
-        ME = MException('MATLAB:read_nc_file',['no variable available' ...
-            ' to read']);
-        throw(ME);
+    % if want a struct array as output
+    if out_opt ==1
+        % Use data struct array to hold:
+        N = numel(vnms);
+        ds(N)=struct('Name',[],'Data',[], ...
+            'Dims',[],'FillValue',[],'Attrs',[]);
+        % loop through variable names (vnms) to read data and attributes
+        for ivar=1:numel(vnms)
+            name = vnms{ivar};
+            vinfo = ncinfo(filename,name);
+            ds(ivar).Name = vinfo.Name;
+            ds(ivar).FillValue = str2double(vinfo.FillValue);
+            ds(ivar).Data = ncread(filename, name);
+            ds(ivar).Dims = {vinfo.Dimensions.Name};
+            ds(ivar).Attrs = vinfo.Attributes;
+        end
+        return
     end
-
-    % initiate output struct()
+    % if want a struct
     ds = struct();
     % loop through variable names (vnms) to read data and attributes
     for ivar=1:numel(vnms)
-        name = vnms{ivar};tmplst = split(name,'/');
-        vname = tmplst{end};
-        if nargin > 1
-            % use user specified input
-            vinfo = ncinfo(filename,name);
-        else
-            % read all variables under '/' 
-            vinfo = finfo.Variables(ivar);
-        end
-        % check if vname is valid to be a field name of struct()
-        % if not, convert it to a valid field name
-        vname = check_name(vname);
-        % read in metadata and assign it to the variable
-        ds.(vname).data = ncread(filename,name);
-        % assign dims name to the variable
-        if ~isempty(vinfo.Dimensions)
-            ds.(vname).dims = {vinfo.Dimensions.Name};
-        else
-            ds.(vname).dims = {};
-        end
-        % assign FillValue to the variable
-        if ~isnumeric(vinfo.FillValue)
-            ds.(vname).FillValue = str2double(vinfo.FillValue);
-        else
-            ds.(vname).FillValue = vinfo.FillValue;
-        end
-        ds.(vname).attrs = struct();
-        % if no arributes skip
-        if isempty(vinfo.Attributes)
-            continue
-        end
-        % otherwise, loop through to 
-        % assign Attributes & check _FillValue
-        attrnames = {vinfo.Attributes.Name};
-        for iattr = 1:numel(attrnames)
-            aname = attrnames{iattr};
-            % _FillValue in data attributes:
-            if strcmp(aname,'_FillValue') 
-                % assign a new FillValue only if it was NaN
-                if isnan(ds.(vname).FillValue)
-                    ds.(vname).FillValue = ...
-                        vinfo.Attributes(iattr).Value;
-                end
-                continue
-            else
-                aname = check_name(aname);
-                ds.(vname).attrs.(aname) = ...
-                    vinfo.Attributes(iattr).Value;
-            end
-        end
+        name = vnms{ivar};
+        vinfo = ncinfo(filename,name);
+        ds = nc_get_var_info(filename,vinfo,name,ds);
     end
     % assign global attributes of the file
     if ~isempty(finfo.Attributes)
