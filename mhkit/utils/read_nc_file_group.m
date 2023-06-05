@@ -8,15 +8,44 @@ function data = read_nc_file_group(fname,varargin)
 %       Filename of NetCDF file to read.
 %   vnms: cell array of characters (optional)
 %       Variable names to read.
-%       Note: if the variable is in a group, make sure to include group name,
+%       Read all variables if vnms not given. Otherwise, read specified
+%       variables by calling read_nc_file_var(fname,vnms,opt_out=0), which
+%       returns a structure (ds) with fields ds.(vname) as described below.
+%       If the variable is in a group, make sure to include group name,
 %       i.e., {'GROUP_NAME1/VAR_NAME1',
 %              'GROUP_NAME2/SUBGROUP_NAME2/VAR_NAME2',...}
-%         
-%       Read all variables if vnms not given.
-%
+%   
+%   Note 1. Variables in root group ('/') can be extracted 
+%    directly by 'VARNAME'.
+%   Note 2. To find the group info of a variable, other than reading 
+%    the provided user manual of the corresponding NetCDF data product, 
+%    one can use ncdisp(filename) in MATLAB which shows variable info 
+%    for all groups and subgroups. 
+%   An example ncdisp(filename.nc) output can be:
+%   ...
+%       /GrpName/SubGrpName/
+%       Variables: 
+%           ...
+%           VAR_I_Need
+%               Size: ...
+%               Dimensions: ...
+%               ...
+%   To get VAR_I_Need from filename.nc, one can run this function as:
+% 
+%    ds = read_nc_file_group('filename.nc',...
+%           {'/GrpName/SubGrpName/VAR_I_Need'});
+%   
+%   Note 3. If needs to read all variables within a Group, one can use ncinfo():
+%       
+%    ginfo = ncinfo('filename.nc','/GrpName/SubGrpName/');
+%    vnms = {ginfo.Variables.Name};
+%    vnms = strcat('GrpName/SubGrpName/',vnms);
+%    ds = read_nc_file_group('filename.nc',vnms);
+%       
 % Returns
-% ---------
-%     ds: structure that has fields:
+% ------------
+%     ds: struct
+%   1. If vnms not specified, ds has fields:
 %       groups: struct that contains names of child groups as fields
 %       LongName: path to current group
 %       Attributes: Attributes of current group
@@ -30,6 +59,9 @@ function data = read_nc_file_group(fname,varargin)
 %           FillValue: V.FillValue or V.Attributes{'_FillValue'} if
 %               the former is not given.
 %           Attrs: V.Attributes except for V.Attributes{'_FillValue'}
+%   2. If vnms specified, ds has fields: ds.(varname).
+%       Each ds.(varname) contains fields same as Variables.(varname) 
+%       described above.
 %        
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % precheck:

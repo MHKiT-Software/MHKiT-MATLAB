@@ -1,4 +1,4 @@
-function ds = read_nc_file_var(filename,vnms,out_opt)
+function ds = read_nc_file_var(filename,vnms,opt_out)
 %%%%%%%%%%%%%%%%%%%%
 %     Read NetCDF data structure.
 %     
@@ -11,12 +11,50 @@ function ds = read_nc_file_var(filename,vnms,out_opt)
 %         variable names to read.
 %         if the variable is in a group, make sure to include group name,
 %         i.e., {'GROUP_NAME1/VAR_NAME1','GROUP_NAME2/VAR_NAME2',...}
-%
-%     out_opt: 0 if output as structure, ds.(vname) & ds.attrs.
+%     
+%     opt_out: 0 if output as structure, ds.(vname) & ds.attrs.
 %              1 if output as structure array, ds(N).
+%   
+%   Note 1. Variables in root group ('/') can be extracted 
+%    directly by 'VARNAME'.
+%   Note 2. To find the group info of a variable, other than reading 
+%    the provided user manual of the corresponding NetCDF data product, 
+%    one can use ncdisp(filename) in MATLAB which shows variable info 
+%    for all groups and subgroups. 
+%   An example ncdisp(filename.nc) output can be:
+%   ...
+%       /GrpName/SubGrpName/
+%       Variables: 
+%           ...
+%           VAR_I_Need
+%               Size: ...
+%               Dimensions: ...
+%               ...
+%   To get VAR_I_Need from filename.nc, one can run this function as:
+% 
+%    ds = read_nc_file_var('filename.nc',...
+%           {'/GrpName/SubGrpName/VAR_I_Need',...
+%           '/GrpName/SubGrpName/Another_VAR_I_Need'},...
+%           opt_out=0);
+%   to get a struct.
+% 
+%    OR: 
+%    ds = read_nc_file_var('filename.nc',...
+%           {'/GrpName/SubGrpName/VAR_I_Need',...
+%           '/GrpName/SubGrpName/Another_VAR_I_Need'},...
+%           opt_out=1);
+%   to get a struct array.
+%   
+%   Note 3. If needs to read all variables within a Group, one can use ncinfo():
+%       
+%    ginfo = ncinfo('filename.nc','/GrpName/SubGrpName/');
+%    vnms = {ginfo.Variables.Name};
+%    vnms = strcat('GrpName/SubGrpName/',vnms);
+%    ds = read_nc_file_var('filename.nc',vnms,opt_out=0);%struct 
+%    %ds = read_nc_file_var('filename.nc',vnms,opt_out=1);%struct array
 %
 % Returns
-% ---------
+% ------------
 %     ds: structure or structure array
 %       1. structure that has fields:
 %          1.1 variable names from nc file 
@@ -32,7 +70,7 @@ function ds = read_nc_file_var(filename,vnms,out_opt)
 %               V.Attributes{'_FillValue'}
 %           1.2 global attributes from nc file
 %       
-%       2. structure array, and each structure has the same fields as
+%       2. struct array, and each struct has the same fields as
 %       res.(varname) stated above.
 %        
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -43,7 +81,7 @@ function ds = read_nc_file_var(filename,vnms,out_opt)
 
     finfo = ncinfo(filename);
     % if want a struct array as output
-    if out_opt ==1
+    if opt_out ==1
         % Use data struct array to hold:
         N = numel(vnms);
         ds(N)=struct('Name',[],'Data',[], ...
