@@ -74,6 +74,10 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             assert(all(phase2 == phi))
         end
         function test_read_nc_file_group(testCase)
+            % Check MATLAB version
+            if isMATLABReleaseOlderThan("R2021b")
+                return;
+            end
             fnms = {dir('example_ncfiles/').name};
             %1. Check LongName with group path
             %fprintf("1. Check LongName with group path: ");
@@ -177,7 +181,7 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                 end
                 val1 = res.Variables.(vname).Data;
                 val2 = ncread(strcat('example_ncfiles/',fnm),vnms{idx});
-                testCase.verifyTrue(isequaln(val1,val2));
+                testCase.verifyTrue(isequaln(val1,val2),{vname,val1,val2});
                 % 3.3 check Attributes
                 %fprintf("3.3 Check Variable Attributes: \n");
                 idx = randi([1,sz(2)],1); 
