@@ -122,9 +122,7 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             val2 = ncread(strcat('example_ncfiles/',fnm),...
                 strcat('PRODUCT/SUPPORT_DATA/DETAILED_RESULTS/',vnms{idx}));
             
-            testCase.verifyTrue(isequaln(val1,val2),...
-                strcat(vname,': ',num2str(reshape(val1,1,[])),...
-                '; ',num2str(reshape(val2,1,[]))));
+            testCase.verifyTrue(isequaln(val1,val2),vname);
             % 3.3 check Attributes
             %fprintf("3.3 Check Variable Attributes: \n");
             idx = randi([1,sz(2)],1); 
@@ -184,9 +182,7 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                 val1 = res.Variables.(vname).Data;
                 val2 = ncread(strcat('example_ncfiles/',fnm),vnms{idx});
                 %testCase.verifyTrue(isequaln(val1,val2),{vname,val1,val2});
-                testCase.verifyTrue(isequaln(val1,val2),...
-                strcat(vname,': ',num2str(reshape(val1,1,[])),...
-                '; ',num2str(reshape(val2,1,[]))));
+                testCase.verifyTrue(isequaln(val1,val2),vname);
                 % 3.3 check Attributes
                 %fprintf("3.3 Check Variable Attributes: \n");
                 idx = randi([1,sz(2)],1); 
