@@ -173,12 +173,13 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                 % 3.2 check Data
                 %fprintf("3.2 Check Variable Data: ");
                 idx = randi([1,sz(2)],1); 
-                vname = check_name(vnms{idx});
+                %vname = check_name(vnms{idx});
                 count = 0;
                 while (isempty(ginfo.Variables(idx).Dimensions)&&count<10)
                     idx = randi([1,sz(2)],1); 
                     count = count + 1;
                 end
+                vname = check_name(vnms{idx});
                 val1 = res.Variables.(vname).Data;
                 val2 = ncread(strcat('example_ncfiles/',fnm),vnms{idx});
                 %testCase.verifyTrue(isequaln(val1,val2),{vname,val1,val2});
