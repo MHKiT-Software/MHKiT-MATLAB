@@ -1,4 +1,4 @@
-function [Rfic,Lfic]=calc_fictitious_grid(Sr,SCR,Un,fg)
+function [Rfic,Lfic]=calc_Rfic_Lfic(Sr,SCR,Un,fg)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates electrical angle of the fundamental of the measured
 %   voltage. According to IEC Standard 62600-30 formula(3).
@@ -21,11 +21,11 @@ function [Rfic,Lfic]=calc_fictitious_grid(Sr,SCR,Un,fg)
 % Returns
 % ------- 
 %   Rfic: double array of size (4) 
-%       fictitious grid resistance for the impedance phase angle (Phi_k)
-%       equals to 30, 50, 70, and 85 degree (Ohm).
+%       fictitious grid resistance (Ohm) for the impedance phase angle (Phi_k)
+%       equals to 30, 50, 70, and 85 degree.
 %   Lfic: double array of size (4)
-%       fictitious grid inductance for the impedance phase angle (Phi_k)
-%       equals to 30, 50, 70, and 85 degree (H).
+%       fictitious grid inductance (H) for Phi_k equals to 30, 50, 70, 
+%       and 85 degree.
 % Note
 % -------
 %   Phi_k: network impedance phase angle (degree)

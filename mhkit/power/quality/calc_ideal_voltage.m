@@ -15,7 +15,7 @@ function u0=calc_ideal_voltage(Un,u_m,alpha_0,method)
 %       .time: time for each time step; 
 %       .data: measured voltage with instantaneous value u_m(t) (V).
 %   alpha_0: double 
-%       the electrical angle at t=0. 
+%       the electrical angle at t=0 (radian). 
 %   method: ???
 %       option of methods to use to calculate alpha_m, DFT or ZCD.
 % 
@@ -30,8 +30,8 @@ function u0=calc_ideal_voltage(Un,u_m,alpha_0,method)
 % 1. According to the IEC standard 62600-30(ed1.0) formula (2):
 %   u0(t) = sqrt(2/3)*Un*sin(alpha_m(t)), where:
 %
-% 2. alpha_m(t): electrical angle of the fundamental of the measured
-%   voltage, according to the IEC Standard 62600-30 formula(3):
+% 2. alpha_m(t): electrical angle (radian) of the fundamental of the 
+%   measured voltage, according to the IEC Standard 62600-30 formula(3):
 %   alpha_m(t) = 2pi*integral(freq(t),[0,t])+alpha_0
 % 3. freq(t): frequency of the measured u_m (that may vary over time).
 %   freq = calc_frequency(u_m,method);
