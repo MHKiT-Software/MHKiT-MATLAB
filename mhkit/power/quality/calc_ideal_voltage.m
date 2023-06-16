@@ -1,5 +1,5 @@
-function u0=calc_ideal_voltage(Un,u_m,alpha_0,method)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function u0=calc_ideal_voltage(Un,alpha0,freq)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%FillVal
 %   Calculates the ideal phase-to-neutral voltage source (V). According to 
 % IEC standard 62600-30(ed1.0) formula (2).
 %
@@ -11,13 +11,14 @@ function u0=calc_ideal_voltage(Un,u_m,alpha_0,method)
 % -----------
 %   Un: double 
 %       RMS value of the nomianal voltage of the grid (V).
-%   u_m: struct()
-%       .time: time for each time step; 
-%       .data: measured voltage with instantaneous value u_m(t) (V).
-%   alpha_0: double 
+%   alpha0: double
 %       the electrical angle at t=0 (radian). 
-%   method: ???
-%       option of methods to use to calculate alpha_m, DFT or ZCD.
+%   freq: struct()
+%       .time: time instants corresponding to the centers of the data 
+%              segments used to capture the power spectrum estimates. 
+%       .data: freq(t), the fundamental frequency calculated from the 
+%              STFT for u_m. Frequency of the measured u_m (that may vary 
+%              over time).
 % 
 % Returns
 % -------
@@ -32,21 +33,11 @@ function u0=calc_ideal_voltage(Un,u_m,alpha_0,method)
 %
 % 2. alpha_m(t): electrical angle (radian) of the fundamental of the 
 %   measured voltage, according to the IEC Standard 62600-30 formula(3):
-%   alpha_m(t) = 2pi*integral(freq(t),[0,t])+alpha_0
-% 3. freq(t): frequency of the measured u_m (that may vary over time).
-%   freq = calc_frequency(u_m,method);
-%   Two methods can be used to calculate the frequency:
-%   1) STFT/DFT: Short Time Fourier Transform
-%   2) ZCD: Zero Crossing Detection
+%   alpha_m(t) = 2pi*integral(freq(t)dt)+alpha0
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % calculate frequency using u_m and corresponding method:
-    freq = calc_frequency(u_m,method);
-
     % calculate alpha_m:
-    % use trapz() to calculate integral of freq(t) from [0,t]
-    alpha_m = 2*pi*trapz(freq,u_m.time)+alpha_0;
-
+    alpha_m = 2*pi*cumtrapz(freq.time,freq)+alpha0;
     %IEC standard 62600-30(ed1.0) formula (2)
     u0 = sqrt(2/3)*Un*sin(alpha_m);
 end
