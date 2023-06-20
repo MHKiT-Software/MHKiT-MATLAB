@@ -1,5 +1,5 @@
 function u0=calc_ideal_voltage(Un,alpha0,freq)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%FillVal
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates the ideal phase-to-neutral voltage source (V). According to 
 % IEC standard 62600-30(ed1.0) formula (2).
 %
@@ -37,7 +37,7 @@ function u0=calc_ideal_voltage(Un,alpha0,freq)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % calculate alpha_m:
-    alpha_m = 2*pi*cumtrapz(freq.time,freq)+alpha0;
+    alpha_m = 2*pi*cumtrapz(freq.time,freq.data)+alpha0;
     %IEC standard 62600-30(ed1.0) formula (2)
     u0 = sqrt(2/3)*Un*sin(alpha_m);
 end

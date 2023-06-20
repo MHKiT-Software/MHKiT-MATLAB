@@ -54,5 +54,4 @@ function [Rfic,Lfic]=calc_Rfic_Lfic(Sr,SCR,Un,fg)
     Rfic = Un.^2./(S_kfic.*sqrt(1+(tand(Phi_k)).^2));
     X_fic = Rfic.*tand(Phi_k);
     Lfic = X_fic/(2*pi*fg);
-    
 end

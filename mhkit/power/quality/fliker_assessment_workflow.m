@@ -1,11 +1,17 @@
-% 1. Construct the fititious grid:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Conduct flicker assessment according to IECTS-30
+%
+% 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1. Construct the fictitious grid:
 [Rfic,Lfic]=calc_Rfic_Lfic(Sr,SCR,Un,fg);
 
 % 2. Calculate ideal voltage (u0) from measured voltage (u_m)
 % Calculate the fundamental frequency of u_m:
 method = {'Window',rectwin(M),'OverlapLength',L,...
     'FFTLength',128,'FrequencyRange','twosided'};
-[alpha0,freq] = calc_frequency(u_m,method); 
+[alpha0,freq] = calc_voltage_frequency(u_m,method); 
 % Interpolate the frequencies to the time steps of u_m 
 ft = struct();ft.time = u_m.time;
 ft.data =interp1(seconds(freq.time),freq.data,...
