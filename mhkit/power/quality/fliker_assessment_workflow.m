@@ -12,10 +12,14 @@
 method = {'Window',rectwin(M),'OverlapLength',L,...
     'FFTLength',128,'FrequencyRange','twosided'};
 [alpha0,freq] = calc_voltage_frequency(u_m,method); 
-% Interpolate the frequencies to the time steps of u_m 
+% interpolate the frequencies to the time steps of u_m 
 ft = struct();ft.time = u_m.time;
-ft.data =interp1(seconds(freq.time),freq.data,...
+if length(freq.data)==1
+    ft.data = ones(size(u_m.time))*freq.data;
+else
+    ft.data =interp1(seconds(freq.time),freq.data,...
     u_m.time,'linear','extrap');
+end
 % Calculate the ideal voltage:
 u0 = calc_ideal_voltage(Un,alpha0,ft);
 

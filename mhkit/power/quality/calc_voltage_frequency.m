@@ -10,7 +10,8 @@ function [alpha0,freq] = calc_voltage_frequency(u_m,methodopts)
 %       .data: measured voltage (V) with instantaneous values u_m(t).
 %   methodopts: cell array 
 %       cell array of name-value arguments, e.g.,
-%       opts = {'Window',rectwin(M),'OverlapLength',L,'FFTLength',128}
+%       opts = {'Window',rectwin(M),'OverlapLength',L,
+%               'FFTLength',Nfrq,'FrequencyRange','twosided'}
 %       
 % 
 % Returns
@@ -24,7 +25,9 @@ function [alpha0,freq] = calc_voltage_frequency(u_m,methodopts)
 %       electrical angle at t=0.
 % Note
 % -------
-% 1. Short-Time Fourier Transform (STFT) is used to calculate the frequency.
+% 1. The minimum window length necessary to characterize the fundamental
+% component is one cycle.
+% 2. Short-Time Fourier Transform (STFT) is used to calculate the frequency.
 % calculate frequency using u_m and corresponding method:
 %    [alpha0,freq] = calc_frequency(u_m,methodopts);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -42,6 +45,8 @@ function [alpha0,freq] = calc_voltage_frequency(u_m,methodopts)
     f_fund = f(fidx);
     freq.time = t;
     freq.data = f_fund;
-    fftout = fft(u_m.data);
-    alpha0 = angle(fftout(1));
+    %fftout = fft(u_m.data);
+    %alpha0 = angle(fftout(1));
+    % try this?
+    alpha0  = angle(s(fidx(1),1))+pi/2;
 end

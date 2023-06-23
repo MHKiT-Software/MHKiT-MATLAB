@@ -43,7 +43,9 @@ function u_fic=calc_simulated_voltage(u0,i_m,Rfic,Lfic)
     % Center-Euler, Euler-Forward, OR Euler-Backward
     % to calculate dim/dt
     % calculate u_fic(t)
-    u_fic = reshape(u0.data,[],1) + Rfic.*i_m.data+Lfic.*dim_dt;
+    %u_fic = reshape(u0.data,[],1) + Rfic.*i_m.data+Lfic.*dim_dt;
+    disp(size(u0.data));disp(size(Rfic))
+    u_fic = u0.data + Rfic'.*i_m.data+Lfic'.*dim_dt';
     
 
 
