@@ -35,6 +35,7 @@ py.importlib.import_module('mhkit');
 py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit_python_utils');
 
+% assign freq_bin
 if nargin == 2
     freq_bins = py.numpy.array(varargin{1});
 elseif nargin == 1
@@ -43,6 +44,7 @@ else
     ME = MException('MATLAB:significant_wave_height','Incorrect number of input arguments');
         throw(ME);
 end
+% convert to pandas dataframe
 if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(S)==1)
         x=size(S.spectrum);
@@ -64,5 +66,6 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     end
 end
 
+% calculate significant wave height
 Hm0=py.mhkit.wave.resource.significant_wave_height(S,pyargs('frequency_bins',freq_bins));
 Hm0=double(Hm0.values);

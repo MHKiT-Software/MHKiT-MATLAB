@@ -57,6 +57,7 @@ end
 py.importlib.import_module('mhkit');
 py.importlib.import_module('mhkit_python_utils');
 
+% convert to dataframe
 if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(S)==1)
         x=size(S.spectrum);
@@ -79,7 +80,7 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
 end
 
 
-
+% calculate energy flux
 J=py.mhkit.wave.resource.energy_flux(S,h,pyargs('rho',options.rho,'g',options.g,...
     'deep',options.deep, 'ratio',options.ratio));
 

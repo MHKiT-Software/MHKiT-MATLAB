@@ -36,7 +36,7 @@ function datast=read_NDBC_file(file_name,varargin)
 %         
 %         OR if a spectra data NDBC file
 %
-%         data.spectra: spectra data
+%         data.spectrum: spectra data
 %
 %         data.time: given in datetime 
 %
