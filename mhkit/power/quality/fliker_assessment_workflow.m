@@ -6,7 +6,7 @@
 %% 0. prepare data needed: 
 % u_m, i_m, Sr, Un, In, SCR, fg, & fs
 %
-% Sr = 3e6; Un=12e3; In=144;SCR=20;fg=60;fs=50e3;
+Sr = 3e6; Un=12e3; In=144;SCR=20;fg=60;fs=50e3;
 % % OBS data: 230627_2019_11_11_18_10_PowRaw.tdms 
 % fs = 50e3; fg=60Hz;
 data = readmatrix('..\OneDrive - NREL\MHKiT-MATLAB\power\data\230627_2019_11_11_18_10_PowRaw.csv');
@@ -37,17 +37,22 @@ alpha_m = calc_electrical_angle(freq,alpha0);
 % 2.3 Calculate ideal voltage (u0):
 u0 = calc_ideal_voltage(Un,alpha_m);
 %% check u0 to make sure it fullfills the requirements in the IECTS
-% plot(u_m.time,u_m.data);hold on;
-% plot(u_m.time,u0);legend('um','u0');xlim([0 1])
+hold off;
+plot(u_m.time,u_m.data/max(u_m.data));hold on;
+plot(u_m.time,u0/max(u0));legend('um','u0');xlim([0 1])
 
 %% 3. Calculate simulated voltage (u_fic)
 u_fic = calc_simulated_voltage(u0,i_m,Rfic,Lfic);
 %%
 
 %% 4. Calculate flicker emission (P_st,fic)
-P_stfic = calc_flicker_emission_fic(u_fic);
+% P_stfic = calc_flicker_emission_fic(u_fic);
+% prep input for digital flickermeter
+% use digital flickermeter
+P_stfic = Pst;
 %%
 
 %% 5. Calculate flicker coefficient
-S_kfic = Un^2./sqrt(Rfic^2+Lfic^2);
+Xfic = 2*pi*fg*Lfic;
+S_kfic = (Un^2)./sqrt(Rfic.^2+Xfic.^2);
 c = calc_flicker_coefficient(P_stfic,S_kfic,Sr);

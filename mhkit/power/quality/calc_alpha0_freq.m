@@ -51,7 +51,13 @@ function [alpha0,freq] = calc_alpha0_freq(u_m,method,methodopts)
         f_mid = f(fidx);
         t_lead = seconds([2*t(1)-t(2);0.5*(t(1:end-1)+t(2:end))]);%t;
         amp = min(abs(max(u_m.data)),abs(min(u_m.data)));
-        alpha0 = asin(u_m.data(1)/amp);
+        if u_m.data(1)==0 && u_m.data(2)>0
+            alpha0 = 0;
+        elseif u_m.data(1)==0 && u_m.data(2)<0
+            alpha0 = pi;
+        else 
+            alpha0 = asin(u_m.data(1)/amp);
+        end
     else
         % use ZCD
         x = u_m.time; y = u_m.data;
@@ -61,7 +67,13 @@ function [alpha0,freq] = calc_alpha0_freq(u_m,method,methodopts)
         x0 = -y(i)./m+x(i);
         t_lead = x0(1:end-1);%0.5*(x0(1:end-1)+x0(2:end));
         f_mid = 1./(diff(x0)*2);
-        alpha0 = pi*(1+sign(u_m.data(1)))/2-2*pi*f_mid(1)*x0(1);
+        if u_m.data(1)==0 && u_m.data(2)>0
+            alpha0 = 0;
+        elseif u_m.data(1)==0 && u_m.data(2)<0
+            alpha0 = pi;
+        else 
+            alpha0 = pi*(1+sign(u_m.data(1)))/2-2*pi*f_mid(1)*x0(1);
+        end
     end
     % interpolate back to u_m.time resolution
     ft = interp1(t_lead,f_mid,u_m.time,'previous','extrap');
