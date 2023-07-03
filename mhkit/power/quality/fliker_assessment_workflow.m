@@ -6,17 +6,24 @@
 %% 0. prepare data needed: 
 % u_m, i_m, Sr, Un, In, SCR, fg, & fs
 %
-Sr = 3e6; Un=12e3; In=144;SCR=20;fg=60;fs=50e3;
-% % OBS data: 230627_2019_11_11_18_10_PowRaw.tdms 
-% fs = 50e3; fg=60Hz;
-data = readmatrix('..\OneDrive - NREL\MHKiT-MATLAB\power\data\230627_2019_11_11_18_10_PowRaw.csv');
-% % Resolve the time jump in the first 20000 OBSs:
-xtime = data(20001:end,7);
-xum=data(20001:end,1);xim=data(20001:end,4);
-u_m = struct();u_m.time = xtime - xtime(1); u_m.data = xum;
-i_m = struct();i_m.time = xtime - xtime(1); i_m.data = xim;
-% calculate Un and In from u_m and i_m
-Un = rms(u_m.data); In = rms(i_m.data);
+Sr = 3e6; Un=12e3; In=144; SCR=20; fg=60; fs=50e3;
+%% opt1: generate test data:
+% IEC 61400-21-1: B.3.5 slow freq change
+% TableB.2,fg=60, SCR=20, fm=20, SCR=20, Phik=30
+fm = 20;% modulating frequency 
+DeltaI_I = 3.212;% for Phik=30
+[i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,DeltaI_I);
+%[i_m,u_m]=gen_test_data(Un,In,fs,20,3.212);
+%% opt 2: OBS data: 230627_2019_11_11_18_10_PowRaw.tdms 
+% % fs = 50e3; fg=60Hz;
+% data = readmatrix('..\OneDrive - NREL\MHKiT-MATLAB\power\data\230627_2019_11_11_18_10_PowRaw.csv');
+% % % Resolve the time jump in the first 20000 OBSs:
+% xtime = data(20001:end,7);
+% xum=data(20001:end,1);xim=data(20001:end,4);
+% u_m = struct();u_m.time = xtime - xtime(1); u_m.data = xum;
+% i_m = struct();i_m.time = xtime - xtime(1); i_m.data = xim;
+% % calculate Un and In from u_m and i_m
+% Un = rms(u_m.data); In = rms(i_m.data);
 %%
 
 
@@ -43,6 +50,7 @@ plot(u_m.time,u0/max(u0));legend('um','u0');xlim([0 1])
 
 %% 3. Calculate simulated voltage (u_fic)
 u_fic = calc_simulated_voltage(u0,i_m,Rfic,Lfic);
+% writematrix(u_fic,"230703_B.3.5_u_fic.txt");
 %%
 
 %% 4. Calculate flicker emission (P_st,fic)
