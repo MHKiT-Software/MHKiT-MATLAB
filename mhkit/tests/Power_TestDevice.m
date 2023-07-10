@@ -113,6 +113,169 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             assertEqual(testCase,sum(P2.power), 1011.518,'AbsTol', 0.01)
             assertEqual(testCase,sum(P2b.power), 1011.518/2,'AbsTol', 0.01)
         end
+        
+        function test_gen_test_data(testCase)
+            % u_m, i_m, Sr, Un, In, SCR, fg, & fs
+            Sr = 3e6; Un=12e3; In=144; SCR=20; fg=60; fs=50e3;
+            % 1. opt=0, pure sine wave
+            opt = 0;fm = 20;
+            DeltaI_I = [0 0 0 0];% pure sine wave
+            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,DeltaI_I,opt,10);
+            u_m0 = readmatrix("testdata/sinewave-pi6_um.txt");
+            i_m0 = readmatrix("testdata/sinewave-pi6_im.txt");
+            testCase.verifyTrue(max(abs( ...
+                (i_m.data(1:100,1)-i_m0(:,1))./i_m0(:,1) ...
+                ))<1e-10,opt);
+            testCase.verifyTrue(max(abs((u_m.data(1:100)-u_m0)./u_m0))<1e-10,...
+                opt);
+            
+            % 2. opt=4, Distorted um with inter-harmonic modulation
+            opt = 4; SCR=20; fm = 25;
+            DeltaI_I = [4.763 5.726 7.640 9.488];% table B.2
+            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,DeltaI_I,opt,10);
+            i_m0 = readmatrix("testdata/B.3.4_fm25_SCR20_im.txt");
+            u_m0 = readmatrix("testdata/B.3.4_fm25_SCR20_fv0.5_um.txt");
+            testCase.verifyTrue(max(abs( ...
+                (i_m.data(1:100,1)-i_m0(:,1))./i_m0(:,1) ...
+                ))<1e-10,opt);
+            testCase.verifyTrue(max(abs((u_m.data(1:100)-u_m0)./u_m0))<1e-10,...
+                opt);
+            % 2. opt=5, B.3.5 slow frequency changes
+            opt = 5; SCR=20; fm = 25;
+            %DeltaI_I = [3.212 3.958 5.644 7.711]; % fm=20
+            DeltaI_I = [4.763 5.726 7.640 9.488];% table B.2 fm=25
+            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,DeltaI_I,opt,10);
+            i_m0 = readmatrix("testdata/B.3.5_fm25_SCR20_im.txt");
+            u_m0 = readmatrix("testdata/B.3.5_fm25_SCR20_um.txt");
+            testCase.verifyTrue(max(abs( ...
+                (i_m.data(1:100,2)-i_m0(:,2))./i_m0(:,2) ...
+                ))<1e-10,opt);
+            testCase.verifyTrue(max(abs((u_m.data(1:100)-u_m0)./u_m0))<1e-10,...
+                opt);
+        end
+
+        function test_flicker_assessment(testCase)
+            %1 opt = 0, pure sine waves:
+            % u_m, i_m, Sr, Un, In, SCR, fg, & fs
+            Sr = 3e6; Un=12e3; In=144; fg=60; fs=50e3;
+            fm = 20;SCR=20;opt = 0;
+            DeltaI_I = [0 0 0 0];% pure sine wave
+            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,DeltaI_I,opt,650);
+            method = 'ZCD'; opts = {};
+            [~,freq,alpha_m,u0,u_fic] = ...
+                flicker_assessment(Sr,Un,SCR,fg,u_m,i_m,method,opts);
+            freq0=readmatrix("testdata/sinewave-pi6_SCR20_freq.txt");
+            alpha_m0 =readmatrix("testdata/sinewave-pi6_SCR20_alpham.txt");
+            u00=readmatrix("testdata/sinewave-pi6_SCR20_u0.txt");
+            u_fic0=readmatrix("testdata/sinewave-pi6_SCR20_ufic.txt");
+            testCase.verifyTrue(...
+                max(abs(freq.data(1:100)-freq0)./freq0(:,1))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((u0(1:100)-u00)./u00(:,1)))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((u_fic(1:100,2)-u_fic0(:,2))./u_fic0(:,2)))<1e-10,string(opt));
+            % 2 opt = 2, B.3.2
+            fm = 33.3;SCR=50;opt = 2;
+            % TableB.3,fg=60, SCR=50
+            DeltaI_I = [8.040 9.376 11.479 12.844]; % fm=33.3
+            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,DeltaI_I,opt,650);
+            method = 'ZCD'; opts = {};
+            [~,freq,alpha_m,u0,u_fic] = ...
+                flicker_assessment(Sr,Un,SCR,fg,u_m,i_m,method,opts);
+            freq0=readmatrix(    "testdata/B.3.2_fm33.3_SCR50_freq.txt");
+            alpha_m0 =readmatrix("testdata/B.3.2_fm33.3_SCR50_alpham.txt");
+            u00=readmatrix(      "testdata/B.3.2_fm33.3_SCR50_u0.txt");
+            u_fic0=readmatrix(   "testdata/B.3.2_fm33.3_SCR50_ufic.txt");
+            testCase.verifyTrue(...
+                max(abs(freq.data(1:100)-freq0)./freq0(:,1))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((u0(1:100)-u00)./u00(:,1)))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((u_fic(1:100,1)-u_fic0(:,1))./u_fic0(:,1)))<1e-10, string(opt));
+            % 3 opt = 3, B.3.3 Distorted um with multiple zero crossings
+            fm = 25;SCR=20;opt = 3;
+            % TableB.2,fg=60, SCR=20
+            DeltaI_I = [4.763 5.726 7.640 9.488]; % fm=25
+            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,DeltaI_I,opt,650);
+            method = 'STFT'; 
+            opts = {'Window',rectwin(50000),'OverlapLength',25000,...
+                'FFTLength',50e3,'FrequencyRange','onesided'};
+            [~,freq,alpha_m,u0,u_fic] = ...
+                flicker_assessment(Sr,Un,SCR,fg,u_m,i_m,method,opts);
+            freq0=readmatrix(    "testdata/B.3.3_fm25_SCR20_freq.txt");
+            alpha_m0 =readmatrix("testdata/B.3.3_fm25_SCR20_alpham.txt");
+            u00=readmatrix(      "testdata/B.3.3_fm25_SCR20_u0.txt");
+            u_fic0=readmatrix(   "testdata/B.3.3_fm25_SCR20_ufic.txt");
+            testCase.verifyTrue(...
+                max(abs(freq.data(1:100)-freq0)./freq0(:,1))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((u0(1:100)-u00)./u00(:,1)))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((u_fic(1:100,3)-u_fic0(:,3))./u_fic0(:,3)))<1e-10, string(opt));
+            % 4 opt = 4, B.3.4 Distorted um with inter-harmonic modulation
+            fm = 25;SCR=20;opt = 4;
+            % TableB.2,fg=60, SCR=20
+            DeltaI_I = [4.763 5.726 7.640 9.488]; % fm=25
+            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,DeltaI_I,opt,650);
+            method = 'zcd'; 
+            [~,freq,alpha_m,u0,u_fic] = ...
+                flicker_assessment(Sr,Un,SCR,fg,u_m,i_m,method,opts);
+            freq0=readmatrix(    "testdata/B.3.4_fm25_SCR20_freq.txt");
+            alpha_m0 =readmatrix("testdata/B.3.4_fm25_SCR20_alpham.txt");
+            u00=readmatrix(      "testdata/B.3.4_fm25_SCR20_u0.txt");
+            u_fic0=readmatrix(   "testdata/B.3.4_fm25_SCR20_ufic.txt");
+            testCase.verifyTrue(...
+                max(abs(freq.data(1:100)-freq0)./freq0(:,1))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((u0(1:100)-u00)./u00(:,1)))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((u_fic(1:100,3)-u_fic0(:,3))./u_fic0(:,3)))<1e-10, string(opt));
+            % 5 opt = 5, B.3.5 slow frequency changes
+            fm = 25;SCR=20;opt = 5;
+            % TableB.2,fg=60, SCR=20
+            DeltaI_I = [4.763 5.726 7.640 9.488]; % fm=25
+            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,DeltaI_I,opt,650);
+            method = 'zcd'; 
+            [~,freq,alpha_m,u0,u_fic] = ...
+                flicker_assessment(Sr,Un,SCR,fg,u_m,i_m,method,opts);
+            freq0=readmatrix(    "testdata/B.3.5_fm25_SCR20_freq.txt");
+            alpha_m0 =readmatrix("testdata/B.3.5_fm25_SCR20_alpham.txt");
+            u00=readmatrix(      "testdata/B.3.5_fm25_SCR20_u0.txt");
+            u_fic0=readmatrix(   "testdata/B.3.5_fm25_SCR20_ufic.txt");
+            testCase.verifyTrue(...
+                max(abs(freq.data(1:100)-freq0)./freq0(:,1))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((u0(1:100)-u00)./u00(:,1)))<1e-10,string(opt));
+            testCase.verifyTrue(...
+                max(abs((u_fic(1:100,4)-u_fic0(:,4))./u_fic0(:,4)))<1e-10, string(opt));
+        end
+        function test_calc_Rfic_Lfic(testCase)
+            Sr = 3e6; Un=12e3; fg=60; 
+            % 1. SCR = 20:
+            SCR = 20;
+            [Rfic,Lfic]=calc_Rfic_Lfic(Sr,SCR,Un,fg);
+            Rfic0=readmatrix("testdata/FicGrid_SCR20_fg60_Rfic.txt");
+            Lfic0=readmatrix("testdata/FicGrid_SCR20_fg60_Lfic.txt");
+            testCase.verifyTrue(max(abs((Rfic-Rfic0)./Rfic0))<1e-10,string(SCR));
+            testCase.verifyTrue(max(abs((Lfic-Lfic0)./Lfic0))<1e-10,string(SCR));
+            % 2. SCR = 50:
+            SCR = 50;
+            [Rfic,Lfic]=calc_Rfic_Lfic(Sr,SCR,Un,fg);
+            Rfic0=readmatrix("testdata/FicGrid_SCR50_fg60_Rfic.txt");
+            Lfic0=readmatrix("testdata/FicGrid_SCR50_fg60_Lfic.txt");
+            testCase.verifyTrue(max(abs((Rfic-Rfic0)./Rfic0))<1e-10,string(SCR));
+            testCase.verifyTrue(max(abs((Lfic-Lfic0)./Lfic0))<1e-10,string(SCR));
+        end
     end
 end  
 

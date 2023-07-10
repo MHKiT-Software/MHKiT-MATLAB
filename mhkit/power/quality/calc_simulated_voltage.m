@@ -35,16 +35,16 @@ function u_fic=calc_simulated_voltage(u0,i_m,Rfic,Lfic)
    
     % calculate dim(t)/dt
     % use diff() function in MATLAB
-    delta_im = reshape(diff(i_m.data),[],1);
+    delta_im = reshape(diff(i_m.data),[],4);
     delta_t = reshape(diff(i_m.time),[],1);
     dim_dt = delta_im./delta_t;
-    dim_dt(end+1) = dim_dt(end);
+    dim_dt(end+1,:) = dim_dt(end,:);
     % Can also consider using: 
     % Center-Euler, Euler-Forward, OR Euler-Backward
     % to calculate dim/dt
     % calculate u_fic(t)
     %u_fic = reshape(u0.data,[],1) + Rfic.*i_m.data+Lfic.*dim_dt;
     disp(size(u0));disp(size(Rfic));
-    u_fic = u0 + i_m.data*Rfic+dim_dt*Lfic;
+    u_fic = u0 + i_m.data.*Rfic+dim_dt.*Lfic;
 
 end
