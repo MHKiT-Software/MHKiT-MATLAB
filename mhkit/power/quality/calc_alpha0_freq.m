@@ -8,36 +8,39 @@ function [alpha0,freq] = calc_alpha0_freq(u_m,method,methodopts)
 % -----------
 %   u_m: struct()
 %       .time: time for each time step; 
-%       .data: measured voltage (V) with instantaneous values u_m(t).
+%       .data: array of size (ntime), measured voltage (V) with instantaneous values u_m(t).
 %   
 %   method: string (case-insensitive)
 %       'zcd' or 'stft', default is 'zcd'.
 %   
 %   methodopts: cell array 
-%       cell array of name-value arguments for STFT, e.g.,
+%       Name-value arguments for STFT, e.g.,
 %       opts = {'Window',rectwin(M),'OverlapLength',L,
-%               'FFTLength',Nfrq,'FrequencyRange','twosided'}
+%               'FFTLength',Nfrq,'FrequencyRange','onesided'}
+%       if using 'ZCD' method, can set to {}.
 % Returns
 % -------
 %   freq: struct()
-%       .time: time instants corresponding to the centers of the data 
-%              segments used to capture the power spectrum estimates. 
-%       .data: freq(t), the fundamental frequency calculated from the 
-%              STFT for u_m.
+%       .time: time at each measurement time step (s) 
+%       .data: double array of size (ntime), freq(t), the fundamental 
+%       frequency (that may vary over time) calculated for u_m(t).
 %   alpha0: double 
-%       the electrical angle (radian) at t=0.
+%       The electrical angle (radians) at t=0.
 % Note
 % -------
-% 1. The minimum window length necessary to characterize the fundamental
-% component is one cycle.
-% 2. Windowsize settings are crucial to get the accurate results if 
+% 1. Window settings are crucial to get accurate results if 
 % Short-Time Fourier Transform (STFT) is used to calculate the frequency.
+% 2. Steps:
+%   Step1. adjust time values
+%   Step2. Estimate fundamental freq using either STFT or ZCD 
+%   Step3. Interpolate estimated freq back to u_m.time 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % make sure time starts at 0.0
+    % 1. make sure time starts at 0.0
     u_m.time = u_m.time-u_m.time(1);
     freq = struct();
     d = seconds(u_m.time(2)-u_m.time(1));
-    % use STFT
+    % 2. Estimate fundamental frequency using STFT or ZCD
+    % opt 1, use STFT
     if strcmpi(method,'stft')
         % what is window size one cycle?
         if isempty(methodopts)
@@ -59,7 +62,7 @@ function [alpha0,freq] = calc_alpha0_freq(u_m,method,methodopts)
             alpha0 = asin(u_m.data(1)/amp);
         end
     else
-        % use ZCD
+        % opt 2, use ZCD
         x = u_m.time; y = u_m.data;
         % indexes of zero crossings: x(i)*x(i+1)<0
         i=find(y(1:end-1).*y(2:end)<0);
@@ -75,7 +78,7 @@ function [alpha0,freq] = calc_alpha0_freq(u_m,method,methodopts)
             alpha0 = pi*(1+sign(u_m.data(1)))/2-2*pi*f_mid(1)*x0(1);
         end
     end
-    % interpolate back to u_m.time resolution
+    % 3. Interpolate estimated frequency back to u_m.time resolution
     ft = interp1(t_lead,f_mid,u_m.time,'previous','extrap');
     ft(isnan(ft))=f_mid(1);
     freq.data = ft;

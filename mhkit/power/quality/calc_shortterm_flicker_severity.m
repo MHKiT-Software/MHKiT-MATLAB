@@ -3,8 +3,6 @@ function Pst = calc_shortterm_flicker_severity(P)
 %   Calculates short-term flicker severity P_st according to the IEC 
 %   61000-4-15(ed2.0) section 5.7.2 Short-term flicker evaluation.
 %
-%   
-%   
 % Parameters
 % -----------
 %   P: struct()
@@ -38,7 +36,6 @@ function Pst = calc_shortterm_flicker_severity(P)
 %   P_10s = (P_6+P_8+P_10+P_13+P_17)/5.;
 %   P_3s = (P_2.2+P_3+P_4)/3.;
 %   P_1s = (P_0.7+P_1+P_1.5)/3.;
-%
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     P_50s = (P.p30+P.p50+P.p80)/3.;

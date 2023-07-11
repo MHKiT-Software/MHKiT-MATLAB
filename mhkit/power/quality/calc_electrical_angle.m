@@ -1,32 +1,29 @@
 function alpha_m = calc_electrical_angle(freq,alpha0)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates the electrical angle alpha_m(t) of the fundamental of the 
-% measured voltage. According to IEC standard 62600-30(ed1.0) formula (3).
+% measured voltage (u_m(t)) according to IECTS 62600-30(ed1.0) Eq (3).
 %
 %   
 % Parameters
 % -----------
-%   alpha0: double
-%       the electrical angle at t=0 (radian). 
+%   alpha0: double 
+%       Electrical angle (radians) at t=0.
 %   freq: struct()
-%       .time: time instants corresponding to the centers of the data 
-%              segments used to capture the power spectrum estimates. 
-%       .data: freq(t), the fundamental frequency calculated from the 
-%              STFT for u_m. Frequency of the measured u_m (that may vary 
-%              over time).
+%       .time: time at each measurement time step (s) 
+%       .data: double array of size (ntime), freq(t), the fundamental 
+%       frequency (that may vary over time) for u_m(t).
 % 
 % Returns
 % -------
-%   alpha_m: double array
-%       alpha_m(t) is the electrical angle (radian) for the fundamental of 
-%       the measured voltage (u_m) at each time step.
+%   alpha_m: double array (ntime)
+%       Electrical angle (alpha_m(t)) of the fundamental component of u_m.
 % Note
 % -------
-% 1. According to the IEC Standard 62600-30 formula(3):
+% 1. IECTS-62600-30 Eq(3):
 %   alpha_m(t) = 2pi*integral(freq(t)dt)+alpha0
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    % calculate alpha_m:
+    % IECTS-62600-30 Eq(3)
     alpha_m = 2*pi*cumtrapz(freq.time,freq.data)+alpha0;
 end

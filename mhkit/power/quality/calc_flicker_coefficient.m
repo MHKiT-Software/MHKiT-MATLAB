@@ -1,34 +1,33 @@
-function c=calc_flicker_coefficient(P_stfic,S_kfic,Sr)
+function coef_flicker=calc_flicker_coefficient(P_stfic,S_kfic,Sr)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates the flicker coefficient c(Phi_k) for each set of the 10 min 
 %   measured voltage and current time-series, using the calculated 
-%   flicker emission values by applying Eq 6 from IECTS-62600-30. 
+%   flicker emission values using IECTS-62600-30 Eq (6). 
 %   
 %   
 % Parameters
 % -----------
 %   P_stfic: double 
-%       short-term flicker severity (Pst) (flicker emission value) for the
+%       short-term flicker severity (Pst) (flicker emission value) on the
 %       fictitious grid. 
 %   S_kfic: double
-%       short-circuit apparent power (VA) of the fictitious grid.
+%       Short-circuit apparent power (VA) of the fictitious grid.
 %       S_kfic = Un^2/sqrt(Rfic^2+X_fic^2) (Eq5) 
-%   SCR,short-circuit ratio:
+%   SCR: double 
+%       Short-circuit ratio:
 %           SCR = S_kfic/Sr (pg24)
 %   Sr: double
-%       rated apparent power (VA) of the marine energy converter unit. 
+%       Rated apparent power (VA) of the marine energy converter unit. 
 % 
 % Returns
 % -------
-%   c: double array of size (4) 
-%       flicker coefficient for the impedance phase angle (Phi_k)
-%       equals to 30, 50, 70, and 85 degree.
+%   coef_flicker: double 
+%       Flicker coefficient for continuous operation
 % Note
 % -------
-% 1. 
-%
-%
+% 1. According to IECTS62600-30 Eq (6): 
+%       c(Phi_k) = P_stfic*S_kfic/Sr
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %calculate flicker coefficient:
-    c = P_stfic*S_kfic/Sr;
+    % IECTS62600-30 Eq (6):
+    coef_flicker = P_stfic*S_kfic/Sr;
 end
