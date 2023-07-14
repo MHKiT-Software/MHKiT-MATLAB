@@ -41,7 +41,7 @@ function Pst = calc_shortterm_flicker_severity(P)
     % check input:
     names_need = {'p30','p50','p80','p6','p8','p10','p13','p17',...
         'p2p2','p3','p4','p0p7','p1','p1p5','p0p1'};
-    for i=1:lendth(names_need)
+    for i=1:length(names_need)
         if ~isfield(P,names_need{i})
             ME = MException('MATLAB:calc_shortterm_flicker_severity',...
             'invalid handles in structure, must contain x.data & x.time');

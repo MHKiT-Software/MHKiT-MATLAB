@@ -121,8 +121,8 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             opt = 0;fm = 20;
             DeltaI_I = [0 0 0 0];% pure sine wave
             [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,10);
-            u_m0 = readmatrix("testdata/sinewave-pi6_um.txt");
-            i_m0 = readmatrix("testdata/sinewave-pi6_im.txt");
+            u_m0 = readmatrix("../../examples/data/power/testdata/sinewave-pi6_um.txt");
+            i_m0 = readmatrix("../../examples/data/power/testdata/sinewave-pi6_im.txt");
             testCase.verifyTrue(max(abs( ...
                 (i_m.data(1:100,1)-i_m0(:,1))./i_m0(:,1) ...
                 ))<1e-10,opt);
@@ -143,10 +143,10 @@ classdef Power_TestDevice < matlab.unittest.TestCase
                 %DeltaI_I = [3.212 3.958 5.644 7.711];% fm=20
             end
             [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,10);
-            fnm = ls(sprintf('testdata/B.3.%i*_im.txt',opt));
-            i_m0 = readmatrix(fnm);
-            fnm = ls(sprintf('testdata/B.3.%i*_um.txt',opt));
-            u_m0 = readmatrix(fnm);
+            i_m0 = readmatrix( ...
+                sprintf('../../examples/data/power/testdata/B.3.%i_im.txt',opt));
+            u_m0 = readmatrix( ...
+                sprintf('../../examples/data/power/testdata/B.3.%i_um.txt',opt));
             testCase.verifyTrue(max(abs( ...
                 (i_m.data(1:100,1)-i_m0(:,1))./i_m0(:,1) ...
                 ))<1e-10,opt);
@@ -160,14 +160,14 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             %1. opt = 0, pure sine waves:
             opt = 0; idx = randi([1,4],1);
             fm=20; SCR=20; DeltaI_I = [0 0 0 0];% pure sine wave
-            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,650);
+            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,10);
             method = 'ZCD'; methodopts = {};
             [~,~,~,freq,alpha_m,u0,u_fic] = flicker_ufic( ...
                 Sr,Un,SCR,fg,u_m,i_m,method,methodopts);
-            freq0=readmatrix("testdata/sinewave-pi6_SCR20_freq.txt");
-            alpha_m0 =readmatrix("testdata/sinewave-pi6_SCR20_alpham.txt");
-            u00=readmatrix("testdata/sinewave-pi6_SCR20_u0.txt");
-            u_fic0=readmatrix("testdata/sinewave-pi6_SCR20_ufic.txt");
+            freq0=readmatrix("../../examples/data/power/testdata/sinewave-pi6_SCR20_freq.txt");
+            alpha_m0 =readmatrix("../../examples/data/power/testdata/sinewave-pi6_SCR20_alpham.txt");
+            u00=readmatrix("../../examples/data/power/testdata/sinewave-pi6_SCR20_u0.txt");
+            u_fic0=readmatrix("../../examples/data/power/testdata/sinewave-pi6_SCR20_ufic.txt");
             testCase.verifyTrue(max(abs( ...
                 (freq.data(1:100)-freq0)./freq0))<1e-10,string(opt));
             testCase.verifyTrue(max(abs( ...
@@ -189,7 +189,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
                 DeltaI_I = [4.763 5.726 7.640 9.488];% fm=25
                 %DeltaI_I = [3.212 3.958 5.644 7.711];% fm=20
             end
-            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,650);
+            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,10);
             if opt==3
                 % B.3.3 Distorted um with multiple zero crossings
                 method = 'stft';methodopts = {...
@@ -200,14 +200,14 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             end
             [~,~,~,freq,alpha_m,u0,u_fic] = flicker_ufic(...
                 Sr,Un,SCR,fg,u_m,i_m,method,methodopts);
-            fnm      = ls(sprintf('testdata/B.3.%i*_freq.txt',opt));
-            freq0    = readmatrix(fnm);
-            fnm      = ls(sprintf('testdata/B.3.%i*_alpham.txt',opt));
-            alpha_m0 = readmatrix(fnm);
-            fnm      = ls(sprintf('testdata/B.3.%i*_u0.txt',opt));
-            u00      = readmatrix(fnm);
-            fnm      = ls(sprintf('testdata/B.3.%i*_ufic.txt',opt));
-            u_fic0   = readmatrix(fnm);
+            freq0    = readmatrix( ...
+                sprintf('../../examples/data/power/testdata/B.3.%i_freq.txt',opt));
+            alpha_m0 = readmatrix( ...
+                sprintf('../../examples/data/power/testdata/B.3.%i_alpham.txt',opt));
+            u00      = readmatrix( ...
+                sprintf('../../examples/data/power/testdata/B.3.%i_u0.txt',opt));
+            u_fic0   = readmatrix(...
+                sprintf('../../examples/data/power/testdata/B.3.%i_ufic.txt',opt));
             testCase.verifyTrue(max(abs( ...
                 (freq.data(1:100)-freq0)./freq0))<1e-10, string(opt));
             testCase.verifyTrue(max(abs( ...
@@ -224,18 +224,39 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             % 1. SCR = 20:
             SCR = 20;
             [Rfic,Lfic]=calc_Rfic_Lfic(Sr,SCR,Un,fg);
-            Rfic0=readmatrix("testdata/FicGrid_SCR20_fg60_Rfic.txt");
-            Lfic0=readmatrix("testdata/FicGrid_SCR20_fg60_Lfic.txt");
+            Rfic0=readmatrix("../../examples/data/power/testdata/FicGrid_SCR20_fg60_Rfic.txt");
+            Lfic0=readmatrix("../../examples/data/power/testdata/FicGrid_SCR20_fg60_Lfic.txt");
             testCase.verifyTrue(max(abs((Rfic-Rfic0)./Rfic0))<1e-10,string(SCR));
             testCase.verifyTrue(max(abs((Lfic-Lfic0)./Lfic0))<1e-10,string(SCR));
             % 2. SCR = 50:
             SCR = 50;
             [Rfic,Lfic]=calc_Rfic_Lfic(Sr,SCR,Un,fg);
-            Rfic0=readmatrix("testdata/FicGrid_SCR50_fg60_Rfic.txt");
-            Lfic0=readmatrix("testdata/FicGrid_SCR50_fg60_Lfic.txt");
+            Rfic0=readmatrix("../../examples/data/power/testdata/FicGrid_SCR50_fg60_Rfic.txt");
+            Lfic0=readmatrix("../../examples/data/power/testdata/FicGrid_SCR50_fg60_Lfic.txt");
             testCase.verifyTrue(max(abs((Rfic-Rfic0)./Rfic0))<1e-10,string(SCR));
             testCase.verifyTrue(max(abs((Lfic-Lfic0)./Lfic0))<1e-10,string(SCR));
         end
+        
+        function test_calc_flicker_coefficient(testCase)
+            P_stfic = 0.1016;
+            S_kfic = 6e7;
+            Sr = 3e6;
+            coef_flicker = calc_flicker_coefficient(P_stfic,S_kfic,Sr);
+            assertEqual(testCase,coef_flicker, 2.032);
+        end
+
+        function test_calc_shortterm_flicker_severity(testCase)
+            % prep input:
+            P = struct();P.p0p1=0.4073; 
+            P.p0p7=0.3242; P.p1=0.3236;P.p1p5 = 0.3230;
+            P.p2p2=0.2620; P.p3=0.2615;P.p4=0.2610;
+            P.p6=0.1628; P.p8=0.1625;P.p10=0.1619;P.p13=0.1613;P.p17=0.161;
+            P.p30=0.0308;P.p50=0.0301;P.p80=0.0294;
+            % calculate Pst
+            Pst = calc_shortterm_flicker_severity(P);
+            testCase.verifyTrue(abs((Pst-0.307731652580621)./Pst)<1e-6,'Pst');
+        end
+
     end
 end  
 
