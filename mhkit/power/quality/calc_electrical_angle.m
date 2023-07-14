@@ -23,6 +23,12 @@ function alpha_m = calc_electrical_angle(freq,alpha0)
 %   alpha_m(t) = 2pi*integral(freq(t)dt)+alpha0
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % check input:
+    if ~isfield(freq,'time') || ~isfield(freq, 'data')
+        ME = MException('MATLAB:calc_electrail_angle',...
+            'invalid handles in structure, must contain x.data & x.time');
+        throw(ME);
+    end
     
     % IECTS-62600-30 Eq(3)
     alpha_m = 2*pi*cumtrapz(freq.time,freq.data)+alpha0;

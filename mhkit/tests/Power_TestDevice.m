@@ -162,7 +162,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             fm=20; SCR=20; DeltaI_I = [0 0 0 0];% pure sine wave
             [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,650);
             method = 'ZCD'; methodopts = {};
-            [~,freq,alpha_m,u0,u_fic] = flicker_ufic( ...
+            [~,~,~,freq,alpha_m,u0,u_fic] = flicker_ufic( ...
                 Sr,Un,SCR,fg,u_m,i_m,method,methodopts);
             freq0=readmatrix("testdata/sinewave-pi6_SCR20_freq.txt");
             alpha_m0 =readmatrix("testdata/sinewave-pi6_SCR20_alpham.txt");
@@ -198,7 +198,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             else
                 method = 'ZCD'; methodopts = {};
             end
-            [~,freq,alpha_m,u0,u_fic] = flicker_ufic(...
+            [~,~,~,freq,alpha_m,u0,u_fic] = flicker_ufic(...
                 Sr,Un,SCR,fg,u_m,i_m,method,methodopts);
             fnm      = ls(sprintf('testdata/B.3.%i*_freq.txt',opt));
             freq0    = readmatrix(fnm);

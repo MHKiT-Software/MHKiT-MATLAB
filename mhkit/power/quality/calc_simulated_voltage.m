@@ -26,10 +26,16 @@ function u_fic=calc_simulated_voltage(u0,i_m,Rfic,Lfic)
 % ------- 
 %   1. ufic(t) = u0(t)+Rfic*im(t)+Lfic*dim(t)/dt (Eq1, IECTS62600-30)
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+    % check input:
+    if ~isfield(i_m,'time') || ~isfield(i_m, 'data') 
+        ME = MException('MATLAB:calc_simulated_voltage',...
+            'invalid handles in structure, must contain x.data & x.time');
+        throw(ME);
+    end
     % 1. calculate dim(t)/dt using diff()
-    delta_im = reshape(diff(i_m.data),[],4);
-    delta_t = reshape(diff(i_m.time),[],1);
+    delta_im = diff(i_m.data);%reshape(,[],4);
+    delta_t = diff(i_m.time);%reshape(,[],1);
     dim_dt = delta_im./delta_t;
     dim_dt(end+1,:) = dim_dt(end,:);
     % Can also consider using: Center-Euler, Euler-Forward, OR 

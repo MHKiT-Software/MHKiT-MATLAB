@@ -78,7 +78,7 @@ opt=5; T=650;
 % opt 2: OBS data with necessary data cleanings. 
 
 %% Step 1-3. call flicker_ufic() to calculate u_fic from i_m and u_m.
-[~,~,~,~,u_fic] = flicker_ufic(...
+[~,~,~,~,~,~,u_fic] = flicker_ufic(...
     Sr,Un,SCR,fg,u_m,i_m,method,methodopts);
 % check u0 to make sure it fullfills the requirements in the IECTS
 % hold off; plot(u_m.time,u_m.data);hold on; grid on;

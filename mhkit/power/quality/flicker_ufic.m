@@ -1,4 +1,4 @@
-function [alpha0,freq,alpha_m,u0,u_fic] = flicker_ufic(Sr,Un,SCR,fg, ...
+function [Lfic,Rfic,alpha0,freq,alpha_m,u0,u_fic] = flicker_ufic(Sr,Un,SCR,fg, ...
         u_m,i_m,method,methodopts)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Conduct flicker assessment according to IECTS62600-30 and
@@ -33,6 +33,11 @@ function [alpha0,freq,alpha_m,u0,u_fic] = flicker_ufic(Sr,Un,SCR,fg, ...
 % 
 % Returns
 % -------
+%   Lfic: double array (4)
+%       fictitious grid inductance (H) for Phi_k = 30, 50, 70, 85.
+%   Rfic: double array (4) 
+%       fictitious grid resistance (Ohm) for the impedance phase angle (Phi_k)
+%       equals to 30, 50, 70, and 85 (degrees).
 %   alpha0: double 
 %       Electrical angle (radians) at t=0.
 %   freq: struct()
@@ -53,7 +58,7 @@ function [alpha0,freq,alpha_m,u0,u_fic] = flicker_ufic(Sr,Un,SCR,fg, ...
 %
 % Step 2. Calculate ideal voltahe source (u0) from measured voltage (u_m).
 %   Step 2.1 Calculate the fundamental frequency and alpha_0 of u_m 
-%       [alpha0,freq] = calc_alpha0_freq(u_m,method,methodopts) 
+%       [alpha0,freq] = calc_fundamental_freq(u_m,method,methodopts) 
 %   Step 2.2 Calculate the electrical angle (alpha_m) 
 %       alpha_m = calc_electrical_angle(freq,alpha0)
 %   Step 2.3 Calculate the ideal voltage (u0) 
@@ -63,14 +68,21 @@ function [alpha0,freq,alpha_m,u0,u_fic] = flicker_ufic(Sr,Un,SCR,fg, ...
 %       u_fic=calc_simulated_voltage(u0,i_m,Rfic,Lfic)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% check input:
+if ~isfield(u_m,'time') || ~isfield(u_m, 'data') ||...
+        ~isfield(i_m,'time') || ~isfield(i_m, 'data') 
+    ME = MException('MATLAB:flicker_ufic',...
+        'invalid handles in structure, must contain x.data & x.time');
+    throw(ME);
+end
 %% Step 1. Construct the fictitious grid:
 [Rfic,Lfic] = calc_Rfic_Lfic(Sr, SCR, Un, fg);
 %% Step 2. Calculate ideal voltage (u0) from measured voltage (u_m)
 % Step 2.1 Calculate the fundamental frequency and alpha_0:
-% opt1: method ZCD: method = 'ZCD'; methodopts={};
-% opt2: method STFT: method = 'stft'; methodopts = {'Window',rectwin(M),...
-% 'OverlapLength',L,'FFTLength',128,'FrequencyRange','onesided'};
-[alpha0,freq] = calc_alpha0_freq(u_m,method,methodopts);
+%   -opt1: method ZCD: method = 'ZCD'; methodopts={};
+%   -opt2: method STFT: method = 'stft'; methodopts = {'Window',rectwin(M),...
+%           'OverlapLength',L,'FFTLength',128,'FrequencyRange','onesided'};
+[alpha0,freq] = calc_fundamental_freq(u_m,method,methodopts);
 % Step 2.2 Calculate the electrical angle (alpha_m):
 alpha_m = calc_electrical_angle(freq,alpha0);
 % Step 2.3 Calculate ideal voltage (u0):
