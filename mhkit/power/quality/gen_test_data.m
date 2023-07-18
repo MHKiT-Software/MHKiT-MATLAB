@@ -1,6 +1,7 @@
 function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Generate test data according to IEC61400-21-1 Annex B.
+%   Generate test data according to IEC61400-21-1 Annex B.3 to be used for
+%   the verification test of the measurement procedure for flicker.
 % 
 % Parameters
 % -----------

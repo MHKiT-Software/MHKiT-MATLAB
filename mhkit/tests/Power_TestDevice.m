@@ -154,7 +154,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
                 opt);
         end
 
-        function test_flicker_ufic(testCase)
+        function test_flicker_ufic_workflow(testCase)
             % u_m, i_m, Sr, Un, In, SCR, fg, & fs
             Sr = 3e6; Un=12e3; In=144; fg=60; fs=50e3;fv=0.5;
             %1. opt = 0, pure sine waves:
@@ -162,20 +162,20 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             fm=20; SCR=20; DeltaI_I = [0 0 0 0];% pure sine wave
             [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,10);
             method = 'ZCD'; methodopts = {};
-            [~,~,~,freq,alpha_m,u0,u_fic] = flicker_ufic( ...
+            out = flicker_ufic_workflow( ...
                 Sr,Un,SCR,fg,u_m,i_m,method,methodopts);
             freq0=readmatrix("../../examples/data/power/testdata/sinewave-pi6_SCR20_freq.txt");
             alpha_m0 =readmatrix("../../examples/data/power/testdata/sinewave-pi6_SCR20_alpham.txt");
             u00=readmatrix("../../examples/data/power/testdata/sinewave-pi6_SCR20_u0.txt");
             u_fic0=readmatrix("../../examples/data/power/testdata/sinewave-pi6_SCR20_ufic.txt");
             testCase.verifyTrue(max(abs( ...
-                (freq.data(1:100)-freq0)./freq0))<1e-10,string(opt));
+                (out.freq.data(1:100)-freq0)./freq0))<1e-10,string(opt));
             testCase.verifyTrue(max(abs( ...
-                (alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10,string(opt));
+                (out.alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10,string(opt));
             testCase.verifyTrue(max(abs( ...
-                (u0(1:100)-u00)./u00))<1e-10,string(opt));
+                (out.u0(1:100)-u00)./u00))<1e-10,string(opt));
             testCase.verifyTrue(max(abs(( ...
-                u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
+                out.u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
                 string(opt));
             % 2. opt=randi([2,5]) tests generated according to IECTS
             opt = randi([2,5],1); idx = randi([1,4],1);
@@ -198,7 +198,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             else
                 method = 'ZCD'; methodopts = {};
             end
-            [~,~,~,freq,alpha_m,u0,u_fic] = flicker_ufic(...
+            out = flicker_ufic_workflow(...
                 Sr,Un,SCR,fg,u_m,i_m,method,methodopts);
             freq0    = readmatrix( ...
                 sprintf('../../examples/data/power/testdata/B.3.%i_freq.txt',opt));
@@ -209,13 +209,13 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             u_fic0   = readmatrix(...
                 sprintf('../../examples/data/power/testdata/B.3.%i_ufic.txt',opt));
             testCase.verifyTrue(max(abs( ...
-                (freq.data(1:100)-freq0)./freq0))<1e-10, string(opt));
+                (out.freq.data(1:100)-freq0)./freq0))<1e-10, string(opt));
             testCase.verifyTrue(max(abs( ...
-                (alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10, string(opt));
+                (out.alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10, string(opt));
             testCase.verifyTrue(max(abs( ...
-                (u0(1:100)-u00)./u00))<1e-10, string(opt));
+                (out.u0(1:100)-u00)./u00))<1e-10, string(opt));
             testCase.verifyTrue(max(abs(( ...
-                u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
+                out.u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
                 string(opt));
         end
 
