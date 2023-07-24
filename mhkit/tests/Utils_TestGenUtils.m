@@ -74,34 +74,25 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             assert(all(phase2 == phi))
         end
         function test_read_nc_file_group(testCase)
-            % Check MATLAB version
-            if isMATLABReleaseOlderThan("R2021b")
-                return;
-            end
-            fnms = {dir('example_ncfiles/').name};
+            % MATLAB version should >= 2021b
+            
             %1. Check LongName with group path
-            %fprintf("1. Check LongName with group path: ");
             fnm = 'QA4ECV_L2_NO2_OMI_20180301T052400_o72477_fitB_v1.nc';
-            res = read_nc_file_group(strcat('example_ncfiles/',fnm));
+            res = read_nc_file(strcat('example_ncfiles/',fnm));
             val1 = res.groups.PRODUCT.groups.SUPPORT_DATA.groups.INPUT_DATA.LongName;
             val2 = '/PRODUCT/SUPPORT_DATA/INPUT_DATA';
             assertEqual(testCase,val1,val2);
             %2. Check Group Attributes
-            %fprintf("2. Check Group Attributes: ");
             finfo = ncinfo(strcat('example_ncfiles/',fnm));
             val1 = res.groups.METADATA.groups.ALGORITHM_SETTINGS.groups.SLANT_COLUMN_RETRIEVAL.Attributes;
             val2 = finfo.Groups(2).Groups(1).Groups(1).Attributes;
             assertEqual(testCase,val1,val2);
-            %3. Check Variables
-            %fprintf("3. Check Variable \n");
-            % file with groups
-            %fprintf("Check file with groups\n");
+            %3. Check Variables: file with groups
             % '/PRODUCT/SUPPORT_DATA/DETAILED_RESULTS'
             ginfo = finfo.Groups(1).Groups(1).Groups(2);
             vnms = {ginfo.Variables.Name};
             sz = size(ginfo.Variables);
             % 3.1 check Dims
-            %fprintf("3.1 Check Variable Dims: ");
             idx = randi([1,sz(2)],1); 
             vname = check_name(vnms{idx});
             val1 = res.groups.PRODUCT.groups.(['SUPPORT_' ...
@@ -114,7 +105,6 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             assertEqual(testCase,val1,val2);
             assertEqual(testCase,val3,val4);
             % 3.2 check Data
-            %fprintf("3.2 Check Variable Data: ");
             idx = randi([1,sz(2)],1); 
             vname = check_name(vnms{idx});
             val1 = res.groups.PRODUCT.groups.(['SUPPORT_' ...
@@ -124,7 +114,6 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             
             testCase.verifyTrue(isequaln(val1,val2),vname);
             % 3.3 check Attributes
-            %fprintf("3.3 Check Variable Attributes: \n");
             idx = randi([1,sz(2)],1); 
             vname = check_name(vnms{idx});
             in_names = {ginfo.Variables(idx).Attributes.Name};
@@ -132,7 +121,6 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             xtemp = res.groups.PRODUCT.groups.(['SUPPORT_' ...
                 'DATA']).groups.DETAILED_RESULTS.Variables;
             for iattr = 1:numel(in_names)
-                %fprintf(" - Attr %s: ",in_names{iattr});
                 if strcmp(in_names{iattr},'_FillValue')
                     out_val = xtemp.(vname).FillValue;
                 else
@@ -140,21 +128,23 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                 end
                 testCase.verifyTrue(isequaln(in_vals{iattr},out_val));
             end
-
-            % file without groups
-            %fprintf("Check file without groups\n");
+        end
+        
+        function test_read_nc_file_nogroup(testCase)
+            % MATLAB version should >= 2021b
+            fnms = {dir('example_ncfiles/').name};
+            % file without groups: check variables
             for ifnm = 3:numel(fnms)
                 fnm = fnms{ifnm};
                 if strcmp(fnm,'QA4ECV_L2_NO2_OMI_20180301T052400_o72477_fitB_v1.nc')
                     continue
                 end
                 fprintf("Checking File: %s \n",fnm);
-                res = read_nc_file_group(strcat('example_ncfiles/',fnm));
+                res = read_nc_file(strcat('example_ncfiles/',fnm));
                 ginfo = ncinfo(strcat('example_ncfiles/',fnm));
                 vnms = {ginfo.Variables.Name};
                 sz = size(ginfo.Variables);
-                % 3.1 check Dims
-                %fprintf("3.1 Check Variable Dims: ");
+                % 1 check Dims
                 idx = randi([1,sz(2)],1); 
                 count = 0;
                 while (isempty(ginfo.Variables(idx).Dimensions)&&count<10)
@@ -170,10 +160,8 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                     assertEqual(testCase,val1,val2);
                     assertEqual(testCase,val3,val4);
                 end
-                % 3.2 check Data
-                %fprintf("3.2 Check Variable Data: ");
+                % 2 check Data
                 idx = randi([1,sz(2)],1); 
-                %vname = check_name(vnms{idx});
                 count = 0;
                 while (isempty(ginfo.Variables(idx).Dimensions)&&count<10)
                     idx = randi([1,sz(2)],1); 
@@ -182,10 +170,8 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                 vname = check_name(vnms{idx});
                 val1 = res.Variables.(vname).Data;
                 val2 = ncread(strcat('example_ncfiles/',fnm),vnms{idx});
-                %testCase.verifyTrue(isequaln(val1,val2),{vname,val1,val2});
                 testCase.verifyTrue(isequaln(val1,val2),vname);
-                % 3.3 check Attributes
-                %fprintf("3.3 Check Variable Attributes: \n");
+                % 3 check Attributes
                 idx = randi([1,sz(2)],1); 
                 count = 0;
                 while (isempty(ginfo.Variables(idx).Attributes)&&count<10)
@@ -197,7 +183,6 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                     in_names = {ginfo.Variables(idx).Attributes.Name};
                     in_vals = {ginfo.Variables(idx).Attributes.Value};
                     for iattr = 1:numel(in_names)
-                        %fprintf(" - Attr %s: ",in_names{iattr});
                         if strcmp(in_names{iattr},'_FillValue')
                             out_val = res.Variables.(vname).FillValue;
                         else
@@ -209,10 +194,148 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             
             end
         end
+        
+        function test_read_nc_file_var(testCase)
+            % MATLAB version should >= 2021b
+            fnms = {dir('example_ncfiles/').name};
+            %1. test on file with group:
+            fnm = 'QA4ECV_L2_NO2_OMI_20180301T052400_o72477_fitB_v1.nc';
+            varlst = {'PRODUCT/amf_total','PRODUCT/amf_trop',...
+                'PRODUCT/latitude','PRODUCT/averaging_kernel',...
+                'PRODUCT/tropospheric_no2_vertical_column',...
+                'PRODUCT/SUPPORT_DATA/GEOLOCATIONS/viewing_zenith_angle',...
+                'PRODUCT/SUPPORT_DATA/GEOLOCATIONS/latitude_bounds',...
+                'PRODUCT/SUPPORT_DATA/DETAILED_RESULTS/radiance_calibration_stretch'};
+            res = read_nc_file_var(strcat('example_ncfiles/',fnm),...
+                varlst,0);
+            res1 = read_nc_file_var(strcat('example_ncfiles/',fnm),...
+                varlst,1);           
+            idx = randi([1,length(varlst)],1);
+            var2check = varlst{idx}; nstr = split(var2check,'/');
+            vname = check_name(nstr{end});
+            % 1.1 check Data Field:
+            val1 = res.(vname).Data;
+            val1_1 = res1(idx).Data;
+            val2 = ncread(strcat('example_ncfiles/',fnm),var2check);
+            %1.1.1 test opt=0: output as struct
+            testCase.verifyTrue(isequaln(val1,val2),...
+                strcat('opt=0,',var2check));
+            %1.1.1 test opt=1: output as struct array
+            testCase.verifyTrue(isequaln(val1_1,val2),...
+                strcat('opt=1,',var2check));
+            % 1.2 check Dims Names:
+            vinfo = ncinfo(strcat('example_ncfiles/',fnm),var2check);
+            val1 = res.(vname).Dims;
+            val1_1 = res1(idx).Dims;
+            val2 = {vinfo.Dimensions.Name};
+            testCase.verifyTrue(isequaln(val1,val2),...
+                strcat('opt=0,',var2check));
+            testCase.verifyTrue(isequaln(val1_1,val2),...
+                strcat('opt=1,',var2check));
+            %1.3 check Attrs & FillValue:
+            val1 = res.(vname).FillValue;
+            val1_1 = res1(idx).FillValue;
+            val2 = vinfo.FillValue;
+            testCase.verifyTrue(isequaln(val1,val2),...
+                strcat('opt=0,',var2check));
+            testCase.verifyTrue(isequaln(val1_1,val2),...
+                strcat('opt=1,',var2check));
+            if ~isempty(vinfo.Attributes)
+                in_names = {vinfo.Attributes.Name};
+                in_vals = {vinfo.Attributes.Value};
+                for iattr = 1:numel(in_names)
+                    if strcmp(in_names{iattr},'_FillValue')
+                        out_val = res.(vname).FillValue;
+                        out_val1 = res1(idx).FillValue;
+                    else
+                        out_val = res.(vname).Attrs.(in_names{iattr});
+                        out_val1 = res1(idx).Attrs(iattr).Value;
+                    end
+                    testCase.verifyTrue(isequaln(in_vals{iattr},...
+                        out_val),strcat('opt=0,',var2check,': ',in_names{iattr}));
+                    testCase.verifyTrue(isequaln(in_vals{iattr},...
+                        out_val1),strcat('opt=1,',var2check,': ',in_names{iattr}));
+                end
+            end
+            
+            %2. test on files without group:
+            for ifnm = 3:numel(fnms)
+                fnm = fnms{ifnm};
+                if strcmp(fnm,'QA4ECV_L2_NO2_OMI_20180301T052400_o72477_fitB_v1.nc')
+                    continue
+                end
+                fprintf("Checking File: %s \n",fnm);
+                ginfo = ncinfo(strcat('example_ncfiles/',fnm));                
+                vnms = {ginfo.Variables.Name};
+                res = read_nc_file_var(strcat('example_ncfiles/',fnm),...
+                    vnms,0);
+                res1 = read_nc_file_var(strcat('example_ncfiles/',fnm),...
+                    vnms,1);
+                sz = length(vnms);
+                % 2.1 check Data Field: 
+                idx = randi([1,sz],1);%max([fix(sz*0.1),1]));
+                var2check = vnms{idx};
+                vname = check_name(var2check);
+                val1 = res.(vname).Data;
+                val1_1 = res1(idx).Data;
+                val2 = ncread(strcat('example_ncfiles/',fnm),var2check);
+                %2.1.1 test opt=0: output as struct
+                testCase.verifyTrue(isequaln(val1,val2),...
+                    strcat('opt=0,',var2check));
+                %2.1.1 test opt=1: output as struct array
+                testCase.verifyTrue(isequaln(val1_1,val2),...
+                    strcat('opt=1,',var2check));
+                %testCase.verifyTrue(isequaln(val1,val2),var2check);
+                % 2.2 check Dims Names:
+                vinfo = ncinfo(strcat('example_ncfiles/',fnm),var2check);
+                if ~isempty(vinfo.Dimensions)
+                    val1 = res.(vname).Dims;
+                    val1_1 = res1(idx).Dims;
+                    val2 = {vinfo.Dimensions.Name};
+                    testCase.verifyTrue(isequaln(val1,val2),...
+                        strcat('opt=0,',var2check));
+                    testCase.verifyTrue(isequaln(val1_1,val2),...
+                        strcat('opt=1,',var2check));
+                    %testCase.verifyTrue(isequaln(val1,val2),var2check);
+                else
+                    testCase.verifyTrue(isempty(res.(vname).Dims),...
+                        strcat('opt=0,',var2check));
+                    testCase.verifyTrue(isempty(res1(idx).Dims),...
+                        strcat('opt=1,',var2check));
+                end
+                % 2.3 check Attrs & FillValue:
+                val1 = res.(vname).FillValue;
+                val1_1 = res1(idx).FillValue;
+                val2 = vinfo.FillValue;
+                testCase.verifyTrue(isequaln(val1,val2),...
+                    strcat('opt=0,',var2check));
+                testCase.verifyTrue(isequaln(val1_1,val2),...
+                    strcat('opt=1,',var2check));
+                %testCase.verifyTrue(isequaln(val1,val2),var2check);
+                if ~isempty(vinfo.Attributes)
+                    in_names = {vinfo.Attributes.Name};
+                    in_vals = {vinfo.Attributes.Value};
+                    for iattr = 1:numel(in_names)
+                        if strcmp(in_names{iattr},'_FillValue')
+                            out_val = res.(vname).FillValue;
+                            out_val_1 = res1(idx).FillValue;
+                        else
+                            out_val = res.(vname).Attrs.(in_names{iattr});
+                            out_val_1 = res1(idx).Attrs(iattr).Value;
+                        end
+                        testCase.verifyTrue(isequaln(in_vals{iattr},...
+                            out_val),strcat('opt=0,',var2check,': ',in_names{iattr}));
+                        testCase.verifyTrue(isequaln(in_vals{iattr},...
+                            out_val_1),strcat('opt=1,',var2check,': ',in_names{iattr}));
+                    end
+                end
+            end
+            
+            
+        end
     end
 end  
 
 
 
 
-        

@@ -16,7 +16,7 @@ jobs:
         mat_release: [latest]
         include:
           - os: ubuntu-latest
-            mat_release: R2020b
+            mat_release: R2021a
     runs-on: ${{ matrix.os }}
     env:
       mhkit-python-dir: 'MHKiT-Python'

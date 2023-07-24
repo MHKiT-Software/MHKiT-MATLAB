@@ -12,8 +12,8 @@ function ds = read_nc_file_var(filename,vnms,opt_out)
 %         if the variable is in a group, make sure to include group name,
 %         i.e., {'GROUP_NAME1/VAR_NAME1','GROUP_NAME2/VAR_NAME2',...}
 %     
-%     opt_out: 0 if output as structure, ds.(vname) & ds.attrs.
-%              1 if output as structure array, ds(N).
+%     opt_out: 0 will output as structure, ds.(vname) & ds.attrs.
+%              1 will output as structure array, ds(N).
 %   
 %   Note 1. Variables in root group ('/') can be extracted 
 %    directly by 'VARNAME'.
@@ -91,10 +91,16 @@ function ds = read_nc_file_var(filename,vnms,opt_out)
             name = vnms{ivar};
             vinfo = ncinfo(filename,name);
             ds(ivar).Name = vinfo.Name;
-            ds(ivar).FillValue = str2double(vinfo.FillValue);
+            if isstring(vinfo.FillValue)
+                ds(ivar).FillValue = str2double(vinfo.FillValue);
+            else
+                ds(ivar).FillValue = vinfo.FillValue;
+            end
             ds(ivar).Data = ncread(filename, name);
-            ds(ivar).Dims = {vinfo.Dimensions.Name};
             ds(ivar).Attrs = vinfo.Attributes;
+            if ~isempty(vinfo.Dimensions)
+                ds(ivar).Dims = {vinfo.Dimensions.Name};
+            end
         end
         return
     end

@@ -91,6 +91,7 @@ end
 
 PMpan=py.mhkit.wave.performance.power_matrix(LMpan,JMpan);
 
+% convert vals1d to original shape
 vals=double(py.array.array('d',py.numpy.nditer(PMpan.values)));
 sha=cell(PMpan.values.shape);
 x=int64(sha{1,1});
