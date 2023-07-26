@@ -73,7 +73,6 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             assert(all(phase1 == theta))
             assert(all(phase2 == phi))
         end
-        
         function test_read_nc_file_group(testCase)
             % MATLAB version should >= 2021b
             
@@ -340,4 +339,3 @@ end
 
 
 
-        
