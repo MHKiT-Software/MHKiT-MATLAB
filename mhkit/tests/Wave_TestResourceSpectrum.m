@@ -7,7 +7,7 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             Obj.Tp = 8;
             Obj.Hs = 2.5;
             
-            S = create_spectra('pierson_moskowitz_spectrum',Obj.f,Obj.Tp,Obj.Hs);
+            S = pierson_moskowitz_spectrum(Obj.f,Obj.Tp,Obj.Hs);
             Tp0 = peak_period(S);
             error = abs(Obj.Tp - Tp0)/Obj.Tp;
             assertLessThan(testCase,error, 0.01);
@@ -69,7 +69,7 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             Obj.t = 0:0.05:Trep;
             dt = Obj.t(2)-Obj.t(1);
             
-            S = create_spectra('jonswap_spectrum',Obj.f, Obj.Tp, Obj.Hs);
+            S = jonswap_spectrum(Obj.f, Obj.Tp, Obj.Hs);
             wave_elevation = surface_elevation(S, Obj.t);
             Sn = elevation_spectrum(wave_elevation.elevation, 1/dt,length(wave_elevation.elevation),Obj.t,"window","boxcar","detrend",false,"noverlap",0);
             m0 = frequency_moment(S,0);

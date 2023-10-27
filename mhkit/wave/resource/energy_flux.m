@@ -6,12 +6,6 @@ function J=energy_flux(S,h,options)
 % Parameters
 % ------------
 %    S: Spectral Density (m^2/Hz)
-%       Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,spectra)
-%
-%       OR
-%
 %       structure of form:
 %           S.spectrum: Spectral Density (m^2/Hz)
 %
@@ -20,17 +14,28 @@ function J=energy_flux(S,h,options)
 %
 %           S.frequency: frequency (Hz)
 %
-%    h: float
+%    h: double
 %         Water depth (m)
+%    
+%    deep: logical (optional)
+%         If True use the deep water approximation. Default False. When
+%         False a depth check is run to check for shallow water. The ratio
+%         of the shallow water regime can be changed using the ratio
+%         keyword.
+%         to call: energy_flux(S,h,"deep",py.True)
 %
-%    rho: float (optional)
+%    rho: double (optional)
 %         water density (kg/m^3)
 %         to call: energy_flux(S,h,"rho",rho)
 %
-%    g: float (optional)
+%    g: double (optional)
 %         gravitational acceleration (m/s^2)
 %         to call: energy_flux(S,h,"g",g)
 %
+%    ratio: double or int (optional)
+%         Only applied if depth=False. If h/l > ratio,
+%         water depth will be set to deep. Default ratio = 2.
+%         to call: energy_flux(S,h,"ratio",1.5)
 % Returns
 % -------
 %     J: double
@@ -42,14 +47,17 @@ function J=energy_flux(S,h,options)
 arguments
     S 
     h
+    options.deep = py.False;
     options.rho = 1025;
     options.g = 9.80665;
+    options.ratio = 2;
     
 end
 
 py.importlib.import_module('mhkit');
 py.importlib.import_module('mhkit_python_utils');
 
+% convert to dataframe
 if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(S)==1)
         x=size(S.spectrum);
@@ -72,8 +80,9 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
 end
 
 
-
-J=py.mhkit.wave.resource.energy_flux(S,h,pyargs('rho',options.rho,'g',options.g));
+% calculate energy flux
+J=py.mhkit.wave.resource.energy_flux(S,h,pyargs('rho',options.rho,'g',options.g,...
+    'deep',options.deep, 'ratio',options.ratio));
 
 
 

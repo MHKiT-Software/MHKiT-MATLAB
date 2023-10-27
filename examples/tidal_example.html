@@ -44,7 +44,7 @@
 <!-- 
 ##### SOURCE BEGIN #####
 %% Example: MHKiT-MATLAB Tidal Module 
-% The following example will familiarize the user with the <https://mhkit-code-hub.github.io/MHKiT/source/mhkit-matlab/mhkit.tidal.html 
+% The following example will familiarize the user with the <https://mhkit-software.github.io/MHKiT/mhkit-matlab/api.tidal.html 
 % MHKiT tidal module> by stepping through the calculation of the velocity duration 
 % curve. The data file used in this example is stored in the <https://github.com/MHKiT-Code-Hub/MHKiT-MATLAB/tree/master/examples/data 
 % \MHKiT\examples\data> directory.
@@ -56,9 +56,9 @@
 % The request function can save the json file for later use. 
 % 
 % For simplicity, this example loads data from a json file into a MATLAB Series. 
-% This data contains 1 year of 6 minute averaged data from the Southampton Shoal 
+% This data contains 1 year of 6-minute averaged data from the Southampton Shoal 
 % Channel LB 6 (Station Number: s08010) in San Francisco Bay. The data includes 
-% 6 minute averaged direction [degrees] and speed [cm/s] indexed by time. The 
+% 6-minute averaged direction [degrees] and speed [cm/s] indexed by time. The 
 % structure names returned by NOAA are 'd' for direction and 's' for speed. Since 
 % MHKIT uses SI units, speed is converted to m/s.
 
@@ -77,7 +77,7 @@ data.s = data.s/100.;
 %% 
 % The request_noaa_data has returned a Matlab Structure of time series data 
 % between November of 2016 and March of 2018. The time series data points are 
-% 6 minute averaged direction [degrees] and speed [cm/s] data indexed by time. 
+% 6-minute averaged direction [degrees] and speed [cm/s] data indexed by time. 
 % The structure key names returned by NOAA are 'd' for direction and 's' for speed. 
 % The speed returned from NOAA is in cm/s so we converted this to m/s.
 %% Principal Flow Directions
@@ -110,10 +110,10 @@ ebb = direction2 ; % flow out
 plot_current_timeseries(data,flood);
 %% 
 % The plot above shows that the NOAA site request did not return data for most 
-% of early and mid 2017. The IEC standard reccomends a minimum of 1 year of 10 
-% minute averaged data (See IEC 201 for full description). For the purposes of 
-% demonstration this dataset is suffcient. To look at a speficic month we can 
-% slice the dataset before passing to the plotting function.
+% of early and mid-2017. The IEC standard recommends a minimum of 1 year of 10-minute 
+% averaged data (See IEC 201 for full description). For the purposes of demonstration 
+% this dataset is sufficient. To look at a specific month we can slice the dataset 
+% before passing to the plotting function.
 
 % Slice December of 2017 out of the full dataset 
 start = posixtime(datetime('2017-12-01','InputFormat','yyyy-MM-dd'));
@@ -137,7 +137,7 @@ width_velocity  = 0.1 ; %[m/s]
 figure;
 plot_joint_probability_distribution(data,width_direction,width_velocity);
 %% Rose Plot
-% A rose plot shows the same information as the joint probability distribution 
+% A rose plot shows the same information as the joint probability distribution, 
 % but the probability is now the r-axis, and the velocity is the contour value. 
 % As compared to a joint probability distribution plot, a rose plot can be more 
 % readable when using larger bins sizes.
@@ -171,4 +171,5 @@ plot_velocity_duration_curve(data.s,F.F);
 plot_tidal_phase_probability(data,flood,ebb);
 plot_tidal_phase_exceedance(data,flood,ebb);
 ##### SOURCE END #####
---></body></html>
+-->
+</div></body></html>
