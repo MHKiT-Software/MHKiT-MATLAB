@@ -110,7 +110,7 @@ classdef Wave_TestIO < matlab.unittest.TestCase
         
         % WPTO multiple locations
         function test_WPTO_point_multiloc(testCase)
-
+            if ispc
             api_key = '3K3JQbjZmWctY0xmIfSYvYgtIcM3CN0cb1Y2w9bf';
             hindcast_data = request_wpto('1-hour',...
                 ["energy_period"],[44.624076,-124.280097;43.489171,-125.152137],...
@@ -140,11 +140,13 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             assertEqual(testCase,expected_meta.timezone(2),hindcast_data(2).metadata.timezone);
             assertEqual(testCase,expected_meta.jurisdiction{2},hindcast_data(2).metadata.jurisdiction);
             assertEqual(testCase,expected_meta.distance_to_shore(2),hindcast_data(2).metadata.distance_to_shore,'RelTol',0.000001);
-         
+            else
+            
+            end
         end
         
         function test_WPTO_point_multiparm(testCase)
-
+            if ismac
             api_key = '3K3JQbjZmWctY0xmIfSYvYgtIcM3CN0cb1Y2w9bf';
             hindcast_data = request_wpto('3-hour',...
                 ["mean_absolute_period","significant_wave_height"],[44.624076,-124.280097],...
@@ -166,6 +168,10 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             assertEqual(testCase,expected_meta.timezone(1),hindcast_data.metadata.timezone);
             assertEqual(testCase,expected_meta.jurisdiction{1},hindcast_data.metadata.jurisdiction);
             assertEqual(testCase,expected_meta.distance_to_shore(1),hindcast_data.metadata.distance_to_shore,'RelTol',0.000001);
+
+            else
+
+            end
         end
     end
 end

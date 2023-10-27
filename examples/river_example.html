@@ -92,10 +92,10 @@ plot_discharge_timeseries(data);
 % they are most often exceeded.
 
 % Calculating the exceedance probability structure (F) from the Discharge data structure
-F = exceedance_probability(data); 
+F = exceedance_probability(data.Discharge) 
 
 % plotting the flow duration curve from Discharge and Exceedance Probability vectors
-plot_flow_duration_curve(data.Discharge,F.F); 
+plot_flow_duration_curve(data.Discharge,F); 
 %% Velocity Duration Curve
 % At each river energy converter location, we must provide a curve that relates 
 % the velocity at the turbine location to the river discharge levels. IEC 301 
@@ -129,10 +129,10 @@ plt=plot_discharge_vs_velocity(DV_curve.D,DV_curve.V,"polynomial_coeff",p.coef);
 
 % Use polynomial fit from DV curve to calculate velocity('V') from 
 %  discharge at turbine location
-V = discharge_to_velocity(data, p.coef); % Input of discharge structure and polynomial coeficients 
+V = discharge_to_velocity(data, p.coef) % Input of discharge structure and polynomial coeficients 
 
 % Plot the velocity duration curve (VDC) 
-p2 = plot_velocity_duration_curve(V.V, F.F); % Input velocity vector and exceedance probability vector
+p2 = plot_velocity_duration_curve(V.V, F); % Input velocity vector and exceedance probability vector
 %% Power Duration Curve
 % The power duration curve is created in a nearly identical manner to the VDC. 
 % Here a velocity to power curve will be used to create a polynomial fit. The 
@@ -155,7 +155,7 @@ p3 = plot_velocity_vs_power(VP_curve.V, VP_curve.P,"polynomial_coeff", p_VP.coef
 P = velocity_to_power(V,p_VP.coef,min(VP_curve.V), max(VP_curve.V)); % Input is velocity structure, poly-coef, min and max of VP curve
 
 % Plot the power duration curve
-p4 = plot_power_duration_curve(P.P, F.F); % Input of power vector and exceedance probability vector
+p4 = plot_power_duration_curve(P.P, F); % Input of power vector and exceedance probability vector
 %% Annual Energy Produced 
 % Finally, annual energy produced is computed, as shown below.
 
