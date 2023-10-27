@@ -80,14 +80,11 @@ else
 	isEbb = ~((data.d < upper_split) & (data.d >= lower_split));
 end
 
-s_ebb = struct('time', {data.time(isEbb)},...
-    'Discharge', {data.Discharge(isEbb)});
-s_flood = struct('time', {data.time(~isEbb)},...
-    'Discharge', {data.Discharge(~isEbb)});
+s_ebb = data.s(isEbb);
+s_flood = data.s(~isEbb);
 
-F = exceedance_probability(data).F;
-F_ebb = exceedance_probability(s_ebb).F;
-F_flood = exceedance_probability(s_flood).F;
+F_ebb = exceedance_probability(s_ebb);
+F_flood = exceedance_probability(s_flood);
 
 decimals = round(options.bin_size/0.1);
 s_new = [round(min(data.s),decimals):options.bin_size:...
@@ -95,19 +92,15 @@ s_new = [round(min(data.s),decimals):options.bin_size:...
 s_new = s_new(1:end-1); % this accounts for the difference between matlab 
                         % and numpy.arange which uses a half open interval
 
-py.importlib.import_module('scipy');
-kwa = pyargs('bounds_error',false);
+[~,i_ebb] = unique(s_ebb);
+[~,i_flood] = unique(s_flood);
 
 f_ebb = py.scipy.interpolate.interpolate.interp1d(s_ebb.Discharge,...
     F_ebb, kwa);
 f_flood = py.scipy.interpolate.interpolate.interp1d(s_flood.Discharge,...
     F_flood, kwa);
 
-F_ebb = double(f_ebb(s_new));
-F_flood = double(f_flood(s_new));
-
-py.importlib.import_module('numpy');
-F_max_total = py.numpy.nanmax(F_ebb) + py.numpy.nanmax(F_flood);
+F_max_total = max(F_ebb(~isnan(F_ebb))) + max(F_flood(~isnan(F_flood)));
 
 s_plot = repmat(s_new,2,1);
 figure = area(s_plot.', [F_ebb/F_max_total*100; F_flood/F_max_total*100].');
