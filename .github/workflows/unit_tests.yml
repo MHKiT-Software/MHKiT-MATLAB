@@ -12,11 +12,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: [3.8, 3.9]
+        # os: [ubuntu-latest]
+        # python-version: [3.8, 3.9, 3.10, 3.11]
+        python-version: [3.9]
         mat_release: [latest]
-        include:
-          - os: ubuntu-latest
-            mat_release: R2021a
+        # include:
+        #   - os: ubuntu-latest
+        #     mat_release: R2021a
     runs-on: ${{ matrix.os }}
     env:
       mhkit-python-dir: 'MHKiT-Python'
@@ -55,21 +57,55 @@ jobs:
       - name: Output matlab pyenv
         run: matlab -batch "pyenv"
 
-      # - name: Add MATLAB test commands
-      #   shell: bash
-      #   run: echo "version, 
-      #              addpath(genpath('mhkit')), 
-      #              import matlab.unittest.TestSuite, 
-      #              import matlab.unittest.TestRunner, 
-      #              testFolder = ['mhkit' filesep 'tests'], 
-      #              suite = TestSuite.fromFolder(testFolder), 
-      #              runner = TestRunner.withTextOutput,
-      #              results = runner.run(suite), 
-      #              assertSuccess(results)" >> run.m
+      - name: Output python version
+        run: python -c "import sys; print(sys.executable)"
 
-      # - name: Install and test MHKiT-MATLAB
-      #   id: runTests
-      #   run: matlab -batch "run"
+      # - name: Setup MATLAB pyversion
+      #   shell: bash
+      #   run: echo -n "pyversion('/usr/bin/python')" > setup_matlab.m
+      - name: Setup MATLAB pyversion
+        shell: bash
+        run: printf 'pyversion("%s")\n' $(python -c "import sys; print(sys.executable)") > setup_matlab.m
+
+      # - name: Append MATLAB pyversion
+      #   shell: bash
+      #   run:  python -c "import sys; print(sys.executable)" >> setup_matlab.m
+
+      # - name: Finish MATLAB pyversion
+      #   shell: bash
+      #   run:  echo -n "')" >> setup_matlab.m
+        
+      - name: Output MATLAB pyversion raw
+        shell: bash
+        run: cat setup_matlab.m
+
+      - name: Setup MATLAB python
+        shell: bash
+        run: matlab -batch "setup_matlab"
+
+      - name: Output matlab pyenv again
+        run: matlab -batch "pyenv"
+
+      - name: Set MATLAB OutOfProcess Python execution mode
+        shell: bash
+        run: echo "pyenv('ExecutionMode', 'OutOfProcess')" > run.m
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+
+      - name: Add MATLAB test commands
+        shell: bash
+        run: echo "version, 
+                   addpath(genpath('mhkit')), 
+                   import matlab.unittest.TestSuite, 
+                   import matlab.unittest.TestRunner, 
+                   testFolder = ['mhkit' filesep 'tests'], 
+                   suite = TestSuite.fromFolder(testFolder), 
+                   runner = TestRunner.withTextOutput,
+                   results = runner.run(suite), 
+                   assertSuccess(results)" >> run.m
+
+      - name: Install and test MHKiT-MATLAB
+        id: runTests
+        run: matlab -batch "run"
 
       # - name: Test MHKiT-Python
       #   run: |
