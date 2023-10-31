@@ -4,6 +4,9 @@ classdef Python_MHKiT_Import < matlab.unittest.TestCase
 
         function test_mhkit_import(testCase)
             py.importlib.import_module('mhkit');
+            pyenv()
+            getenv('PYTHONHOME')
+            getenv("PATH")
             assertTrue(testCase, true);
         end
 

@@ -23,6 +23,91 @@ jobs:
     env:
       mhkit-python-dir: 'MHKiT-Python'
     steps:
+      # - name:  Install h5py and netcdf4 on macos
+      #   run:   |
+      #          if [ "$RUNNER_OS" == "macOS" ]; then
+      #             brew install hdf5
+      #             brew install netcdf
+      #          fi
+      #   shell: bash
+
+      # - name:  Install h5py and netcdf4 on Linux
+      #   run:   |
+      #          if [ "$RUNNER_OS" == "Linux" ]; then
+      #             brew install hdf5
+      #             brew install netcdf
+      #          fi
+      #   shell: bash
+
+      # Install anaconda?
+      - name: Install/Setup Miniconda
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          # auto-update-conda: true
+          # python-version: ${{ matrix.python-version }}
+          activate-environment: mhkit
+          python-version: 3.9
+          channels: conda-forge
+          
+      - name: Install h5py
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: conda install h5py
+  
+      - name: Install netcdf4
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: conda install -c conda-forge netcdf4
+
+      # - name: Activate Anaconda Environment
+      #   run: source activate mhkit
+
+      # - name:  Activate Anaconda Environment
+      #   run:   |
+      #          if [ "$RUNNER_OS" != "Windows" ]; then
+      #           conda init bash
+      #           exec bash
+      #           conda activate mhkit
+      #          fi
+      #   shell: bash
+      
+
+      # - name:  Install h5py and netcdf4 on macos
+      #   run:   |
+      #          if [ "$RUNNER_OS" != "macOS" ]; then
+      #           brew install h
+      #          fi
+      #   shell: bash
+
+      # - name: Conda info
+      #   shell: bash -el {0}
+      #   run: conda info
+      # - name: Conda list
+      #   shell: pwsh
+      #   run: conda list
+
+      # - name: Conda list environments
+      #   run: conda env list
+      
+
+      # - name: Python where
+      #   shell: bash
+      #   run: which python
+
+      # - name: Python where
+      #   run: where python
+
+      # - name: Activate Anaconda
+      #   run: conda activate mhkit
+
+      - name: Output python executable
+        run: python -c "import sys; print(sys.executable)"
+
+      - name: Print Python Version
+        run: python --version
+
+      
+
+      # Does this do anything
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v2
 
@@ -37,17 +122,27 @@ jobs:
         with:
           release: ${{ matrix.mat_release }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+      # - name: Set up Python
+      #   uses: actions/setup-python@v2
+      #   with:
+      #     python-version: ${{ matrix.python-version }}
 
-      - name: Install mhkit module (from source)
-        run: python -m pip install -e .
+      - name: Output python version
+        run: python -c "import sys; print(sys.executable)"
+
+      - name: Install mhkit module from source
+        # pip install mhkit --only-binary=:all:
+        run: "pip3 install -e ."
         working-directory: ${{env.mhkit-python-dir}}
 
       - name: Install mhkit-python-utils module
-        run: python -m pip install -e .
+        run: pip3 install -e .
+
+      - name: Output MHKiT-Python version
+        run: python -c "import mhkit; print(mhkit.__version__)"
+
+      - name: Output MHKiT-Python Location
+        run: python -c "import mhkit; import os; print(os.path.dirname(mhkit.__file__))"
 
       # - name: Set MATLAB OutOfProcess Python execution mode
       #   shell: bash
@@ -55,7 +150,10 @@ jobs:
       #   if: ${{ matrix.os == 'ubuntu-latest' }}
 
       - name: Output matlab pyenv
-        run: matlab -batch "pyenv"
+        uses: matlab-actions/run-command@v1
+        with:
+          command: pyenv
+          startup-options: -noFigureWindows
 
       - name: Output python version
         run: python -c "import sys; print(sys.executable)"
@@ -79,17 +177,27 @@ jobs:
         shell: bash
         run: cat setup_matlab.m
 
-      - name: Setup MATLAB python
-        shell: bash
-        run: matlab -batch "setup_matlab"
-
+      # - name: Setup MATLAB python
+      #   shell: bash
+      #   run: matlab -batch "setup_matlab"
       - name: Output matlab pyenv again
-        run: matlab -batch "pyenv"
+        uses: matlab-actions/run-command@v1
+        with:
+          command: setup_matlab
+          startup-options: -noFigureWindows
+
+      # - name: Output matlab pyenv again
+      #   run: matlab -batch "pyenv"
+      # - name: Output matlab pyenv again
+      #   uses: matlab-actions/run-command@v1
+      #   with:
+      #     command: pyenv
+      #     startup-options: -noFigureWindows
 
       - name: Set MATLAB OutOfProcess Python execution mode
         shell: bash
         run: echo "pyenv('ExecutionMode', 'OutOfProcess')" > run.m
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        # if: ${{ matrix.os == 'ubuntu-latest' }}
 
       - name: Add MATLAB test commands
         shell: bash
