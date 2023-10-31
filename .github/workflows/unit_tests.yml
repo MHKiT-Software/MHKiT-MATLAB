@@ -103,9 +103,15 @@ jobs:
                    results = runner.run(suite), 
                    assertSuccess(results)" >> run.m
 
-      - name: Install and test MHKiT-MATLAB
-        id: runTests
-        run: matlab -batch "run"
+      # - name: Install and test MHKiT-MATLAB
+      #   id: runTests
+      #   run: matlab -batch "run"
+
+      - name: Run command
+        uses: matlab-actions/run-command@v1
+        with:
+          command: run
+          startup-options: -noFigureWindows
 
       # - name: Test MHKiT-Python
       #   run: |
