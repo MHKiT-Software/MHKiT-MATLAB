@@ -6,12 +6,6 @@ function wave_elevation=surface_elevation(S,time_index,options)
 % Parameters
 % ------------
 %    S: Spectral Density (m^2/Hz)
-%       Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,spectra)
-%
-%       OR
-%
 %       structure of form:
 %           S.spectrum: Spectral Density (m^2/Hz)
 %
@@ -52,95 +46,50 @@ arguments
     S 
     time_index
     options.seed {mustBeNumeric} = 123;
-    options.frequency_bins = py.None;
-    options.phases = py.None;
+    options.frequency_bins = nan;
+    options.phases = nan;
 end
 
-py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
-py.importlib.import_module('mhkit_python_utils');
-
-frequency= S.frequency ;
-
-if (isa(time_index,'py.numpy.ndarray') ~= 1)
-    
-    time_index = py.numpy.array(time_index);
-    
+if ~isnan(options.frequency_bins)
+    assert(all(size(options.frequency_bins) == size(S.frequency)), ...
+        "shape of frequency_bins must match shape of S")
 end
 
-if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
-    if (isstruct(S)==1)
-        x=size(S.spectrum);
-        li=py.list();
-        if x(2)>1 
-            for i = 1:x(2)
-                app=py.list(S.spectrum(:,i));
-                li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-            
-            end
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency(:,1),li,int32(x(2)));
-        elseif x(2)==1
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,py.numpy.array(S.spectrum),int32(x(2)));
-        end
-    else
-        ME = MException('MATLAB:significant_wave_height','S needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
-        throw(ME);
-    end
+if ~isnan(options.phases)
+    assert(all(size(options.phases) == size(S.frequency)), "shape " + ...
+        "of phases must match shape of S")
 end
 
-if (isa(options.frequency_bins,'py.NoneType')~=1)
-    if isnumeric(options.frequency_bins)
-    
-        options.frequency_bins = py.numpy.array(options.frequency_bins);
-    else
-        ME = MException('MATLAB:significant_wave_height','frequency_bins need to be of numeric type');
-        throw(ME);
-    end
+
+f = S.frequency;
+
+if isnan(options.frequency_bins)
+    delta_f = f(2)-f(1);
+else
+    delta_f = options.frequency_bins;
 end
 
-if (isa(options.phases,'py.NoneType')~=1)
-    if isnumeric(options.phases)
-     x=size(options.phases);
-     li=py.list();
-     if x(2)>1 
-         for i = 1:x(2)
-             app=py.list(options.phases(:,i));
-             li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-            
-         end
-         options.phases=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency(:,1),li,int32(x(2)));
-      elseif x(2)==1
-         options.phases=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,py.numpy.array(options.phases),int32(x(2)));
-     end
-      
-    else
-        ME = MException('MATLAB:significant_wave_height','phases need to be of numeric type');
-        throw(ME);
-    end
-    
+if isnan(options.phases)
+    rng(options.seed);
+    phase = 2*pi*rand(size(S.spectrum));
+else
+    phase = options.phases;
 end
-    
- 
-eta=py.mhkit.wave.resource.surface_elevation(S,time_index,pyargs('seed',...
-    py.int(options.seed),'frequency_bins',options.frequency_bins,'phases',options.phases));
- 
 
-vals=double(py.array.array('d',py.numpy.nditer(eta.values)));
- sha=cell(eta.values.shape);
- x=int64(sha{1,1});
- y=int64(sha{1,2});
- vals=reshape(vals,[x,y]);
+omega = 2*pi*f;
 
-si=size(vals);
+% Wave amplitude times delta f
+A = 2*S.spectrum;
+A = A.*delta_f;
+A = sqrt(A);
 
-wave_elevation.elevation=vals;
-% for i=1:si(2)
-%    wave_elevation.spectrum{i}=vals(:,i);
-% end
+% Product of omega and time
+B = time_index.*omega;
 
-wave_elevation.type='Time Series from Spectra';
+% wave elevation
+C = cos(B + phase);
+elevation = sum((C.*A));
 
-wave_elevation.time=double(py.array.array('d',py.numpy.nditer(eta.index)));
-
-    
-    
+wave_elevation.type = 'Time Series from Spectra';
+wave_elevation.elevation = elevation;
+wave_elevation.time = time_index;
