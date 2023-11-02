@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
 
-      # Expecting 2 * 4 * 7 - 12 = 44 jobs
+      # Expecting 2 * 4 * 7 - 13 = 43 jobs
       matrix:
         os: [macos-latest, ubuntu-latest]
         python-version: [3.8, 3.9, "3.10", 3.11]
@@ -19,6 +19,8 @@ jobs:
         exclude:
             - matlab-version: R2023b
               python-version: 3.8
+            - matlab-version: R2023a
+              python-version: 3.11
             - matlab-version: R2022b
               python-version: 3.11
             - matlab-version: R2022a
@@ -40,7 +42,7 @@ jobs:
             - matlab-version: R2020b
               python-version: "3.10"
             - matlab-version: R2020b
-              python-version: "3.9"
+              python-version: 3.9
     
     runs-on: ${{ matrix.os }}
 
