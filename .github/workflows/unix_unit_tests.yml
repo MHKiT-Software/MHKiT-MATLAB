@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
 
-      # Expecting 2 * 4 * 7 - 13 = 43 jobs
+      # Expecting 2 * 4 * 7 - (13 * 2) = 30 jobs
       matrix:
         os: [macos-latest, ubuntu-latest]
         python-version: [3.8, 3.9, "3.10", 3.11]
@@ -114,9 +114,17 @@ jobs:
         shell: bash
         run: cat run.m
 
-      - name: Run MATLAB Unit Tests
-        uses: matlab-actions/run-command@v1
+      - name: Run MHKiT-MATLAB Unit Tests
+        uses: matlab-actions/run-tests@v1
         with:
-          command: run
-          startup-options: -noFigureWindows
+            select-by-folder: mhkit/tests
+
+    #   - name: Run MATLAB Unit Tests
+    #     uses: matlab-actions/run-command@v1
+    #     with:
+    #       command: run
+    #       startup-options: -noFigureWindows
+
+        
+
       
