@@ -12,13 +12,36 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
-        # python-version: [3.8, 3.9, 3.10, 3.11]
-        python-version: ["3.9", "3.10", "3.11"]
-        mat_release: [latest]
-        # include:
-        #   - os: ubuntu-latest
-        #     mat_release: R2021a
+        python-version: [3.8, 3.9, "3.10", 3.11]
+        matlab-version: [R2020b, R2021a, R2021b, R2022a, R2022b, R2023a, R2023b]
+        exclude:
+            - matlab-version: R2023b
+              python-version: 3.8
+            - matlab-version: 2022b
+              python-version: 3.11
+            - matlab-version: 2022a
+              python-version: 3.11
+            - matlab-version: 2022a
+              python-version: "3.10"
+            - matlab-version: 2021b
+              python-version: 3.11
+            - matlab-version: 2021b
+              python-version: "3.10"
+            - matlab-version: 2021a
+              python-version: 3.11
+            - matlab-version: 2021a
+              python-version: "3.10"
+            - matlab-version: 2021a
+              python-version: 3.9
+            - matlab-version: 2020b
+              python-version: 3.11
+            - matlab-version: 2020b
+              python-version: "3.10"
+            - matlab-version: 2020b
+              python-version: "3.9"
+    
     runs-on: ${{ matrix.os }}
+
     env:
       mhkit-python-dir: 'MHKiT-Python'
     steps:
@@ -62,7 +85,7 @@ jobs:
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
         with:
-          release: ${{ matrix.mat_release }}
+          release: ${{ matrix.matlab-version }}
 
       # OutOfProcess allows MATLAB python to access libraries that use Cython (h5py).
       # So far, this is necessary on linux, more investigation is needed on MacOS
