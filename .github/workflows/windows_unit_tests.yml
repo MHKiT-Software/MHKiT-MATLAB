@@ -15,24 +15,21 @@ jobs:
         python-version: [3.9]
         mat_release: [latest]
     runs-on: ${{ matrix.os }}
+
     env:
       mhkit-python-dir: 'MHKiT-Python'
     steps:
     
-      # Install Anaconda
-      - name: Python Windows Setup - Install/Setup Miniconda
-        if: ${{ matrix.os == 'windows-latest' }}
+      - name: Install/Setup Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
-          # auto-update-conda: true
-          # python-version: ${{ matrix.python-version }}
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
           activate-environment: mhkit
-          python-version: 3.9
           channels: conda-forge
           
-      - name: "Windows: Conda install h5py, netcdf4, and cython"
+      - name: "Conda install h5py, netcdf4, and cython"
         run: conda install -c conda-forge h5py netcdf4 cython
-        if: ${{ matrix.os == 'windows-latest' }}
       
       - name: Output python executable
         run: python -c "import sys; print(sys.executable)"
@@ -40,7 +37,6 @@ jobs:
       - name: Print Python Version
         run: python --version
 
-      # Does this do anything
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
@@ -50,15 +46,13 @@ jobs:
           repository: 'MHKiT-Software/MHKiT-Python'
           path: ${{env.mhkit-python-dir}}
 
-        # This works!
-      - name: Install mhkit module from pip
+      - name: pip install mhkit from source
         # pip install mhkit --only-binary=:all:
-        run: "pip install mhkit"
+        run: "pip install -e ."
         working-directory: ${{env.mhkit-python-dir}}
 
-      - name: Install mhkit-python-utils module
+      - name: pip install mhkit-python-utils module from source
         run: pip install -e .
-
 
       - name: List installed pip modules
         run: pip freeze
@@ -68,15 +62,6 @@ jobs:
       #   if: ${{ matrix.os == 'windows-latest' }}
       #   run: python -m pip install matlabengine==9.14.3
       # run: "pip3 install matlabengine --only-binary=:all:"
-        
-    #   - name: Import and verify MHKiT operations
-    #     run: "python -c 'import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AD);'"
-
-      # - name: Output MHKiT-Python version
-      #   run: python -c "import mhkit; print(mhkit.__version__)"
-
-      # - name: Output MHKiT-Python Location
-      #   run: python3 -c "import mhkit; import os; print(os.path.dirname(mhkit.__file__))"
 
       # - name: Test MHKiT-Python
       #   if: ${{ matrix.os == 'windows-latest' }}
@@ -91,88 +76,12 @@ jobs:
         with:
           release: ${{ matrix.mat_release }}
 
-      
-
-      # - name: Set up MATLAB
-      #   uses: matlab-actions/setup-matlab@v1
-      #   with:
-      #     release: ${{ matrix.mat_release }}git
-
-    #   - name: Output matlab pyenv
-    #     uses: matlab-actions/run-command@v1
-    #     with:
-    #       command: pyenv
-    #       startup-options: -noFigureWindows
-
-    #   - name: Output python version
-    #     run: python -c "import sys; print(sys.executable)"
-
-      # - name: Setup MATLAB pyversion
-      #   shell: bash
-      #   run: echo -n "pyversion('/usr/bin/python')" > setup_matlab.m
-      # - name: Setup MATLAB pyversion
-      #   shell: bash
-      #   run: printf 'pyversion("%s")\n' $(python -c "import sys; print(sys.executable)") > setup_matlab.m
-
-      # - name: Setup MATLAB pyversion
-      #   shell: bash
-      #   run: printf 'pyversion("%s")\n' $(python -c "import sys; print(sys.executable)") > run.m
-
-      # - name: Setup MATLAB python through pyenv
-      #   shell: bash
-      #   run: printf 'pyenv(Version="%s")\n' $(python -c "import sys; print(sys.executable)") > run.m
-
-      # - name: Setup MATLAB python through pyenv
-      #   shell: bash
-      #   run: echo 'pyenv(Version="C:\Miniconda\envs\mhkit\python.exe", ExecutionMode="InProcess")' > run.m
-      #   if: ${{ matrix.os == 'windows-latest' }}
-
-      # OutOfProcess errors with See Run #79
-      - name: Pass Anaconda Python Executable to MATLAB
+      # OutOfProcess is what we probably need (seems to work locally), but there are MATLAB issues: See Run #79
+      - name: Configure MATLAB pyenv Version and ExecutionMode
         if: ${{ matrix.os == 'windows-latest' }}
         shell: pwsh
         run: > 
           "pyenv(Version='{0}', ExecutionMode='InProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
-
-      # - name: Append MATLAB pyversion
-      #   shell: bash
-      #   run:  python -c "import sys; print(sys.executable)" >> setup_matlab.m
-
-      # - name: Finish MATLAB pyversion
-      #   shell: bash
-      #   run:  echo -n "')" >> setup_matlab.m
-        
-      # - name: Output MATLAB pyversion raw
-      #   shell: bash
-      #   run: cat setup_matlab.m
-
-      # - name: Setup MATLAB python
-      #   shell: bash
-      #   run: matlab -batch "setup_matlab"
-      # - name: Pass system Python executable to MATLAB
-      #   uses: matlab-actions/run-command@v1
-      #   with:
-      #     command: setup_matlab
-      #     startup-options: -noFigureWindows
-
-      # - name: Output matlab pyenv again
-      #   run: matlab -batch "pyenv"
-      # - name: Output matlab pyenv again
-      #   uses: matlab-actions/run-command@v1
-      #   with:
-      #     command: pyenv
-      #     startup-options: -noFigureWindows
-
-      # Do not use this on Windows! Windows tests will run just fine without this!
-      - name: Set MATLAB OutOfProcess Python execution mode
-        shell: bash
-        run: echo "pyenv('ExecutionMode', 'OutOfProcess')" >> run.m
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-
-      # - name: Set MATLAB OutOfProcess Python execution mode
-      #   shell: bash
-      #   run: echo "pyenv('ExecutionMode', 'OutOfProcess')" > run.m
-      # #   if: ${{ matrix.os == 'ubuntu-latest' }}
 
       - name: Add MATLAB test commands
         shell: bash
@@ -190,11 +99,7 @@ jobs:
         shell: bash
         run: cat run.m
 
-      # - name: Install and test MHKiT-MATLAB
-      #   id: runTests
-      #   run: matlab -batch "run"
-
-      - name: Run Matlab Tests
+      - name: Run MHKiT-MATLAB Unit Tests
         uses: matlab-actions/run-command@v1
         with:
           command: run
