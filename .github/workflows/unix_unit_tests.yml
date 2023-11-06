@@ -114,16 +114,17 @@ jobs:
         shell: bash
         run: cat run.m
 
-      - name: Run MHKiT-MATLAB Unit Tests
-        uses: matlab-actions/run-tests@v1
-        with:
-            select-by-folder: mhkit/tests
-
-    #   - name: Run MATLAB Unit Tests
-    #     uses: matlab-actions/run-command@v1
+    # This is a good idea but does not work because you cannot explicitly set the python execution mode
+    #   - name: Run MHKiT-MATLAB Unit Tests
+    #     uses: matlab-actions/run-tests@v1
     #     with:
-    #       command: run
-    #       startup-options: -noFigureWindows
+    #         select-by-folder: mhkit/tests
+
+      - name: Run MATLAB Unit Tests
+        uses: matlab-actions/run-command@v1
+        with:
+          command: run
+          startup-options: -noFigureWindows
 
         
 
