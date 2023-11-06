@@ -15,6 +15,8 @@ def timeseries_to_pandas(ts,ind,x):
         
     return df.astype('float64')
 
+def list_to_series(input_list, index=None):
+    return pd.Series(input_list, index)
 
 def spectra_to_pandas(frequency,spectra,x,cols=None):
     if x>1:       
