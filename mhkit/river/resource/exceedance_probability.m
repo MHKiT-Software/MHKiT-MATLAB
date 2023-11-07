@@ -5,27 +5,104 @@ function F=exceedance_probability(Q)
 %    
 % Parameters
 % ----------
-%     Q : Array
-%       Discharge data [m3/s]
+%     Q : Discharge data [m3/s]
+%
+%         Pandas dataframe indexed by time [datetime or s]  
+%
+%           To make a pandas data frame from user supplied frequency and spectra
+%           use py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(timeseries,time,x)
+%
+%         OR
+%
+%         structure of form:
+%
+%           Q.Discharge
+%
+%           Q.time
 %         
 % Returns   
 % -------
-%     F : Array
-%       Exceedance probability [unitless] 
+%     F : Structure 
+%
+%
+%         F.F: Exceedance probability [unitless] 
+%
+%         F.time: time [epoch time (s)]
+%
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% First we make a sorted array of discharge values
-sort_q = sort(Q,'descend');
-% Next we make a ranking array
-rank = [1:numel(sort_q)];
-% Now each value in Q is assigned a rank where rank is the same as pandas
-% ranking algorithm with the 'max' option. For example in the data set 
-% [1, 2, 2, 3] the ranks would be [ 1, 2, 3, 4] and the rank of 2 would be
-% 3 because 3 is the maximum rank that a 2 has in the total set. 
-assigned_rank = arrayfun(@(x) rank(find(sort_q==x,1,'last')), Q);
 
-F = 100 * (assigned_rank / (numel(Q)+1));
+py.importlib.import_module('mhkit_python_utils');
+py.importlib.import_module('mhkit');
+
+% Check if Q is a dataframe
+% If it is not, it is expecting a struct with Discharge and time "keys"
+if (isa(Q,'py.pandas.core.frame.DataFrame')~=1)
+    x=size(Q.Discharge);
+    li=py.list();
+    if x(2)>1 
+        for i = 1:x(2)
+            app=py.list(Q.Discharge(:,i));
+            disp("Pre list append!")
+            li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
+
+        end
+    elseif x(2) ==1 
+        li=Q.Discharge;
+    end
+
+    if (~isempty(Q.time))
+        if any(isdatetime(Q.time(1)))
+            si=size(Q.time);
+            for i=1:si(2)
+            Q.time(i)=posixtime(Q.time(i));
+            end
+        end
+    end
+    % Q=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,Q.time,int32(x(2)));
+    
+    if (~isempty(Q.time))
+        Q = py.mhkit_python_utils.pandas_dataframe.list_to_series(Q.Discharge, Q.time);
+    else
+        Q = py.mhkit_python_utils.pandas_dataframe.list_to_series(Q.Discharge);
+    end
+    
+end
+
+% disp("Starting mhkit.river.resource.exceedance_probability call...")
+
+EPpd=py.mhkit.river.resource.exceedance_probability(Q);
+
+% disp("Completed call...")
+
+% disp(EPpd);
+
+xx=cell(EPpd.axes);
+v=xx{2};
+vv=cell(py.list(py.numpy.nditer(v.values,pyargs("flags",{"refs_ok"}))));
+
+vals=double(py.array.array('d',py.numpy.nditer(EPpd.values)));
+sha=cell(EPpd.values.shape);
+x=int64(sha{1,1});
+y=int64(sha{1,2});
+
+vals=reshape(vals,[x,y]);
+
+si=size(vals);
+ for i=1:si(2)
+    test=string(py.str(vv{i}));
+    newname=split(test,",");
+    
+    F.(newname(1))=vals(:,i);
+    
+ end
+ F.time=double(py.array.array('d',py.numpy.nditer(EPpd.index)));
+
+
+
+
+
 
 
 
