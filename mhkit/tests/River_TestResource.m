@@ -11,11 +11,11 @@ classdef River_TestResource < matlab.unittest.TestCase
 
         function test_exceedance_probability(testCase)
             % Create arbitrary discharge between 0 and 8(N=9)
-            Q = [0;1;2;3;4;5;6;7;8];
+            Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[0 1 2 3 4 5 6 7 8]);
             % Rank order for non-repeating elements simply adds 1 to each element
             %if N=9, max F = 100((max(Q)+1)/10) =  90%
             %if N=9, min F = 100((min(Q)+1)/10) =  10%
-            f = exceedance_probability(Q);
+            f = exceedance_probability(Q).F;
             assertEqual(testCase,min(f), 10);
             assertEqual(testCase,max(f), 90);
         end
@@ -103,7 +103,7 @@ classdef River_TestResource < matlab.unittest.TestCase
             end
                 
             Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[0 1 2 3 4 5 6 7 8]);
-            f = exceedance_probability(Q.Discharge);
+            f = exceedance_probability(Q).F;
             
             plot_flow_duration_curve(Q.Discharge, f,"savepath",filename);
             
@@ -118,7 +118,7 @@ classdef River_TestResource < matlab.unittest.TestCase
             end
             
             Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[0 1 2 3 4 5 6 7 8]);
-            f = exceedance_probability(Q.Discharge);
+            f = exceedance_probability(Q).F;
             poly = polynomial_fit(0:1:8, 10*(0:1:8),1);
             V = discharge_to_velocity(Q, poly.coef);
             VV = V.V;
@@ -145,7 +145,7 @@ classdef River_TestResource < matlab.unittest.TestCase
             Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[0 1 2 3 4 5 6 7 8]);
             poly = polynomial_fit(0:1:8, 10*(0:1:8),1);
             V = discharge_to_velocity(Q, poly.coef);
-            f = exceedance_probability(Q.Discharge);
+            f = exceedance_probability(Q).F;
             
             plot_velocity_duration_curve(V.V, f,"savepath",filename);
             
