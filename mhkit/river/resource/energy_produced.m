@@ -54,7 +54,8 @@ if (isa(P,'py.pandas.core.frame.DataFrame')~=1)
     end
 
 
-    P=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,P.time,int32(x(2)));
+    % P=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,P.time,int32(x(2)));
+    P = py.mhkit_python_utils.pandas_dataframe.list_to_series(li, P.time);
 end
 
 E=py.mhkit.river.resource.energy_produced(P,seconds);

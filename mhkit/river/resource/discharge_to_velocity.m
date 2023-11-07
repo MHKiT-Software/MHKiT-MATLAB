@@ -59,7 +59,8 @@ if (isa(Q,'py.pandas.core.frame.DataFrame')~=1)
         Q.time(i)=posixtime(Q.time(i));
         end
     end
-    Q=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,Q.time,int32(x(2)));
+    % Q=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,Q.time,int32(x(2)));
+    Q = py.mhkit_python_utils.pandas_dataframe.list_to_series(Q.Discharge, Q.time);
 end
 
 polynomial_coefficients=py.numpy.poly1d(polynomial_coefficients);

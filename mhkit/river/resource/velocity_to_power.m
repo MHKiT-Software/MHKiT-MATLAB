@@ -61,7 +61,8 @@ if (isa(V,'py.pandas.core.frame.DataFrame')~=1)
     end
 
 
-    V=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,V.time,int32(x(2)));
+    % V=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,V.time,int32(x(2)));
+    V = py.mhkit_python_utils.pandas_dataframe.list_to_series(li, V.time);
 end
 
 polynomial_coefficients=py.numpy.poly1d(polynomial_coefficients);
