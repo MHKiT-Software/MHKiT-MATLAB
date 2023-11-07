@@ -7,7 +7,7 @@ classdef River_TestDevice < matlab.unittest.TestCase
 
             [eq, ca] = circular(Obj.diameter);
             assertEqual(testCase,eq, Obj.diameter);
-            assertEqual(testCase,ca, 4*pi*Obj.diameter^2.);
+            assertEqual(testCase,ca, (1/4) *pi*Obj.diameter^2.);
         end
 
         function test_ducted(testCase)
@@ -15,7 +15,7 @@ classdef River_TestDevice < matlab.unittest.TestCase
 
             [eq, ca] = ducted(Obj.diameter); 
             assertEqual(testCase,eq, Obj.diameter);
-            assertEqual(testCase,ca, 4*pi*Obj.diameter^2.);
+            assertEqual(testCase,ca, (1/4)*pi*Obj.diameter^2.);
         end
 
         function test_rectangular(testCase)

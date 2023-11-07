@@ -46,15 +46,15 @@ pos=get(gca,'position');
 width=pos(3)/(cols-1);
 height =pos(4)/(rows-1);
 %create textbox annotations
-for i=1:cols-1
-      for j=rows-1:-1:1 
-          if ~isnan(M.values(j,i)) 
-        annotation('textbox',[pos(1)+width*(i-1),pos(2)+height*(j-1),width,height], ...
-       'string',num2str(M.values(j,i)),'LineStyle','none','HorizontalAlignment','center',...
-       'VerticalAlignment','middle');
-          end
-      end
-end
+% for i=1:cols-1
+%       for j=rows-1:-1:1 
+%           if ~isnan(M.values(j,i)) 
+%         annotation('textbox',[pos(1)+width*(i-1),pos(2)+height*(j-1),width,height], ...
+%        'string',num2str(M.values(j,i)),'LineStyle','none','HorizontalAlignment','center',...
+%        'VerticalAlignment','middle');
+%           end
+%       end
+% end
 
 len = strlength(options.savepath);
 if len > 1

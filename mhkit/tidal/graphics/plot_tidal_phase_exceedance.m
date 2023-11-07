@@ -83,8 +83,10 @@ end
 s_ebb = data.s(isEbb);
 s_flood = data.s(~isEbb);
 
-F_ebb = exceedance_probability(s_ebb);
-F_flood = exceedance_probability(s_flood);
+F_ebb = exceedance_probability(struct('Discharge', s_ebb, 'time', []));
+F_ebb = F_ebb.F;
+F_flood = exceedance_probability(struct('Discharge',s_flood, 'time', []));
+F_flood = F_flood.F;
 
 decimals = round(options.bin_size/0.1);
 s_new = [round(min(data.s),decimals):options.bin_size:...
@@ -95,10 +97,15 @@ s_new = s_new(1:end-1); % this accounts for the difference between matlab
 [~,i_ebb] = unique(s_ebb);
 [~,i_flood] = unique(s_flood);
 
-f_ebb = py.scipy.interpolate.interpolate.interp1d(s_ebb.Discharge,...
-    F_ebb, kwa);
-f_flood = py.scipy.interpolate.interpolate.interp1d(s_flood.Discharge,...
-    F_flood, kwa);
+% f_ebb = py.scipy.interpolate.interp1d(s_ebb.Discharge,...
+%     F_ebb, kwa);
+f_ebb = py.scipy.interpolate.interp1d(s_ebb, F_ebb);
+% f_flood = py.scipy.interpolate.interp1d(s_flood.Discharge,...
+%     F_flood, kwa);
+f_flood = py.scipy.interpolate.interp1d(s_flood, F_flood);
+
+disp(length(f_ebb));
+disp(length(f_flood));
 
 F_max_total = max(F_ebb(~isnan(F_ebb))) + max(F_flood(~isnan(F_flood)));
 
