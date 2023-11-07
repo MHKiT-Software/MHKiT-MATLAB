@@ -10,17 +10,19 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
     end
 
     methods (Test)
-
+        
         function test_mler_coefficients(testCase)
             % create inputs and load validation data
             fpath = '../../examples/data/loads/mler.csv';
             validation = readtable(fpath);
             wave_freq = linspace(0,1,500);
-            js = jonswap_spectrum(wave_freq,15.1,9);
+            % js = jonswap_spectrum(wave_freq, 15.1, 9);
+            this_wave = pierson_moskowitz_spectrum(wave_freq, 15.1, 9);
             response_desired = 1;
             RAO = validation.RAO;
             % execute function
-            mler = mler_coefficients(RAO, js, response_desired);
+            % mler = mler_coefficients(RAO, js, response_desired);
+            mler = mler_coefficients(RAO, this_wave, response_desired);
             % assertions
             assertEqual(testCase, mler.conditioned_spectrum, validation.Res_Spec, 'RelTol',0.005)
             assertEqual(testCase, mler.phase, validation.phase, 'RelTol',0.001)
