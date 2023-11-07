@@ -59,7 +59,7 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
 
       - name: Setup MHKiT Dependencies on ubuntu
-        run: apt install libhdf5-serial-dev libnetcdf-dev
+        run: sudo apt install libhdf5-serial-dev libnetcdf-dev
         if: ${{ matrix.os == 'ubuntu-latest' }}
 
       - name: Print Python executable
