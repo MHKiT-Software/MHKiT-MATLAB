@@ -54,6 +54,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Setup MHKiT Dependencies on macOS
+        run: brew install hdf5 netcdf4
+        if: ${{ matrix.os == 'macos-latest' }}
+
+      - name: Setup MHKiT Dependencies on ubuntu
+        run: apt install libhdf5-serial-dev libnetcdf-dev
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+
       - name: Print Python executable
         run: python -c "import sys; print(sys.executable)"
 
