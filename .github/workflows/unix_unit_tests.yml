@@ -76,6 +76,10 @@ jobs:
         with:
           repository: 'MHKiT-Software/MHKiT-Python'
           path: ${{env.mhkit-python-dir}}
+
+      # This may be necessary for python 3.11 and hdfpy/netcdf4
+      - name: Prepare for mhkit build
+        run: "pip install numpy"
         
       - name: pip install mhkit module from source
         run: "pip install -e ."
