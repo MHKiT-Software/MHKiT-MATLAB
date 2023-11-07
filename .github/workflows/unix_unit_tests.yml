@@ -66,8 +66,7 @@ jobs:
       - name: Check out MHKiT-Python
         uses: actions/checkout@v4
         with:
-          repository: 'simmsa/MHKiT-Python'
-          ref: 'test-more-recent-h5py'
+          repository: 'MHKiT-Software/MHKiT-Python'
           path: ${{env.mhkit-python-dir}}
         
       - name: pip install mhkit module from source
