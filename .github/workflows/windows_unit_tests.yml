@@ -19,7 +19,7 @@ jobs:
     env:
       mhkit-python-dir: 'MHKiT-Python'
     steps:
-    
+
       - name: Install/Setup Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -27,10 +27,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
           activate-environment: mhkit
           channels: conda-forge
-          
+
       - name: "Conda install h5py, netcdf4, and cython"
         run: conda install -c conda-forge h5py netcdf4 cython
-      
+
       - name: Output python executable
         run: python -c "import sys; print(sys.executable)"
 
@@ -47,7 +47,6 @@ jobs:
           path: ${{env.mhkit-python-dir}}
 
       - name: pip install mhkit from source
-        # pip install mhkit --only-binary=:all:
         run: "pip install -e ."
         working-directory: ${{env.mhkit-python-dir}}
 
@@ -80,19 +79,19 @@ jobs:
       - name: Configure MATLAB pyenv Version and ExecutionMode
         if: ${{ matrix.os == 'windows-latest' }}
         shell: pwsh
-        run: > 
+        run: >
           "pyenv(Version='{0}', ExecutionMode='InProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
 
       - name: Add MATLAB test commands
         shell: bash
-        run: echo "version, 
-                   addpath(genpath('mhkit')), 
-                   import matlab.unittest.TestSuite, 
-                   import matlab.unittest.TestRunner, 
-                   testFolder = ['mhkit' filesep 'tests'], 
-                   suite = TestSuite.fromFolder(testFolder), 
+        run: echo "version,
+                   addpath(genpath('mhkit')),
+                   import matlab.unittest.TestSuite,
+                   import matlab.unittest.TestRunner,
+                   testFolder = ['mhkit' filesep 'tests'],
+                   suite = TestSuite.fromFolder(testFolder),
                    runner = TestRunner.withTextOutput,
-                   results = runner.run(suite), 
+                   results = runner.run(suite),
                    assertSuccess(results)" >> run.m
 
       - name: Output Run.m
@@ -104,5 +103,5 @@ jobs:
         with:
           command: run
           startup-options: -noFigureWindows
-      
-     
+
+
