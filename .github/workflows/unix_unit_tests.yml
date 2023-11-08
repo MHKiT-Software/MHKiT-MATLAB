@@ -77,7 +77,7 @@ jobs:
         shell: bash -l {0}
         run: |
             conda create --name TEST python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
-            source activate TEST
+            conda activate TEST
             export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
             pip install -e . --no-deps --force-reinstall
 
@@ -118,32 +118,32 @@ jobs:
       - name: Print Python executable
         shell: bash -l {0}
         run: |
-          source activate TEST 
+          conda activate TEST 
           python -c "import sys; print(sys.executable)"
 
       - name: Print Python Version
         shell: bash -l {0}
         run: |
-          source activate TEST  
+          conda activate TEST  
           python --version
         
       - name: pip install mhkit module from source
         shell: bash -l {0}
         run: |
-          source activate TEST
+          conda activate TEST
           pip install -e .
         working-directory: ${{env.mhkit-python-dir}}
 
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
         run: |
-          source activate TEST
+          conda activate TEST
           pip install -e .
 
       - name: List installed pip modules
         shell: bash -l {0}
         run: |
-          source activate TEST
+          conda activate TEST
           pip freeze
 
       # - name: Test MHKiT-Python
@@ -162,7 +162,7 @@ jobs:
       - name: Configure MATLAB Python Environment 
         shell: bash -l {0}
         run: |
-          source activate TEST
+          conda activate TEST
           printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
 
       - name: Add MATLAB test commands
