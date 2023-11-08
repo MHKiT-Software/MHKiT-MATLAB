@@ -105,7 +105,7 @@ jobs:
       
       - name: Setup MATLAB Path on Ubuntu
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: echo "export LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+        run: echo "LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
 
       - name: Print Python executable
         shell: bash -l {0}
@@ -204,6 +204,8 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+      - name: Dump GitHub Env
+        run: echo "$GITHUB_ENV"
       - name: Dump job context
         env:
           JOB_CONTEXT: ${{ toJson(job) }}
