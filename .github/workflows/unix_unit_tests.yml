@@ -102,7 +102,10 @@ jobs:
       # - name: Setup MATLAB Path on Ubuntu
       #   if: ${{ matrix.os == 'ubuntu-latest' }}
       #   run: echo "export LD_LIBRARY_PATH=/usr/local/MATLAB/${{ matrix.matlab-version }}/sys/os/glnxa64" >> "$GITHUB_ENV"
-        
+      
+      - name: Setup MATLAB Path on Ubuntu
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: echo "export LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
 
       - name: Print Python executable
         shell: bash -l {0}
