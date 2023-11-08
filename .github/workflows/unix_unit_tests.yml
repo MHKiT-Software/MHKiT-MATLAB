@@ -90,7 +90,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           sudo apt update
-          sudo apt install gcc libstdc++
+          sudo apt install build-essential
 
       # - name: Setup MATLAB Path on Ubuntu
       #   if: ${{ matrix.os == 'ubuntu-latest' }}
