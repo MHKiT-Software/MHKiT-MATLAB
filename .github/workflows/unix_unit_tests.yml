@@ -14,7 +14,7 @@ jobs:
       # Expecting 2 * 4 * 7 - (13 * 2) = 30 jobs
       matrix:
         os: [macos-latest, ubuntu-latest]
-        python-version: [3.8, 3.9, "3.10"]
+        python-version: [3.8, 3.9, "3.10", 3.11]
         matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b]
         exclude:
             - matlab-version: R2023b
@@ -49,18 +49,41 @@ jobs:
     env:
       mhkit-python-dir: 'MHKiT-Python'
     steps:
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v4
+
+      - name: Check out MHKiT-Python
+        uses: actions/checkout@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          repository: 'MHKiT-Software/MHKiT-Python'
+          path: ${{env.mhkit-python-dir}}
 
-      - name: Setup MHKiT Dependencies on macOS
-        run: brew install hdf5 netcdf
-        if: ${{ matrix.os == 'macos-latest' }}
+      - name: Setup Conda
+        uses: s-weigand/setup-conda@v1
+        with:
+          activate-conda: false
+          conda-channels: conda-forge
+  
+      - name: Setup Python ${{ matrix.python-version }}
+        shell: bash -l {0}
+        run: |
+            conda create --name TEST python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
+            source activate TEST
+            export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+            pip install -e . --no-deps --force-reinstall
 
-      - name: Setup MHKiT Dependencies on ubuntu
-        run: sudo apt install libhdf5-serial-dev libnetcdf-dev
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+      # - name: Setup Python
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: ${{ matrix.python-version }}
+
+      # - name: Setup MHKiT Dependencies on macOS
+      #   run: brew install hdf5 netcdf
+      #   if: ${{ matrix.os == 'macos-latest' }}
+
+      # - name: Setup MHKiT Dependencies on ubuntu
+      #   run: sudo apt install libhdf5-serial-dev libnetcdf-dev
+      #   if: ${{ matrix.os == 'ubuntu-latest' }}
 
       - name: Print Python executable
         run: python -c "import sys; print(sys.executable)"
