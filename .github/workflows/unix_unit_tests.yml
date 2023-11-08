@@ -144,7 +144,7 @@ jobs:
        # On macos using python "InProcess" with MATLAB works
       - name: Configure MATLAB pyenv Version and ExecutionMode on macOS
         if: ${{ matrix.os == 'macos-latest' }}
-        shell: bash-l {0}
+        shell: bash -l {0}
         run: |
           source activate TEST
           printf 'pyenv(Version="%s", ExecutionMode="InProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
@@ -152,7 +152,7 @@ jobs:
       # On ubuntu using OutOfProcess is required 
       - name: Configure MATLAB pyenv Version and ExecutionMode on Ubuntu
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        shell: bash-l {0}
+        shell: bash -l {0}
         run: |
           source activate TEST
           printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
