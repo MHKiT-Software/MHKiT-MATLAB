@@ -58,11 +58,19 @@ jobs:
           repository: 'MHKiT-Software/MHKiT-Python'
           path: ${{env.mhkit-python-dir}}
 
-      - name: Setup Conda
-        uses: s-weigand/setup-conda@v1
+      # - name: Setup Conda
+      #   uses: s-weigand/setup-conda@v1
+      #   with:
+      #     activate-conda: false
+      #     conda-channels: conda-forge
+
+      - name: Install & Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-conda: false
-          conda-channels: conda-forge
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          activate-environment: TEST
+          channels: conda-forge
 
   
       - name: Setup Python ${{ matrix.python-version }}
@@ -86,18 +94,18 @@ jobs:
       #   run: sudo apt install libhdf5-serial-dev libnetcdf-dev
       #   if: ${{ matrix.os == 'ubuntu-latest' }}
 
-      - name: Setup MHKiT Dependencies on ubuntu
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-          sudo apt update
-          sudo apt upgrade
-          sudo apt install build-essential
+      # - name: Setup MHKiT Dependencies on ubuntu
+      #   if: ${{ matrix.os == 'ubuntu-latest' }}
+      #   run: |
+      #     sudo apt update
+      #     sudo apt upgrade
+      #     sudo apt install build-essential
 
-      - name: Print GCC Version
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-          gcc --version
-          g++ --version
+      # - name: Print GCC Version
+      #   if: ${{ matrix.os == 'ubuntu-latest' }}
+      #   run: |
+      #     gcc --version
+      #     g++ --version
 
       # - name: Setup MATLAB Path on Ubuntu
       #   if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -118,19 +126,6 @@ jobs:
         run: |
           source activate TEST  
           python --version
-
-      # - name: Check out MHKiT-MATLAB
-      #   uses: actions/checkout@v4
-
-      # - name: Check out MHKiT-Python
-      #   uses: actions/checkout@v4
-      #   with:
-      #     repository: 'MHKiT-Software/MHKiT-Python'
-      #     path: ${{env.mhkit-python-dir}}
-
-      # This may be necessary for python 3.11 and hdfpy/netcdf4
-      # - name: Prepare for mhkit build
-      #   run: "pip install numpy"
         
       - name: pip install mhkit module from source
         shell: bash -l {0}
@@ -163,30 +158,12 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
-       # On macos using python "OutOfProcess" with MATLAB works
-      - name: Configure MATLAB pyenv Version and ExecutionMode on macOS
-        if: ${{ matrix.os == 'macos-latest' }}
+      # OutOfProcess is required to properly call netcdf/hdf5 and works reliably on macos and ubuntu
+      - name: Configure MATLAB Python Environment 
         shell: bash -l {0}
         run: |
           source activate TEST
           printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
-
-      # On ubuntu using OutOfProcess is required 
-      - name: Configure MATLAB pyenv Version and ExecutionMode on Ubuntu
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        shell: bash -l {0}
-        run: |
-          source activate TEST
-          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
-
-      # OutOfProcess allows MATLAB python to access libraries that use Cython (h5py).
-      # So far, this is necessary on linux, more investigation is needed on MacOS
-      # - name: Set MATLAB OutOfProcess Python execution mode
-      #   shell: bash
-      #   run: echo "pyenv('ExecutionMode', 'OutOfProcess')" >> run.m
-      #   if: ${{ matrix.os == 'ubuntu-latest' }}
-
-
 
       - name: Add MATLAB test commands
         shell: bash
@@ -199,41 +176,6 @@ jobs:
                    runner = TestRunner.withTextOutput,
                    results = runner.run(suite), 
                    assertSuccess(results)" >> run.m
-
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Dump GitHub Env
-        run: echo "$GITHUB_ENV"
-      - name: Dump job context
-        env:
-          JOB_CONTEXT: ${{ toJson(job) }}
-        run: echo "$JOB_CONTEXT"
-      - name: Dump steps context
-        env:
-          STEPS_CONTEXT: ${{ toJson(steps) }}
-        run: echo "$STEPS_CONTEXT"
-      - name: Dump runner context
-        env:
-          RUNNER_CONTEXT: ${{ toJson(runner) }}
-        run: echo "$RUNNER_CONTEXT"
-      - name: Dump strategy context
-        env:
-          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-        run: echo "$STRATEGY_CONTEXT"
-      - name: Dump matrix context
-        env:
-          MATRIX_CONTEXT: ${{ toJson(matrix) }}
-        run: echo "$MATRIX_CONTEXT"
-
-      - name: Show default environment variables
-        run: |
-          echo "The job_id is: $GITHUB_JOB"   # reference the default environment variables
-          echo "The id of this action is: $GITHUB_ACTION"   # reference the default environment variables
-          echo "The run id is: $GITHUB_RUN_ID"
-          echo "The GitHub Actor's username is: $GITHUB_ACTOR"
-          echo "GitHub SHA: $GITHUB_SHA"
 
       - name: Output run.m
         shell: bash
