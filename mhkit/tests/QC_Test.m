@@ -1,11 +1,11 @@
 classdef QC_Test < matlab.unittest.TestCase
 
-    methods (Test) 
+    methods (Test)
 
         function test_pass(testCase)
             assertEqual(testCase, true, true)
         end
-        
+
         function test_check_corrupt(testCase)
 
             assumeFail(testCase, "TODO: Fix - Python Serialization Errors");
@@ -40,7 +40,7 @@ classdef QC_Test < matlab.unittest.TestCase
             assumeFail(testCase, "TODO: Fix - Python Serialization Errors");
 
             % Column A has the same value (0.5) from 12:00 until 14:30
-            % Column C does not follow the expected sine function from 13:00 until 16:15. 
+            % Column C does not follow the expected sine function from 13:00 until 16:15.
             % The change is abrupt and gradually corrected.
             simple = readtable('../../examples/data/qc/simple_expected.xlsx');
             simple_expected = readtable('../../examples/data/qc/simple_expected.xlsx');
@@ -55,7 +55,7 @@ classdef QC_Test < matlab.unittest.TestCase
             bound = [-1.0, 1.0];
             window = 2*3600; % seconds
             resultsA = check_delta(dataA,bound,window);
-            resultsC = check_delta(dataC,bound,window);            
+            resultsC = check_delta(dataC,bound,window);
 
             expectedA.values = simple_expected.A;
             expectedC.values = simple_expected.C;
@@ -65,7 +65,7 @@ classdef QC_Test < matlab.unittest.TestCase
         end
 
         function test_check_increment(testCase)
-            
+
             assumeFail(testCase, "TODO: Fix - Python Serialization Errors");
 
             % Column A has the same value (0.5) from 12:00 until 14:30
@@ -82,7 +82,7 @@ classdef QC_Test < matlab.unittest.TestCase
             datenumC = datenum(dataC.time);
 
             bound = [0.0001, 0.6];
-%             
+
             expectA.values = zeros(size(dataA.values));
             for i = 1:96
                 if i >= 68 && i <= 69
@@ -95,7 +95,7 @@ classdef QC_Test < matlab.unittest.TestCase
                 else
                     expectA.values(i) = dataA.values(i);
                     expectA.mask(i) = 1;
-                end   
+                end
             end
             expectC.values = zeros(size(dataC.values));
             for ii = 1:96
@@ -112,7 +112,7 @@ classdef QC_Test < matlab.unittest.TestCase
 
                     expectC.values(ii) = dataC.values(ii);
                     expectC.mask(ii) = 1;
-                end   
+                end
             end
             expectedA.values = expectA.values;
             expectedA.mask = int64(expectA.mask.');
@@ -152,24 +152,18 @@ classdef QC_Test < matlab.unittest.TestCase
             assertEqual(testCase, results.mask, expected.mask);
         end
 
-%         function test_check_outlier(testCase)
-% 
-%         end  
-
-%         function test_check_range(testCase)
-%             % Column B is below the expected lower bound of 0 at 6:30 and above the expected upper bound of 1 at 15:30
-%             % Column D is occasionally below the expected lower bound of -1 around midday (2 time steps)
-%             % and above the expected upper bound of 1 in the early morning and late evening (10 time steps).
-%         end
-
-
+        % function test_check_range(testCase)
+        %     % Column B is below the expected lower bound of 0 at 6:30 and above the expected upper bound of 1 at 15:30
+        %     % Column D is occasionally below the expected lower bound of -1 around midday (2 time steps)
+        %     % and above the expected upper bound of 1 in the early morning and late evening (10 time steps).
+        % end
 
         function test_check_timestamp(testCase)
 
             assumeFail(testCase, "TODO: Fix - Python Serialization Errors");
-%             % Missing timestamp at 5:00
-%             % Duplicate timestamp 17:00
-%             % Non-monotonic timestamp 19:30
+            % Missing timestamp at 5:00
+            % Duplicate timestamp 17:00
+            % Non-monotonic timestamp 19:30
             simple = readtable('../../examples/data/qc/simple.xlsx');
             simple_expected = readtable('../../examples/data/qc/simple_expected.xlsx');
             data.values = simple.A;
@@ -184,5 +178,7 @@ classdef QC_Test < matlab.unittest.TestCase
             assertEqual(testCase, results.values, expected.values, 'AbsTol', ABSTOL);
             assertEqual(testCase, datenum_time, expected_datenum_time, 'AbsTol', ABSTOL);
         end
+
     end
-end  
+
+end

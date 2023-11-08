@@ -1,32 +1,32 @@
-classdef Dolfyn_Test_Orient < matlab.unittest.TestCase       
-   
+classdef Dolfyn_Test_Orient < matlab.unittest.TestCase
+
     methods (Test)
-          
-        function orient_testcase(testCase) 
-            % These tests confirm that the euler2orient and orient2euler 
-            % functions are consistent, and that they follow the 
-            % conventions defined in the DOLfYN documentation 
+
+        function orient_testcase(testCase)
+            % These tests confirm that the euler2orient and orient2euler
+            % functions are consistent, and that they follow the
+            % conventions defined in the DOLfYN documentation
             % (data-structure.html#heading-pitch-roll), namely:
-     
-            %   - a "ZYX" rotation order. That is, these variables are 
-            %     computed assuming that rotation from the 
-            %     earth -> instrument frame happens by rotating around the 
-            %     z-axis first (heading), then rotating around the y-axis 
+
+            %   - a "ZYX" rotation order. That is, these variables are
+            %     computed assuming that rotation from the
+            %     earth -> instrument frame happens by rotating around the
+            %     z-axis first (heading), then rotating around the y-axis
             %     (pitch), then rotating around the x-axis (roll).
-     
-            %   - heading is defined as the direction the x-axis points, 
-            %     positive clockwise from North (this is the opposite 
+
+            %   - heading is defined as the direction the x-axis points,
+            %     positive clockwise from North (this is the opposite
             %     direction from the right-hand-rule around the Z-axis)
-     
-            %   - pitch is positive when the x-axis pitches up (this is 
+
+            %   - pitch is positive when the x-axis pitches up (this is
             %     opposite the right-hand-rule around the Y-axis)
-     
-            %   - roll is positive according to the right-hand-rule 
+
+            %   - roll is positive according to the right-hand-rule
             %     around the instument's x-axis
-     
-            % IF YOU MAKE CHANGES TO THESE CONVENTIONS, BE SURE TO UPDATE 
+
+            % IF YOU MAKE CHANGES TO THESE CONVENTIONS, BE SURE TO UPDATE
             % THE DOCUMENTATION.
-            
+
             test_omat = [[0, 1, 0];[-1, 0, 0];[0, 0, 1]];
             test_omat = reshape(test_omat,[1,1,3,3]);
             Obj.diff = Dolfyn_Test_Orient.check_hpr(...
@@ -106,20 +106,20 @@ classdef Dolfyn_Test_Orient < matlab.unittest.TestCase
             dt2(tmp2) = 0.0;
 
             diff = diff + abs(sum(abs(dt1 - dt2),...
-                    1:numel(size(dt1)))/length(dt1)); 
+                    1:numel(size(dt1)))/length(dt1));
             % Dims
             for kk = 1:length(cntrl.dims)
                 diff = diff + double(~strcmpi(...
                     cntrl.dims{kk}, dcm.dims{kk}));
             end
-            % Coords 
+            % Coords
             cntrl_coord_names =fieldnames(cntrl.coords);
             read_coord_names = fieldnames(dcm.coords);
             for kk = 1:numel(cntrl_coord_names)
                 chk_nm = cntrl_coord_names{kk};
                 diff = diff + ...
                     double(~any(strcmpi(chk_nm,read_coord_names)));
-            end 
+            end
 
             testCase.assertLessThan(diff, 5e-4,"Disagreement b/t " + ...
                 "quaternion-calc'd & HPR-calc'd orientmat");

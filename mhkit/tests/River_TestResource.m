@@ -1,6 +1,6 @@
 classdef River_TestResource < matlab.unittest.TestCase
 
-    methods (Test) 
+    methods (Test)
 
         function test_Froude_number(testCase)
             v = 2;
@@ -44,7 +44,7 @@ classdef River_TestResource < matlab.unittest.TestCase
         function test_velocity_to_power(testCase)
             % Calculate a first order polynomial on an DV_Curve x=y line 10 times greater than the Q values
             poly = polynomial_fit(0:1:8, 10*(0:1:8),1);
-%           Becuase the polynomial line fits perfect we should expect the V to equal 10*Q
+            % Because the polynomial line fits perfect we should expect the V to equal 10*Q
             Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[0 1 2 3 4 5 6 7 8]);
             V = discharge_to_velocity(Q, poly.coef);
             VV = V.V;
@@ -66,7 +66,7 @@ classdef River_TestResource < matlab.unittest.TestCase
         function test_energy_produced(testCase)
             seednum = 123;
             rng(seednum);
-            % If power is always X then energy produced with be x*seconds 
+            % If power is always X then energy produced with be x*seconds
             X=1;
             seconds=1;
             P = struct('P',[X;X;X;X;X;X;X;X;X;X],'time',[0 1 2 3 4 5 6 7 8 9]);
@@ -75,7 +75,7 @@ classdef River_TestResource < matlab.unittest.TestCase
             % for a normal distribution of Power EP = mean *seconds
             mu=5;
             sigma=1;
-            
+
             function normrnd = normrnd(mu, sigma)
                 normrnd = randn * sigma + mu;
             end
@@ -101,22 +101,22 @@ classdef River_TestResource < matlab.unittest.TestCase
             if isfile(filename)
                 delete(filename);
             end
-                
+
             Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[0 1 2 3 4 5 6 7 8]);
             f = exceedance_probability(Q).F;
-            
+
             plot_flow_duration_curve(Q.Discharge, f,"savepath",filename);
-            
+
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
-            
+
         function test_plot_power_duration_curve(testCase)
             filename = 'river_plot_power_duration_curve.png';
             if isfile(filename)
                 delete(filename);
             end
-            
+
             Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[0 1 2 3 4 5 6 7 8]);
             f = exceedance_probability(Q).F;
             poly = polynomial_fit(0:1:8, 10*(0:1:8),1);
@@ -129,66 +129,66 @@ classdef River_TestResource < matlab.unittest.TestCase
             cut_out = VV(end);
             % Power should be 10x greater and exclude the ends of V
             P = velocity_to_power(V, poly.coef, cut_in, cut_out);
-            
+
             plot_power_duration_curve(P.P, f,"savepath",filename);
-            
+
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
-            
+
         function test_plot_velocity_duration_curve(testCase)
             filename = 'river_plot_velocity_duration_curve.png';
             if isfile(filename)
                 delete(filename);
             end
-            
+
             Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[0 1 2 3 4 5 6 7 8]);
             poly = polynomial_fit(0:1:8, 10*(0:1:8),1);
             V = discharge_to_velocity(Q, poly.coef);
             f = exceedance_probability(Q).F;
-            
+
             plot_velocity_duration_curve(V.V, f,"savepath",filename);
-            
+
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
-        
+
         function test_plot_discharge_timeseries(testCase)
             filename = 'river_plot_discharge_timeseries.png';
             if isfile(filename)
                 delete(filename);
             end
-            
+
             Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[0 1 2 3 4 5 6 7 8]);
 
             plot_discharge_timeseries(Q,"savepath",filename);
-            
+
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
-            
+
         function test_plot_discharge_vs_velocity(testCase)
             filename = 'river_plot_discharge_vs_velocity.png';
             if isfile(filename)
                 delete(filename);
             end
-            
+
             Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[0 1 2 3 4 5 6 7 8]);
             poly = polynomial_fit(0:1:8, 10*(0:1:8),1);
             V = discharge_to_velocity(Q, poly.coef);
-            
+
             plot_discharge_vs_velocity(Q.Discharge,V.V,"savepath",filename);
-            
+
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
-        
+
         function test_plot_velocity_vs_power(testCase)
             filename = 'river_plot_velocity_vs_power.png';
             if isfile(filename)
                 delete(filename);
             end
-            
+
             Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[0 1 2 3 4 5 6 7 8]);
             poly = polynomial_fit(0:1:8, 10*(0:1:8),1);
             V = discharge_to_velocity(Q, poly.coef);
@@ -200,12 +200,13 @@ classdef River_TestResource < matlab.unittest.TestCase
             cut_out = VV(end);
             % Power should be 10x greater and exclude the ends of V
             P = velocity_to_power(V, poly.coef, cut_in, cut_out);
-            
+
             plot_velocity_vs_power(V.V, P.P,"polynomial_coeff",poly.coef,"savepath",filename);
 
             assertTrue(testCase,isfile(filename));
             delete(filename);
             end
-        
+
     end
+
 end

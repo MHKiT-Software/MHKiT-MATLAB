@@ -1,7 +1,7 @@
 classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
     methods (Test)
-   
+
         function test_kfromw(testCase)
             relative_file_name = '../../examples/data/wave/ValData1.json'; % filename in JSON extension
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
@@ -38,28 +38,28 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             data = load(full_file_name);
             Valdata = data.CalcSpecCheckData;
-            
+
             H5SP = Valdata.H5sP;
             H10SP = Valdata.H10sP;
             AH1 = Valdata.AH1;
             AH6 = Valdata.AH6;
             CDIP1 = Valdata.CDiP1;
             CDIP6 = Valdata.CDiP6;
-           
+
             S1 = struct('spectrum',H5SP.PowSpecHanWin','type','TimeSeries','frequency',H5SP.freq);
             S2 = struct('spectrum',H10SP.PowSpecHanWin','type','TimeSeries','frequency',H10SP.freq);
             S3 = struct('spectrum',AH1.PowSpecHanWin,'type','TimeSeries','frequency',AH1.freq);
             S4 = struct('spectrum',AH6.PowSpecHanWin,'type','TimeSeries','frequency',AH6.freq);
             S5 = struct('spectrum',CDIP1.PowSpec,'type','TimeSeries','frequency',CDIP1.freq);
             S6 = struct('spectrum',CDIP6.PowSpec,'type','TimeSeries','frequency',CDIP6.freq);
-            
+
             expected1 = H5SP.Moment;
             expected2 = H10SP.Moment;
             expected3 = AH1.Moment;
             expected4 = AH6.Moment;
             expected5 = CDIP1.Moment;
             expected6 = CDIP6.Moment;
-            
+
             for i = 0:5
                 calculated1 = frequency_moment(S1, i-1);
                 assertEqual(testCase,expected1(i+1),calculated1,'AbsTol',0.01);
@@ -84,9 +84,9 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             data = load(full_file_name);
             Valdata = data.CalcSpecCheckData;
-            H5SP = Valdata.H5sP;            
+            H5SP = Valdata.H5sP;
             S1 = struct('spectrum',H5SP.PowSpecHanWin','type','TimeSeries','frequency',H5SP.freq);
-           
+
             % Hm0
             expected = H5SP.waveMoments.Hm0;
             calculated = significant_wave_height(S1);
@@ -135,7 +135,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             error = abs(expected-calculated)/expected;
             assertLessThan(testCase,error, 0.01);
        end
-       
+
        function test_metrics_AH(testCase)
 
             assumeFail(testCase, "TODO: Fix - ??");
@@ -146,7 +146,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             Valdata = data.CalcSpecCheckData;
             AH1 = Valdata.AH1;
             S1 = struct('spectrum',AH1.PowSpecHanWin,'type','TimeSeries','frequency',AH1.freq);
-           
+
             % Hm0
             expected = AH1.waveMoments.Hm0;
             calculated = significant_wave_height(S1);
@@ -195,7 +195,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             error = abs(expected-calculated)/expected;
             assertLessThan(testCase,error, 0.01);
        end
-       
+
        function test_metrics_CDIP1(testCase)
 
            assumeFail(testCase, "TODO: Fix - ??");
@@ -206,7 +206,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             Valdata = data.CalcSpecCheckData;
             CDIP1 = Valdata.CDiP1;
             S1 = struct('spectrum',CDIP1.PowSpec,'type','TimeSeries','frequency',CDIP1.freq);
-           
+
             % Hm0
             expected = CDIP1.waveMoments.Hm0;
             calculated = significant_wave_height(S1,CDIP1.freqBinWidth);
@@ -255,7 +255,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             error = abs(expected-calculated)/expected;
             assertLessThan(testCase,error, 0.01);
         end
-                
+
         function test_plot_elevation_timeseries(testCase)
 
             assumeFail(testCase, "TODO: Fix - ??");
@@ -265,8 +265,8 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             data = load(full_file_name);
             Valdata = data.CalcSpecCheckData;
             H5sP = Valdata.H5sP;
-            
-            df = 0.01/(2*pi);   
+
+            df = 0.01/(2*pi);
             Trep = 1/df;
             time = 0:0.062838:Trep;
 
@@ -281,26 +281,26 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             end
 
             wave_elevation = struct('time',time','elevation',H5sP.S.spectrum);
-            
-            df = 0.01/(2*pi);   
+
+            df = 0.01/(2*pi);
             Trep = 1/df;
             time = 0:0.12566:Trep;
             wave_elevation.time = time';
 
-            plot_elevation_timeseries(wave_elevation,"savepath",filename); 
+            plot_elevation_timeseries(wave_elevation,"savepath",filename);
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
-        
+
         function test_environmental_contour(testCase)
 
             assumeFail(testCase, "TODO: Fix - ??");
-            
+
             assumeFail(testCase, "Not compatible with latest MHKIT-Python")
-            
+
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
-            
+
             fid = fopen(full_file_name); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
@@ -310,7 +310,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             Te = table2array(Te_table);
             Hm0_table = struct2table(valdata1.Hm0,'AsArray',true);
             Hm0 = table2array(Hm0_table);
-            
+
             filter = Hm0 < 20;
             Hm0 = Hm0(filter);
             Te = Te(filter);
@@ -319,38 +319,38 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             Te = Te(col);
             [row, col] = find(~isnan(Hm0));
             Hm0 = Hm0(col);
-            Te = Te(col); 
-            
+            Te = Te(col);
+
             time_str = Hm0_table.Properties.VariableNames;
-            
+
             time1 = str2num(erase(time_str{1},'x'));
             time2 = str2num(erase(time_str{2},'x'));
-            
+
             dt = (time2-time1)/1000.;
             time_R = 100;
 
             contour = environmental_contour(Hm0, Te, dt, time_R);
-            
+
             relative_file_name= '../../examples/data/wave/Hm0_Te_contours_46022.csv';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             expected_contours = readmatrix(full_file_name);
-            
+
             Hm0_expected = expected_contours(:,2);
             Te_expected = expected_contours(:,1);
- 
+
             assertEqual(testCase,table2array(contour.contour2),Hm0_expected,'RelTol',0.01);
             assertEqual(testCase,table2array(contour.contour1),Te_expected,'RelTol',0.01);
-            
+
 
         end
-        
+
         function test_plot_environmental_contour(testCase)
-            
+
             assumeFail(testCase, "Not compatible with latest MHKIT-Python")
-            
+
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
-            
+
             fid = fopen(full_file_name); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
@@ -360,7 +360,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             Te = table2array(Te_table);
             Hm0_table = struct2table(valdata1.Hm0,'AsArray',true);
             Hm0 = table2array(Hm0_table);
-            
+
             filter = Hm0 < 20;
             Hm0 = Hm0(filter);
             Te = Te(filter);
@@ -369,39 +369,39 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             Te = Te(col);
             [row, col] = find(~isnan(Hm0));
             Hm0 = Hm0(col);
-            Te = Te(col); 
-            
+            Te = Te(col);
+
             time_str = Hm0_table.Properties.VariableNames;
-            
+
             time1 = str2num(erase(time_str{1},'x'));
             time2 = str2num(erase(time_str{2},'x'));
-            
+
             dt = (time2-time1)/1000.;
             time_R = 100;
 
             contour = environmental_contour(Hm0, Te, dt, time_R);
-            
+
             filename = 'wave_plot_env_contour.png';
             if isfile(filename)
                 delete(filename);
             end
 
-          
+
             plot_environmental_contours(Te, Hm0,contour.contour2,contour.contour1,"savepath",filename...
                 ,"x_label",...
                 'Energy Period (s)', "y_label",'Significant Wave Height (m)',"data_label",'NDBC 46022',...
-                "contour_label",'100 Year Contour'); 
+                "contour_label",'100 Year Contour');
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
-        
+
         function test_plot_environmental_contour_multiyear(testCase)
-            
+
             assumeFail(testCase, "Not compatible with latest MHKIT-Python")
-            
+
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
-            
+
             fid = fopen(full_file_name); % Opening the file
             raw = fread(fid,inf); % Reading the contents
             str = char(raw'); % Transformation
@@ -411,7 +411,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             Te = table2array(Te_table);
             Hm0_table = struct2table(valdata1.Hm0,'AsArray',true);
             Hm0 = table2array(Hm0_table);
-            
+
             filter = Hm0 < 20;
             Hm0 = Hm0(filter);
             Te = Te(filter);
@@ -420,32 +420,32 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             Te = Te(col);
             [row, col] = find(~isnan(Hm0));
             Hm0 = Hm0(col);
-            Te = Te(col); 
-            
+            Te = Te(col);
+
             time_str = Hm0_table.Properties.VariableNames;
-            
+
             time1 = str2num(erase(time_str{1},'x'));
             time2 = str2num(erase(time_str{2},'x'));
-            
+
             dt = (time2-time1)/1000.;
             time_R = [100, 120, 130];
 
             contour = environmental_contour(Hm0, Te, dt, time_R);
-            
+
             filename = 'wave_plot_env_contour_multiyear.png';
             if isfile(filename)
                 delete(filename);
             end
 
-          
+
             plot_environmental_contours(Te, Hm0,contour.contour2,contour.contour1,"savepath",filename...
                 ,"x_label",...
                 'Energy Period (s)', "y_label",'Significant Wave Height (m)',"data_label",'NDBC 46022',...
-                "contour_label",{'100 Year Contour','120 Year Contour','130 Year Contour'}); 
+                "contour_label",{'100 Year Contour','120 Year Contour','130 Year Contour'});
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
-        
+
         function test_chakrabarti(testCase)
             D = 5;
             H = 8;
@@ -458,17 +458,17 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
-        
+
         function test_wave_length(testCase)
          k=[1,2,10,3];
          l_expected = (2.*3.14)./k;
 
-         
-         l_calculated = wave_length(k);            
+
+         l_calculated = wave_length(k);
          assertEqual(testCase,l_expected,l_calculated,'RelTol',0.01);
-        
+
          end
-        
+
 
          function test_depth_regime(testCase)
          expected = [1,1,0,1];
@@ -476,11 +476,11 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
          h = 10;
 
-         calculated = depth_regime(l_vector,h);            
+         calculated = depth_regime(l_vector,h);
          assertEqual(testCase,expected,calculated);
 
          end
-         
+
          function test_wave_celerity(testCase)
          % small change in f will give similar value cg
          f=linspace(20.0001,20.0005,5);
@@ -496,19 +496,19 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
          assertEqual(testCase,cg_shallow1, cg_shallow2);
 
          x = (3.14.*f)./k.values;
-         % all deep 
+         % all deep
          cg = wave_celerity(k, 1000,"depth_check",py.True);
          assertEqual(testCase,x,cg.values,'RelTol',0.01);
          end
-         
+
          function test_energy_flux_deep(testCase)
 
          assumeFail(testCase, "TODO: Fix - ??");
-             
+
          omega = [0.1:0.01:3.5];
          f = omega./(2*pi);
          Hs = 2.5;
-         Tp = 8 ;   
+         Tp = 8 ;
          % Dependent on mhkit.resource.BS spectrum
          S = jonswap_spectrum(f,Tp,Hs);
          Te = energy_period(S);

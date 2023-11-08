@@ -10,7 +10,7 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
     end
 
     methods (Test)
-        
+
         function test_mler_coefficients(testCase)
             % create inputs and load validation data
             fpath = '../../examples/data/loads/mler.csv';
@@ -33,11 +33,11 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             T = linspace(-150,150,301);
             X = linspace(-300,300,601);
             sim = mler_simulation();
-            
+
             assertEqual(testCase, sim.T, T)
             assertEqual(testCase, sim.X, X)
         end
-        
+
         function test_mler_wave_amp_normalize(testCase)
             fpath = '../../examples/data/loads/mler.csv';
             validation = readtable(fpath);
@@ -45,15 +45,15 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             mler.phase = validation.phase;
             wave_freq = linspace(0,1,500);
             mler.frequency = wave_freq';
-            
+
             k = wave_number(wave_freq, 70);
             k.values = fillmissing(k.values,'constant',0);
             sim = mler_simulation();
             mler_norm = mler_wave_amp_normalize(4.5*1.9, mler, sim, k.values);
-            
+
             assertEqual(testCase, mler_norm.conditioned_spectrum, validation.Norm_Spec, 'AbsTol', 0.002)
         end
-        
+
         function test_mler_export_time_series(testCase)
             fpath = '../../examples/data/loads/mler_ts.csv';
             validation = readtable(fpath);
@@ -65,11 +65,13 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             mler.frequency = wave_freq';
             RAO = normed.RAO;
             k = wave_number(wave_freq, 70);
-            k.values = fillmissing(k.values,'constant',0); 
+            k.values = fillmissing(k.values,'constant',0);
             sim = mler_simulation();
             mler_ts = mler_export_time_series(RAO, mler, sim, k.values);
-            
+
             assertEqual(testCase, mler_ts.linear_response, validation.LinearResponse, 'AbsTol', 0.00005)
          end
+
     end
+
 end
