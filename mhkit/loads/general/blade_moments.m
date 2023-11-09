@@ -3,33 +3,33 @@ function [M_flap,M_edge] = blade_moments(blade_coefficients,flap_offset,...
 
 %%%%%%%%%%%%%%%%%%%%
 %     Transfer function for deriving blade flap and edge moments using blade matrix.
-%     
+%
 % Parameters
 % ------------
-%     blade_coefficients: vector  
-%         Derived blade calibration coefficients listed in order of D1, D2, D3, D4 
+%     blade_coefficients: vector
+%         Derived blade calibration coefficients listed in order of D1, D2, D3, D4
 %
-%     flap_offset : double or int 
-%         Derived offset of raw flap signal obtained during calibration process  
+%     flap_offset : double or int
+%         Derived offset of raw flap signal obtained during calibration process
 %
-%     flap_raw : vector 
+%     flap_raw : vector
 %         Raw strain signal of blade in the flapwise direction
 %
-%     edge_offset : double or int 
+%     edge_offset : double or int
 %         Derived offset of raw edge signal obtained during calibration process
 %
-%     edge_raw : vector 
+%     edge_raw : vector
 %         Raw strain signal of blade in the edgewise direction
-%     
+%
 % Returns
 % ---------
-%     M_flap: vector 
+%     M_flap: vector
 %         Blade flapwise moment in SI units
 %
-%     M_edge: vector 
+%     M_edge: vector
 %         Blade edgewise moment in SI units
 %
-%         
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 py.importlib.import_module('mhkit');

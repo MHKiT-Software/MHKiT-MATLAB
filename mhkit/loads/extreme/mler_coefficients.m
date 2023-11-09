@@ -3,8 +3,8 @@ function mler = mler_coefficients(RAO, wave_spectrum, response_desired)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Calculate MLER (most likely extreme response) coefficients from a
-%     sea state spectrum and a response RAO.  
-%     
+%     sea state spectrum and a response RAO.
+%
 %     Parameters
 %     ----------
 %         RAO : array
@@ -12,11 +12,11 @@ function mler = mler_coefficients(RAO, wave_spectrum, response_desired)
 %         wave_spectrum: struct
 %             Struct with wave spectral density [m^2/Hz] and frequency [Hz]
 %         response_desired: int or float
-%             Latitude longitude pairs at which to extract data. 
+%             Latitude longitude pairs at which to extract data.
 %
 %      Returns
 %      -------
-%         mler : struct 
+%         mler : struct
 %             containing conditioned wave spectral amplitude
 %             coefficient [m^2-s], and phase [rad] indexed by frequency [Hz].
 %
@@ -72,15 +72,8 @@ end
 
 % outputs
 mler.conditioned_spectrum = S;
-mler.phase = phase; 
+mler.phase = phase;
 mler.frequency = freq_hz;
 
 end
-
-
-
-
-
-
-
 

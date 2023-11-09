@@ -1,11 +1,11 @@
 function figure=plot_bin_statistics(bin_centers,bin_mean,bin_max,bin_min,bin_mean_std,bin_max_std,bin_min_std,options)
 
 %%%%%%%%%%%%%%%%%%%%
-%     Plot showing standard binned statistics of single variable 
-%     
+%     Plot showing standard binned statistics of single variable
+%
 % Parameters
 % ------------
-%     bin_centers: vector  
+%     bin_centers: vector
 %         x-axis bin center values
 %
 %     bin_mean: vector
@@ -17,13 +17,13 @@ function figure=plot_bin_statistics(bin_centers,bin_mean,bin_max,bin_min,bin_mea
 %     bin_min: vector
 %         Binned min statistical values of variable
 %
-%     bin_mean_std: vector 
+%     bin_mean_std: vector
 %         Standard deviations of mean binned statistics
 %
-%     bin_max_std: vector 
+%     bin_max_std: vector
 %         Standard deviations of max binned statistics
 %
-%     bin_min_std: vector 
+%     bin_min_std: vector
 %         Standard deviations of min binned statistics
 %
 %     xlabel: string (optional)
@@ -44,14 +44,12 @@ function figure=plot_bin_statistics(bin_centers,bin_mean,bin_max,bin_min,bin_mea
 %
 % Returns
 % ---------
-%     figure: figure 
-%          
+%     figure: figure
 %
-%         
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
-    bin_centers 
+    bin_centers
     bin_mean
     bin_max
     bin_min
@@ -78,5 +76,6 @@ ylabel(options.ylabel)
 
 if strlength(options.savepath) > 1
     saveas(figure, options.savepath)
-end 
+end
 hold off
+
