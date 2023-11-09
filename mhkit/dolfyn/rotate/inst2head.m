@@ -26,7 +26,7 @@ ds = advo;
                 'but it was not set using `set_inst2head_rotmat.'];
             ME = MException('MATLAB:dolfyn:rotate:inst2head',msgtext);
             throwAsCaller(ME)
-        end      
+        end
         if det(advo.inst2head_rotmat.data) ~= 1
             ME = MException('MATLAB:dolfyn:rotate:inst2head',"Invalid " + ...
                 "inst2head_rotmat (determinant != 1)");

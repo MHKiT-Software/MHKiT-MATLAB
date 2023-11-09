@@ -1,28 +1,28 @@
 function ds = read_rdi(filename,options)
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Read a TRDI binary data file.
-%     
+%
 % Parameters
 % ------------
 %     filename: string
 %         Filename of TRDI file to read.
 %     userdata: bool or string (optional)
 %         true, false, or string of userdata.json filename (default true)
-%         Whether to read the '<base-filename>.userdata.json' file.%     
+%         Whether to read the '<base-filename>.userdata.json' file.%
 %     nens: nan, int, or 2-element array (optional)
-%         nan (default: read entire file), int, or 2-element tuple 
+%         nan (default: read entire file), int, or 2-element tuple
 %         (start, stop) Number of pings to read from the file.
 %
-%     call with options -> read_rdi(filename,'userdata',false,'do_checksum',true,'nens',12) 
+%     call with options -> read_rdi(filename,'userdata',false,'do_checksum',true,'nens',12)
 %
 % Returns
 % ---------
-%     ds: structure 
+%     ds: structure
 %         Structure from the binary instrument data
-%        
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     arguments
-        filename 
+        filename
         options.userdata = true;
         options.do_checksum = false;
         options.nens = nan;
@@ -34,25 +34,25 @@ function ds = read_rdi(filename,options)
             'character string']);
         throw(ME);
     end
-    
+
     % check to see if the file exists
     if ~isfile(filename)
         ME = MException('MATLAB:read_rdi','file does not exist');
         throw(ME);
     end
-    
+
     % check to make sure userdata is bool or string
     if ~isa(options.userdata, 'logical') && ~isa(options.userdata, 'string')
         ME = MException('MATLAB:read_rdi','userdata must be a logical or string');
         throw(ME);
     end
-    
+
     % check to make sure nens is numeric or nan
     if ~all(isa(options.nens, 'numeric'))
         ME = MException('MATLAB:read_rdi','nens must be numeric or nan');
         throw(ME);
     end
-    
+
     % check to make sure if nens is numeric that its length is equal to 1 or 2
     nstart = 0;
     if ~isnan(options.nens)
@@ -60,7 +60,7 @@ function ds = read_rdi(filename,options)
             ME = MException('MATLAB:read_rdi','nens must be a single value or tuple');
             throw(ME);
         end
-        if length(options.nens) == 1            
+        if length(options.nens) == 1
             npings = options.nens(1);
         else
             nstart = options.nens(1);
@@ -68,7 +68,7 @@ function ds = read_rdi(filename,options)
         end
     else
         npings = options.nens;
-    end   
+    end
 
     %% <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                    year    Initialize Routine
@@ -96,23 +96,23 @@ function ds = read_rdi(filename,options)
 
     fseek(fid,pos_,'bof');
     n_avg = 1;
-    ensemble = create_ensemble(n_avg, cfg.n_cells);    
+    ensemble = create_ensemble(n_avg, cfg.n_cells);
     filesize = find_filesize();
     npings = floor(filesize / (hdr.nbyte + 2 + extrabytes));
     vars_read = {'time'};
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                        End Initialize
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    
+
     %% <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                        Read File
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     ds = load_data();
-    fclose(fid);    % close the file 
+    fclose(fid);    % close the file
 
     %% <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                       Post Process
-    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>    
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     userdata = read_userdata(filename, options.userdata);
     user_fields = fieldnames(userdata);
     for i = 1:numel(user_fields)
@@ -127,7 +127,7 @@ function ds = read_rdi(filename,options)
     % Create xarray like dataset from upper level structure
     ds = create_dataset(ds);
     ds = set_coords(ds,ds.coord_sys);
-    
+
     if ~isfield(ds, 'beam2inst_orientmat')
         ds.beam2inst_orientmat.data = calc_beam_orientmat(...
             ds.attrs.beam_angle,...
@@ -140,9 +140,9 @@ function ds = read_rdi(filename,options)
     end
 
     if ~isfield(ds, 'orientmat')
-        ds.orientmat.data = calc_orientmat(ds);        
+        ds.orientmat.data = calc_orientmat(ds);
         ds.orientmat.coords.time = ds.time;
-        ds.orientmat.coords.inst = {'X' 'Y' 'Z'}; 
+        ds.orientmat.coords.inst = {'X' 'Y' 'Z'};
         ds.orientmat.coords.earth = {'E' 'N' 'U'};
         ds.orientmat.dims = {'time', 'inst', 'earth'};
     end
@@ -177,19 +177,19 @@ function ds = read_rdi(filename,options)
     if ~isnan(declin)
         ds = set_declination(ds, declin);
     end
-    
+
     % VMDAS applies gps correction on velocity in .ENX files only
     end_check = split(filename,'.');
     if strcmpi(end_check{end},'ENX')
         ds.attrs.vel_gps_corrected = true;
-    else 
+    else
         ds.attrs.vel_gps_corrected = false;
     end
 
     %% <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                        Read Functions
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    function dat = load_data()        
+    function dat = load_data()
         if isnan(options.nens)
             nens_ = floor(npings / n_avg);
             ens_range = 1:nens_;
@@ -214,7 +214,7 @@ function ds = read_rdi(filename,options)
         % iteration so we save time seperately and change it at the end.
         time = NaT(size(dat.coords.time));
         ms = zeros(size(dat.coords.time));
-       
+
         for i = 1:nens_
             try
                 read_buffer();
@@ -235,14 +235,14 @@ function ds = read_rdi(filename,options)
                 otherdims = repmat({':'},1,l-1);
                 if strcmpi(nm,'time')
                     continue;
-                else                    
+                else
                     dat.(group).(nm)(i,otherdims{:}) = ...
                         ensemble.(nm).data;
                 end
             end
-            try 
+            try
                 clock = ensemble.rtc.data(:);
-                clock(7) = clock(7) * 0.01;    
+                clock(7) = clock(7) * 0.01;
                 time(i) = datetime(clock(1)...
                      ,clock(2),clock(3),clock(4),clock(5),clock(6));
                 ms(i) = clock(7);
@@ -257,7 +257,7 @@ function ds = read_rdi(filename,options)
         ind = ~isnat(time);
         dat.coords.time(ind) = double(convertTo(time(ind)...
             ,'epochtime','Epoch','1970-01-01'));
-        dat.coords.time(ind) = dat.coords.time(ind) + ms(ind);        
+        dat.coords.time(ind) = dat.coords.time(ind) + ms(ind);
         %
         dat = finalize(dat);
         if isfield(dat.data_vars, 'vel_bt')
@@ -276,7 +276,7 @@ function ds = read_rdi(filename,options)
                 id = fread(fid,1,"uint16");
                 winrivprob_ = false;
                 retval = read_dat(id);
-                if ~retval 
+                if ~retval
                     break
                 end
                 byte_offset = byte_offset + nbyte_;
@@ -437,7 +437,7 @@ function ds = read_rdi(filename,options)
         cfg.coord_sys = coord_sys_options{...
             bitand(bitshift(coord_sys,-3),3)+1};
         cfg.use_pitchroll = bitand(coord_sys, 4) == 4;
-        cfg.use_3beam = bitand(coord_sys, 2) == 2; 
+        cfg.use_3beam = bitand(coord_sys, 2) == 2;
         cfg.bin_mapping = bitand(coord_sys, 1) == 1;
         temp = fread(fid,2,'int16');
         cfg.xducer_misalign_deg = temp(1) * .01;
@@ -503,7 +503,7 @@ function ds = read_rdi(filename,options)
         ensemble.pitch.data(ensemble.k)     = temp(1) * .01;
         ensemble.roll.data(ensemble.k)      = temp(2) * .01;
         ensemble.salinity.data(ensemble.k)  = temp(3);
-        ensemble.temp.data(ensemble.k)      = temp(4) * .01;        
+        ensemble.temp.data(ensemble.k)      = temp(4) * .01;
         ensemble.min_preping_wait.data(ensemble.k) = ...
             sum(fread(fid,3,'uint8').*[60.; 1.; .01]);
         temp = fread(fid,11,'uint8');
@@ -517,7 +517,7 @@ function ds = read_rdi(filename,options)
     function read_vel()
         if ~any(strcmp(vars_read, 'vel'))
             vars_read{end+1} = 'vel';
-        end        
+        end
         temp = fread(fid,4*cfg.n_cells,'int16') * .001;
         ensemble.vel.data(ensemble.k,1,:,:) = ...
             reshape(temp,[ensemble.k,1,4,cfg.n_cells]);
@@ -527,7 +527,7 @@ function ds = read_rdi(filename,options)
     function read_corr()
         if ~any(strcmp(vars_read, 'corr'))
             vars_read{end+1} = 'corr';
-        end 
+        end
         temp = fread(fid, 4*cfg.n_cells, 'uint8');
         ensemble.corr.data(ensemble.k,1,:,:) = ...
             reshape(temp,[ensemble.k,1,4,cfg.n_cells]);
@@ -537,7 +537,7 @@ function ds = read_rdi(filename,options)
     function read_amp()
         if ~any(strcmp(vars_read, 'amp'))
             vars_read{end+1} = 'amp';
-        end 
+        end
         temp = fread(fid, 4*cfg.n_cells, 'uint8');
         ensemble.amp.data(ensemble.k,1,:,:) = ...
             reshape(temp,[ensemble.k,1,4,cfg.n_cells]);
@@ -547,7 +547,7 @@ function ds = read_rdi(filename,options)
     function read_prcnt_gd()
         if ~any(strcmp(vars_read, 'prcnt_gd'))
             vars_read{end+1} = 'prcnt_gd';
-        end 
+        end
         temp = fread(fid, 4*cfg.n_cells, 'uint8');
         ensemble.prcnt_gd.data(ensemble.k,1,:,:) = ...
             reshape(temp,[ensemble.k,1,4,cfg.n_cells]);
@@ -557,7 +557,7 @@ function ds = read_rdi(filename,options)
     function read_status()
         if ~any(strcmp(vars_read, 'status'))
             vars_read{end+1} = 'status';
-        end 
+        end
         temp = fread(fid, 4*cfg.n_cells, 'uint8');
         ensemble.status.data(ensemble.k,1,:,:) = ...
             reshape(temp,[ensemble.k,1,4,cfg.n_cells]);
@@ -570,7 +570,7 @@ function ds = read_rdi(filename,options)
         for qq = 1:numel(vars_to_add)
             if ~any(strcmp(vars_read, vars_to_add{qq}))
                 vars_read{end+1} = vars_to_add{qq};
-            end            
+            end
         end
         if source_ == 2
             warning('lat/lon bottom reading passed')
@@ -599,7 +599,7 @@ function ds = read_rdi(filename,options)
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function read_vmdas()
-        % Read something from VMDAS 
+        % Read something from VMDAS
         % The raw files produced by VMDAS contain a binary navigation data
         % block.
         cfg.sourceprog = 'VMDAS';
@@ -615,37 +615,37 @@ function ds = read_rdi(filename,options)
         for qq = 1:numel(vars_to_add)
             if ~any(strcmp(vars_read, vars_to_add{qq}))
                 vars_read{end+1} = vars_to_add{qq};
-            end 
+            end
         end
-        utim = fread(fid,4,'uint8');        
+        utim = fread(fid,4,'uint8');
         milliseconds = int32(fread(fid,1,'uint32') / 10);
         date = datetime(utim(3) + utim(4) * 256, utim(2), utim(1), ...
             0, 0, milliseconds/1000);
         fseek(fid, 4, 0);
         ensemble.time_gps.data(ensemble.k) = ...
             datenum(datestr(date),'dd-mmm-yyyy HH:MM:SS');
-        ensemble.latitude_gps.data(ensemble.k) = fread(fid,1,'int32') ... 
+        ensemble.latitude_gps.data(ensemble.k) = fread(fid,1,'int32') ...
             * cfac_;
-        ensemble.longitude_gps.data(ensemble.k) = fread(fid,1,'int32') ... 
+        ensemble.longitude_gps.data(ensemble.k) = fread(fid,1,'int32') ...
             * cfac_;
         milliseconds = int32(fread(fid,1,'uint32') * 10);
         date = datetime(utim(3) + utim(4) * 256, utim(2), utim(1), ...
             0, 0, milliseconds/1000);
         ensemble.etime_gps.data(ensemble.k) = ...
-            datenum(datestr(date),'dd-mmm-yyyy HH:MM:SS'); 
-        ensemble.elatitude_gps.data(ensemble.k) = fread(fid,1,'int32') ... 
-            * cfac_;        
-        ensemble.elongitude_gps.data(ensemble.k) = fread(fid,1,'int32') ... 
-            * cfac_;        
+            datenum(datestr(date),'dd-mmm-yyyy HH:MM:SS');
+        ensemble.elatitude_gps.data(ensemble.k) = fread(fid,1,'int32') ...
+            * cfac_;
+        ensemble.elongitude_gps.data(ensemble.k) = fread(fid,1,'int32') ...
+            * cfac_;
         fseek(fid, 12, 0);
         ensemble.flags.data(ensemble.k) = fread(fid,1,'uint16');
         fseek(fid, 6, 0);
-        utim = fread(fid,4,'uint8');        
+        utim = fread(fid,4,'uint8');
         milliseconds = int32(fread(fid,1,'uint32') / 10);
         date = datetime(utim(1) + utim(2) * 256, utim(4), utim(3),...
             0, 0, milliseconds/1000);
         ensemble.ntime.data(ensemble.k) = ...
-            datenum(datestr(date),'dd-mmm-yyyy HH:MM:SS'); 
+            datenum(datestr(date),'dd-mmm-yyyy HH:MM:SS');
         fseek(fid, 16, 0);
         nbyte_ = 2 + 76;
     end
@@ -675,7 +675,7 @@ function ds = read_rdi(filename,options)
                 ensemble.rtc.data(1) = ensemble.rtc.data(1) + 2000;
             end
             tmp_time = ...
-                datetime(cat(2, squeeze(ensemble.rtc.data(1:3))', time)); 
+                datetime(cat(2, squeeze(ensemble.rtc.data(1:3))', time));
             ensemble.time_gps.data(ensemble.k) = ...
                 datenum(datestr(tmp_time),'dd-mmm-yyyy HH:MM:SS');
             fseek(fid, 1, 0);
@@ -722,7 +722,7 @@ function ds = read_rdi(filename,options)
             for qq = 1:numel(vars_to_add)
                 if ~any(strcmp(vars_read, vars_to_add{qq}))
                     vars_read{end+1} = vars_to_add{qq};
-                end 
+                end
             end
             nbyte_ = ftell(fid) - startpos + 2;
         end
@@ -743,7 +743,7 @@ function ds = read_rdi(filename,options)
     function read_nocode(id)
         fprintf('Unrecognized ID code: %0.4X.\n', id)
     end
-    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> 
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
     %% <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                        Helper Functions
@@ -758,7 +758,7 @@ function ds = read_rdi(filename,options)
                 fseek(fid,-numbytes-2,0);
                 if cfgid(1) == 127 && (cfgid(2) == 127 || cfgid(2) == 121)
                     if cfgid(2) == 121 && isnan(debug7f79_)
-                        debug7f79_ = true;                        
+                        debug7f79_ = true;
                     end
                     valid = true;
                 end
@@ -1024,7 +1024,7 @@ function ds = read_rdi(filename,options)
         if offset ~= 4 && fixoffset_ == 0
             fixoffset_ = offset - 4;
         end
-        fseek(fid, 4 + fixoffset_, 0); 
+        fseek(fid, 4 + fixoffset_, 0);
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out = remove_end(data, iens)
@@ -1033,13 +1033,13 @@ function ds = read_rdi(filename,options)
         for qq = 1 : numel(vars_read)
             ky = vars_read{qq};
             try
-                group = ensemble.(ky).group;     
+                group = ensemble.(ky).group;
                 l = length(size((out.(group).(ky))));
                 otherdims = repmat({':'},1,l-1);
                 out.(group).(ky) = out.(group).(ky)(1:iens-1,otherdims{:});
             catch
                 continue
-            end            
+            end
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -1049,14 +1049,14 @@ function ds = read_rdi(filename,options)
         fields = fieldnames(ensemble);
         for qq = 1 : numel(fields)
             ky = fields{qq};
-            if ~any(strcmp(vars_read, ky))   
+            if ~any(strcmp(vars_read, ky))
                 try
                     group = ensemble.(ky).group;
-                    out.(group) = rmfield(out.(group), ky);                    
+                    out.(group) = rmfield(out.(group), ky);
                 catch
                     continue
                 end
-                
+
             end
         end
         fields = fieldnames(cfg);
@@ -1078,12 +1078,12 @@ function ds = read_rdi(filename,options)
                 end
             catch
                 continue
-            end            
+            end
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out = remove_gps_duplicates(dat)
-        % Removes duplicate and nan timestamp values in 'time_gps' 
+        % Removes duplicate and nan timestamp values in 'time_gps'
         % coordinate, and adds hardware (ADCP DAQ) timestamp corresponding
         % to GPS acquisition (in addition to the GPS unit's timestamp).
         out = dat;
@@ -1092,7 +1092,7 @@ function ds = read_rdi(filename,options)
 
         % Remove duplicate timestamp values, if applicable
         [out.coords.time_gps, idx] = unique(out.coords.time_gps);
-     
+
         % Remove nan values, if applicable
         nans = isnan(out.coords.time_gps);
         out.coords.time_gps = out.coords.time_gps(~nans);
@@ -1108,7 +1108,7 @@ function ds = read_rdi(filename,options)
             end
         end
     end
-    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>    
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 end
 

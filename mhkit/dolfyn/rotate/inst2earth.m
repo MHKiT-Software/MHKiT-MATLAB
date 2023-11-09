@@ -1,19 +1,19 @@
 function ds = inst2earth(advo,reverse,make)
 %     Rotate data in an ADV object to the earth from the instrument
 %     frame (or vice-versa).
-% 
+%
 %     Parameters
 %     ----------
 %     advo : The adv object containing the data.
-% 
+%
 %     reverse : bool (default: False)
 %            If True, this function performs the inverse rotation
 %            (earth->inst).
-% 
+%
 %     make : char
 %       awac, vector, signature, rdi
 
-if strcmpi(make,'awac') 
+if strcmpi(make,'awac')
     ds = inst2earth_awac();
 elseif strcmpi(make,'vector')
     ds = inst2earth_vector();
@@ -31,17 +31,17 @@ end
             cs_now = 'earth';
             cs_new = 'inst';
         else % inst->earth
-            sumstr = 'dcba,dceb->dcea'; %'ijk,j...k->i...k'; 
+            sumstr = 'dcba,dceb->dcea'; %'ijk,j...k->i...k';
             cs_now = 'inst';
             cs_new = 'earth';
         end
-    
+
         if isfield(advo.attrs, 'rotate_vars')
             rotate_vars = advo.attrs.rotate_vars;
         else
             rotate_vars = {'vel'};
         end
-    
+
         cs = lower(advo.coord_sys);
         if strcmp(cs,cs_new)
             return;
@@ -51,7 +51,7 @@ end
             ME = MException('MATLAB:dolfyn:inst2earth',msgtext);
             throwAsCaller(ME)
         end
-    
+
         if isfield(advo, 'orientmat')
             omat = advo.orientmat.data;
         else
@@ -65,7 +65,7 @@ end
                              advo.roll.data,...
                              orientation_down);
         end
-    
+
         % Take the transpose of the orientation to get the inst->earth rotation
         % matrix.
         rmat = permute(omat, [1 2 4 3]);
@@ -79,7 +79,7 @@ end
             warning("Invalid orientation matrix (determinant != 1) " + ...
                 "in inst2earth")
         end
-    
+
         for qq = 1:numel(rotate_vars)
             nm = rotate_vars{qq};
             n = size(advo.(nm).data);
@@ -106,17 +106,17 @@ end
             cs_now = 'earth';
             cs_new = 'inst';
         else % inst->earth
-            sumstr = 'dba,dcb->dca'; %'ijk,j...k->i...k'; 
+            sumstr = 'dba,dcb->dca'; %'ijk,j...k->i...k';
             cs_now = 'inst';
             cs_new = 'earth';
         end
-    
+
         if isfield(advo.attrs, 'rotate_vars')
             rotate_vars = advo.attrs.rotate_vars;
         else
             rotate_vars = {'vel'};
         end
-    
+
         cs = lower(advo.coord_sys);
         if strcmp(cs,cs_new)
             return;
@@ -126,7 +126,7 @@ end
             ME = MException('MATLAB:dolfyn:inst2earth',msgtext);
             throwAsCaller(ME)
         end
-    
+
         if isfield(advo, 'orientmat')
             omat = advo.orientmat.data;
         else
@@ -140,7 +140,7 @@ end
                              advo.roll.data,...
                              orientation_down);
         end
-    
+
         % Take the transpose of the orientation to get the inst->earth rotation
         % matrix.
         rmat = permute(omat, [1 2 4 3]);
@@ -155,7 +155,7 @@ end
                 "in inst2earth")
         end
         rmat = squeeze(rmat);
-    
+
         for qq = 1:numel(rotate_vars)
             nm = rotate_vars{qq};
             n = size(advo.(nm).data);
@@ -182,7 +182,7 @@ end
             cs_now = 'earth';
             cs_new = 'inst';
         else % inst->earth
-            sumstr = 'dca,dbc->dba'; %'ijk,j...k->i...k'; 
+            sumstr = 'dca,dbc->dba'; %'ijk,j...k->i...k';
             cs_now = 'inst';
             cs_new = 'earth';
         end
@@ -194,13 +194,13 @@ end
                 down = false;
             end
         end
-           
+
         if isfield(advo.attrs, 'rotate_vars')
             rotate_vars = advo.attrs.rotate_vars;
         else
             rotate_vars = {'vel'};
         end
-    
+
         cs = lower(advo.coord_sys);
         if strcmp(cs,cs_new)
             return;
@@ -211,15 +211,15 @@ end
                 ,msgtext);
             throwAsCaller(ME)
         end
-    
+
         if isfield(advo, 'orientmat')
             omat = advo.orientmat.data;
-        else            
+        else
             omat = euler2orient( advo.heading.data,...
                                  advo.pitch.data,...
                                  advo.roll.data);
         end
-    
+
         % Take the transpose of the orientation to get the inst->earth rotation
         % matrix.
         rmat = permute(omat, [1 2 4 3]);
@@ -233,10 +233,10 @@ end
             warning("Invalid orientation matrix (determinant != 1) " + ...
                 "in inst2earth")
         end
-    
+
         % The dictionary of rotation matrices for different sized arrays.
         rmd_3 = rmat;
-        
+
         % The 4-row rotation matrix assume that rows 0,1 are u,v,
         % and 2,3 are independent estimates of w.
         tmp = zeros([length(rmat),1,4,4],"double");
@@ -257,7 +257,7 @@ end
         if reverse
             % 3-element inverse handled by sumstr definition (transpose)
             step1 = squeeze(permute(rmd_4,[3,4,1,2]));
-            % matlab cant invert n-d matricies 
+            % matlab cant invert n-d matricies
             shape = size(step1);
             step2 = zeros(shape);
             for kk = 1:shape(3)
@@ -274,7 +274,7 @@ end
             n = shape(end);
             otherdims = repmat({':'},1,length(shape)-1);
             % Nortek documents sign change for upside-down instruments
-            if down                
+            if down
                 if ~reverse
                     for kk = 2:n
                         dat(otherdims{:},kk) = dat(otherdims{:},kk) .* -1.;
@@ -291,21 +291,21 @@ end
                     end
                 else
                     if n == 3
-                        dat = tensorproduct(rmd_3,dat,sumstr); 
+                        dat = tensorproduct(rmd_3,dat,sumstr);
                     elseif n == 4
-                        dat = tensorproduct(rmd_4,dat,'dcba,dceb->dcea');                        
+                        dat = tensorproduct(rmd_4,dat,'dcba,dceb->dcea');
                     else
                         msgtext = ["The entry %s is not a vector, it " +...
                             "cannot be rotated.", nm];
                         ME = MException('MATLAB:inst2earth',msgtext);
                         throwAsCaller(ME)
-                    end                    
+                    end
                     for kk = 2:n
                         dat(otherdims{:},kk) = dat(otherdims{:},kk) .* -1.;
                     end
                 end
             else % 'up' and AHRS
-                if n == 3                    
+                if n == 3
                     dat = tensorproduct(rmd_3,dat,sumstr);
                 elseif n == 4
                     dat = tensorproduct(rmd_4,dat,'dcba,dceb->dcea');
@@ -315,7 +315,7 @@ end
                         ME = MException('MATLAB:inst2earth',msgtext);
                         throwAsCaller(ME)
                 end
-            end 
+            end
             advo.(nm).data = dat;
         end
 
@@ -327,16 +327,16 @@ end
 
     function out = inst2earth_rdi()
         % Rotate velocities from the instrument to earth coordinates.
-        % 
+        %
         % This function also rotates data from the 'ship' frame, into the
         % earth frame when it is in the ship frame (and
         % ``adcpo.use_pitchroll == 'yes'``). It does not support the
         % 'reverse' rotation back into the ship frame.
-        % 
+        %
         % Parameters
         % ----------
         % adpo : The ADP object containing the data.
-        % 
+        %
         % reverse : bool (default: False)
         %        If True, this function performs the inverse rotation
         %        (earth->inst).
@@ -346,7 +346,7 @@ end
         % force : bool (default: False)
         %     When true do not check which coordinate system the data is in
         %     prior to performing this rotation.
-        % 
+        %
         % Notes
         % -----
         % The rotation matrix is taken from the Teledyne RDI ADCP Coordinate
@@ -398,9 +398,9 @@ end
                 sumstr = sumstr3;
             else
                 sumstr = sumstr4;
-            end            
+            end
             advo.(nm).data(otherdims{:},1:3) = ...
-                tensorproduct(rmat,dat,sumstr);            
+                tensorproduct(rmat,dat,sumstr);
         end
 
         advo = set_coords(advo, cs_new);

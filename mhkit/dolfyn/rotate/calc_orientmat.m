@@ -1,8 +1,8 @@
 function rotmat = calc_orientmat(adcpo)
 %%%%%%%%%%%%%%%%%%%%
-%    Calculate the orientation matrix using the raw 
+%    Calculate the orientation matrix using the raw
 %    heading, pitch, roll values from the RDI binary file.
-%     
+%
 % Parameters
 % ------------
 %    adcpo : The ADP object containing the data.
@@ -22,9 +22,9 @@ function rotmat = calc_orientmat(adcpo)
 %
 % Returns
 % ---------
-%     rotmat: array 
+%     rotmat: array
 %         orientation matrix
-%        
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     r = deg2rad(adcpo.roll.data);
@@ -66,7 +66,7 @@ function rotmat = calc_orientmat(adcpo)
     rotmat(:,:,3,2) = -sh .* sr - ch .* sp .* cr;
     rotmat(:,:,1,3) = -cp .* sr;
     rotmat(:,:,2,3) = sp;
-    rotmat(:,:,3,3) = cp .* cr;   
+    rotmat(:,:,3,3) = cp .* cr;
 
     rotmat = permute(rotmat, [1 2 4 3]);
 end

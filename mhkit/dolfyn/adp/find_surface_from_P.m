@@ -2,30 +2,30 @@ function out = find_surface_from_P(ds, options)
 % Calculates the distance to the water surface. Temperature and salinity
 % are used to calculate seawater density, which is in turn used with the
 % pressure data to calculate depth.
-% 
+%
 % Parameters
 % ----------
 % ds: Dataset
 %   The full adcp dataset
 % salinity: numeric
 %   Water salinity in psu
-% 
+%
 % Returns
 % -------
 % out: Dataset
 %   adds the variables "water_density" and "depth" to the input dataset.
-% 
+%
 % Notes
 % -----
 % Requires that the instrument's pressure sensor was calibrated/zeroed
 % before deployment to remove atmospheric pressure.
-% 
+%
 % Calculates seawater density at normal atmospheric pressure according
-% to the UNESCO 1981 equation of state. Does not include hydrostatic 
+% to the UNESCO 1981 equation of state. Does not include hydrostatic
 % pressure.
 
     arguments
-        ds         
+        ds
         options.salinity = 35;
     end
 

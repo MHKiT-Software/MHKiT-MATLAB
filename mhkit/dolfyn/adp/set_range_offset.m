@@ -3,26 +3,26 @@ function out = set_range_offset(ds, h_deploy)
 % or depth below water surface (for a down-facing instrument) to the range
 % coordinate. Also adds an attribute to the Dataset with the current
 % "h_deploy" distance.
-% 
+%
 % Parameters
 % ----------
 % ds : xarray.Dataset
 %   The adcp dataset to ajust 'range' on
 % h_deploy : numeric
 %   Deployment location in the water column, in [m]
-% 
+%
 % Returns
 % -------
 % None, operates "in place"
-% 
+%
 % Notes
 % -----
 % Center of bin 1 = h_deploy + blank_dist + cell_size
-% 
+%
 % Nortek doesn't take h_deploy into account, so the range that DOLfYN
 % calculates distance is from the ADCP transducers. TRDI asks for h_deploy
 % input in their deployment software and is thereby known by DOLfYN.
-% 
+%
 % If the ADCP is mounted on a tripod on the seafloor, h_deploy will be
 % the height of the tripod +/- any extra distance to the transducer faces.
 % If the instrument is vessel-mounted, h_deploy is the distance between
@@ -45,7 +45,7 @@ end
 
 % If any of the range values changed we need to propogate that through the
 % fields that would be affected
-fn = fieldnames(ds); 
+fn = fieldnames(ds);
 for qq = 1:numel(fn)
     field = fn{qq};
     if isfield(ds.(field),'coords')
