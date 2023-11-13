@@ -8,10 +8,10 @@ function results = runTests()
     testFileName = mfilename('fullpath');
     testsFolder = fileparts(testFileName);
     suite = TestSuite.fromFolder(testsFolder);
-    
+
     % Build the runner
     runner = TestRunner.withTextOutput;
-    
+
     % Add HTML plugin
     htmlFolder = fullfile(testsFolder, 'test_results');
     plugin = TestReportPlugin.producingHTML(htmlFolder);
@@ -26,3 +26,4 @@ function results = runTests()
     results = runner.run(suite);
 
 end
+
