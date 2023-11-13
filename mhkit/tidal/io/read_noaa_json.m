@@ -1,7 +1,7 @@
 function data=read_noaa_json(filename)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Returns site structure from a json saved from the 
+%     Returns site structure from a json saved from the
 %     request_noaa_data
 %
 % Parameters
@@ -35,7 +35,7 @@ for idx = 1:length(fields)
 end
 init_data = rmfield(init_data,'metadata');
 
-% Move the data fields over and create time 
+% Move the data fields over and create time
 fields = fieldnames(init_data);
 shape = size(fieldnames(init_data.(fields{1})));
 for idx = 1:length(fields)
@@ -50,15 +50,16 @@ data.time = cellfun(@(x) x(2:end), time, 'UniformOutput', false);
 data.time = cellfun(@str2double,data.time);
 data.time = transpose(data.time/1000.);
 % Time is in epochtime since 1970-01-01. Divide by 1000 to remove
-% milliseconds. convert with 
+% milliseconds. convert with
 % datetime(time,'ConvertFrom','epochtime','Epoch','1970-01-01')
 
 for idx = 1:length(fields)
-    test = init_data.(fields{idx}).(time{1});    
+    test = init_data.(fields{idx}).(time{1});
     data.(fields{idx}) = cell2mat(struct2cell(init_data.(fields{idx})));
-    if ischar(test) || isstring(test)        
+    if ischar(test) || isstring(test)
         data.(fields{idx}) = arrayfun(@str2double,data.(fields{idx}));
     end
 end
 
 end
+

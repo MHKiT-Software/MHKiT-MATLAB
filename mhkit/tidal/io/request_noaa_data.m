@@ -1,10 +1,10 @@
 function data=request_noaa_data(station, parameter, start_date, end_date, options)
 
-%     Loads NOAA current data directly from https://tidesandcurrents.noaa.gov/api/ using a 
+%     Loads NOAA current data directly from https://tidesandcurrents.noaa.gov/api/ using a
 %     GET request into a structure. NOAA sets max of 31 days between start and end date.
 %     See https://co-ops.nos.noaa.gov/api/ for options. All times are reported as GMT and metric
 %     units are returned for data.
-% 
+%
 %     Parameters
 %     ----------
 %     station : str
@@ -17,7 +17,7 @@ function data=request_noaa_data(station, parameter, start_date, end_date, option
 %         Start date in the format yyyyMMdd
 %
 %     end_date : str
-%         End date in the format yyyyMMdd 
+%         End date in the format yyyyMMdd
 %
 %     proxy : None
 %         Parameter is now deprecated.
@@ -32,10 +32,10 @@ function data=request_noaa_data(station, parameter, start_date, end_date, option
 %     write_json : str or None (optional)
 %         Name of json file to write data
 %         to call: request_noaa_data(station,parameter,start_date,end_date,"write_json",write_json)
-%         
+%
 %     Returns
 %     -------
-%     data : structure 
+%     data : structure
 %
 %
 %         data.id: station ID
@@ -46,10 +46,10 @@ function data=request_noaa_data(station, parameter, start_date, end_date, option
 %
 %         data.lon: station Longitude
 %
-%         data.vars: this will vary depending on parameter input. 
+%         data.vars: this will vary depending on parameter input.
 %
 %         data.time: epoch time [s]
-% 
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
@@ -84,7 +84,7 @@ while start_period_datetime <= end_datetime
     [data_in_period, timeseries_fields] = request_noaa_data_restricted_duration( ...
         station, parameter, start_period, end_period, ...
         MAX_RETRIES, REQUIRED_FIELDS, MAX_DAYS_PER_QUERY);
-    
+
     if isempty(fieldnames(data_in_period)) || isempty(timeseries_fields)
         % do nothing
     elseif is_first_query
@@ -92,4 +92,4 @@ while start_period_datetime <= end_datetime
         is_first_query = false;
     end
 end
-  
+

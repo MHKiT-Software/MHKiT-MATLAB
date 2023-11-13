@@ -1,11 +1,12 @@
 function fig=plot_joint_probability_distribution(Q, width_dir, width_vel, ...
                                         options)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Creates a polar histogram. Direction angles from binned histogram must 
+%   Creates a polar histogram. Direction angles from binned histogram must
 %   be specified such that 0 is north.
-%     
+%
 % Parameters
-% ------------   
+% ------------
 %    data: structure
 %
 %     data.time: vector
@@ -17,24 +18,24 @@ function fig=plot_joint_probability_distribution(Q, width_dir, width_vel, ...
 %     data.s: vector
 %           time-series of speeds [cm/s]
 %
-%    width_dir: float 
+%    width_dir: float
 %       Width of directional bins for histogram in degrees
 %
-%    width_vel: float 
+%    width_vel: float
 %       Width of velocity bins for histogram in m/s
 %
 %    flood_ebb: 2 element vector (optional)
-%       Direction in degrees added to theta ticks 
+%       Direction in degrees added to theta ticks
 %       to call: plot_joint_probability_distribution(Q, width_dir, width_vel,"flood_ebb",flood_ebb)
 %
 %    title: string (optional)
-%       title for the plot 
+%       title for the plot
 %       to call: plot_joint_probability_distribution(Q, width_dir, width_vel,"title",title)
 %
 %    savepath: string (optional)
 %       path and filename to save figure.
 %       to call: plot_joint_probability_distribution(Q, width_dir, width_vel,"savepath",savepath)
-% 
+%
 % Returns
 % ---------
 %   figure handle to joint probability distribution plot
@@ -105,7 +106,7 @@ VelEdges = 0:width_vel:max(Q.s);
 [H] = histcounts2(Q.d,Q.s,DirEdges,VelEdges,'Normalization','probability');
 H = H*100;
 
-% creating vel & dir bins index to point to the middle of bin 
+% creating vel & dir bins index to point to the middle of bin
 dir_bins = DirEdges(2:end)-width_dir/2;
 dir_bins(1) = 0;
 vel_bins = VelEdges(2:end)-width_vel/2;
@@ -143,7 +144,7 @@ end
 title(options.title)
 
 % adding in the flood and ebb directions if they are included
-if length(options.flood_ebb) == 2 
+if length(options.flood_ebb) == 2
     line([0,MaxR*sin(options.flood_ebb(1)/180*pi)],[0 MaxR*cos(options.flood_ebb(1)/180*pi)]);
     text(MaxR*sin(options.flood_ebb(1)/180*pi)*1.1,MaxR*cos(options.flood_ebb(1)/180*pi)*1.1,'Flood','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
     line([0,MaxR*sin(options.flood_ebb(2)/180*pi)],[0 MaxR*cos(options.flood_ebb(2)/180*pi)]);
@@ -155,9 +156,9 @@ end
 % matrix
 dir_matrix = ones(size(H)).*(dir_bins'/180*pi);
 y_pos = cos(dir_matrix).*vel_bins;
-y_pos = [y_pos; y_pos(1,:)]; 
+y_pos = [y_pos; y_pos(1,:)];
 x_pos = sin(dir_matrix).*vel_bins;
-x_pos = [x_pos; x_pos(1,:)]; 
+x_pos = [x_pos; x_pos(1,:)];
 H = [H;H(1,:)];
 
 % creating the color plot for the PDF
@@ -173,7 +174,7 @@ ylabel(cbh,'Joint Probability [%]','fontsize',20);
 len = strlength(options.savepath);
 if len > 1
     saveas(figure, options.savepath);
-end 
+end
 
 hold off
 
@@ -181,3 +182,4 @@ hold off
 % if nargin == 4
 %     title(varargin{1})
 % end
+

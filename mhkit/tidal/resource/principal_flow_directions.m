@@ -1,16 +1,17 @@
 function [ebb, flood]=principal_flow_directions(directions,width_dir)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Calculates the principal flow directions of current data
-%     The weighted average (over the working velocity range of the TEC) 
-%     should be considered to be the principal direction of the current, 
-%     and should be used for both the ebb and flood cycles to determine 
-%     the TEC optimum orientation. 
-%     
+%     The weighted average (over the working velocity range of the TEC)
+%     should be considered to be the principal direction of the current,
+%     and should be used for both the ebb and flood cycles to determine
+%     the TEC optimum orientation.
+%
 %     Parameters
 %     ----------
 %     directions: vector
 %       flow directions [degrees]
-%         
+%
 %     width_dir: int or vector
 %       width of direction bins [degrees]
 %     Returns
@@ -35,7 +36,7 @@ odd = logical(rem(N_dir,2));
 % Shift by 180 degrees and sum
 if odd
     % Then split middle bin counts to left and right
-    H0to180    = H1(1:floor(N_dir/2)-1); 
+    H0to180    = H1(1:floor(N_dir/2)-1);
     H180to360  = H1(floor(N_dir/2)+1:end);
     H0to180(end)    = H0to180(end) + H1(floor(N_dir/2))/2;
     % Add the two
@@ -48,9 +49,9 @@ end
 maxDegreeStacked = find(H180 == max(H180)) - 1;
 % Shift by 90 to find angles normal to principal direction
 floodEbbNormalDegree1 = normalize_angle(maxDegreeStacked + 90.);
-% Find the complimentary angle 
+% Find the complimentary angle
 floodEbbNormalDegree2 = normalize_angle(floodEbbNormalDegree1+180.);
-% Reset values so that the Degree1 is the smaller angle, and Degree2 
+% Reset values so that the Degree1 is the smaller angle, and Degree2
 % the large
 floodEbbNormalDegree1 = min(floodEbbNormalDegree1, floodEbbNormalDegree2);
 floodEbbNormalDegree2 = floodEbbNormalDegree1 + 180.;
@@ -86,11 +87,11 @@ flood = 0.5 * (dir2_edges(max2) +...
 
     function new_degree = normalize_angle(degree)
         % Normalizes degrees to be between 0 and 360
-        % 
+        %
         % Parameters
         % ----------
         % degree: int or float
-        % 
+        %
         % Returns
         % -------
         % new_degree: float
@@ -98,23 +99,23 @@ flood = 0.5 * (dir2_edges(max2) +...
 
         % Set new degree as remainder
         new_degree = rem(degree, 360);
-        % Ensure Positive 
+        % Ensure Positive
         new_degree = rem((new_degree + 360),360);
     end
 
     function out = pdf(hist, edges)
-        % Probability density function: 
+        % Probability density function:
         % Given a histrogram, the result is the value of the
         % probability density function at the bin, normalized such that
         % the integral over the range is 1. Note that the sum of the
         % histogram values will not be equal to 1 unless bins of unity
         % width are chosen; it is not a probability *mass* function.
-        % 
+        %
         % Parameters
         % ----------
         % hist: array (histogram count)
         % edges: array (edges of histogram)
-        % 
+        %
         % Returns
         % -------
         % out: array
@@ -125,3 +126,4 @@ flood = 0.5 * (dir2_edges(max2) +...
     end
 
 end
+

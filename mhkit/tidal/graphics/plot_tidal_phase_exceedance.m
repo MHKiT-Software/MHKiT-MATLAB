@@ -1,11 +1,11 @@
 function figure=plot_tidal_phase_exceedance(data, flood, ebb, ...
                                                           options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Returns a stacked area plot of the exceedance probability for the 
-%     flood and ebb tidal phases. 
-%     
+%     Returns a stacked area plot of the exceedance probability for the
+%     flood and ebb tidal phases.
+%
 % Parameters
-% ------------   
+% ------------
 %    data: structure
 %
 %      data.time: vector
@@ -22,13 +22,13 @@ function figure=plot_tidal_phase_exceedance(data, flood, ebb, ...
 %
 %    ebb: float
 %        principal ebb direction [degrees]
-% 
+%
 %    bin_size: numeric (optional)
 %       Speed bin size. Default = 0.1 m/s
 %       to call: plot_tidal_phase_probability(data, flood, ebb,"bin_size",bin_size)
 %
 %    title: string (optional)
-%       title for the plot 
+%       title for the plot
 %       to call: plot_tidal_phase_probability(data, flood, ebb,"title",title)
 %
 %    savepath: string (optional)
@@ -37,14 +37,14 @@ function figure=plot_tidal_phase_exceedance(data, flood, ebb, ...
 %
 % Returns
 % ---------
-%   figure: stacked bar graph of the probability of exceedance in 
-%           flood and ebb directions 
+%   figure: stacked bar graph of the probability of exceedance in
+%           flood and ebb directions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     data
     flood
-	ebb
+    ebb
     options.bin_size = 0.1; % m/s
     options.title = "";
     options.savepath = "";
@@ -70,14 +70,14 @@ end
 
 max_angle = max(ebb, flood);
 min_angle = min(ebb, flood);
-    
+
 lower_split = rem((min_angle + (360 - max_angle + min_angle)/2 ) , 360);
 upper_split = lower_split + 180;
-    
+
 if (lower_split <= ebb) && (ebb < upper_split)
-	isEbb = ((data.d < upper_split) & (data.d >= lower_split));
+    isEbb = ((data.d < upper_split) & (data.d >= lower_split));
 else
-	isEbb = ~((data.d < upper_split) & (data.d >= lower_split));
+    isEbb = ~((data.d < upper_split) & (data.d >= lower_split));
 end
 
 s_ebb = data.s(isEbb);
@@ -91,7 +91,7 @@ F_flood = F_flood.F;
 decimals = round(options.bin_size/0.1);
 s_new = [round(min(data.s),decimals):options.bin_size:...
     round(max(data.s),decimals)+options.bin_size];
-s_new = s_new(1:end-1); % this accounts for the difference between matlab 
+s_new = s_new(1:end-1); % this accounts for the difference between matlab
                         % and numpy.arange which uses a half open interval
 
 [~,i_ebb] = unique(s_ebb);
@@ -123,6 +123,7 @@ title(options.title)
 len = strlength(options.savepath);
 if len > 1
     exportgraphics(gca, options.savepath);
-end 
+end
 
 hold off
+

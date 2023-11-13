@@ -1,11 +1,12 @@
 function figure=plot_rose(data, width_dir, width_vel, ...
                                         options)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       Creates a polar histogram. Direction angles from binned histogram must 
+%       Creates a polar histogram. Direction angles from binned histogram must
 %       be specified such that 0  degrees is north.
-%     
+%
 % Parameters
-% ------------  
+% ------------
 %    data: structure
 %
 %      data.time: vector
@@ -17,10 +18,10 @@ function figure=plot_rose(data, width_dir, width_vel, ...
 %      data.s: vector
 %       time-series of speeds [cm/s]
 %
-%    width_dir: float 
+%    width_dir: float
 %        Width of directional bins for histogram in degrees
 %
-%    width_vel: float 
+%    width_vel: float
 %        Width of velocity bins for histogram in m/s
 %
 %    flood_ebb: 2 element vector (optional)
@@ -28,14 +29,14 @@ function figure=plot_rose(data, width_dir, width_vel, ...
 %        to call: plot_rose(Q, width_dir, width_vel,"flood_ebb",flood_ebb)
 %
 %    title: string (optional)
-%        title for the plot 
+%        title for the plot
 %        to call: plot_rose(Q, width_dir, width_vel,"title",title)
 %
 %    savepath: string (optional)
 %        path and filename to save figure.
 %        to call: plot_rose(Q, width_dir, width_vel,"savepath",savepath)
 %
-% 
+%
 % Returns
 % ---------
 %   figure handle to water current rose plot
@@ -86,7 +87,7 @@ end
 %         end;
 %     end;
 % end;
-    
+
 % Plot Variables
 radialLabelDir = 30;
 propRingRad    = 5;
@@ -139,10 +140,10 @@ axinfo.FontSize = 20;
 % adding in the flood and ebb directions if they are included
 
 if length(options.flood_ebb) == 2
-    % adding in the radial lines for the ebb and flood 
+    % adding in the radial lines for the ebb and flood
     polarplot([1,1]*options.flood_ebb(1)/180*pi,[0,max(RadRingLoc/100)*length(data.s)],'linewidth',2,'color','r','displayname','Flood Direction');
     text(options.flood_ebb(1)/180*pi,max(RadRingLoc/100)*length(data.s),'Flood','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
-    polarplot([1,1]*options.flood_ebb(2)/180*pi,[0,max(RadRingLoc/100)*length(data.s)],'linewidth',2,'color','b','displayname','Ebb Direction');    
+    polarplot([1,1]*options.flood_ebb(2)/180*pi,[0,max(RadRingLoc/100)*length(data.s)],'linewidth',2,'color','b','displayname','Ebb Direction');
     text( options.flood_ebb(2)/180*pi,max(RadRingLoc/100)*length(data.s),'Ebb','fontsize',15,'HorizontalAlignment','Center','BackGroundColor','w');
 end
 
@@ -151,7 +152,7 @@ if len > 1
     saveas(figure, options.savepath);
 end
 
-hold off   
+hold off
 
 
 % if nargin == 4
