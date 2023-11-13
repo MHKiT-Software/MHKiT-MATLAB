@@ -2,15 +2,15 @@ function interharmonics=interharmonics(harmonics,grid_freq)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates the interharmonics from the harmonics of current based on IEC 61000-4-7.
-%    
+%
 % Parameters
 % -----------
-%     harmonics: structure with handles- harmonics.amplitude and harmonics.harmonic  
-%         Harmonic amplitude with each timeseries in its own column 
-% 
+%     harmonics: structure with handles- harmonics.amplitude and harmonics.harmonic
+%         Harmonic amplitude with each timeseries in its own column
+%
 %     grid_freq: int
 %         Value indicating if the power supply is 50 or 60 Hz. Options = 50 or 60
-% 
+%
 % Returns
 % -------
 %     interharmonics: structure with handles interharmonics.amplitude and
@@ -27,11 +27,11 @@ data = harmonics.amplitude;
 
 dsize=size(data);
 li=py.list();
-if dsize(2)>1 
+if dsize(2)>1
    for i = 1:dsize(2)
       app=py.list(data(:,i));
       li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-            
+
    end
    data_pd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(harmonics.harmonic,li,int32(dsize(2)));
 elseif dsize(2)==1
@@ -48,3 +48,4 @@ vals=reshape(vals,[x,y]);
 
 interharmonics.amplitude=vals;
 interharmonics.harmonic = double(py.array.array('d',py.numpy.nditer(interharmonics_pd.index)));
+
