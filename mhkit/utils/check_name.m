@@ -1,30 +1,30 @@
 function output_name=check_name(input_name)
 %%%%%%%%%%%%%%%%%%%%
-%   Check if a given string is a valid 
-%       field name for MATLAB struct. 
+%   Check if a given string is a valid
+%       field name for MATLAB struct.
 %   If not, convert it to a valid field name
-%   
-%   "Field names can contain ASCII letters (A–Z, a–z), digits (0–9), 
-%   and underscores, and must begin with a letter. 
-%   The maximum length of a field name is $namelengthmax$." 
+%
+%   "Field names can contain ASCII letters (A–Z, a–z), digits (0–9),
+%   and underscores, and must begin with a letter.
+%   The maximum length of a field name is $namelengthmax$."
 %   -- MATLAB ref for struct
-%     
+%
 % Parameters
 % ------------
 %   input_name: string
-%       Name to check. 
+%       Name to check.
 %
 % Returns
 % ------------
-%   output_name: the same as input_name if it is valid, 
+%   output_name: the same as input_name if it is valid,
 %       otherwise, it is the modified name.
 %   1. All special characters are replaced by '_SC'
 %   2. Names not beigining with letters now begins with 'A'.
-%   3. Name length exceeding $namelengthmax$ (=63) are truncated 
+%   3. Name length exceeding $namelengthmax$ (=63) are truncated
 %       to name with a length of $namelengthmax$.
-% 
-%     
-%        
+%
+%
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     output_name = input_name;
     % check if the name is valid:
@@ -47,3 +47,4 @@ function output_name=check_name(input_name)
         end
     end
 end
+
