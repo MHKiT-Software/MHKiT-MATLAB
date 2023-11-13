@@ -2,16 +2,16 @@ function results = check_corrupt(data,vals,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Check for data that is outside expected range
-%    
+%
 % Parameters
 % ------------
 %
 %     data: pandas dataframe or qcdata structure
-%          Pandas dataframe indexed by datetime (use 
+%          Pandas dataframe indexed by datetime (use
 %          py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))
 %
 %          OR
-%     
+%
 %          qcdata structure of form:
 %
 %             data.values: 2D array of doubles with arbitrary number of columns
@@ -20,7 +20,7 @@ function results = check_corrupt(data,vals,options)
 %
 %     vals: cell array of floats
 %         Array of at least two corrupt data values
-%         Use cell array for one value, or pack array with NaN 
+%         Use cell array for one value, or pack array with NaN
 %         (A single value array becomes a non-iterable scalar in python and
 %         will cause an error.)
 %
@@ -34,25 +34,25 @@ function results = check_corrupt(data,vals,options)
 %         default = 1
 %         to call: check_corrupt(data,vals,"min_failures",min_failures)
 %
-%     
+%
 % Returns
 % ---------
 %     results: qcdata structure of form:
 %
 %         results.values: array of doubles
 %            Same shape as input data.values
-%            Elements that failed QC test replaced with NaN 
+%            Elements that failed QC test replaced with NaN
 %
 %         results.mask: array of int64
 %            Same shape as input data.values
-%            Logical mask of QC results (1 = passed, 0 = failed QC test) 
+%            Logical mask of QC results (1 = passed, 0 = failed QC test)
 %
 %         results.time: array of datetimes
-%            Same as input times 
+%            Same as input times
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-arguments 
+arguments
     data
     vals
     options.key = py.None;
@@ -76,4 +76,5 @@ r = struct(py.pecos.monitoring.check_corrupt(data,vals,pyargs("key",options.key,
   % Extract time from index, convert to posix then datetime
   ptime = double(py.array.array('d',py.numpy.nditer(r.cleaned_data.index.values)))/1e9;
   results.time=datetime(ptime,'ConvertFrom','posix');
-end 
+end
+

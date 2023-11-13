@@ -2,16 +2,16 @@ function results = check_increment(data,bound,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Check data increments using the difference between values
-%    
+%
 % Parameters
 % ------------
 %
 %     data: pandas dataframe or qcdata structure
-%          Pandas dataframe indexed by datetime (use 
+%          Pandas dataframe indexed by datetime (use
 %          py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))
 %
 %          OR
-%     
+%
 %          qcdata structure of form:
 %
 %             data.values: 2D array of doubles with arbitrary number of columns
@@ -20,7 +20,7 @@ function results = check_increment(data,bound,options)
 %
 %     bound: cell array of floats
 %         [lower bound, upper bound] for min/max difference
-%         NaN or py.None can be used for either bound 
+%         NaN or py.None can be used for either bound
 %
 %     key: string (optional)
 %         Data column name or translation dictionary key.  If not specified
@@ -40,25 +40,25 @@ function results = check_increment(data,bound,options)
 %         default = 1
 %         to call: check_increment(data,bound,"min_failures",min_failures)
 %
-%     
+%
 % Returns
 % ---------
 %     results: qcdata structure of form:
 %
 %         results.values: array of doubles
 %            Same shape as input data.values
-%            Elements that failed QC test replaced with NaN 
+%            Elements that failed QC test replaced with NaN
 %
 %         results.mask: array of int64
 %            Same shape as input data.values
-%            Logical mask of QC results (1 = passed, 0 = failed QC test) 
+%            Logical mask of QC results (1 = passed, 0 = failed QC test)
 %
 %         results.time: array of datetimes
-%            Same as input times 
+%            Same as input times
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-arguments 
+arguments
     data
     bound
     options.key = py.None;
@@ -86,4 +86,5 @@ r = struct(py.pecos.monitoring.check_increment(data,bound,...
   ptime = double(py.array.array('d',py.numpy.nditer(r.cleaned_data.index.values)))/1e9;
   results.time=datetime(ptime,'ConvertFrom','posix');
 
-end 
+end
+
