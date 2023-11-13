@@ -34,7 +34,7 @@ function P=ac_power_three_phase(voltage,current,power_factor,varargin)
 %         power factor for the system
 %
 %     line_to_line: bool (Optional)
-%         set true if the given voltage measuremtn is line_to_line
+%         set true if the given voltage measurement is line_to_line
 %
 % Returns
 % ---------

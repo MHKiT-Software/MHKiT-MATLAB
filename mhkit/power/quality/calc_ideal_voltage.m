@@ -11,7 +11,7 @@ function u0=calc_ideal_voltage(Un,alpha_m)
 % Parameters
 % -----------
 %   Un: double
-%       RMS value of the nomianal voltage of the grid (V).
+%       RMS value of the nominal voltage of the grid (V).
 %   alpha_m: double array (ntime)
 %       Electrical angle of the fundamental component of u_m(t)
 % Returns

@@ -7,7 +7,7 @@ function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
 % Parameters
 % -----------
 %   Un: double
-%       RMS value of the nomianal voltage of the grid (V).
+%       RMS value of the nominal voltage of the grid (V).
 %   In: double
 %       Nominal current (A).
 %   fg: double
