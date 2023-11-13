@@ -1,14 +1,14 @@
 function p=velocity_to_power(V,polynomial_coefficients,cut_in,cut_out)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Calculates power given velocity data and the relationship 
+%     Calculates power given velocity data and the relationship
 %     between velocity and power from an individual turbine
-%     
+%
 % Parameters
 % ----------
 %     V : Velocity [m/s]
 %
-%          Pandas dataframe indexed by time [datetime or s]  
+%          Pandas dataframe indexed by time [datetime or s]
 %
 %           To make a pandas data frame from user supplied frequency and spectra
 %           use py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(timeseries,time,x)
@@ -22,7 +22,7 @@ function p=velocity_to_power(V,polynomial_coefficients,cut_in,cut_out)
 %           V.time: time [datetime or s]
 %
 %     polynomial_coefficients : vector
-%         vector of polynomial coefficients that discribe the relationship between 
+%         vector of polynomial coefficients that discribe the relationship between
 %         velocity and power at an individual turbine
 %
 %     cut_in: float
@@ -30,13 +30,13 @@ function p=velocity_to_power(V,polynomial_coefficients,cut_in,cut_out)
 %
 %     cut_out: float
 %         Velocity values above cut_out are not used to compute P
-%     
-% Returns   
+%
+% Returns
 % -------
-%     p : Structure 
+%     p : Structure
 %
 %
-%        P.P: Power [W] 
+%        P.P: Power [W]
 %
 %        P.time: epoch time [s]
 %
@@ -50,13 +50,13 @@ py.importlib.import_module('mhkit');
 if (isa(V,'py.pandas.core.frame.DataFrame')~=1)
     x=size(V.V);
     li=py.list();
-    if x(2)>1 
+    if x(2)>1
         for i = 1:x(2)
             app=py.list(V.V(:,i));
             li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-            
+
         end
-    elseif x(2) ==1 
+    elseif x(2) ==1
         li=V.V;
     end
 
@@ -87,8 +87,9 @@ si=size(vals);
  for i=1:si(2)
     test=string(py.str(vv{i}));
     newname=split(test,",");
-    
+
     p.(newname(1))=vals(:,i);
-    
+
  end
  p.time=double(py.array.array('d',py.numpy.nditer(Pdf.index)));
+

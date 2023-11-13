@@ -1,14 +1,14 @@
 function [D_E,projected_capture_area]=ducted(diameter)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Calculates the equivalent diameter and projected capture area of a 
+%     Calculates the equivalent diameter and projected capture area of a
 %     ducted turbine
-%     
+%
 % Parameters
 % ------------
 %     diameter : float
 %         ducted diameter [m]
-%         
+%
 % Returns
 % ---------
 %     D_E : float
@@ -25,3 +25,4 @@ result=py.mhkit.river.performance.ducted(diameter);
 resultc=cell(result);
 D_E=resultc{1};
 projected_capture_area=resultc{2};
+
