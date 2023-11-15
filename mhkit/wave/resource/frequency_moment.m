@@ -2,7 +2,7 @@ function m=frequency_moment(S,N,varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates the Nth frequency moment of the spectrum
-%    
+%
 % Parameters
 % ------------
 %    S: Spectral Density (m^2/Hz)
@@ -15,21 +15,21 @@ function m=frequency_moment(S,N,varargin)
 %       structure of form:
 %           S.spectrum: Spectral Density (m^2/Hz)
 %
-%           S.type: String of the spectra type, i.e. Bretschneider, 
+%           S.type: String of the spectra type, i.e. Bretschneider,
 %           time series, date stamp etc.
 %
 %           S.frequency: frequency (Hz)
-%   
+%
 %    N: int
 %       Moment (0 for 0th, 1 for 1st ....)
 %
-%    frequency_bins: vector (optional) 
-%       Bin widths for frequency of S. Required for unevenly sized bins 
+%    frequency_bins: vector (optional)
+%       Bin widths for frequency of S. Required for unevenly sized bins
 %
 % Returns
 % ---------
-%    m: double 
-%        
+%    m: double
+%
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -43,11 +43,11 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(S)==1)
         x=size(S.spectrum);
         li=py.list();
-        if x(2)>1 
+        if x(2)>1
             for i = 1:x(2)
                 app=py.list(S.spectrum(:,i));
                 li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-            
+
             end
             S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency(:,1),li,x(2));
         elseif x(2)==1
@@ -69,3 +69,4 @@ else
 end
 
 m=double(m.values);
+

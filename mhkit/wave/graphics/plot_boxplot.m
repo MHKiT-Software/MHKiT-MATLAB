@@ -1,10 +1,11 @@
 function f = plot_boxplot(Hs, time, options)
-%PLOT_BOXPLOT Creates monthly-averaged boxplots of significant wave height
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   PLOT_BOXPLOT Creates monthly-averaged boxplots of significant wave height
 %   Creates monthly-averaged boxplots of significant wave height (Hs)
 %   Developed based on:
 %   http://cdip.ucsd.edu/themes/media/docs/documents/html_pages/annualHs_plot.html
-%   
+%
 %   Parameters
 %   ----------
 %       Hs: double array
@@ -13,7 +14,7 @@ function f = plot_boxplot(Hs, time, options)
 %           timestamps
 %       buoy_title: string (optional)
 %           figure suptitle (super title)
-%   
+%
 %   Returns
 %   -------
 %       f : figure object
@@ -139,3 +140,4 @@ Y = 100*(.5:1:n-.5)/n;
 x = [min(x); x; max(x)];
 Y = [0 Y 100];
 yi = interp1(Y,x,p);
+

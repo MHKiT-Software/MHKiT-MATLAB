@@ -1,11 +1,12 @@
 function [data] = cdip_request_parse_workflow(options)
+
 %CDIP_REQUEST_PARSE_WORKFLOW Parses CDIP data from a web request
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Requests data for a station number (from http://cdip.ucsd.edu/) and
 %   parses. Years may be non-consecutive e.g. [2001, 2010]. Time may be
 %   sliced by dates (start_date or end date in YYYY-MM-DD). By default 2D
 %   variables are not parsed if all 2D variables are needed.
-%   
+%
 %   Parameters
 %   ----------
 %       station_number: string
@@ -26,7 +27,7 @@ function [data] = cdip_request_parse_workflow(options)
 %           processing time. If all 2D variables are not needed it is
 %           recommended to pass 2D parameters of interest using the
 %           'parameters' keyword and leave this set to the default false.
-%   
+%
 %   Returns
 %   -------
 %       data: structure
@@ -116,7 +117,7 @@ for i = 1:length(data_to_query)                     % for each data metric
                 end
                 continue;
             end
-    
+
             % Convert any times
             if endsWith(name, 'Time')
                 value = datetime(value, ...
@@ -467,3 +468,4 @@ else
     end
 end
 end
+

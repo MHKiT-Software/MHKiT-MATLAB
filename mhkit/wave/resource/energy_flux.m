@@ -1,22 +1,22 @@
 function J=energy_flux(S,h,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-%    
+%
+%
 % Parameters
 % ------------
 %    S: Spectral Density (m^2/Hz)
 %       structure of form:
 %           S.spectrum: Spectral Density (m^2/Hz)
 %
-%           S.type: String of the spectra type, i.e. Bretschneider, 
+%           S.type: String of the spectra type, i.e. Bretschneider,
 %           time series, date stamp etc.
 %
 %           S.frequency: frequency (Hz)
 %
 %    h: double
 %         Water depth (m)
-%    
+%
 %    deep: logical (optional)
 %         If True use the deep water approximation. Default False. When
 %         False a depth check is run to check for shallow water. The ratio
@@ -45,13 +45,13 @@ function J=energy_flux(S,h,options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
-    S 
+    S
     h
     options.deep = py.False;
     options.rho = 1025;
     options.g = 9.80665;
     options.ratio = 2;
-    
+
 end
 
 py.importlib.import_module('mhkit');
@@ -62,13 +62,13 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(S)==1)
         x=size(S.spectrum);
         li=py.list();
-        if x(2)>1 
+        if x(2)>1
             for i = 1:x(2)
                 app=py.list(S.spectrum(:,i));
                 li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-            
+
             end
-            
+
             S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency(:,1),li,int32(x(2)));
         elseif x(2)==1
             S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency,py.numpy.array(S.spectrum),int32(x(2)));
@@ -87,3 +87,4 @@ J=py.mhkit.wave.resource.energy_flux(S,h,pyargs('rho',options.rho,'g',options.g,
 
 
 J=double(J.values);
+

@@ -1,10 +1,9 @@
 function available_data=NDBC_available_data(parameter,options)
 
 %%%%%%%%%%%%%%%%%%%%
-%     For a given parameter this will return a structure of years, 
-%     station IDs and file names that contain that parameter data. 
-%     
-%     
+%     For a given parameter this will return a structure of years,
+%     station IDs and file names that contain that parameter data.
+%
 % Parameters
 % ------------
 %     parameter : string
@@ -12,7 +11,7 @@ function available_data=NDBC_available_data(parameter,options)
 %         'stdmet': 'Standard Meteorological Current Year Historical Data'
 %
 %     buoy_number : string (optional)
-%         Buoy Number.  5-character alpha-numeric station identifier 
+%         Buoy Number.  5-character alpha-numeric station identifier
 %         to call: NDBC_available_data(parameter,"buoy_number",buoy_number)
 %
 %     proxy : None
@@ -24,16 +23,16 @@ function available_data=NDBC_available_data(parameter,options)
 %           MATLAB -> Web -> Use a proxy server to connect to the Internet
 %         See the following for details:
 %           https://www.mathworks.com/help/matlab/import_export/proxy.html
-%     
+%
 % Returns
 % ---------
-%     available_data : structure 
+%     available_data : structure
 %         Structure with station_id, years, and NDBC file names.
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-arguments 
+arguments
     parameter string {mustBeMember(parameter,{'swden','stdmet'})}
     options.buoy_number string = "";
 end
@@ -128,3 +127,4 @@ if options.buoy_number ~= ""
                 options.buoy_number);
     end
 end
+
