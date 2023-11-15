@@ -2,9 +2,9 @@ name: MHKiT-MATLAB Windows Unit Tests
 
 on:
   push:
-    branches: [ master, develop, ebbflood ]
+    branches: [master, develop, ebbflood]
   pull_request:
-    branches: [ master, develop, ebbflood ]
+    branches: [master, develop, ebbflood]
 
 jobs:
   main:
@@ -17,9 +17,8 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
-      mhkit-python-dir: 'MHKiT-Python'
+      mhkit-python-dir: "MHKiT-Python"
     steps:
-
       - name: Install/Setup Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -43,7 +42,7 @@ jobs:
       - name: Check out MHKiT-Python
         uses: actions/checkout@v4
         with:
-          repository: 'MHKiT-Software/MHKiT-Python'
+          repository: "MHKiT-Software/MHKiT-Python"
           path: ${{env.mhkit-python-dir}}
 
       - name: pip install mhkit from source
@@ -85,14 +84,14 @@ jobs:
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version,
-                   addpath(genpath('mhkit')),
-                   import matlab.unittest.TestSuite,
-                   import matlab.unittest.TestRunner,
-                   testFolder = ['mhkit' filesep 'tests'],
-                   suite = TestSuite.fromFolder(testFolder),
-                   runner = TestRunner.withTextOutput,
-                   results = runner.run(suite),
-                   assertSuccess(results)" >> run.m
+          addpath(genpath('mhkit')),
+          import matlab.unittest.TestSuite,
+          import matlab.unittest.TestRunner,
+          testFolder = ['mhkit' filesep 'tests'],
+          suite = TestSuite.fromFolder(testFolder),
+          runner = TestRunner.withTextOutput,
+          results = runner.run(suite),
+          assertSuccess(results)" >> run.m
 
       - name: Output Run.m
         shell: bash
@@ -103,5 +102,3 @@ jobs:
         with:
           command: run
           startup-options: -noFigureWindows
-
-

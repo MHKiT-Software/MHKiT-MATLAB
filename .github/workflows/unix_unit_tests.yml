@@ -2,9 +2,9 @@ name: MHKiT-MATLAB Unix Unit Tests
 
 on:
   push:
-    branches: [ master, develop, ebbflood ]
+    branches: [master, develop, ebbflood]
   pull_request:
-    branches: [ master, develop, ebbflood ]
+    branches: [master, develop, ebbflood]
 
 jobs:
   main:
@@ -17,37 +17,37 @@ jobs:
         python-version: [3.8, 3.9, "3.10", 3.11]
         matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b]
         exclude:
-            - matlab-version: R2023b
-              python-version: 3.8
-            - matlab-version: R2023a
-              python-version: 3.11
-            - matlab-version: R2022b
-              python-version: 3.11
-            - matlab-version: R2022a
-              python-version: 3.11
-            - matlab-version: R2022a
-              python-version: "3.10"
-            - matlab-version: R2021b
-              python-version: 3.11
-            - matlab-version: R2021b
-              python-version: "3.10"
-            - matlab-version: R2021a
-              python-version: 3.11
-            - matlab-version: R2021a
-              python-version: "3.10"
-            - matlab-version: R2021a
-              python-version: 3.9
-            - matlab-version: R2020b
-              python-version: 3.11
-            - matlab-version: R2020b
-              python-version: "3.10"
-            - matlab-version: R2020b
-              python-version: 3.9
+          - matlab-version: R2023b
+            python-version: 3.8
+          - matlab-version: R2023a
+            python-version: 3.11
+          - matlab-version: R2022b
+            python-version: 3.11
+          - matlab-version: R2022a
+            python-version: 3.11
+          - matlab-version: R2022a
+            python-version: "3.10"
+          - matlab-version: R2021b
+            python-version: 3.11
+          - matlab-version: R2021b
+            python-version: "3.10"
+          - matlab-version: R2021a
+            python-version: 3.11
+          - matlab-version: R2021a
+            python-version: "3.10"
+          - matlab-version: R2021a
+            python-version: 3.9
+          - matlab-version: R2020b
+            python-version: 3.11
+          - matlab-version: R2020b
+            python-version: "3.10"
+          - matlab-version: R2020b
+            python-version: 3.9
 
     runs-on: ${{ matrix.os }}
 
     env:
-      mhkit-python-dir: 'MHKiT-Python'
+      mhkit-python-dir: "MHKiT-Python"
     steps:
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -55,7 +55,7 @@ jobs:
       - name: Check out MHKiT-Python
         uses: actions/checkout@v4
         with:
-          repository: 'MHKiT-Software/MHKiT-Python'
+          repository: "MHKiT-Software/MHKiT-Python"
           path: ${{env.mhkit-python-dir}}
 
       # - name: Setup Conda
@@ -72,14 +72,13 @@ jobs:
           activate-environment: TEST
           channels: conda-forge
 
-
       - name: Setup Python ${{ matrix.python-version }}
         shell: bash -l {0}
         run: |
-            conda create --name TEST python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
-            conda activate TEST
-            export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-            pip install -e . --no-deps --force-reinstall
+          conda create --name TEST python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
+          conda activate TEST
+          export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+          pip install -e . --no-deps --force-reinstall
 
       # - name: Setup Python
       #   uses: actions/setup-python@v4
@@ -168,28 +167,27 @@ jobs:
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version,
-                   addpath(genpath('mhkit')),
-                   import matlab.unittest.TestSuite,
-                   import matlab.unittest.TestRunner,
-                   testFolder = ['mhkit' filesep 'tests'],
-                   suite = TestSuite.fromFolder(testFolder),
-                   runner = TestRunner.withTextOutput,
-                   results = runner.run(suite),
-                   assertSuccess(results)" >> run.m
+          addpath(genpath('mhkit')),
+          import matlab.unittest.TestSuite,
+          import matlab.unittest.TestRunner,
+          testFolder = ['mhkit' filesep 'tests'],
+          suite = TestSuite.fromFolder(testFolder),
+          runner = TestRunner.withTextOutput,
+          results = runner.run(suite),
+          assertSuccess(results)" >> run.m
 
       - name: Output run.m
         shell: bash
         run: cat run.m
 
-    # This is a good idea but does not work because you cannot explicitly set the python execution mode
-    #   - name: Run MHKiT-MATLAB Unit Tests
-    #     uses: matlab-actions/run-tests@v1
-    #     with:
-    #         select-by-folder: mhkit/tests
+      # This is a good idea but does not work because you cannot explicitly set the python execution mode
+      #   - name: Run MHKiT-MATLAB Unit Tests
+      #     uses: matlab-actions/run-tests@v1
+      #     with:
+      #         select-by-folder: mhkit/tests
 
       - name: Run MATLAB Unit Tests
         uses: matlab-actions/run-command@v1
         with:
           command: run
           startup-options: -noFigureWindows
-
