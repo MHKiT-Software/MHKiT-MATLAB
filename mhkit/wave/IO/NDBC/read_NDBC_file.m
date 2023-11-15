@@ -49,7 +49,7 @@ py.importlib.import_module('mhkit');
 % large amount of warnings. We need to figure out how to just import the
 % one matlab function we need. Note 'numpy.nditer' does not work. You also
 % cannot save this to a variable and access it that way...
-py.importlib.import_module('numpy');
+% py.importlib.import_module('numpy');
 
 if nargin == 2
     missing=py.list(varargin{1});

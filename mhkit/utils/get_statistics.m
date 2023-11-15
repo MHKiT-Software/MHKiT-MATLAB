@@ -35,7 +35,7 @@ arguments
 end
 
 py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
+% py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit_python_utils');
 
 fn = fieldnames(data);

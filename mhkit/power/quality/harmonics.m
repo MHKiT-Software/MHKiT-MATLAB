@@ -23,7 +23,7 @@ function harmonics=harmonics(x,freq,grid_freq)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
+% py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit_python_utils');
 
 time= x.time ;

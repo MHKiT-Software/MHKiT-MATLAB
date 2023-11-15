@@ -20,7 +20,7 @@ function THCD=total_harmonic_current_distortion(harmonic_subgroups,rated_current
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
+% py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit_python_utils');
 
 

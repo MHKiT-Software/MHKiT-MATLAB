@@ -61,7 +61,7 @@ arguments
 end
 
 py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
+% py.importlib.import_module('numpy');
 py.importlib.import_module('pandas');
 py.importlib.import_module('mhkit_python_utils');
 if (isa(ts,'py.pandas.core.frame.DataFrame')~=1)

@@ -16,7 +16,7 @@ function new_time=excel_to_datetime(excel_num)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
+% py.importlib.import_module('numpy');
 
 
 new_time = datetime(excel_num,'ConvertFrom','excel');

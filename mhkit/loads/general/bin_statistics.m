@@ -31,7 +31,7 @@ function bins=bin_statistics(data,bin_against,bin_edges, varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
+% py.importlib.import_module('numpy');
 
 
 fn = fieldnames(data);

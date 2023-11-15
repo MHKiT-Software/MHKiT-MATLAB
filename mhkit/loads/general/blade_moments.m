@@ -33,7 +33,7 @@ function [M_flap,M_edge] = blade_moments(blade_coefficients,flap_offset,...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
+% py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit_python_utils');
 
 data = py.mhkit.loads.general.blade_moments(py.numpy.array(blade_coefficients),...

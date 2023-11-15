@@ -20,7 +20,7 @@ function L=capture_length(Power,J)
 
 
 py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
+% py.importlib.import_module('numpy');
 
 Power=py.numpy.array(Power);
 J=py.numpy.array(J);
