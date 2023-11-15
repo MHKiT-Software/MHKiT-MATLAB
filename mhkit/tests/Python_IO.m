@@ -1,5 +1,5 @@
 % Unit tests for data conversion to and from Python
-classdef PythonIO < matlab.unittest.TestCase
+classdef Python_IO < matlab.unittest.TestCase
 
     methods (Test)
 
