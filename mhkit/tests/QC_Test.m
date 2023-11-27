@@ -8,8 +8,6 @@ classdef QC_Test < matlab.unittest.TestCase
 
         function test_check_corrupt(testCase)
 
-            assumeFail(testCase, "TODO: Fix - Python Serialization Errors");
-
             %  Column C has corrupt data (-999) between 7:30 and 9:30
             simple = readtable('../../examples/data/qc/simple.xlsx');
             data.values = simple.C;
@@ -37,8 +35,6 @@ classdef QC_Test < matlab.unittest.TestCase
 
         function test_check_delta(testCase)
 
-            assumeFail(testCase, "TODO: Fix - Python Serialization Errors");
-
             % Column A has the same value (0.5) from 12:00 until 14:30
             % Column C does not follow the expected sine function from 13:00 until 16:15.
             % The change is abrupt and gradually corrected.
@@ -65,8 +61,6 @@ classdef QC_Test < matlab.unittest.TestCase
         end
 
         function test_check_increment(testCase)
-
-            assumeFail(testCase, "TODO: Fix - Python Serialization Errors");
 
             % Column A has the same value (0.5) from 12:00 until 14:30
             % Column C does not follow the expected sine function from 13:00 until 16:15.
@@ -129,8 +123,6 @@ classdef QC_Test < matlab.unittest.TestCase
 
         function test_check_missing(testCase)
 
-            assumeFail(testCase, "TODO: Fix - Python Serialization Errors");
-
             % Column D is missing data from 17:45 until 18:15
             simple = readtable('../../examples/data/qc/simple.xlsx');
             data.values = simple.D;
@@ -160,7 +152,6 @@ classdef QC_Test < matlab.unittest.TestCase
 
         function test_check_timestamp(testCase)
 
-            assumeFail(testCase, "TODO: Fix - Python Serialization Errors");
             % Missing timestamp at 5:00
             % Duplicate timestamp 17:00
             % Non-monotonic timestamp 19:30

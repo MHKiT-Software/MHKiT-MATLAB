@@ -65,7 +65,7 @@ end
   if (isa(data,'py.pandas.core.frame.DataFrame')~=1)
     data=qc_data_to_dataframe(data);
   end
-   vals = py.list(vals);
+  vals = py.list(vals);
 
 r = struct(py.pecos.monitoring.check_corrupt(data,vals,pyargs("key",options.key,...
     "min_failures",int32(options.min_failures))));

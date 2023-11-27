@@ -39,6 +39,11 @@ function df = qc_data_to_dataframe(data)
   if any(isdatetime(data.time(1)))
     data.time=posixtime(data.time);
   end
+
+  % Convert the data to python lists
+  li = py.list(li);
+  data.time = py.list(data.time);
+
   df=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,data.time,int32(x(2)));
 
   % One final thing to convert index to python DateTimeindex, as required by pecos
