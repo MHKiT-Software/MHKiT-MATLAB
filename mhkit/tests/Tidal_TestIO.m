@@ -27,6 +27,30 @@ classdef Tidal_TestIO < matlab.unittest.TestCase
             assertEqual(testCase,size(data.b), [184 1]);
         end
 
+        function test_request_noaa_data_multiple_days(testCase)
+
+            data = request_noaa_data('s08010', 'currents','20180101','20180105');
+
+            assertTrue(testCase, isfield(data,'s'));
+            assertTrue(testCase, isfield(data,'d'));
+            assertTrue(testCase, isfield(data,'b'));
+            assertEqual(testCase,size(data.s), [470 1]);
+            assertEqual(testCase,size(data.d), [470 1]);
+            assertEqual(testCase,size(data.b), [470 1]);
+        end
+
+        function test_request_noaa_data_multiple_months(testCase)
+
+            data = request_noaa_data('s08010', 'currents','20180101','20180331');
+
+            assertTrue(testCase, isfield(data,'s'));
+            assertTrue(testCase, isfield(data,'d'));
+            assertTrue(testCase, isfield(data,'b'));
+            assertEqual(testCase,size(data.s), [11120 1]);
+            assertEqual(testCase,size(data.d), [11120 1]);
+            assertEqual(testCase,size(data.b), [11120 1]);
+        end
+
     end
 
 end
