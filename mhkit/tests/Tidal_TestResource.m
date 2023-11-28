@@ -106,8 +106,6 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
 
         function test_plot_phase_exceedance(testCase)
 
-            assumeFail(testCase, "TODO: Fix - Error using area X must be same length as Y.");
-
             filename = 'tidal_plot_phase_exceedance.png';
             if isfile(filename)
                 delete(filename);
