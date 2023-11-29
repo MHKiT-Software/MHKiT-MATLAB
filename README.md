@@ -1,6 +1,6 @@
 MHKiT-MATLAB
 ===================================
-[![MHKiT-MATLAB Unix Unit Tests](https://github.com/simmsa/MHKiT-MATLAB-2/actions/workflows/unix_unit_tests.yml/badge.svg)](https://github.com/simmsa/MHKiT-MATLAB-2/actions/workflows/unix_unit_tests.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3928405.svg)](https://doi.org/10.5281/zenodo.3928405)
+[![MHKiT-MATLAB Unix Unit Tests](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/workflows/unix_unit_tests.yml/badge.svg)](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/workflows/unix_unit_tests.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3928405.svg)](https://doi.org/10.5281/zenodo.3928405)
 
 MHKiT-MATLAB is a MATLAB package designed for marine renewable energy applications to assist in
 data processing and visualization.  The software package include functionality for:
