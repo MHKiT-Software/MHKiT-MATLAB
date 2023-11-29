@@ -57,9 +57,9 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
                 li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
 
             end
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(S.frequency(:,1)),li,int32(x(2)));
+            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(S.frequency(:,1)),li,x(2));
         elseif x(2)==1
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(S.frequency),double(S.spectrum),int32(x(2)));
+            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(S.frequency),py.numpy.array(S.spectrum),x(2));
         end
 
     else
