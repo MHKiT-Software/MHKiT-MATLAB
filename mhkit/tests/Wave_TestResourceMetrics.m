@@ -252,8 +252,6 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
         function test_plot_elevation_timeseries(testCase)
 
-            assumeFail(testCase, "TODO: Fix - ??");
-
             relative_file_name = '../../examples/data/wave/ValData2.mat';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             data = load(full_file_name);
