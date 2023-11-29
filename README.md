@@ -11,21 +11,21 @@ data processing and visualization.  The software package include functionality f
 * Tidal resource and device
 * Data visualization
 * Mechanical loads analysis
-* Power quality assessments 
+* Power quality assessments
 
-See the [documentation](https://mhkit-software.github.io/MHKiT/) for more information about MHKiT. 
+See the [documentation](https://mhkit-software.github.io/MHKiT/) for more information about MHKiT.
 
 Installation
 ------------------------
-MHKiT-MATLAB consists of functions which wrap the MHKiT-Python functions. Therefore, MHKiT-MATLAB requires Python (3.6, or 3.7) along with several Python 
-package dependency. 
+MHKiT-MATLAB consists of functions which wrap the MHKiT-Python functions. Therefore, MHKiT-MATLAB requires Python (3.6, or 3.7) along with several Python
+package dependency.
 
 See [installation instructions](https://mhkit-software.github.io/MHKiT/installation.html) for more information.
 
 Copyright and license
 ------------------------
-MHKiT is copyright through the National Renewable Energy Laboratory, 
-Pacific Northwest National Laboratory, and Sandia National Laboratories. 
+MHKiT is copyright through the National Renewable Energy Laboratory,
+Pacific Northwest National Laboratory, and Sandia National Laboratories.
 The software is distributed under the Revised BSD License.
 
 See [copyright and license](https://mhkit-software.github.io/MHKiT/license.html) for more information.
