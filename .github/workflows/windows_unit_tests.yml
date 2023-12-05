@@ -55,13 +55,19 @@ jobs:
           channels: conda-forge
 
       - name: "Conda install h5py, netcdf4, and cython"
-        run: conda install -c conda-forge h5py netcdf4 cython
+        run: |
+          conda activate mhkit
+          conda install -c conda-forge h5py netcdf4 cython
 
       - name: Output python executable
-        run: python -c "import sys; print(sys.executable)"
+        run: |
+          conda activate mhkit
+          python -c "import sys; print(sys.executable)"
 
       - name: Print Python Version
-        run: python --version
+        run: |
+          conda activate mhkit
+          python --version
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -73,14 +79,20 @@ jobs:
           path: ${{env.mhkit-python-dir}}
 
       - name: pip install mhkit from source
-        run: "pip install -e ."
         working-directory: ${{env.mhkit-python-dir}}
+        run: |
+          conda activate mhkit
+          pip install -e .
 
       - name: pip install mhkit-python-utils module from source
-        run: pip install -e .
+        run: |
+          conda activate mhkit
+          pip install -e .
 
       - name: List installed pip modules
-        run: pip freeze
+        run: |
+          conda activate mhkit
+          pip freeze
 
       # Note, does not work, fails with error: RuntimeError: MATLAB installation not found in Windows Registry: [WinError 2] The system cannot find the file specified
       # - name: Install MATLAB Engine API for Python on Windows
