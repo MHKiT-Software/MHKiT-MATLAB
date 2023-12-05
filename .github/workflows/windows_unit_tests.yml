@@ -79,7 +79,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         shell: pwsh
         run: >
-          "pyenv(Version='{0}', ExecutionMode='InProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
+          "pyenv(Version='{0}', ExecutionMode='OutOfProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
 
       - name: Add MATLAB test commands
         shell: bash
