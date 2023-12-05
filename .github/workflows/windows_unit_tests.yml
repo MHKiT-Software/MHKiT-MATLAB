@@ -118,12 +118,18 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
-      # OutOfProcess is what we probably need (seems to work locally), but there are MATLAB issues: See Run #79
+      # OutOfProcess works reliably on linux and macos, on Windows
+      # OutOfProcess fails with error:
+      # Caught "std::exception" Exception message is:
+      # Unable to launch Simple server: Unable to launch C:\Program Files\MATLAB\R2023b\interprocess\bin\win64\pycli\MATLABPyHost.exe
+      # because: Peer process exited before transport type handshake. Exit status: 3221226505
+      # ERROR: MATLAB error Exit Status: 0x00000001
+      # exit status 1
       - name: Configure MATLAB pyenv Version and ExecutionMode
         if: ${{ matrix.os == 'windows-latest' }}
         shell: pwsh
         run: >
-          "pyenv(Version='{0}', ExecutionMode='OutOfProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
+          "pyenv(Version='{0}', ExecutionMode='InProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
 
       - name: Add MATLAB test commands
         shell: bash
