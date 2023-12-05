@@ -80,7 +80,7 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
             end
             S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency(:,1),li,int32(x(2)));
         elseif x(2)==1
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,py.numpy.array(S.spectrum),int32(x(2)));
+            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(py.list(frequency),py.numpy.array(S.spectrum),int32(x(2)));
         end
     else
         ME = MException('MATLAB:significant_wave_height','S needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
@@ -110,7 +110,7 @@ if (isa(options.phases,'py.NoneType')~=1)
          end
          options.phases=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency(:,1),li,int32(x(2)));
       elseif x(2)==1
-         options.phases=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,py.numpy.array(options.phases),int32(x(2)));
+         options.phases=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(py.list(frequency),py.numpy.array(options.phases),int32(x(2)));
      end
 
     else
@@ -119,7 +119,6 @@ if (isa(options.phases,'py.NoneType')~=1)
     end
 
 end
-
 
 eta=py.mhkit.wave.resource.surface_elevation(S,time_index,pyargs('seed',...
     py.int(options.seed),'frequency_bins',options.frequency_bins,'phases',options.phases));
