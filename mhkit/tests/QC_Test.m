@@ -24,10 +24,6 @@ classdef QC_Test < matlab.unittest.TestCase
             end
             expected.values = expect.values.';
             expected.mask = int64(expect.mask.');
-            disp(data);
-            disp(data.values);
-            disp(corrupt_vals);
-            disp("Pre check corrupt...");
             results = check_corrupt(data,corrupt_vals);
             assertEqual(testCase, results.values, expected.values);
             assertEqual(testCase, results.mask, expected.mask);
