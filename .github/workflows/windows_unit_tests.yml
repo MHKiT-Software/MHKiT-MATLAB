@@ -54,10 +54,15 @@ jobs:
           activate-environment: mhkit
           channels: conda-forge
 
+      # - name: "Conda install h5py, netcdf4, and cython"
+      #   run: |
+      #     conda activate mhkit
+      #     conda install -c conda-forge h5py netcdf4 cython
+
       - name: "Conda install h5py, netcdf4, and cython"
         run: |
           conda activate mhkit
-          conda install -c conda-forge h5py netcdf4 cython
+          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
 
       - name: Output python executable
         run: |
