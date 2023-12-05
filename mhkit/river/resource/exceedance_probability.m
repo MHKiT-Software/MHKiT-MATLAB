@@ -44,7 +44,6 @@ if (isa(Q,'py.pandas.core.frame.DataFrame')~=1)
     if x(2)>1
         for i = 1:x(2)
             app=py.list(Q.Discharge(:,i));
-            disp("Pre list append!")
             li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
 
         end
@@ -70,13 +69,7 @@ if (isa(Q,'py.pandas.core.frame.DataFrame')~=1)
 
 end
 
-% disp("Starting mhkit.river.resource.exceedance_probability call...")
-
 EPpd=py.mhkit.river.resource.exceedance_probability(Q);
-
-% disp("Completed call...")
-
-% disp(EPpd);
 
 xx=cell(EPpd.axes);
 v=xx{2};

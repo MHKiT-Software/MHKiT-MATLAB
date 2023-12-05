@@ -48,7 +48,6 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(S)==1)
         x=size(S.spectrum);
         li=py.list();
-        disp(x(2))
         if x(2)>1
             for i = 1:x(2)
                 app=py.list(S.spectrum(:,i));

@@ -55,7 +55,6 @@ function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
     %% i_m (see TableB.2 & TableB.3 DeltaI/I)
     i_m = struct();i_m.time = t;
     i_opts = [0 2 3 4];
-    % disp(opt);
     if any(i_opts == opt)
         % Eq (B.1)
         i_m.data = sqrt(2)*In*(1+1/100/2*sin(2*pi*fm*t)*DeltaI_I).*...
