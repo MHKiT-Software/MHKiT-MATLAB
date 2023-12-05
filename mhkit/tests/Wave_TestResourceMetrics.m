@@ -286,8 +286,6 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
         function test_environmental_contour(testCase)
 
-            assumeFail(testCase, "TODO: Fix - ??");
-
             assumeFail(testCase, "Not compatible with latest MHKIT-Python")
 
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
