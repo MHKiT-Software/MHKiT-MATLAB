@@ -95,7 +95,6 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: mhkit_webread_cache
-          path: mhkit_webread_cache
 
   main:
     needs: cache_population
