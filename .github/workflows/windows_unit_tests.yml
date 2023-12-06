@@ -245,8 +245,3 @@ jobs:
           command: run
           startup-options: -noFigureWindows
 
-      - name: Save mhkit_webread_cache directory as an artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: mhkit_webread_cache
-          path: mhkit_webread_cache
