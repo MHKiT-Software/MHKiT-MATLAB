@@ -152,6 +152,12 @@ jobs:
       #   working-directory: ${{env.mhkit-python-dir}}
       # #   if: always() && steps.runTests.outcome == 'failure'
 
+      - name: Download mhkit_webread_cache artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: mhkit_webread_cache
+          path: mhkit_webread_cache
+
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
         with:
@@ -191,3 +197,9 @@ jobs:
         with:
           command: run
           startup-options: -noFigureWindows
+
+      - name: Save mhkit_webread_cache directory as an artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: mhkit_webread_cache
+          path: mhkit_webread_cache
