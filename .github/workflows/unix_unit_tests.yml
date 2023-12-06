@@ -106,6 +106,7 @@ jobs:
           name: mhkit_webread_cache
           path: mhkit_webread_cache
   main:
+    needs: cache_population
     strategy:
       fail-fast: false
 
@@ -245,13 +246,6 @@ jobs:
         run: |
           conda activate TEST
           pip freeze
-
-      # - name: Test MHKiT-Python
-      #   run: |
-      #     pip install nose pytest
-      #     nosetests -v --traverse-namespace mhkit
-      #   working-directory: ${{env.mhkit-python-dir}}
-      # #   if: always() && steps.runTests.outcome == 'failure'
 
       - name: Download mhkit_webread_cache artifact
         uses: actions/download-artifact@v3
