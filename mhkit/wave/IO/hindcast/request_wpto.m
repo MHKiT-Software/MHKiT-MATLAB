@@ -69,9 +69,9 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
 
     % get links to the databases
     baseURL = ['https://developer.nrel.gov/api/hsds/?api_key=' api_key dom];
-    root = webread(baseURL);
+    root = cached_webread(baseURL,options);
     groupsURL = ['https://developer.nrel.gov/api/hsds/groups/' root.root '/links?api_key=' api_key dom];
-    groups = webread(groupsURL);
+    groups = cached_webread(groupsURL,options);
     groups = struct2table(groups.links);
 
     % get standard parameters
@@ -83,7 +83,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
     for i=1:length(vars)
         ID = groups.id(find(strcmpi(vars(i),groups.title)));
         URL = ['https://developer.nrel.gov/api/hsds/datasets/' ID{:} '/value?api_key=' api_key dom];
-        temp = webread(URL,options);
+        temp = cached_webread(URL,options);
         if isequal(vars{i},"time_index")
             standard_params.(vars(i)) = datetime(temp.value,'InputFormat','yyyy-MM-dd HH:mm:ssXXX',...
                 'TimeZone','UTC');
@@ -114,7 +114,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
             else
                 paramURL = ['https://developer.nrel.gov/api/hsds/datasets/' paramID{:} '/value?api_key=' api_key '&select=[:,' num2str(idx(y)-1) ']' dom];
             end
-            param = webread(paramURL,options);
+            param = cached_webread(paramURL,options);
             data(y).(parameter(z)) = param.value;
         end
     end
@@ -127,7 +127,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
                 i1 = num2str((z-1)*486);
                 i2 = num2str(z*486);
                 paramURL = ['https://developer.nrel.gov/api/hsds/datasets/' paramID{:} '/value?api_key=' api_key '&select=[' i1 ':' i2 ',:,:,' num2str(idx(y)-1) ']' dom];
-                param = webread(paramURL,options);
+                param = cached_webread(paramURL,options);
                 try
                     dws = cat(1,dws,param.value);
                 catch
