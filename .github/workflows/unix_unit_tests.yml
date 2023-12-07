@@ -254,7 +254,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: mhkit_webread_cache
-          path: .
+          path: mhkit_webread_cache
 
       - name: Display structure mhkit_webread_cache
         run: ls -R
