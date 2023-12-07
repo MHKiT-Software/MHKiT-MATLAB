@@ -52,12 +52,6 @@ jobs:
           conda activate mhkit
           pip install -e .
 
-      - name: Download mhkit_webread_cache artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: mhkit_webread_cache
-          path: mhkit_webread_cache
-
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
         with:
@@ -92,9 +86,12 @@ jobs:
           startup-options: -noFigureWindows
 
       - name: Save mhkit_webread_cache directory as an artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
+          # GitHub Action "Name" of artifact
           name: mhkit_webread_cache
+          # Filesystem path of directory
+          path: mhkit_webread_cache
 
   main:
     needs: cache_population
@@ -196,7 +193,11 @@ jobs:
       - name: Download mhkit_webread_cache artifact
         uses: actions/download-artifact@v3
         with:
-          path: mhkit_webread_cache
+          name: mhkit_webread_cache
+
+      - name: Display structure mhkit_webread_cache
+        run: ls -R
+        working-directory: mhkit_webread_cache
 
       # Note, does not work, fails with error: RuntimeError: MATLAB installation not found in Windows Registry: [WinError 2] The system cannot find the file specified
       # - name: Install MATLAB Engine API for Python on Windows
