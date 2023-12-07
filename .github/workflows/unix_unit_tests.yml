@@ -251,6 +251,18 @@ jobs:
           conda activate TEST
           pip freeze
 
+      - name: Print MHKiT-Python Version
+        shell: bash -l {0}
+        run: |
+          conda activate TEST
+          python -c "import mhkit; print(mhkit.__version__)"
+
+      - name: Verify MHKiT-Python Operation
+        shell: bash -l {0}
+        run: |
+          conda activate TEST
+          python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
+
       - name: Download mhkit_webread_cache artifact
         uses: actions/download-artifact@v3
         with:
