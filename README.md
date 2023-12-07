@@ -17,10 +17,12 @@ See the [documentation](https://mhkit-software.github.io/MHKiT/) for more inform
 
 Installation
 ------------------------
-MHKiT-MATLAB consists of functions which wrap the MHKiT-Python functions. Therefore, MHKiT-MATLAB requires Python (3.6, or 3.7) along with several Python
-package dependency.
 
-See [installation instructions](https://mhkit-software.github.io/MHKiT/installation.html) for more information.
+MHKiT-MATLAB consists of functions that wrap the MHKiT-Python functions. Therefore, MHKiT-MATLAB has specific Python package dependencies.
+
+Before proceeding with the installation, please ensure compatibility with your MATLAB version and the recommended Python version combinations. Refer to the [Compatible Python and MATLAB Versions](#compatible-python-and-matlab-versions) section for the compatibility matrix.
+
+For detailed installation instructions, please visit the [installation guide](https://mhkit-software.github.io/MHKiT/installation.html).
 
 Compatible Python and MATLAB Versions
 ------------------------
