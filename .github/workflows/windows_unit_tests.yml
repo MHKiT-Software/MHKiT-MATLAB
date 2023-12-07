@@ -194,10 +194,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: mhkit_webread_cache
+          path: .
 
       - name: Display structure mhkit_webread_cache
         run: ls -R
-        working-directory: mhkit_webread_cache
+        working-directory: .
 
       # Note, does not work, fails with error: RuntimeError: MATLAB installation not found in Windows Registry: [WinError 2] The system cannot find the file specified
       # - name: Install MATLAB Engine API for Python on Windows
