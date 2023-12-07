@@ -18,6 +18,10 @@ function data = cached_webread(url, options)
 %             The data retrieved from the specified URL.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Define the number of retries if the URL request fails
+    maxRetries = 5;
+    % Define the seconds to pause between webread retries
+    retryPause = 5;
 
     % Define the fixed cache directory at the project root
     cacheDir = fullfile(fileparts(mfilename('fullpath')), '..', '..' , 'mhkit_webread_cache');
@@ -50,7 +54,22 @@ function data = cached_webread(url, options)
     % Perform webread
     disp("Cache of url not found! Performing webread for url:");
     disp(url)
-    data = webread(url, options);
+
+     for attempt = 1:maxRetries
+        try
+            data = webread(url, options);
+            break; % Break out of the loop if webread is successful
+        catch exception
+            disp(['Error during webread attempt ', num2str(attempt), ':']);
+            disp(exception.message);
+            if attempt < maxRetries
+                disp(['Retrying in ', num2str(retryPause), ' seconds...']);
+                pause(retryPause);
+            else
+                error('Webread failed after maximum number of retries.');
+            end
+        end
+    end
 
     % Save raw data to cache
     save(cacheFilename, 'data');
