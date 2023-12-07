@@ -31,10 +31,10 @@ MHKiT-MATLAB supports the following combinations of MATLAB and Python versions. 
 
 |       | R2021b | R2022a | R2022b | R2023a | R2023b |
 | ----- | ------ | ------ | ------ | ------ | ------ |
-| 3.11  |        |        |        |        | ✔      |
-| 3.10  |        |        | ✔      | ✔      | ✔      |
-| 3.9   | ✔      | ✔      | ✔      | ✔      | ✔      |
-| 3.8   | ✔      | ✔      | ✔      | ✔      |        |
+| 3.11  |        |        |        |        | ✓      |
+| 3.10  |        |        | ✓      | ✓      | ✓      |
+| 3.9   | ✓      | ✓      | ✓      | ✓      | ✓      |
+| 3.8   | ✓      | ✓      | ✓      | ✓      |        |
 
 
 Copyright and license
