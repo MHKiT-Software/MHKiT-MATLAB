@@ -48,6 +48,8 @@ function data = cached_webread(url, options)
     end
 
     % Perform webread
+    disp("Cache of url not found! Performing webread for url:");
+    disp(url)
     data = webread(url, options);
 
     % Save raw data to cache
