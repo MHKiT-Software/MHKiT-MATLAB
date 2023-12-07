@@ -22,6 +22,19 @@ package dependency.
 
 See [installation instructions](https://mhkit-software.github.io/MHKiT/installation.html) for more information.
 
+Compatible Python and MATLAB Versions
+------------------------
+
+MHKiT-MATLAB supports the following combinations of MATLAB and Python versions. For a comprehensive list of compatible MATLAB/Python versions, refer to [MathWorks Python Compatibility](https://www.mathworks.com/support/requirements/python-compatibility.html).
+
+|       | R2021b | R2022a | R2022b | R2023a | R2023b |
+| ----- | ------ | ------ | ------ | ------ | ------ |
+| 3.11  |        |        |        |        | ✔      |
+| 3.10  |        |        | ✔      | ✔      | ✔      |
+| 3.9   | ✔      | ✔      | ✔      | ✔      | ✔      |
+| 3.8   | ✔      | ✔      | ✔      | ✔      |        |
+
+
 Copyright and license
 ------------------------
 MHKiT is copyright through the National Renewable Energy Laboratory,
