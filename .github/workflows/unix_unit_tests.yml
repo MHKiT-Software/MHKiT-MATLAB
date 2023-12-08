@@ -120,9 +120,11 @@ jobs:
         python-version: [3.8, 3.9, "3.10", 3.11]
         matlab-version: [R2021b, R2022a, R2022b, R2023a, latest]
         exclude:
+          # cache_population job
           - python-version: "3.10"
             matlab-version: R2022b
             os: ubuntu-latest
+          # Non compatiable MATLAB/Python Versions
           - matlab-version: latest
             python-version: 3.8
           - matlab-version: R2023a
@@ -149,6 +151,15 @@ jobs:
             python-version: "3.10"
           - matlab-version: R2020b
             python-version: 3.9
+          # Combinations with failing tests that seem related to GitHub Actions
+          # Python Error: ImportError:
+          # dlopen(/usr/local/miniconda/envs/TEST/lib/python3.11/site-packages/netCDF4/_netCDF4.cpython-311-darwin.so,
+          # 0x0002): Symbol not found: (_SSL_get0_group_name) Referenced from:
+          # '/usr/local/miniconda/envs/TEST/lib/libcurl.4.dylib' Expected in:
+          # '/Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/bin/maci64/libssl.3.dylib'
+          - python-version: 3.11
+            matlab-version: latest
+            os: macos-latest
 
     runs-on: ${{ matrix.os }}
 
