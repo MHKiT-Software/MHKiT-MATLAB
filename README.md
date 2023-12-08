@@ -30,7 +30,7 @@ MHKiT-MATLAB supports the following combinations of MATLAB and Python versions.[
 | 3.9   | ✓      | ✓      | ✓      | ✓      | ✓      |
 | 3.8   | ✓      | ✓      | ✓      | ✓      |        |
 
-Before proceeding with the installation, please ensure your system has compatible versions of Python and MATLAB installed per the table above.
+Before installing MHKiT-MATLAB, please ensure your system has compatible versions of Python and MATLAB installed per the table above.
 
 ### Installation Guide
 
