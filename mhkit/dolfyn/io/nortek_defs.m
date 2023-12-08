@@ -32,7 +32,7 @@ vec_data.('PressureLSW').('dtype') = "uint16";
 vec_data.('PressureLSW').('group') = "data_vars";
 vec_data.('PressureLSW').('units') = "dbar";
 
-vec_data.('AnaIn1').('dims.('vel'')  = {};
+vec_data.('AnaIn1').('dims') = {};
 vec_data.('AnaIn1').('dtype') = "uint16";
 vec_data.('AnaIn1').('group') = "sys";
 vec_data.('AnaIn1').('units') = "";
@@ -215,3 +215,4 @@ awac_profile.("amp").("units") = "counts";
 % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 save nortek_defs.mat awac_profile vec_sysdata vec_data
+
