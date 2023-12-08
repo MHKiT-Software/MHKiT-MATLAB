@@ -66,11 +66,35 @@ jobs:
       #     nosetests -v --traverse-namespace mhkit
       #   working-directory: ${{env.mhkit-python-dir}}
       # #   if: always() && steps.runTests.outcome == 'failure'
-      - name: Download mhkit_webread_cache artifact
-        uses: actions/download-artifact@v3
+
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
         with:
+          # Optional, workflow file name or ID
+          # If not specified, will be inferred from run_id (if run_id is specified), or will be the current workflow
+          workflow: unix_unit_tests.yml
+          # Optional, the status or conclusion of a completed workflow to search for
+          # Can be one of a workflow conclusion:
+          #   "failure", "success", "neutral", "cancelled", "skipped", "timed_out", "action_required"
+          # Or a workflow status:
+          #   "completed", "in_progress", "queued"
+          # Use the empty string ("") to ignore status or conclusion in the search
+          workflow_conclusion: ""
+          # Optional, uploaded artifact name,
+          # will download all artifacts if not specified
+          # and extract them into respective subdirectories
+          # https://github.com/actions/download-artifact#download-all-artifacts
+          # is treated as a regular expression if input name_is_regexp is true
+          # will download only those artifacts with a name that matches this regular expression
+          # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions
           name: mhkit_webread_cache
+          # Optional, a directory where to extract artifact(s), defaults to the current directory
           path: mhkit_webread_cache
+
+      - name: Display structure mhkit_webread_cache
+        run: ls -R
+        working-directory: .
 
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
@@ -328,4 +352,3 @@ jobs:
         with:
           command: run
           startup-options: -noFigureWindows
-
