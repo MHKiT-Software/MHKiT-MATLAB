@@ -30,7 +30,6 @@ Thumbs.db
 *.json
 *egg-info
 *build
-*.prj
 .gitignore
 
 # Test results
