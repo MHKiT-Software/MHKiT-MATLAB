@@ -16,10 +16,12 @@ See the [documentation](https://mhkit-software.github.io/MHKiT/) for more inform
 
 ## Installation
 
-MHKiT-MATLAB utilizes Python functions from MHKiT-Python and requires the user to have compatible
-versions of Python and MHKiT-Python installed. MHKiT-MATLAB supports the following combinations of
-MATLAB and Python versions. For a comprehensive list of compatible MATLAB/Python versions, refer to
-the [MathWorks Python Compatibility Documentation](https://www.mathworks.com/support/requirements/python-compatibility.html).
+### Software Requirements
+
+MHKiT-MATLAB utilizes Python functions from MHKiT-Python and requires the user to have
+compatible versions of Python and MHKiT-Python installed.
+
+MHKiT-MATLAB supports the following combinations of MATLAB and Python versions.[^1] 
 
 |       | R2021b | R2022a | R2022b | R2023a | R2023b |
 | ----- | ------ | ------ | ------ | ------ | ------ |
@@ -30,6 +32,8 @@ the [MathWorks Python Compatibility Documentation](https://www.mathworks.com/sup
 
 Before proceeding with the installation, please ensure your system has compatible versions of Python and MATLAB installed per the table above.
 
+### Installation Guide
+
 For complete installation instructions, please visit the [installation guide](https://mhkit-software.github.io/MHKiT/installation.html).
 
 ## Copyright and License
@@ -39,3 +43,6 @@ Pacific Northwest National Laboratory, and Sandia National Laboratories.
 The software is distributed under the Revised BSD License.
 
 See [copyright and license](https://mhkit-software.github.io/MHKiT/license.html) for more information.
+
+[^1]: For a comprehensive list of compatible MATLAB/Python versions, refer to the [MathWorks Python
+    Compatibility Documentation](https://www.mathworks.com/support/requirements/python-compatibility.html).
