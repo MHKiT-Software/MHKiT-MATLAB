@@ -35,3 +35,7 @@ Thumbs.db
 
 # Test results
 mhkit/tests/test_results/*
+
+# MHKiT-MATLAB Specific Files
+# Hindcast data cache
+mhkit_webread_cache
