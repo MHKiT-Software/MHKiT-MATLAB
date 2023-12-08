@@ -32,7 +32,7 @@ Before proceeding with the installation, please ensure your system has compatibl
 
 For complete installation instructions, please visit the [installation guide](https://mhkit-software.github.io/MHKiT/installation.html).
 
-## Copyright and license
+## Copyright and License
 
 MHKiT is copyright through the National Renewable Energy Laboratory,
 Pacific Northwest National Laboratory, and Sandia National Laboratories.
