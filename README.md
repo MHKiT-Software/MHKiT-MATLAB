@@ -18,16 +18,7 @@ See the [documentation](https://mhkit-software.github.io/MHKiT/) for more inform
 Installation
 ------------------------
 
-MHKiT-MATLAB consists of functions that wrap the MHKiT-Python functions. Therefore, MHKiT-MATLAB has specific Python package dependencies.
-
-Before proceeding with the installation, please ensure compatibility with your MATLAB version and the recommended Python version combinations. Refer to the [Compatible Python and MATLAB Versions](#compatible-python-and-matlab-versions) section for the compatibility matrix.
-
-For detailed installation instructions, please visit the [installation guide](https://mhkit-software.github.io/MHKiT/installation.html).
-
-Compatible Python and MATLAB Versions
-------------------------
-
-MHKiT-MATLAB supports the following combinations of MATLAB and Python versions. For a comprehensive list of compatible MATLAB/Python versions, refer to [MathWorks Python Compatibility](https://www.mathworks.com/support/requirements/python-compatibility.html).
+MHKiT-MATLAB utilizes Python functions from MHKiT-Python and requires compatible versions of Python and MHKiT-Python to be installed. MHKiT-MATLAB supports the following combinations of MATLAB and Python versions. For a comprehensive list of compatible MATLAB/Python versions, refer to [MathWorks Python Compatibility](https://www.mathworks.com/support/requirements/python-compatibility.html).
 
 |       | R2021b | R2022a | R2022b | R2023a | R2023b |
 | ----- | ------ | ------ | ------ | ------ | ------ |
@@ -36,6 +27,9 @@ MHKiT-MATLAB supports the following combinations of MATLAB and Python versions. 
 | 3.9   | ✓      | ✓      | ✓      | ✓      | ✓      |
 | 3.8   | ✓      | ✓      | ✓      | ✓      |        |
 
+Before proceeding with the installation, please ensure your system has compatible versions of Python and MATLAB installed per the table above.
+
+For complete installation instructions, please visit the [installation guide](https://mhkit-software.github.io/MHKiT/installation.html).
 
 Copyright and license
 ------------------------
