@@ -120,14 +120,16 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest]
         python-version: [3.8, 3.9, "3.10", 3.11]
-        matlab-version: [R2021b, R2022a, R2022b, R2023a, latest]
+        matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, latest]
         exclude:
           # cache_population job
           - python-version: "3.10"
             matlab-version: R2022b
             os: ubuntu-latest
-          # Non compatiable MATLAB/Python Versions
+          # Non compatiable MATLAB/Python Versions according to Mathworks
           - matlab-version: latest
+            python-version: 3.8
+          - matlab-version: R2023b
             python-version: 3.8
           - matlab-version: R2023a
             python-version: 3.11
@@ -159,8 +161,7 @@ jobs:
           # 0x0002): Symbol not found: (_SSL_get0_group_name) Referenced from:
           # '/usr/local/miniconda/envs/MHKIT_CONDA_ENV/lib/libcurl.4.dylib' Expected in:
           # '/Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/bin/maci64/libssl.3.dylib'
-          - python-version: 3.11
-            matlab-version: latest
+          - matlab-version: latest
             os: macos-latest
 
     runs-on: ${{ matrix.os }}
