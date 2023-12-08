@@ -35,14 +35,14 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-          activate-environment: TEST
+          activate-environment: MHKIT_CONDA_ENV
           channels: conda-forge
 
       - name: Setup Python ${{ matrix.python-version }}
         shell: bash -l {0}
         run: |
-          conda create --name TEST python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime openssl --strict-channel-priority
-          conda activate TEST
+          conda create --name MHKIT_CONDA_ENV python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime openssl --strict-channel-priority
+          conda activate MHKIT_CONDA_ENV
           conda install -c conda-forge netcdf4
           export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
           pip install -e . --no-deps --force-reinstall
@@ -50,14 +50,14 @@ jobs:
       - name: pip install mhkit module from source
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           pip install -e .
         working-directory: ${{env.mhkit-python-dir}}
 
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           pip install -e .
 
       # Create the cache and add a dummy file
@@ -78,7 +78,7 @@ jobs:
       - name: Configure MATLAB Python Environment
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
 
       - name: Add MATLAB test commands
@@ -155,9 +155,9 @@ jobs:
             python-version: 3.9
           # Combinations with failing tests that seem related to GitHub Actions
           # Python Error: ImportError:
-          # dlopen(/usr/local/miniconda/envs/TEST/lib/python3.11/site-packages/netCDF4/_netCDF4.cpython-311-darwin.so,
+          # dlopen(/usr/local/miniconda/envs/MHKIT_CONDA_ENV/lib/python3.11/site-packages/netCDF4/_netCDF4.cpython-311-darwin.so,
           # 0x0002): Symbol not found: (_SSL_get0_group_name) Referenced from:
-          # '/usr/local/miniconda/envs/TEST/lib/libcurl.4.dylib' Expected in:
+          # '/usr/local/miniconda/envs/MHKIT_CONDA_ENV/lib/libcurl.4.dylib' Expected in:
           # '/Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/bin/maci64/libssl.3.dylib'
           - python-version: 3.11
             matlab-version: latest
@@ -188,14 +188,14 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-          activate-environment: TEST
+          activate-environment: MHKIT_CONDA_ENV
           channels: conda-forge
 
       - name: Setup Python ${{ matrix.python-version }}
         shell: bash -l {0}
         run: |
-          conda create --name TEST python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
-          conda activate TEST
+          conda create --name MHKIT_CONDA_ENV python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
+          conda activate MHKIT_CONDA_ENV
           export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
           pip install -e . --no-deps --force-reinstall
 
@@ -236,44 +236,44 @@ jobs:
       - name: Print Python executable
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           python -c "import sys; print(sys.executable)"
 
       - name: Print Python Version
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           python --version
 
       - name: pip install mhkit module from source
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           pip install -e .
         working-directory: ${{env.mhkit-python-dir}}
 
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           pip install -e .
 
       - name: List installed pip modules
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           pip freeze
 
       - name: Print MHKiT-Python Version
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           python -c "import mhkit; print(mhkit.__version__)"
 
       - name: Verify MHKiT-Python Operation
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
 
       - name: Download mhkit_webread_cache artifact
@@ -295,7 +295,7 @@ jobs:
       - name: Configure MATLAB Python Environment
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
 
       - name: Add MATLAB test commands

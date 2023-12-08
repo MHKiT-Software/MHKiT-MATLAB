@@ -24,12 +24,12 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-          activate-environment: mhkit
+          activate-environment: MHKIT_CONDA_ENV
           channels: conda-forge
 
       - name: "Conda install h5py, netcdf4, and cython"
         run: |
-          conda activate mhkit
+          conda activate MHKIT_CONDA_ENV
           conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
 
       - name: Check out MHKiT-MATLAB
@@ -44,12 +44,12 @@ jobs:
       - name: pip install mhkit from source
         working-directory: ${{env.mhkit-python-dir}}
         run: |
-          conda activate mhkit
+          conda activate MHKIT_CONDA_ENV
           pip install -e .
 
       - name: pip install mhkit-python-utils module from source
         run: |
-          conda activate mhkit
+          conda activate MHKIT_CONDA_ENV
           pip install -e .
 
       # Create the cache and add a dummy file
@@ -151,27 +151,27 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-          activate-environment: mhkit
+          activate-environment: MHKIT_CONDA_ENV
           channels: conda-forge
 
       # - name: "Conda install h5py, netcdf4, and cython"
       #   run: |
-      #     conda activate mhkit
+      #     conda activate MHKIT_CONDA_ENV
       #     conda install -c conda-forge h5py netcdf4 cython
 
       - name: "Conda install h5py, netcdf4, and cython"
         run: |
-          conda activate mhkit
+          conda activate MHKIT_CONDA_ENV
           conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
 
       - name: Output python executable
         run: |
-          conda activate mhkit
+          conda activate MHKIT_CONDA_ENV
           python -c "import sys; print(sys.executable)"
 
       - name: Print Python Version
         run: |
-          conda activate mhkit
+          conda activate MHKIT_CONDA_ENV
           python --version
 
       - name: Check out MHKiT-MATLAB
@@ -186,29 +186,29 @@ jobs:
       - name: pip install mhkit from source
         working-directory: ${{env.mhkit-python-dir}}
         run: |
-          conda activate mhkit
+          conda activate MHKIT_CONDA_ENV
           pip install -e .
 
       - name: pip install mhkit-python-utils module from source
         run: |
-          conda activate mhkit
+          conda activate MHKIT_CONDA_ENV
           pip install -e .
 
       - name: List installed pip modules
         run: |
-          conda activate mhkit
+          conda activate MHKIT_CONDA_ENV
           pip freeze
 
       - name: Print MHKiT-Python Version
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           python -c "import mhkit; print(mhkit.__version__)"
 
       - name: Verify MHKiT-Python Operation
         shell: bash -l {0}
         run: |
-          conda activate TEST
+          conda activate MHKIT_CONDA_ENV
           python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
 
       - name: Download mhkit_webread_cache artifact
