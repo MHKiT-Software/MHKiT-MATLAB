@@ -52,6 +52,15 @@ jobs:
           conda activate mhkit
           pip install -e .
 
+      # Create the cache and add a dummy file
+      # The dummy file ensures that the artifact download
+      - name: Setup mhkit_webread_cache
+        shell: bash -l {0}
+        run: |
+          mkdir mhkit_webread_cache
+          touch mhkit_webread_cache/test.txt
+          echo "Hello World" > mhkit_webread_cache/test.txt
+
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
         with:
