@@ -52,6 +52,12 @@ jobs:
           conda activate mhkit
           pip install -e .
 
+      - name: Download mhkit_webread_cache artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: mhkit_webread_cache
+          path: mhkit_webread_cache
+
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
         with:

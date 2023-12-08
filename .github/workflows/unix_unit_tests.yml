@@ -66,6 +66,11 @@ jobs:
       #     nosetests -v --traverse-namespace mhkit
       #   working-directory: ${{env.mhkit-python-dir}}
       # #   if: always() && steps.runTests.outcome == 'failure'
+      - name: Download mhkit_webread_cache artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: mhkit_webread_cache
+          path: mhkit_webread_cache
 
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
