@@ -3,15 +3,14 @@
 [![Linux and macOS Unit Tests](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/workflows/unix_unit_tests.yml/badge.svg)](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/workflows/unix_unit_tests.yml) [![Windows Unit Tests](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/workflows/windows_unit_tests.yml/badge.svg)](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/workflows/windows_unit_tests.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3928405.svg)](https://doi.org/10.5281/zenodo.3928405)
 
 MHKiT-MATLAB is a MATLAB package designed for marine renewable energy applications to assist in
-data processing and visualization.  The software package includes functionality for:
+data processing and visualization.  The software package include functionality for:
 
-* Quality control analysis
-* Wave resource and wave performance
-* River resource and device
-* Tidal resource and device
+* Data processing
 * Data visualization
-* Mechanical loads analysis
-* Power quality assessments
+* Data quality control
+* Resource assessment
+* Device performance
+* Device loads
 
 See the [documentation](https://mhkit-software.github.io/MHKiT/) for more information about MHKiT.
 
