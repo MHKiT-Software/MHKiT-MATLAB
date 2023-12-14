@@ -65,12 +65,12 @@ Our software undergoes rigorous testing through an [extensive suite of unit test
 
 #### Windows (`windows-latest`)
 
-|      | R2021b | R2022a | R2022b                            | R2023a                            | R2023b                            |
-| ---- | ------ | ------ | --------------------------------- | --------------------------------- | --------------------------------- |
-| 3.11 | -      | -      | -                                 | -                                 | X[^windows-gt-2022a-action-error] |
-| 3.10 | -      | -      | X[^windows-gt-2022a-action-error] | X[^windows-gt-2022a-action-error] | X[^windows-gt-2022a-action-error] |
-| 3.9  | ✓      | ✓      | X[^windows-gt-2022a-action-error] | X[^windows-gt-2022a-action-error] | X[^windows-gt-2022a-action-error] |
-| 3.8  | ✓      | ✓      | X[^windows-gt-2022a-action-error] | X[^windows-gt-2022a-action-error] | X[^windows-gt-2022a-action-error] |
+|      | R2021b | R2022a | R2022b | R2023a | R2023b                            |
+| ---- | ------ | ------ | ------ | ------ | --------------------------------- |
+| 3.11 | -      | -      | -      | -      | X[^windows-gt-2022a-action-error] |
+| 3.10 | -      | -      | X      | X      | X                                 |
+| 3.9  | ✓      | ✓      | X      | X      | X                                 |
+| 3.8  | ✓      | ✓      | X      | X      | X                                 |
 
 ### Legend
 
@@ -94,27 +94,26 @@ See [copyright and license](https://mhkit-software.github.io/MHKiT/license.html)
 
 [^macos-311-action-error]:
 
-<https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/7143629923/job/19455784365#step:20:3373>
+[macOS Python 3.11 action error](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/7143629923/job/19455784365#step:20:3373)
 
-```
-Python Error: ImportError:
-      dlopen(/usr/local/miniconda/envs/MHKIT_CONDA_ENV/lib/python3.11/site-packages/netCDF4/_netCDF4.cpython-311-darwin.so,
-      0x0002): Symbol not found: (_SSL_get0_group_name)
-        Referenced from:
-        '/usr/local/miniconda/envs/MHKIT_CONDA_ENV/lib/libcurl.4.dylib'
-        Expected in:
-        '/Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/bin/maci64/libssl.3.dylib'
-```
+    ```
+    Python Error: ImportError:
+          dlopen(/usr/local/miniconda/envs/MHKIT_CONDA_ENV/lib/python3.11/site-packages/netCDF4/_netCDF4.cpython-311-darwin.so,
+          0x0002): Symbol not found: (_SSL_get0_group_name)
+            Referenced from:
+            '/usr/local/miniconda/envs/MHKIT_CONDA_ENV/lib/libcurl.4.dylib'
+            Expected in:
+            '/Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/bin/maci64/libssl.3.dylib'
+    ```
 
 [^windows-gt-2022a-action-error]:
+    [Windows MATLAB > 2022a action error](https://github.com/MHKiT-Software/MHKiT-MATLAB/pull/108/commits/63fbf91543392e2fc673a67af52e152ff15f2980)
 
-<https://github.com/MHKiT-Software/MHKiT-MATLAB/pull/108/commits/63fbf91543392e2fc673a67af52e152ff15f2980>
+    ```
+    Error: Caught "std::exception" Exception message is:
+      Unable to launch Simple server: Unable to launch C:\Program Files\MATLAB\R2023b\interprocess\bin\win64\pycli\MATLABPyHost.exe
+      because: Peer process exited before transport type handshake. Exit status: 3221226505
 
-```
-Error: Caught "std::exception" Exception message is:
-  Unable to launch Simple server: Unable to launch C:\Program Files\MATLAB\R2023b\interprocess\bin\win64\pycli\MATLABPyHost.exe
-  because: Peer process exited before transport type handshake. Exit status: 3221226505
-
-  ERROR: MATLAB error Exit Status: 0x00000001
-  exit status 1
-```
+      ERROR: MATLAB error Exit Status: 0x00000001
+      exit status 1
+    ```
