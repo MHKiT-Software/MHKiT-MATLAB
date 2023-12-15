@@ -41,9 +41,11 @@ For complete installation instructions, please visit the [installation guide](ht
 
 ## Unit Tests
 
-Our software undergoes rigorous testing through an [extensive suite of unit tests](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions), ensuring its stability and reliability. These tests simulate a user's machine, and failures on GitHub Actions may not necessarily indicate actual issues but could be artifacts of the build environment.
+To ensure software reliability and stability. MHKiT-MATLAB software [runs a suite of unit tests](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions) using the above MATLAB/Python compatibility matrix on Linux (`ubuntu-latest`), MacOS (`macos-latest`) and Windows (`windows-latest`). These tests simulate a user's machine, but they are not perfect. Unit test failures on GitHub Actions may not necessarily indicate actual issues but could be artifacts of the build environment. Users should consider using a tested version if issues arise.
 
 ### Test Matrices
+
+The test matrices below detail the current state of unit testing. An "X" indicates a OS/MATLAB/Python version with a failing MHKiT-MATLAB unit test on GitHub Action that is due to Actions environment.
 
 #### Linux (`ubuntu-latest`)
 
@@ -74,8 +76,8 @@ Our software undergoes rigorous testing through an [extensive suite of unit test
 
 ### Legend
 
-- ✓: GitHub Actions test passed.
-- X: GitHub Actions test failed; consider using a tested version if issues arise.
+- ✓: GitHub Actions unit test passed.
+- X: GitHub Actions unit test failed; consider using a tested version if issues arise.
 - -: MATLAB/Python version not compatible.
 
 If users face difficulties, using a tested version can help determine whether the problem is in the code or the GitHub Actions environment. Feel free to provide any additional details or specifications for further clarity.
