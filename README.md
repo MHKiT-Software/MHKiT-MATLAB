@@ -80,8 +80,6 @@ The test matrices below detail the current state of unit testing. An "X" indicat
 - X: GitHub Actions unit test failed; consider using a tested version if issues arise.
 - `-`: MATLAB/Python version not compatible.
 
-If users face difficulties, using a tested version can help determine whether the problem is in the code or the GitHub Actions environment. Feel free to provide any additional details or specifications for further clarity.
-
 ## Copyright and License
 
 MHKiT is copyright through the National Renewable Energy Laboratory,
