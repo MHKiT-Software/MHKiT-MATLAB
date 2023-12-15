@@ -31,7 +31,7 @@ MHKiT-MATLAB supports the following combinations of MATLAB and Python versions.[
 | 3.8  | ✓      | ✓      | ✓      | ✓      | -      |
 
 - ✓: MATLAB/Python versions compatible
-- -: MATLAB/Python versions not compatible
+- `-`: MATLAB/Python versions not compatible
 
 Before installing MHKiT-MATLAB, please ensure your system has compatible versions of Python and MATLAB installed per the table above.
 
@@ -78,7 +78,7 @@ The test matrices below detail the current state of unit testing. An "X" indicat
 
 - ✓: GitHub Actions unit test passed.
 - X: GitHub Actions unit test failed; consider using a tested version if issues arise.
-- -: MATLAB/Python version not compatible.
+- `-`: MATLAB/Python version not compatible.
 
 If users face difficulties, using a tested version can help determine whether the problem is in the code or the GitHub Actions environment. Feel free to provide any additional details or specifications for further clarity.
 
