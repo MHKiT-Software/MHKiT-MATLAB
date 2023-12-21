@@ -80,6 +80,42 @@ The test matrices below detail the current state of unit testing. An "X" indicat
 - X: GitHub Actions unit test failed; consider using a tested version if issues arise.
 - `-`: MATLAB/Python version not compatible.
 
+## Development Notes
+
+### Contributions
+
+We encourage contributions through pull requests. Please submit your contributions via pull requests on this repository.
+
+### Local Development
+
+#### Setup
+
+1. Uninstall the MHKiT toolbox if already installed:
+
+   - Navigate to Home > Add-Ons > Manage Add-Ons > right-click on "mhkit" > "Uninstall"
+
+2. Clone or download the MHKiT-MATLAB source code. If contributing code, fork the repository and submit a pull request. GitHub provides details on the forking and pull request process [here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests).
+
+3. Install the latest Python versions of `mhkit` and `mhkit_python_utils`.
+
+   - Navigate to the `MHKiT-MATLAB` directory:
+     - Install `mhkit-python`:
+       - `pip install mhkit`
+     - Install `mhkit-python-utils`:
+       - `pip install -e .`
+
+4. Add the `MHKiT-MATLAB/mhkit` folder and its subfolders to your MATLAB path.
+
+### Local Unit Testing
+
+Ensure code integrity by running unit tests locally before pushing changes to GitHub.
+
+To execute all unit tests, run `mhkit/tests/runTests.m`. Unit test results will display in the command window.
+
+### Code Coverage
+
+Code coverage reports are automatically generated during unit testing (refer to [Local Unit Testing](#local-unit-testing) for execution instructions). `mhkit/tests/coverage_report` contains results from the most recent code coverage report.
+
 ## Copyright and License
 
 MHKiT is copyright through the National Renewable Energy Laboratory,
