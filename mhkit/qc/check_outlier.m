@@ -4,16 +4,16 @@ function results = check_outlier(data,bound,options)
 %   Check or outliers using normalized data within a rolling window
 %   Upper and lower bounds in standard deviations
 %   Data is normalized using (data-mean)/std
-%    
+%
 % Parameters
 % ------------
 %
 %     data: pandas dataframe or qcdata structure
-%          Pandas dataframe indexed by datetime (use 
+%          Pandas dataframe indexed by datetime (use
 %          py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))
 %
 %          OR
-%     
+%
 %          qcdata structure of form:
 %
 %             data.values: 2D array of doubles with arbitrary number of columns
@@ -22,7 +22,7 @@ function results = check_outlier(data,bound,options)
 %
 %     bound: cell array of floats
 %         [lower bound, upper bound] of standard deviations from mean allowed
-%         NaN or py.None can be used for either bound 
+%         NaN or py.None can be used for either bound
 %
 %     key: string (optional)
 %         Data column name or translation dictionary key.  If not specified
@@ -31,7 +31,7 @@ function results = check_outlier(data,bound,options)
 %
 %     window: int (optional)
 %         Size of rolling window (in seconds) used to normalize data
-%         default = 3600.  If window is set to py.None, data is normalized 
+%         default = 3600.  If window is set to py.None, data is normalized
 %         using mean and stddev of entire data set (column by column)
 %         to call: check_outlier(data,bound,"window",window)
 %
@@ -47,24 +47,25 @@ function results = check_outlier(data,bound,options)
 %     streaming: logical (optional)
 %         Indicates if streaming analysis should be used, default = py.False
 %         to call: check_outlier(data,bound,"streaming",streaming)
-%     
+%
 % Returns
 % ---------
 %     results: qcdata structure of form:
 %
 %         results.values: array of doubles
 %            Same shape as input data.values
-%            Elements that failed QC test replaced with NaN 
+%            Elements that failed QC test replaced with NaN
 %
 %         results.mask: array of int64
 %            Same shape as input data.values
-%            Logical mask of QC results (1 = passed, 0 = failed QC test) 
+%            Logical mask of QC results (1 = passed, 0 = failed QC test)
 %
 %         results.time: array of datetimes
-%            Same as input times 
+%            Same as input times
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-arguments 
+
+arguments
     data
     bound
     options.key = py.None;
@@ -94,4 +95,5 @@ r = struct(py.pecos.monitoring.check_outlier(data,bound,...
   ptime = double(py.array.array('d',py.numpy.nditer(r.cleaned_data.index.values)))/1e9;
   results.time=datetime(ptime,'ConvertFrom','posix');
 
-end 
+end
+

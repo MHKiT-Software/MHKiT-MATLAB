@@ -1,13 +1,14 @@
 function figure=plot_velocity_vs_power(V,P,options)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Plots velocity vs power along with a polynomial fit 
-%     
+%     Plots velocity vs power along with a polynomial fit
+%
 % Parameters
 % ------------
 %     V: array
-%         Velocity [m/s] 
-%         
-%     P: array 
+%         Velocity [m/s]
+%
+%     P: array
 %          Power [W]
 %
 %     title: string (optional)
@@ -19,10 +20,10 @@ function figure=plot_velocity_vs_power(V,P,options)
 %          to call: plot_velocity_vs_power(P,F,"savepath",savepath)
 %
 %     polynomial_coeff: array (optional)
-%          polynomial coefficients which can be computed from 
+%          polynomial coefficients which can be computed from
 %          polynomial_fit.m. Expects poly.coef
 %          to call: plot_velocity_vs_power(P,F,"polynomial_coeff",polynomial_coeff)
-% 
+%
 % Returns
 % ---------
 %   figure: plot of velocity vs. power
@@ -51,13 +52,12 @@ lenp = length(options.polynomial_coeff);
 if lenp > 1
    x=linspace(mi(1),ma(1),100);
    p2=plot(x,polyval(options.polynomial_coeff,x),'--');
-   legend(p2,{'Polynomial Fit'},'Location','northwest') 
+   legend(p2,{'Polynomial Fit'},'Location','northwest')
 end
 
 if len > 1
     saveas(figure, options.savepath);
-end 
+end
 
+hold off
 
-
-hold off    

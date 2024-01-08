@@ -1,14 +1,14 @@
 function ndbc_data=NDBC_request_data(parameter,filenames)
 
 %%%%%%%%%%%%%%%%%%%%
-%     Requests data by filenames and returns a structure of structures 
-%     for each filename passed. If filenames for a single buoy are passed 
-%     then the yearly structures in the returned structure (ndbc_data) are 
-%     indexed by year (e.g. ndbc_data.year_2004). If multiple buoy ids are 
-%     passed then the returned dictionary is indexed by buoy id and year 
-%     (e.g. ndbc_data['46022']['2014']). 
-%     
-%     
+%     Requests data by filenames and returns a structure of structures
+%     for each filename passed. If filenames for a single buoy are passed
+%     then the yearly structures in the returned structure (ndbc_data) are
+%     indexed by year (e.g. ndbc_data.year_2004). If multiple buoy ids are
+%     passed then the returned dictionary is indexed by buoy id and year
+%     (e.g. ndbc_data['46022']['2014']).
+%
+%
 % Parameters
 % ------------
 %     parameter : string
@@ -16,8 +16,8 @@ function ndbc_data=NDBC_request_data(parameter,filenames)
 %         'stdmet' : 'Standard Meteorological Current Year Historical Data'
 %
 %     filenames : array of strings
-%         Data filenames on https://www.ndbc.noaa.gov/data/historical/{parameter}/  
-%         
+%         Data filenames on https://www.ndbc.noaa.gov/data/historical/{parameter}/
+%
 %     proxy : None
 %         Parameter is now deprecated.
 %         To request data from behind a firewall, configure in MATLAB
@@ -27,16 +27,16 @@ function ndbc_data=NDBC_request_data(parameter,filenames)
 %           MATLAB -> Web -> Use a proxy server to connect to the Internet
 %         See the following for details:
 %           https://www.mathworks.com/help/matlab/import_export/proxy.html
-%     
+%
 % Returns
 % ---------
-%     ndbc_data: Structure 
+%     ndbc_data: Structure
 %         Structure of structures broken down by buoy and years of data.
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-arguments 
+arguments
     parameter string {mustBeMember(parameter,{'swden','stdmet'})}
     filenames (1,:) string
 end
@@ -154,3 +154,4 @@ field_names = fieldnames(ndbc_data);
 if length(field_names) == 1
     ndbc_data = ndbc_data.(field_names{1});
 end
+

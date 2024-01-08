@@ -15,6 +15,40 @@ def timeseries_to_pandas(ts,ind,x):
         
     return df.astype('float64')
 
+def convert_number_array_and_index_to_dataframe(columns_as_lists, index, transpose_threshold=1):
+    """
+    Convert a time series into a Pandas DataFrame.
+
+    Parameters:
+    time_series (list of lists): The time series data represented as a list of lists.
+    index (list or array-like): The index or datetime index for the DataFrame.
+    transpose_threshold (int): A threshold that controls whether to transpose the time series.
+
+    Returns:
+    pd.DataFrame: A Pandas DataFrame containing the time series data.
+
+    If the 'transpose_threshold' is greater than 1, the time series is transposed before creating
+    the DataFrame using the provided index. If the 'transpose_threshold' is not greater than 1,
+    the DataFrame is created from the original time series without transposing, using the
+    provided index. The data in the DataFrame is treated as float64 for consistency.
+
+    Example:
+    time_series = [[1, 2, 3], [4, 5, 6]]
+    index = ['2023-01-01', '2023-01-02']
+    df = convert_timeseries_to_dataframe(time_series, index, transpose_threshold=2)
+    """
+
+    if transpose_threshold > 1:
+        time_series = list(map(list, zip(*time_series)))
+        df = pd.DataFrame(data=time_series, index=index)
+    else:
+        df = pd.DataFrame(data=time_series, index=index)
+
+    return df.astype('float64')
+
+
+def list_to_series(input_list, index=None):
+    return pd.Series(input_list, index)
 
 def spectra_to_pandas(frequency,spectra,x,cols=None):
     if x>1:       

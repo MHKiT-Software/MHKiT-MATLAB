@@ -66,7 +66,7 @@ python-utils
     <param.required.addons />
     <param.matlab.project.id />
     <param.matlab.project.name />
-    <param.release.start>R2020a</param.release.start>
+    <param.release.start>R2021b</param.release.start>
     <param.release.end>latest</param.release.end>
     <param.release.current.only>false</param.release.current.only>
     <param.compatiblity.windows>true</param.compatiblity.windows>
@@ -117,6 +117,7 @@ python-utils
       <file>${PROJECT_ROOT}/mhkit</file>
     </fileset.rootdir>
     <fileset.rootfiles>
+      <file>${PROJECT_ROOT}/mhkit/dolfyn</file>
       <file>${PROJECT_ROOT}/mhkit/loads</file>
       <file>${PROJECT_ROOT}/mhkit/power</file>
       <file>${PROJECT_ROOT}/mhkit/qc</file>
@@ -133,7 +134,7 @@ python-utils
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>/Applications/MATLAB_R2020a.app</root>
+      <root>/Applications/MATLAB_R2022a.app</root>
       <toolboxes />
     </matlab>
     <platform>
@@ -145,7 +146,7 @@ python-utils
       <vista>false</vista>
       <linux>false</linux>
       <solaris>false</solaris>
-      <osver>10.15.7</osver>
+      <osver>12.6.3</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>maci64</arch>

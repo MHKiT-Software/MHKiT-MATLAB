@@ -4,28 +4,29 @@ function varargout=magnitude_phase(vector)
 %     Calculates magnitude and phase in two or three dimensions
 %     call -> [mag, theta] = magnitude_phase({x; y})
 %     call -> [mag, theta, phi] = magnitude_phase({x; y; z})
-%     
+%
 % Parameters
 % ------------
-%     vector: cell array  
+%     vector: cell array
 %           cell array consisting of x, y, and optionally the z component
 %           of vector
 %       x: array_like x component
 %       y: array like y component
 %       z: array like z component defined positive up (Optional)
-%     
+%
 %% Returns
 % ---------
-%     varargout: array 
-%         depending on number of inputs it will either output an array for    
-%         magnitude and theta or one for magnitude, theta, and phi 
+%     varargout: array
+%         depending on number of inputs it will either output an array for
+%         magnitude and theta or one for magnitude, theta, and phi
 %           magnitude: array - magnitude of vector
 %           theta: array - radians from the x axis
 %           phi: array - radians from the z-axis defined as positive up
-%        
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 arguments
-    vector;    
+    vector;
 end
 
 % check to see if the input argument is a cell array
@@ -74,5 +75,4 @@ else
     theta = atan2(y,x);
     varargout{1} = mag; varargout{2} = theta;
 end
-
 

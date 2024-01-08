@@ -1,24 +1,24 @@
 % function forLegend = bplot(X,varargin)
 % This function will create a nice boxplot from a set of data. You don't
 % need any toolboxes.
-% 
+%
 %     bplot(D) will create a boxplot of data D, no fuss.
-% 
+%
 % T = bplot(D)  If X is a matrix, there is one box per column; if X is a
 %               vector, there is just one box. On each box, the central
 %               mark is the median, the edges of the box are the 25th and
 %               75th percentiles
 %               array 'T' for a legend. You can add the legend as legend(T)
-% 
+%
 % T = bplot(D,x) will plot the boxplot of data D above the 'x' value x
-% 
+%
 % T = bplot(D,y,'horiz') will plot a horizontal boxplot at the 'y' value of y
-% 
+%
 % T = bplot(...,'Property', . . . )
 % T = bplot(...,'PropertyName',PropertyValue, . . . )
-% 
+%
 %   SINGLE PARAMETERS:
-% 
+%
 %          'horizontal': Display the boxplot along the horizontal axis. The
 %                        default is to display the boxplot vertically.
 %                        'horiz'
@@ -45,7 +45,7 @@
 %                        'boxes','boxedge'
 %             'whisker': Set the percentage of points that the whiskers
 %                        span. Default is the 9% and 91%. Choose only the
-%                        lower number in %, for example: 9. 
+%                        lower number in %, for example: 9.
 %                        'whiskers','whiskeredge'
 %           'linewidth': Set the width of all the lines.
 %               'color': Change the color of all the lines. If you use this
@@ -57,30 +57,30 @@
 %                        horizontal plots the height is 1.5/20 of the y axis
 %                        the  bars.
 %                        'barwidth'
-% 
-%% Jitter feature 
+%
+%% Jitter feature
 % The boxplot has a cool jitter feature which will help you view each
 % outlier separately even if two have identical values. It jitters the
 % points around the other axis so that you can see exactly how many are
 % there.
-% 
-% % Examples: 
+%
+% % Examples:
 % bplot(randn(30,3),'outliers')
 % bplot(randn(30,3),'color','black');
 % ----
 % X = round(randn(30,4)*5)/5; % random, with some duplicates
 % T = bplot(X,'points');
 % legend(T,'location','eastoutside');
-% 
+%
 %% development notes:
 % This function was developed to be part of a larger histogram function
 % which can be found at this location:
 % http://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-histograms-pretty-by-default
-% 
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Jonathan Lansey 2013,                                                   %
 %                   questions to Lansey at gmail.com                      %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 function [forLegend, boxEdge, wisEdge] = bplot(x,varargin)
 %% save the initial hold state of the figure.
@@ -145,16 +145,16 @@ x = x(~isnan(x));
 
 %% Initialize some things before accepting user parameters
 horizontalFlag=0;
-barFactor=1; % 
+barFactor=1; %
 % linewidth=2;
 linewidth=1;
 forceNoLegend=0; % will any legend items be allowed in.
 stdFlag = 0;
 meanFlag = 1;
-specialWidthFlag = 0; % this flag will determine whether the bar width is 
+specialWidthFlag = 0; % this flag will determine whether the bar width is
 %                       automatically set as a proportion of the axis width
 
-toScale = 0; % this flag is to scale the jitter function in case the 
+toScale = 0; % this flag is to scale the jitter function in case the
 %              histogram function is calling it
 
 if justOneInputFlag
@@ -163,7 +163,7 @@ if justOneInputFlag
     else
         outlierFlag = 0;
     end
-    
+
 else
     outlierFlag = 0;
 end
@@ -175,7 +175,7 @@ wisColor = [0 0 0]+.3;
 % meanColor = [0.9684    0.2799    0.0723];
 meanColor = [0 0.6 0];
 medianColor = [0.6350, 0.0780, 0.1840];
-outlierColor = [0.9684    0.2799    0.0723]; 
+outlierColor = [0.9684    0.2799    0.0723];
 
 percentileNum = 25; % for the main quantiles
 percentileNum2 = 9; % for the whisker ends
@@ -223,7 +223,7 @@ while k <= length(varargin)
             meanFlag=0;
         case {'toscale','histmode','hist'}
             toScale = 1; % scale away folks!
-            
+
 %         case {'mode','modes'}
 %             modeFlag = 1;
 %         case {'text','alltext','t'} % ?????
@@ -284,7 +284,7 @@ if horizontalFlag
 else %
     hReg2(end+1) = rectangle('Position',[y-barWidth/2,boxEdge(1),barWidth,IQR],'linewidth',linewidth,'EdgeColor',boxColor,'facecolor',[1 1 1]);
     hold on;
-    
+
     hReg2(end+1) = plot([y-barWidth/2 y+barWidth/2],[medianX medianX],'color',medianColor,'linewidth',linewidth*2);
     if meanFlag
 %         hReg2(end+1) = plot(y,meanX,'+','linewidth',linewidth,'color',meanColor,'markersize',10);
@@ -326,7 +326,7 @@ if outlierFlag % but only if you want to
         end
     end
 end
-%% Remove the legend entries 
+%% Remove the legend entries
 % remove extras for all the items.
 for ii=1:length(hReg)
 %     set(get(get(hReg(ii),'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); % Exclude line from legend
@@ -337,7 +337,7 @@ end
 if forceNoLegend
     for ii=1:length(hReg2)
 %         set(get(get(hReg2(ii),'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); % Exclude line from legend
-        set(hReg2(ii),'HandleVisibility','off') 
+        set(hReg2(ii),'HandleVisibility','off')
     end
 end
 %% set the axis
@@ -352,7 +352,7 @@ if justOneInputFlag
         padxfac = 2;
         padyfac = .1;
     end
-    
+
     axis tight;
     p = axis;
     padx = (p(2)-p(1))*padxfac; pady = (p(4)-p(3))*padyfac;
@@ -410,3 +410,4 @@ Y = 100*(.5 :1:n-.5)/n;
 x=[min(x); x; max(x)];
 Y = [0 Y 100];
 yi = interp1(Y,x,p);
+

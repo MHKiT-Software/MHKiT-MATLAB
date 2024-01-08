@@ -17,7 +17,7 @@ function figure=plot_matrix(M,Mtype, options)
 %
 %    Mtype: string
 %         type of matrix (i.e. power, capture length, etc.) to be used
-%         in plot title 
+%         in plot title
 %
 %     savepath: string (optional)
 %         path and filename to save figure.
@@ -29,7 +29,7 @@ function figure=plot_matrix(M,Mtype, options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
-    M 
+    M
     Mtype
     options.savepath = "";
 end
@@ -45,18 +45,19 @@ pos=get(gca,'position');
 [rows,cols]=size(M.values);
 width=pos(3)/(cols-1);
 height =pos(4)/(rows-1);
-%create textbox annotations
-for i=1:cols-1
-      for j=rows-1:-1:1 
-          if ~isnan(M.values(j,i)) 
-        annotation('textbox',[pos(1)+width*(i-1),pos(2)+height*(j-1),width,height], ...
-       'string',num2str(M.values(j,i)),'LineStyle','none','HorizontalAlignment','center',...
-       'VerticalAlignment','middle');
-          end
-      end
-end
+% create textbox annotations
+ for i=1:cols-1
+       for j=rows-1:-1:1
+           if ~isnan(M.values(j,i))
+         annotation('textbox',[pos(1)+width*(i-1),pos(2)+height*(j-1),width,height], ...
+        'string',num2str(M.values(j,i)),'LineStyle','none','HorizontalAlignment','center',...
+        'VerticalAlignment','middle');
+           end
+       end
+ end
 
 len = strlength(options.savepath);
 if len > 1
     saveas(figure, options.savepath);
-end 
+end
+

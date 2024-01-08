@@ -1,14 +1,14 @@
 function stats=get_statistics(data,freq,options)
 
 %%%%%%%%%%%%%%%%%%%%
-%     Calculate mean, max, min and stdev statistics of continuous data for a 
+%     Calculate mean, max, min and stdev statistics of continuous data for a
 %     given statistical window. Default length of statistical window (period) is
 %     based on IEC TS 62600-3:2020 ED1. Also allows calculation of statistics for multiple statistical
-%     windows of continuous data. 
-%     
+%     windows of continuous data.
+%
 % Parameters
 % ------------
-%     data: strucutre  
+%     data: strucutre
 %         structure of variables to get statistics for with field called
 %         time.
 %     freq: double or int
@@ -22,20 +22,20 @@ function stats=get_statistics(data,freq,options)
 %
 % Returns
 % ---------
-%     stats: structure 
+%     stats: structure
 %         Structure with mean, max, min, and stdev of each variable
-%        
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 arguments
-    data 
+    data
     freq
     options.period = 600;
     options.vector_channels = {};
-    
+
 end
 
 py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
+% py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit_python_utils');
 
 fn = fieldnames(data);
@@ -44,10 +44,10 @@ li=py.list();
 li2 = py.list();
 
  for k=1:length(fn)
-     
+
      if ~strcmp(fn{k} , {'time','Timestamp'})
 
-            eval(['temp = data.' fn{k} ';' ]);           
+            eval(['temp = data.' fn{k} ';' ]);
             app=py.list(temp);
             li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
             li2=py.mhkit_python_utils.pandas_dataframe.lis(li2,fn{k});
@@ -66,9 +66,9 @@ mean = double(py.array.array("d",py.numpy.nditer(stat_py{1}.values)));
 max = double(py.array.array("d",py.numpy.nditer(stat_py{2}.values)));
 min = double(py.array.array("d",py.numpy.nditer(stat_py{3}.values)));
 std = double(py.array.array("d",py.numpy.nditer(stat_py{4}.values)));
- 
+
 pointer = 0;
- 
+
 for k=1:length(fn)
      if ~strcmp(fn{k} , {'time','Timestamp'})
         pointer = pointer + 1;

@@ -2,7 +2,7 @@ function k=wave_number(f,h,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Calculates wave number
-%    
+%
 % Parameters
 % ------------
 %    f: frequency (Hz)
@@ -19,7 +19,7 @@ function k=wave_number(f,h,options)
 %         to call: wave_number(f,h,"g",g)
 %
 %
-%         
+%
 %
 % Returns
 % -------
@@ -34,7 +34,7 @@ function k=wave_number(f,h,options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
-    f 
+    f
     h
     options.rho = 1025;
     options.g = 9.80665;
@@ -43,7 +43,7 @@ py.importlib.import_module('mhkit');
 
 f=py.numpy.array(f);
 
- 
+
 kdf=py.mhkit.wave.resource.wave_number(f,h,pyargs('rho',options.rho,'g',options.rho));
 
 
@@ -51,3 +51,4 @@ kdf=py.mhkit.wave.resource.wave_number(f,h,pyargs('rho',options.rho,'g',options.
 k.values=double(py.array.array('d',py.numpy.nditer(kdf.values)));
 k.frequency=double(py.array.array('d',py.numpy.nditer(kdf.index)));
 k.h=h;
+

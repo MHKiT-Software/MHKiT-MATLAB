@@ -1,10 +1,10 @@
 function region = region_selection(lat_lon, data_type)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
+%
 %     Returns the name of the predefined region in which the given coordinates reside.
-%     Can be used to check if the passed lat/lon pair is within the WPTO hindcast dataset. 
-%     
+%     Can be used to check if the passed lat/lon pair is within the WPTO hindcast dataset.
+%
 %     Parameters
 %     ----------
 %         lat_lon : matrix
@@ -18,14 +18,14 @@ function region = region_selection(lat_lon, data_type)
 %             Name of predefined region for given coordinates
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+
     if ~isa(lat_lon,'numeric')
         error("ERROR: lat_lon must be a numeric matrix")
     end
     if ~isa(data_type,'string') & ~isa(data_type,'char')
         error('ERROR: data_type must be a string or char')
     end
-    
+
     if isequal(data_type,'3-hour')
         regions.Hawaii.lat = [15.0,15.0,27.000002,27.000002]';
         regions.Hawaii.lon = [-164.0,-151.0,-151.0,-164.0]';
@@ -55,3 +55,4 @@ function region = region_selection(lat_lon, data_type)
         error("ERROR: coordinates out of bounds OR not within the same region!")
     end
 end
+

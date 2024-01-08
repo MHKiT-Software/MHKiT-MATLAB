@@ -3,15 +3,15 @@ function data=swan_read_block(swan_file)
 %%%%%%%%%%%%%%%%%%%%
 %     Reads in SWAN ASCII block format output and returns a data structure
 %     containing modeled values and assocuated metadata
-%     
+%
 % Parameters
 % ------------
 %     swan_file : string
-%         SWAN file name to import    
-%     
+%         SWAN file name to import
+%
 % Returns
 % ---------
-%     data: Structure 
+%     data: Structure
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 datatp = py.mhkit.wave.io.swan.read_block(swan_file);
@@ -40,3 +40,4 @@ for raw_key = py.list(keys(datapd))
        data.(new_string).(str_meta)= met_val;
    end
 end
+

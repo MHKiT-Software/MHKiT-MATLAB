@@ -2,7 +2,7 @@ function figure=plot_spectrum(wave_spectra,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Plots wave amplitude spectrum
-%     
+%
 % Parameters
 % ----------
 %	wave_spectra: Structure of the following form:
@@ -16,22 +16,22 @@ function figure=plot_spectrum(wave_spectra,options)
 %     savepath: string (optional)
 %         path and filename to save figure.
 %         to call: plot_spectrum(wave_spectra,"savepath",savepath)
-%         
+%
 % Returns
 % ---------
 %	figure: figure
 %       Plot of wave amplitude spectra versus omega
-%     
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
-    wave_spectra 
+    wave_spectra
     options.savepath = "";
 end
 
 figure=plot(wave_spectra.frequency*2*3.14,wave_spectra.spectrum/(2*3.14));
 xlabel('Omega (^{rad}/_{s})')
-ylabel('Spectral Density (m^{2}s/_{rad})') 
+ylabel('Spectral Density (m^{2}s/_{rad})')
 si=size(wave_spectra.spectrum);
 if si(1)==1
     Hm0=significant_wave_height(wave_spectra);
@@ -42,5 +42,5 @@ end
 len = strlength(options.savepath);
 if len > 1
     saveas(figure, options.savepath);
-end 
-    
+end
+

@@ -1,13 +1,14 @@
 function figure=plot_power_duration_curve(P,F,options)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Plots power vs exceedance probability as a Flow Duration Curve (FDC) 
-%     
+%     Plots power vs exceedance probability as a Flow Duration Curve (FDC)
+%
 % Parameters
 % ------------
 %     P: array
-%         Power [W] 
-%         
-%     F: array 
+%         Power [W]
+%
+%     F: array
 %          Exceedance probability [unitless]
 %
 %     title: string (Optional)
@@ -17,7 +18,7 @@ function figure=plot_power_duration_curve(P,F,options)
 %     savepath: string (optional)
 %          path and filename to save figure.
 %          to call: plot_power_duration_curve(P,F,"savepath",savepath)
-% 
+%
 % Returns
 % ---------
 %   figure: plot of power duration curve
@@ -49,6 +50,7 @@ title(options.title)
 len = strlength(options.savepath);
 if len > 1
     saveas(figure, options.savepath);
-end 
+end
 
 hold off
+
