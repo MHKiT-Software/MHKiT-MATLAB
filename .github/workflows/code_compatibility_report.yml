@@ -22,10 +22,6 @@ jobs:
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
-      - name: Setup MATLAB Path on Ubuntu
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: echo "LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
-
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2-beta
         with:
@@ -37,17 +33,11 @@ jobs:
           addpath(genpath('mhkit')),
           results = runCodeCompatibilityReport()" >> run.m
 
-      - name: Output run.m
+      - name: Echo runner for code compatibility report
         shell: bash
         run: cat run.m
 
-      # This is a good idea but does not work because you cannot explicitly set the python execution mode
-      #   - name: Run MHKiT-MATLAB Unit Tests
-      #     uses: matlab-actions/run-tests@v1
-      #     with:
-      #         select-by-folder: mhkit/tests
-
-      - name: Run MATLAB Unit Tests
+      - name: Run code compatibility report
         uses: matlab-actions/run-command@v1
         with:
           command: run
