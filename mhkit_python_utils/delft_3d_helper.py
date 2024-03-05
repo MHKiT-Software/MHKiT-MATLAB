@@ -34,6 +34,9 @@ def get_d3d_keys(netcdf_root):
         and the second list contains their corresponding long names. If a variable does not have a
         long name, an empty string is returned instead.
     """
+    if not isinstance(netcdf_root, netCDF4.Dataset):
+        raise ValueError("Input must be a netCDF4 Dataset object")
+
     result = {}
     for var in netcdf_root.variables.keys():
         try:
