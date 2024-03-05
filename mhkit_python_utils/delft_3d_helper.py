@@ -1,5 +1,6 @@
 import os
 
+from mhkit.river.io import d3d
 import netCDF4
 
 
@@ -45,3 +46,24 @@ def get_d3d_keys(netcdf_root):
             result[var] = ""
 
     return [list(result.keys()), list(result.values())]
+
+
+def call_convert_time(netcdf_root, seconds_run):
+    """
+    Calls the _convert_time function from the mhkit d3d module to find the closest time index to the specified number
+    of seconds, using information from the provided netCDF4 Dataset object.
+
+    Args:
+        netcdf_root (netCDF4.Dataset): The root object of a Delft3D NetCDF dataset.
+        seconds_run (int): The number of seconds to find the closest time index to.
+
+    Returns:
+        int: The index of the closest time index to the specified number of seconds.
+
+    Raises:
+        ValueError: If the input netCDF4 Dataset object is not provided.
+    """
+    if not isinstance(netcdf_root, netCDF4.Dataset):
+        raise ValueError("Input must be a netCDF4 Dataset object")
+
+    return d3d._convert_time(netcdf_root, seconds_run=seconds_run)
