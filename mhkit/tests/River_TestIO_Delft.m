@@ -28,6 +28,23 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             testCase.assertEqual(num_time, 5);
         end
 
+        function testConvertTime(testCase)
+            d3d_file = "../../examples/data/river/d3d/turbineTest_map.nc";
+            data = delft_3d_open_netcdf(d3d_file);
+
+            seconds_run = 62;
+            closest_time_index = delft_3d_convert_time(data, seconds_run);
+            testCase.assertEqual(closest_time_index, 2);
+
+            seconds_run = 111;
+            closest_time_index = delft_3d_convert_time(data, seconds_run);
+            testCase.assertEqual(closest_time_index, 3);
+
+            seconds_run = 1000;
+            closest_time_index = delft_3d_convert_time(data, seconds_run);
+            testCase.assertEqual(closest_time_index, 5);
+        end
+
     end
 
 end
