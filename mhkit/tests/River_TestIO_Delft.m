@@ -17,6 +17,17 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             testCase.assertEqual(num_fieldnames, 52);
         end
 
+        function testGetAllTime(testCase)
+            d3d_file = "../../examples/data/river/d3d/turbineTest_map.nc";
+            data = delft_3d_open_netcdf(d3d_file);
+
+            time = delft_3d_get_all_time(data);
+            testCase.assertEqual(time(1, 5), 240);
+
+            num_time = length(time);
+            testCase.assertEqual(num_time, 5);
+        end
+
     end
 
 end
