@@ -23,6 +23,5 @@ function result = delft_3d_open_netcdf(filename)
 
     % Obtain a Python netCDF object. This approach leverages existing Python functionality,
     % avoiding the need to reimplement it in MATLAB, albeit requiring handling a Python object.
-    result = py.mhkit_python_utils.d3d_converter.open_netcdf_file(filename);
+    result = py.mhkit_python_utils.delft_3d_helper.open_netcdf_file(filename);
 end
-
