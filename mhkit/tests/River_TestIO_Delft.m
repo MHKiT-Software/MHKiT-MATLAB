@@ -219,6 +219,28 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             testCase.assertEqual(turbulent_intensity.turbulent_intensity(1, expected_index), expected_turbulent_intensity, 'AbsTol',0.01);
         end
 
+        function testCalculateVariableInterpolation(testCase)
+            d3d_file = "../../examples/data/river/d3d/turbineTest_map.nc";
+            data = delft_3d_open_netcdf(d3d_file);
+
+            variables = {'turkin1', 'ucx', 'ucy', 'ucz'};
+
+            var_interpolation = delft_3d_calculate_variable_interpolation(data, variables, 'faces', 'nearest');
+
+            % Fieldnames
+            expected_fieldnames = 8;
+            num_fieldnames = length(fieldnames(var_interpolation));
+            testCase.assertEqual(num_fieldnames, expected_fieldnames);
+
+            % Value Spot Check
+            expected_index = 4;
+            expected_x = 0.6250;
+            expected_ucz = 0.0046;
+
+            testCase.assertEqual(var_interpolation.x(1, expected_index), expected_x, 'AbsTol',0.01);
+            testCase.assertEqual(var_interpolation.ucz(1, expected_index), expected_ucz, 'AbsTol',0.01);
+        end
+
     end
 
 end
