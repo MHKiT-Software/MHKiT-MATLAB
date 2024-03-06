@@ -153,6 +153,29 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             testCase.assertEqual(centerline_variable(1, expected_index), expected_val, 'AbsTol',0.01);
         end
 
+        function testGetLayerData(testCase)
+            d3d_file = "../../examples/data/river/d3d/turbineTest_map.nc";
+            data = delft_3d_open_netcdf(d3d_file);
+
+            x_velocity_key = "ucx";
+            layer = 2;
+
+            layer_data = delft_3d_get_layer_data(data, x_velocity_key, layer);
+
+            % Fieldnames
+            expected_fieldnames = 7;
+            num_fieldnames = length(fieldnames(layer_data));
+            testCase.assertEqual(num_fieldnames, expected_fieldnames);
+
+            % Value Spot Check
+            expected_index = 3;
+            expected_x = 0.1250;
+            expected_y = 1.3750;
+
+            testCase.assertEqual(layer_data.x(1, expected_index), expected_x, 'AbsTol',0.01);
+            testCase.assertEqual(layer_data.y(1, expected_index),expected_y, 'AbsTol',0.01);
+        end
+
     end
 
 end
