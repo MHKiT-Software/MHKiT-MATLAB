@@ -37,7 +37,7 @@ function result_struct = delft_3d_calculate_variable_interpolation(delft_3d_py_o
         error('MATLAB:delft_3d_calculate_variable_interpolation:InvalidInput', 'Variables must be a cell array of strings.');
     end
 
-    if ~(ischar(points) || isa(points, 'py.pandas.core.frame.DataFrame'))
+    if ~(isstring(points) || isa(points, 'py.pandas.core.frame.DataFrame'))
         error('MATLAB:delft_3d_calculate_variable_interpolation:InvalidInput', 'Points must be a string or a DataFrame.');
     end
 
@@ -45,7 +45,7 @@ function result_struct = delft_3d_calculate_variable_interpolation(delft_3d_py_o
         edges = '';
     end
 
-    if ~ischar(edges) && ~isempty(edges)
+    if ~isstring(edges) && ~isempty(edges)
         error('MATLAB:delft_3d_calculate_variable_interpolation:InvalidInput', 'Edges must be a string or empty.');
     end
 
