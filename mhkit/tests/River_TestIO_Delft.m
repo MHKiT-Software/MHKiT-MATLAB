@@ -241,6 +241,23 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             testCase.assertEqual(var_interpolation.ucz(1, expected_index), expected_ucz, 'AbsTol',0.01);
         end
 
+        function testCalculateUnorm(testCase)
+            d3d_file = "../../examples/data/river/d3d/turbineTest_map.nc";
+            data = delft_3d_open_netcdf(d3d_file);
+
+            variables = {'turkin1', 'ucx', 'ucy', 'ucz'};
+
+            var_interpolation = delft_3d_calculate_variable_interpolation(data, variables, 'faces', 'nearest');
+
+            var_interpolation.u_mag = delft_3d_calculate_unorm(var_interpolation.ucx, var_interpolation.ucy, var_interpolation.ucz);
+
+            % Value Spot Check
+            expected_index = 4;
+            expected_value = 0.6942;
+
+            testCase.assertEqual(var_interpolation.u_mag(1, expected_index), expected_value, 'AbsTol',0.01);
+        end
+
     end
 
 end
