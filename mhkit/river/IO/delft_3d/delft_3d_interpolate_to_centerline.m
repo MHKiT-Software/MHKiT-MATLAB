@@ -1,35 +1,3 @@
-%function result = delft_3d_interpolate_to_centerline(points, values, xi)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Returns
-%%
-%% Parameters
-%% ------------
-%%    points: 2-D ndarray of floats
-%%       Data point coordinates
-%%    values: ndarray of float
-%%       Data values
-%%    xi: 2-D ndarray of floats
-%%       points at which to interoplate data
-%%
-%% Returns
-%% ---------
-%%    result: ndarray
-%%        Array of interpolated values
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%    % Transposed to get the same shape as an input DataFrame
-%    points = py.numpy.transpose(py.numpy.asarray(points));
-%    values = py.numpy.asarray(values);
-%    % Transposed to get the same shape as an input DataFrame
-%    xi = py.numpy.transpose(py.numpy.asarray(xi));
-
-%    python_result = py.scipy.interpolate.griddata(points, values, xi);
-
-%    result = double(python_result);
-%end
-
 function result = delft_3d_interpolate_to_centerline(points, values, xi)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
