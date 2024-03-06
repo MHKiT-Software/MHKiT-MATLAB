@@ -33,16 +33,19 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             data = delft_3d_open_netcdf(d3d_file);
 
             seconds_run = 62;
+            expected_index = 2;
             closest_time_index = delft_3d_convert_time(data, seconds_run);
-            testCase.assertEqual(closest_time_index, 2);
+            testCase.assertEqual(closest_time_index, expected_index);
 
             seconds_run = 111;
+            expected_index = 3;
             closest_time_index = delft_3d_convert_time(data, seconds_run);
-            testCase.assertEqual(closest_time_index, 3);
+            testCase.assertEqual(closest_time_index, expected_index);
 
             seconds_run = 1000;
+            expected_index = 5;
             closest_time_index = delft_3d_convert_time(data, seconds_run);
-            testCase.assertEqual(closest_time_index, 5);
+            testCase.assertEqual(closest_time_index, expected_index);
         end
 
     end
