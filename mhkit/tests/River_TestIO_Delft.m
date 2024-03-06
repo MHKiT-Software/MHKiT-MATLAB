@@ -225,7 +225,7 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
 
             variables = {'turkin1', 'ucx', 'ucy', 'ucz'};
 
-            var_interpolation = delft_3d_calculate_variable_interpolation(data, variables, 'faces', 'nearest');
+            var_interpolation = delft_3d_calculate_variable_interpolation(data, variables, "faces", "nearest");
 
             % Fieldnames
             expected_fieldnames = 8;
@@ -247,7 +247,7 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
 
             variables = {'turkin1', 'ucx', 'ucy', 'ucz'};
 
-            var_interpolation = delft_3d_calculate_variable_interpolation(data, variables, 'faces', 'nearest');
+            var_interpolation = delft_3d_calculate_variable_interpolation(data, variables, "faces", "nearest");
 
             var_interpolation.u_mag = delft_3d_calculate_unorm(var_interpolation.ucx, var_interpolation.ucy, var_interpolation.ucz);
 
