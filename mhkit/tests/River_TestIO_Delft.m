@@ -176,6 +176,49 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             testCase.assertEqual(layer_data.y(1, expected_index),expected_y, 'AbsTol',0.01);
         end
 
+        function testCalculateTurbulentIntensity(testCase)
+            d3d_file = "../../examples/data/river/d3d/turbineTest_map.nc";
+            data = delft_3d_open_netcdf(d3d_file);
+
+            run_timestamps = delft_3d_get_all_time(data);
+            x_velocity_key = "ucx";
+
+            seconds_into_simulation = run_timestamps(1, 4);
+            seconds_into_simulation_index = delft_3d_convert_time(data, seconds_into_simulation);
+
+            x_velocity_point_data = delft_3d_get_all_data_points(data, x_velocity_key, seconds_into_simulation_index);
+
+            xmax = min(x_velocity_point_data.x);
+            xmin = max(x_velocity_point_data.x);
+
+            ymax = min(x_velocity_point_data.y);
+            ymin = max(x_velocity_point_data.y);
+
+            waterdepth_max = min(x_velocity_point_data.waterdepth);
+            waterdepth_min = max(x_velocity_point_data.waterdepth);
+
+            x2 = linspace(xmin, xmax, 100);
+            y_contour = linspace(ymin, ymax, 40);
+            z2 = mean([waterdepth_max, waterdepth_min]);
+
+            contour_points = delft_3d_create_points(x2, y_contour, z2);
+
+            turbulent_intensity = delft_3d_calculate_turbulent_intensity(data, contour_points.df, true);
+
+            % Fieldnames
+            expected_fieldnames = 9;
+            num_fieldnames = length(fieldnames(turbulent_intensity));
+            testCase.assertEqual(num_fieldnames, expected_fieldnames);
+
+            % Value Spot Check
+            expected_index = 3;
+            expected_x = 17.5164;
+            expected_turbulent_intensity = 4.0759;
+
+            testCase.assertEqual(turbulent_intensity.x(1, expected_index), expected_x, 'AbsTol',0.01);
+            testCase.assertEqual(turbulent_intensity.turbulent_intensity(1, expected_index), expected_turbulent_intensity, 'AbsTol',0.01);
+        end
+
     end
 
 end
