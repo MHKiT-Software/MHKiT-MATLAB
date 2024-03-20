@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 from mhkit.river.io import d3d
 import netCDF4
 
@@ -67,3 +68,33 @@ def call_convert_time(netcdf_root, seconds_run):
         raise ValueError("Input must be a netCDF4 Dataset object")
 
     return d3d._convert_time(netcdf_root, seconds_run=seconds_run)
+
+
+def cleanup_turbulent_kinetic_energy(turbulent_kinetic_energy, threshold=-0.001):
+    """
+    Cleans up a turbulent kinetic energy array by setting values below a threshold to NaN and values above the threshold
+    but below zero to zero.
+
+    Args:
+        turbulent_kinetic_energy (numpy.ndarray): An array representing turbulent kinetic energy values.
+        threshold (float, optional): The threshold value below which values are set to NaN and above which values are set to zero.
+            Defaults to -0.001.
+
+    Returns:
+        numpy.ndarray: The cleaned up turbulent kinetic energy array.
+
+    Raises:
+        ValueError: If the threshold value is greater than zero.
+    """
+    if threshold > 0:
+        raise ValueError("Threshold should be less than zero")
+
+    # Set values below the threshold to Nan
+    turbulent_kinetic_energy[turbulent_kinetic_energy < threshold] = np.nan
+
+    # Set values above the threshold, but below zero to zero
+    turbulent_kinetic_energy[
+        (turbulent_kinetic_energy >= threshold) & (turbulent_kinetic_energy < 0)
+    ] = 0
+
+    return turbulent_kinetic_energy
