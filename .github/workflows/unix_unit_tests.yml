@@ -48,7 +48,15 @@ jobs:
       #     repository: "MHKiT-Software/MHKiT-Python"
       #     path: ${{env.mhkit-python-dir}}
 
-      - name: pip install mhkit module from source
+      - name: Install & Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          activate-environment: MHKIT_CONDA_ENV
+          channels: conda-forge
+
+      - name: pip install mhkit from pypi
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
