@@ -258,6 +258,15 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             testCase.assertEqual(var_interpolation.u_mag(1, expected_index), expected_value, 'AbsTol',0.01);
         end
 
+        function testCleanupTurbulentKineticEnergy(testCase)
+            input = [0 1 2 3 0.001 -0.00002 -0.01 -0.0001 5 -5];
+            threshold = -0.001;
+            expected_output = [0 1 2 3 0.001 0 NaN 0 5 NaN];
+            output = delft_3d_cleanup_turbulent_kinetic_energy(input, threshold);
+
+            testCase.assertEqual(output, expected_output, 'AbsTol',0.001);
+        end
+
     end
 
 end
