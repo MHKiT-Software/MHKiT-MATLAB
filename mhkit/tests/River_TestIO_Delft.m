@@ -44,6 +44,30 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             testCase.assertEqual(seconds, expected_seconds);
         end
 
+        function testSecondsToIndex(testCase)
+            d3d_file = "../../examples/data/river/d3d/turbineTest_map.nc";
+            data = delft_3d_open_netcdf(d3d_file);
+
+            test_seconds = 65;
+            expected_index = 2;
+            seconds_index = delft_3d_seconds_to_index(data, test_seconds);
+
+            testCase.assertEqual(seconds_index, expected_index);
+
+            % If the seconds are halfway between in will pick the lesser index
+            test_seconds = 90;
+            expected_index = 2;
+            seconds_index = delft_3d_seconds_to_index(data, test_seconds);
+
+            testCase.assertEqual(seconds_index, expected_index);
+
+            test_seconds = 91;
+            expected_index = 3;
+            seconds_index = delft_3d_seconds_to_index(data, test_seconds);
+
+            testCase.assertEqual(seconds_index, expected_index);
+        end
+
         function testConvertTime(testCase)
             d3d_file = "../../examples/data/river/d3d/turbineTest_map.nc";
             data = delft_3d_open_netcdf(d3d_file);
