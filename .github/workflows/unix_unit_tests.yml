@@ -31,7 +31,7 @@ jobs:
           path: ${{env.mhkit-python-dir}}
 
       - name: Install & Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -70,7 +70,7 @@ jobs:
           echo "Hello World" > mhkit_webread_cache/test.txt
 
       - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v1
+        uses: matlab-actions/setup-matlab@v2
         with:
           release: ${{ matrix.matlab-version }}
 
@@ -98,13 +98,13 @@ jobs:
         run: cat run.m
 
       - name: Run MATLAB Unit Tests
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: run
           startup-options: -noFigureWindows
 
       - name: Save mhkit_webread_cache directory as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           # GitHub Action "Name" of artifact
           name: mhkit_webread_cache
@@ -179,7 +179,7 @@ jobs:
       #     conda-channels: conda-forge
 
       - name: Install & Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -272,7 +272,7 @@ jobs:
           python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
 
       - name: Download mhkit_webread_cache artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: mhkit_webread_cache
           path: mhkit_webread_cache
@@ -282,7 +282,7 @@ jobs:
         working-directory: .
 
       - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2-beta
+        uses: matlab-actions/setup-matlab@v2
         with:
           release: ${{ matrix.matlab-version }}
 
@@ -316,8 +316,7 @@ jobs:
       #         select-by-folder: mhkit/tests
 
       - name: Run MATLAB Unit Tests
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: run
           startup-options: -noFigureWindows
-
