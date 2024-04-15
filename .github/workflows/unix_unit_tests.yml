@@ -163,25 +163,9 @@ jobs:
             python-version: "3.10"
           - matlab-version: R2020b
             python-version: 3.9
-          # Specific versions of tests that fail consistently. Most likely due to the GitHub actions environment
-          - matlab-version: R2024a # Python netcdf4 pip build error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123413351
-            python-version: 3.11
-            os: macos-13
-          # - matlab-version: R2024a # Working!
-          #   python-version: "3.10"
-          #   os: macos-13
-          - matlab-version: R2024a # Java Segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123411604
-            python-version: 3.9
-            os: macos-13
-          - matlab-version: R2023b # Python netcd4 pip build error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123412889
-            python-version: 3.11
-            os: macos-13
-          - matlab-version: R2023b # Java segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123412352
-            python-version: "3.10"
-            os: macos-13
-          - matlab-version: R2023b # Java segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123411335
-            python-version: 3.9
-            os: macos-13
+          # Combinations with failing tests that seem related to GitHub Actions
+          # - matlab-version: R2023b
+          #   os: macos-latest
 
     runs-on: ${{ matrix.os }}
 
