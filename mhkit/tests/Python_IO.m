@@ -27,6 +27,38 @@ classdef Python_IO < matlab.unittest.TestCase
             testCase.assertEqual(output_struct.second(1, expected_index), expected_second, 'AbsTol',0.01);
         end
 
+         % Convert a numerical struct to a pd.DataFrame
+        function testConvertStructToDataFrame(testCase)
+            % Create a numeric structure
+            ds = struct('data1', [1, 2, 3, 4, 5], 'data2', [6, 7, 8, 9, 10], 'data3', [11, 12, 13, 14, 15]);
+
+            % Convert the DataFrame to a struct
+            output_df = convert_numeric_struct_to_dataframe(ds);
+
+            % % Value Spot Check
+            expected_index = 1;
+            expected_first = 2;
+
+            data_1 = output_df.get("data1");
+            actual_first = data_1.get(expected_index);
+
+            testCase.assertEqual(actual_first, expected_first, 'AbsTol',0.01);
+        end
+
+        function testConvertStructToDataFrameLengthError(testCase)
+            % Create a numeric structure
+            ds = struct('data1', [1, 2, 3, 4], 'data2', [6, 7, 8, 9, 10], 'data3', [11, 12, 13, 14, 15]);
+
+            testCase.verifyError(@() convert_numeric_struct_to_dataframe(ds), 'MATLAB:convert_numeric_struct_to_dataframe:FieldLengthMismatch');
+        end
+
+        function testConvertStructToDataFrameTypeError(testCase)
+            % Create a numeric structure
+            ds = struct('data1', [1, 2, 3, 4, 5], 'data2', {"a", "b", "c", "d", "e"}, 'data3', [11, 12, 13, 14, 15]);
+
+            testCase.verifyError(@() convert_numeric_struct_to_dataframe(ds), 'MATLAB:convert_numeric_struct_to_dataframe:NonNumericValues');
+        end
+
     end
 
 end
