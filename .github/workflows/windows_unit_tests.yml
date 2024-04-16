@@ -334,6 +334,12 @@ jobs:
         run: |
           echo "py.sys.path" >> run.m
 
+      - name: Add Python Dir to Path
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: pwsh
+        run: >
+          "setenv('path', ['{0}', getenv('path')]);" -f (python -c "import sys; import os; print(os.path.dirname(sys.executable))") | Out-File -FilePath run.m -Append
+
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version,
