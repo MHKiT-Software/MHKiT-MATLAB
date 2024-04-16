@@ -163,6 +163,21 @@ jobs:
             python-version: "3.10"
           - matlab-version: R2020b
             python-version: 3.9
+          - matlab-version: R2024a # Segfault in Loads_TestLoads: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850265402
+            python-version: 3.9
+            os: macos-latest
+          - matlab-version: R2023b # Segfault in Loads_TestLoads: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850265833
+            python-version: "3.10"
+            os: macos-latest
+          - matlab-version: R2024a # Segfault in Loads_TestLoads: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850265973
+            python-version: "3.10"
+            os: macos-latest
+          - matlab-version: R2023b # Miniconda/Python _SSL Error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850266138
+            python-version: "3.11"
+            os: macos-latest
+          - matlab-version: R2024a # Miniconda/Python _SSL Error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850266264
+            python-version: "3.11"
+            os: macos-latest
           # Combinations with failing tests that seem related to GitHub Actions
           # - matlab-version: R2023b
           #   os: macos-latest
