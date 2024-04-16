@@ -243,9 +243,12 @@ jobs:
       #   shell: bash -l {0}
       #   run: 'tree C:\\Miniconda\\envs\\MHKIT_CONDA_ENV'
 
+      # - name: Add anaconda env to path
+      #   shell: bash -l {0}
+      #   run: 'echo C:\\Miniconda\\envs\\MHKIT_CONDA_ENV >> $GITHUB_PATH'
       - name: Add anaconda env to path
-        shell: bash -l {0}
-        run: 'echo C:\\Miniconda\\envs\\MHKIT_CONDA_ENV >> $GITHUB_PATH'
+        shell: pwsh
+        run: Add-Content $env:GITHUB_PATH "C:\Miniconda\envs\MHKIT_CONDA_ENV"
 
       - name: Echo Path
         shell: bash -l {0}
