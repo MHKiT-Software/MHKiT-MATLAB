@@ -232,8 +232,7 @@ jobs:
 
       - name: LS Conda Env Dir
         shell: bash -l {0}
-        run: |
-          ls C:\Miniconda\envs\MHKIT_CONDA_ENV
+        run: 'ls C:\\Miniconda\\envs\\MHKIT_CONDA_ENV'
 
       - name: Echo Path
         shell: bash -l {0}
@@ -242,13 +241,11 @@ jobs:
 
       - name: Tree Conda Env Dir
         shell: bash -l {0}
-        run: |
-          tree C:\Miniconda\envs\MHKIT_CONDA_ENV
+        run: 'tree C:\\Miniconda\\envs\\MHKIT_CONDA_ENV'
 
       - name: Add anaconda env to path
         shell: bash -l {0}
-        run: |
-          echo C:\Miniconda\envs\MHKIT_CONDA_ENV >> $GITHUB_PATH
+        run: 'echo C:\\Miniconda\\envs\\MHKIT_CONDA_ENV >> $GITHUB_PATH'
 
       - name: Echo Path
         shell: bash -l {0}
