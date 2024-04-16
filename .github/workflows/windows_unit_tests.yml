@@ -124,6 +124,8 @@ jobs:
         os: [windows-latest]
         python-version: [3.8, 3.9, "3.10", 3.11]
         matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a]
+        # R2022b and above have a windows specific error related to the MATLAB/Python interface
+        # matlab-version: [R2021b, R2022a]
         exclude:
           - matlab-version: R2022a
             python-version: 3.9
