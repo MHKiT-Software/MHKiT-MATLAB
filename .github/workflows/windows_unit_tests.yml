@@ -231,10 +231,14 @@ jobs:
       #     conda activate MHKIT_CONDA_ENV
       #     pip install -e .
 
-      - name: pip install mhkit from source
-        working-directory: ${{env.mhkit-python-dir}}
+      # - name: pip install mhkit from source
+      #   working-directory: ${{env.mhkit-python-dir}}
+      #   run: |
+      #     pip install -e .
+
+      - name: pip install mhkit
         run: |
-          pip install -e .
+          pip install mhkit
 
       # - name: pip install mhkit-python-utils module from source
       #   run: |
