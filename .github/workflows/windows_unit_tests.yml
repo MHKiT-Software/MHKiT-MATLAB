@@ -161,11 +161,47 @@ jobs:
       mhkit-python-dir: "MHKiT-Python"
       MHKIT_PYTHON_VERSION: ${{  matrix.mhkit-python-version }}
     steps:
-      - name: Install/Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v3
+      # - name: Install/Setup Miniconda
+      #   uses: conda-incubator/setup-miniconda@v3
+      #   with:
+      #     auto-update-conda: true
+      #     python-version: ${{ matrix.python-version }}
+      #     activate-environment: MHKIT_CONDA_ENV
+      #     channels: conda-forge
+
+      # - name: "Conda install h5py, netcdf4, and cython"
+      #   run: |
+      #     conda activate MHKIT_CONDA_ENV
+      #     conda install -c conda-forge h5py netcdf4 cython
+
+      # - name: "Conda install h5py, netcdf4, and cython"
+      #   run: |
+      #     conda activate MHKIT_CONDA_ENV
+      #     conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
+
+      # - name: Output python executable
+      #   run: |
+      #     conda activate MHKIT_CONDA_ENV
+      #     python -c "import sys; print(sys.executable)"
+
+      # - name: Print Python Version
+      #   run: |
+      #     conda activate MHKIT_CONDA_ENV
+      #     python --version
+
+      # - name: Output python executable
+      #   run: |
+      #     conda activate MHKIT_CONDA_ENV
+      #     python -c "import sys; print(sys.executable)"
+
+      # - name: Print Python Version
+      #   run: |
+      #     conda activate MHKIT_CONDA_ENV
+      #     python --version
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          miniconda-version: latest
-          auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           activate-environment: mhkit_conda_env
           channels: conda-forge
@@ -179,13 +215,11 @@ jobs:
       - name: Output python executable
         shell: bash -l {0}
         run: |
-          conda activate mhkit_conda_env
           python -c "import sys; print(sys.executable)"
 
       - name: Print Python Version
         shell: bash -l {0}
         run: |
-          conda activate mhkit_conda_env
           python --version
 
       - name: Check out MHKiT-MATLAB
@@ -214,18 +248,26 @@ jobs:
 
       - name: pip install mhkit-python-utils module from source
         run: |
-          conda activate mhkit_conda_env
-          pip3 install -e .
+          pip install -e .
+
+      # - name: List installed pip modules
+      #   run: |
+      #     conda activate MHKIT_CONDA_ENV
+      #     pip freeze
 
       - name: List installed pip modules
         run: |
-          conda activate mhkit_conda_env
-          pip3 freeze
+          pip freeze
+
+      # - name: Print MHKiT-Python Version
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate MHKIT_CONDA_ENV
+      #     python -c "import mhkit; print(mhkit.__version__)"
 
       - name: Print MHKiT-Python Version
         shell: bash -l {0}
         run: |
-          conda activate mhkit_conda_env
           python -c "import mhkit; print(mhkit.__version__)"
 
       - name: LS Conda Env Dir
@@ -256,7 +298,6 @@ jobs:
       - name: Verify MHKiT-Python Operation
         shell: bash -l {0}
         run: |
-          conda activate mhkit_conda_env
           python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
 
       - name: Download mhkit_webread_cache artifact
