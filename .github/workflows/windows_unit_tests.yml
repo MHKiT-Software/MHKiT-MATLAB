@@ -262,10 +262,10 @@ jobs:
       #     conda activate MHKIT_CONDA_ENV
       #     python -c "import mhkit; print(mhkit.__version__)"
 
-      - name: Print MHKiT-Python Version
-        shell: bash -l {0}
-        run: |
-          python -c "import mhkit; print(mhkit.__version__)"
+      # - name: Print MHKiT-Python Version
+      #   shell: bash -l {0}
+      #   run: |
+      #     python -c "import mhkit; print(mhkit.__version__)"
 
       # - name: LS Conda Env Dir
       #   shell: bash -l {0}
