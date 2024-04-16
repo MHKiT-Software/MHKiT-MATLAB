@@ -306,6 +306,19 @@ jobs:
       #     conda activate MHKIT_CONDA_ENV
       #     python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
 
+      - name: Output python executable
+        run: |
+          python -c "import sys; print(sys.executable)"
+
+      - name: Print Python Version
+        run: |
+          python --version
+
+      - name: Verify MHKiT-Python Import
+        shell: bash -l {0}
+        run: |
+          python -c "import mhkit; print(mhkit);"
+
       - name: Verify MHKiT-Python Operation
         shell: bash -l {0}
         run: |
