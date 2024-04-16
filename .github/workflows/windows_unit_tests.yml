@@ -221,6 +221,31 @@ jobs:
           conda activate mhkit_conda_env
           python -c "import mhkit; print(mhkit.__version__)"
 
+      - name: LS Conda Env Dir
+        shell: bash -l {0}
+        run: |
+          ls C:\Miniconda\envs\MHKIT_CONDA_ENV
+
+      - name: Echo Path
+        shell: bash -l {0}
+        run: |
+          echo $GITHUB_PATH
+
+      - name: Tree Conda Env Dir
+        shell: bash -l {0}
+        run: |
+          tree C:\Miniconda\envs\MHKIT_CONDA_ENV
+
+      - name: Add anaconda env to path
+        shell: bash -l {0}
+        run: |
+          echo C:\Miniconda\envs\MHKIT_CONDA_ENV >> $GITHUB_PATH
+
+      - name: Echo Path
+        shell: bash -l {0}
+        run: |
+          echo $GITHUB_PATH
+
       - name: Verify MHKiT-Python Operation
         shell: bash -l {0}
         run: |
