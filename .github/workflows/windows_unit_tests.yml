@@ -314,6 +314,11 @@ jobs:
         run: |
           python --version
 
+      - name: Verify h5py installation
+        shell: bash -l {0}
+        run: |
+          python -c "import h5py; h5py.run_tests();"
+
       - name: Verify MHKiT-Python Import
         shell: bash -l {0}
         run: |
