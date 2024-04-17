@@ -345,23 +345,13 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
-      - name: Add Python Dir to Path
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
-
-      # OutOfProcess works reliably on linux, macos, and windows
-      - name: Configure MATLAB pyenv Version and ExecutionMode
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')\n" $(python -c "import sys; print(sys.executable)") >> run.m
-
-      - name: Check Python System Path
-        shell: bash -l {0}
-        run: |
-          echo "py.sys.path" >> run.m
+      # OutOfProcess works reliably on linux and macos, on Windows
+      # OutOfProcess fails with error:
+      # Caught "std::exception" Exception message is:
+      # Unable to launch Simple server: Unable to launch C:\Program Files\MATLAB\R2023b\interprocess\bin\win64\pycli\MATLABPyHost.exe
+      # because: Peer process exited before transport type handshake. Exit status: 3221226505
+      # ERROR: MATLAB error Exit Status: 0x00000001
+      # exit status 1
 
       # - name: Add Python Dir to Path
       #   if: ${{ matrix.os == 'windows-latest' }}
@@ -374,7 +364,13 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate MHKIT_CONDA_ENV
-          printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
+          printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") > run.m
+
+      - name: Configure MATLAB pyenv Version and ExecutionMode
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: pwsh
+        run: >
+          "pyenv(Version='{0}', ExecutionMode='InProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m -Append
 
       - name: Add MATLAB test commands
         shell: bash
