@@ -86,6 +86,12 @@ jobs:
         run: |
           echo "py.sys.path" >> run.m
 
+      - name: Check Python System Path
+        # if: ${{ matrix.os == 'windows-latest' }}
+        shell: bash -l {0}
+        run: |
+          echo "py.sys.path" >> run.m
+
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version,
@@ -335,6 +341,12 @@ jobs:
         shell: pwsh
         run: >
           "conda activate MHKIT_CONDA_ENV; setenv('path', ['{0}', getenv('path')]);" -f (python -c "import sys; import os; print(os.path.dirname(sys.executable))") | Out-File -FilePath run.m -Append
+
+      - name: Check Python System Path
+        # if: ${{ matrix.os == 'windows-latest' }}
+        shell: bash -l {0}
+        run: |
+          echo "py.sys.path" >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
