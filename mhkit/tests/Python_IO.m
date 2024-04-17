@@ -2,6 +2,12 @@
 classdef Python_IO < matlab.unittest.TestCase
 
     methods (Test)
+         % Test that we can print from python
+        function testPythonPrint(testCase)
+            py.print("Hello World")
+
+            testCase.assertEqual(true, true);
+        end
 
          % Test creation of a Pandas DataFrame with timeseries index
         function testConvertNumericDataframeToStructure(testCase)
