@@ -86,6 +86,12 @@ jobs:
         run: |
           echo "py.sys.path" >> run.m
 
+      - name: Check Python System Path
+        # if: ${{ matrix.os == 'windows-latest' }}
+        shell: bash -l {0}
+        run: |
+          echo "py.sys.path" >> run.m
+
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version,
@@ -332,6 +338,12 @@ jobs:
         shell: bash -l {0}
         run: |
           echo "py.sys.path," >> run.m
+
+      - name: Check Python System Path
+        # if: ${{ matrix.os == 'windows-latest' }}
+        shell: bash -l {0}
+        run: |
+          echo "py.sys.path" >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
