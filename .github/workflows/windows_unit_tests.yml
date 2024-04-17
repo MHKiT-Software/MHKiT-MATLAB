@@ -371,9 +371,10 @@ jobs:
 
       - name: Add Python Dir to Path
         if: ${{ matrix.os == 'windows-latest' }}
-        shell: pwsh
-        run: >
-          "conda activate MHKIT_CONDA_ENV; setenv('path', ['{0}', getenv('path')]);" -f (python -c "import sys; import os; print(os.path.dirname(sys.executable))") | Out-File -FilePath run.m -Append
+        shell: bash
+        run: |
+          conda activate MHKIT_CONDA_ENV
+          printf "setenv('path', ['%s', getenv('path')])" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
