@@ -208,7 +208,7 @@ jobs:
       #     python --version
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -249,7 +249,7 @@ jobs:
 
       - name: pip install mhkit-python-utils module from source
         run: |
-          pip install -e .
+          pip3 install -e .
 
       # - name: List installed pip modules
       #   run: |
@@ -258,7 +258,7 @@ jobs:
 
       - name: List installed pip modules
         run: |
-          pip freeze
+          pip3 freeze
 
       - name: Print MHKiT-Python Version
         shell: bash -l {0}
