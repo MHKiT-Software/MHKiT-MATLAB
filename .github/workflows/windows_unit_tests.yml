@@ -264,6 +264,10 @@ jobs:
         run: |
           pip3 freeze
 
+      - name: pip install latest version of NREL-rex
+        run: |
+          pip3 install --force-reinstall -v "NREL-rex==0.2.86"
+
       # - name: Print MHKiT-Python Version
       #   shell: bash -l {0}
       #   run: |
