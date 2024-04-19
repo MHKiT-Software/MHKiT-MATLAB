@@ -169,58 +169,58 @@ jobs:
       mhkit-python-dir: "MHKiT-Python"
       MHKIT_PYTHON_VERSION: ${{  matrix.mhkit-python-version }}
     steps:
-      # - name: Install/Setup Miniconda
-      #   uses: conda-incubator/setup-miniconda@v3
-      #   with:
-      #     auto-update-conda: true
-      #     python-version: ${{ matrix.python-version }}
-      #     activate-environment: MHKIT_CONDA_ENV
-      #     channels: conda-forge
+      - name: Install/Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          activate-environment: MHKIT_CONDA_ENV
+          channels: conda-forge
 
       # - name: "Conda install h5py, netcdf4, and cython"
       #   run: |
       #     conda activate MHKIT_CONDA_ENV
       #     conda install -c conda-forge h5py netcdf4 cython
 
-      # - name: "Conda install h5py, netcdf4, and cython"
-      #   run: |
-      #     conda activate MHKIT_CONDA_ENV
-      #     conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
-
-      # - name: Output python executable
-      #   run: |
-      #     conda activate MHKIT_CONDA_ENV
-      #     python -c "import sys; print(sys.executable)"
-
-      # - name: Print Python Version
-      #   run: |
-      #     conda activate MHKIT_CONDA_ENV
-      #     python --version
-
-      # - name: Output python executable
-      #   run: |
-      #     conda activate MHKIT_CONDA_ENV
-      #     python -c "import sys; print(sys.executable)"
-
-      # - name: Print Python Version
-      #   run: |
-      #     conda activate MHKIT_CONDA_ENV
-      #     python --version
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
+      - name: "Conda install h5py, netcdf4, and cython"
+        run: |
+          conda activate MHKIT_CONDA_ENV
+          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
 
       - name: Output python executable
         shell: bash -l {0}
         run: |
+          conda activate MHKIT_CONDA_ENV
           python -c "import sys; print(sys.executable)"
 
       - name: Print Python Version
         shell: bash -l {0}
         run: |
+          conda activate MHKIT_CONDA_ENV
           python --version
+
+      # - name: Output python executable
+      #   run: |
+      #     conda activate MHKIT_CONDA_ENV
+      #     python -c "import sys; print(sys.executable)"
+
+      # - name: Print Python Version
+      #   run: |
+      #     conda activate MHKIT_CONDA_ENV
+      #     python --version
+
+      # - name: Setup Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: ${{ matrix.python-version }}
+
+      # - name: Output python executable
+      #   run: |
+      #     python -c "import sys; print(sys.executable)"
+
+      # - name: Print Python Version
+      #   run: |
+      #     python --version
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -231,11 +231,11 @@ jobs:
       #     repository: "MHKiT-Software/MHKiT-Python"
       #     path: ${{env.mhkit-python-dir}}
 
-      # - name: pip install mhkit from source
-      #   working-directory: ${{env.mhkit-python-dir}}
-      #   run: |
-      #     conda activate MHKIT_CONDA_ENV
-      #     pip install -e .
+      - name: pip install mhkit from source
+        working-directory: ${{env.mhkit-python-dir}}
+        run: |
+          conda activate MHKIT_CONDA_ENV
+          pip3 install -e .
 
       - name: pip install mhkit from source
         working-directory: ${{env.mhkit-python-dir}}
@@ -244,25 +244,26 @@ jobs:
 
       # - name: pip install mhkit-python-utils module from source
       #   run: |
-      #     conda activate MHKIT_CONDA_ENV
-      #     pip install -e .
+      #     pip3 install mhkit
 
       - name: pip install mhkit-python-utils module from source
         run: |
+          conda activate MHKIT_CONDA_ENV
           pip3 install -e .
 
-      # - name: List installed pip modules
+      # - name: pip install mhkit-python-utils module from source
       #   run: |
-      #     conda activate MHKIT_CONDA_ENV
-      #     pip freeze
+      #     pip3 install -e .
 
       - name: List installed pip modules
         run: |
+          conda activate MHKIT_CONDA_ENV
           pip3 freeze
 
       - name: Print MHKiT-Python Version
         shell: bash -l {0}
         run: |
+          conda activate MHKIT_CONDA_ENV
           python -c "import mhkit; print(mhkit.__version__)"
 
       - name: LS Conda Env Dir
@@ -290,15 +291,10 @@ jobs:
       #   run: |
       #     echo $GITHUB_PATH
 
-      # - name: Verify MHKiT-Python Operation
-      #   shell: bash -l {0}
-      #   run: |
-      #     conda activate MHKIT_CONDA_ENV
-      #     python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
-
       - name: Verify MHKiT-Python Operation
         shell: bash -l {0}
         run: |
+          conda activate MHKIT_CONDA_ENV
           python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
 
       - name: Download mhkit_webread_cache artifact
@@ -336,11 +332,24 @@ jobs:
         run: >
           "conda activate MHKIT_CONDA_ENV; setenv('path', ['{0}', getenv('path')]);" -f (python -c "import sys; import os; print(os.path.dirname(sys.executable))") | Out-File -FilePath run.m -Append
 
-      # - name: Check Python System Path
-      #   # if: ${{ matrix.os == 'windows-latest' }}
-      #   shell: bash -l {0}
-      #   run: |
-      #     echo "py.sys.path" >> run.m
+      # - name: Configure MATLAB pyenv Version and ExecutionMode
+      #   if: ${{ matrix.os == 'windows-latest' }}
+      #   shell: pwsh
+      #   run: >
+      #     "pyenv(Version='{0}', ExecutionMode='InProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
+
+      - name: Configure MATLAB pyenv Version and ExecutionMode
+        # if: ${{ matrix.os == 'windows-latest' }}
+        shell: bash -l {0}
+        run: |
+          conda activate MHKIT_CONDA_ENV
+          printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')" $(python -c "import sys; print(sys.executable)") >> run.m
+
+      - name: Check Python System Path
+        # if: ${{ matrix.os == 'windows-latest' }}
+        shell: bash -l {0}
+        run: |
+          echo "py.sys.path," >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
