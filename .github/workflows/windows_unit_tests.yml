@@ -83,7 +83,6 @@ jobs:
           "pyenv(Version='{0}', ExecutionMode='OutOfProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
 
       - name: Check Python System Path
-        # if: ${{ matrix.os == 'windows-latest' }}
         shell: bash -l {0}
         run: |
           echo "py.sys.path" >> run.m
@@ -126,8 +125,6 @@ jobs:
         os: [windows-latest]
         python-version: [3.8, 3.9, "3.10", 3.11]
         matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a]
-        # R2022b and above have a windows specific error related to the MATLAB/Python interface
-        # matlab-version: [R2021b, R2022a]
         exclude:
           - matlab-version: R2022a
             python-version: 3.9
@@ -173,11 +170,6 @@ jobs:
           activate-environment: mhkit_conda_env
           channels: conda-forge
 
-      # - name: "Conda install h5py, netcdf4, and cython"
-      #   run: |
-      #     conda activate mhkit_conda_env
-      #     conda install -c conda-forge h5py netcdf4 cython
-
       - name: "Conda install h5py, netcdf4, and cython"
         run: |
           conda activate mhkit_conda_env
@@ -195,29 +187,6 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           python --version
-
-      # - name: Output python executable
-      #   run: |
-      #     conda activate mhkit_conda_env
-      #     python -c "import sys; print(sys.executable)"
-
-      # - name: Print Python Version
-      #   run: |
-      #     conda activate mhkit_conda_env
-      #     python --version
-
-      # - name: Setup Python
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: ${{ matrix.python-version }}
-
-      # - name: Output python executable
-      #   run: |
-      #     python -c "import sys; print(sys.executable)"
-
-      # - name: Print Python Version
-      #   run: |
-      #     python --version
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -247,10 +216,6 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip3 install -e .
-
-      # - name: pip install mhkit-python-utils module from source
-      #   run: |
-      #     pip3 install -e .
 
       - name: List installed pip modules
         run: |
@@ -309,20 +274,6 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
-      # OutOfProcess works reliably on linux and macos, on Windows
-      # OutOfProcess fails with error:
-      # Caught "std::exception" Exception message is:
-      # Unable to launch Simple server: Unable to launch C:\Program Files\MATLAB\R2023b\interprocess\bin\win64\pycli\MATLABPyHost.exe
-      # because: Peer process exited before transport type handshake. Exit status: 3221226505
-      # ERROR: MATLAB error Exit Status: 0x00000001
-      # exit status 1
-
-      # - name: Add Python Dir to Path
-      #   if: ${{ matrix.os == 'windows-latest' }}
-      #   shell: pwsh
-      #   run: >
-      #     "setenv('path', ['{0}', getenv('path')]);" -f (python -c "import sys; import os; print(os.path.dirname(sys.executable))") | Out-File -FilePath run.m -Append
-
       - name: Add Python Dir to Path
         if: ${{ matrix.os == 'windows-latest' }}
         shell: pwsh
@@ -336,14 +287,12 @@ jobs:
       #     "pyenv(Version='{0}', ExecutionMode='InProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
 
       - name: Configure MATLAB pyenv Version and ExecutionMode
-        # if: ${{ matrix.os == 'windows-latest' }}
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')" $(python -c "import sys; print(sys.executable)") >> run.m
 
       - name: Check Python System Path
-        # if: ${{ matrix.os == 'windows-latest' }}
         shell: bash -l {0}
         run: |
           echo "py.sys.path," >> run.m
