@@ -402,7 +402,7 @@ jobs:
         # if: ${{ matrix.os == 'windows-latest' }}
         shell: bash -l {0}
         run: |
-          echo "py.sys.path\n" >> run.m
+          echo "py.sys.path" >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
