@@ -401,13 +401,13 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')" $(python -c "import sys; print(sys.executable)") >> run.m
+          printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')\n" $(python -c "import sys; print(sys.executable)") >> run.m
 
       - name: Check Python System Path
         # if: ${{ matrix.os == 'windows-latest' }}
         shell: bash -l {0}
         run: |
-          echo "py.sys.path," >> run.m
+          echo "py.sys.path\n" >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
