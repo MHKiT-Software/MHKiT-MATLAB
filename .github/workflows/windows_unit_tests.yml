@@ -33,7 +33,7 @@ jobs:
       - name: "Conda install netcdf4, hdf5"
         run: |
           conda activate mhkit_conda_env
-          conda install hdf5 libnetcdf
+          conda install hdf5 netcdf4
           # conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
 
       - name: Check out MHKiT-MATLAB
@@ -173,7 +173,7 @@ jobs:
       - name: "Conda install h5py, netcdf4, and cython"
         run: |
           conda activate mhkit_conda_env
-          conda install hdf5 libnetcdf
+          conda install hdf5 netcdf4
           # conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
 
       - name: Output python executable
