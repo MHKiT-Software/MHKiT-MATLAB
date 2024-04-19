@@ -179,7 +179,7 @@ jobs:
 
       # - name: "Conda install h5py, netcdf4, and cython"
       #   run: |
-      #     conda activate MHKIT_CONDA_ENV
+      #     conda activate mhkit_conda_env
       #     conda install -c conda-forge h5py netcdf4 cython
 
       # - name: "Conda install h5py, netcdf4, and cython"
