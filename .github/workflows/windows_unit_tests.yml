@@ -30,11 +30,10 @@ jobs:
           channels: conda-forge
 
       # This is necessary to fix any issues with netcdf4 and hdf5 headers
-      - name: "Conda install netcdf4, hdf5"
+      - name: "Conda install netcdf4"
         run: |
           conda activate mhkit_conda_env
-          conda install hdf5 netcdf4
-          # conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
+          conda install netcdf4
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -170,11 +169,11 @@ jobs:
           activate-environment: mhkit_conda_env
           channels: conda-forge
 
-      - name: "Conda install h5py, netcdf4, and cython"
+      # This is necessary to fix any issues with netcdf4 and hdf5 headers
+      - name: "Conda install netcdf4"
         run: |
           conda activate mhkit_conda_env
-          conda install hdf5 netcdf4
-          # conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
+          conda install netcdf4
 
       - name: Output python executable
         shell: bash -l {0}
