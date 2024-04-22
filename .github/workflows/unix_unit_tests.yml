@@ -25,19 +25,16 @@ jobs:
       - name: Install & Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          miniconda-version: latest
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           activate-environment: mhkit_conda_env
           channels: conda-forge
 
-      - name: "Conda install netcdf4, hdf5"
+      - name: "Conda install netcdf4"
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
-          # conda install netcdf4 hdf5
-          # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+          conda install netcdf4
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -48,25 +45,14 @@ jobs:
       #     repository: "MHKiT-Software/MHKiT-Python"
       #     path: ${{env.mhkit-python-dir}}
 
-      - name: Install & Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-          activate-environment: MHKIT_CONDA_ENV
-          channels: conda-forge
 
       # This is necessary to fix any issues with netcdf4 and hdf5 headers
-      - name: "Conda install netcdf4"
-        run: |
-          conda activate mhkit_conda_env
-          conda install netcdf4
 
       # - name: Setup Python ${{ matrix.python-version }}
       #   shell: bash -l {0}
       #   run: |
-      #     conda create --name MHKIT_CONDA_ENV python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime openssl --strict-channel-priority
-      #     conda activate MHKIT_CONDA_ENV
+      #     conda create --name mhkit_conda_env python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime openssl --strict-channel-priority
+      #     conda activate mhkit_conda_env
       #     conda install -c conda-forge netcdf4
       #     export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
       #     pip install -e . --no-deps --force-reinstall
@@ -74,7 +60,7 @@ jobs:
       - name: pip install mhkit module from source
         shell: bash -l {0}
         run: |
-          conda activate MHKIT_CONDA_ENV
+          conda activate mhkit_conda_env
           pip install -e .
         working-directory: ${{env.mhkit-python-dir}}
 
@@ -230,8 +216,8 @@ jobs:
       # - name: Setup Python ${{ matrix.python-version }}
         # shell: bash -l {0}
         # run: |
-        #   conda create --name MHKIT_CONDA_ENV python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
-        #   conda activate MHKIT_CONDA_ENV
+        #   conda create --name mhkit_conda_env python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
+        #   conda activate mhkit_conda_env
         #   export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
         #   pip install -e . --no-deps --force-reinstall
 
@@ -296,15 +282,8 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-          pip install mhkit==$MHKIT_PYTHON_VERSION
-
-      - name: pip upgrade netcdf4
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-          pip install --upgrade netcdf4
+          pip install -e .
+        working-directory: ${{env.mhkit-python-dir}}
 
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
@@ -356,7 +335,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") >> run.m
+          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
 
       - name: Add MATLAB test commands
         shell: bash
