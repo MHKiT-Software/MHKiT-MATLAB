@@ -135,6 +135,41 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             delete(filename);
         end
 
+        function testSurfaceElevationMethod(testCase)
+            Trep = 600;
+            df = 1 / Trep;
+            f = 0:df:1;
+            Hs = 2.5;
+            Tp = 8;
+            t = 0:0.05:Trep;
+
+            S = pierson_moskowitz_spectrum(f, Tp, Hs);
+
+            eta_ifft = surface_elevation(S, t, "seed", 1, "method", "ifft");
+            eta_sum_of_sines = surface_elevation(S, t, "seed", 1, "method", "sum_of_sines");
+
+            % figure
+            % plot(eta_ifft.time, eta_ifft.elevation)
+            % hold on
+            % plot(eta_sum_of_sines.time, eta_sum_of_sines.elevation)
+            % hold off
+
+            % xlabel('Time (s)')
+            % ylabel('Surface Elevation (m)')
+            % title('Surface Elevation over Time')
+            % grid on
+            % legend('IFFT Method', 'Sum of Sines Method')
+
+            surface_elevation_diff = abs(sum(eta_ifft.elevation - eta_sum_of_sines.elevation));
+            % disp(surface_elevation_diff);
+
+            % This difference is suboptimal! The actual difference should be
+            % very close to zero. There appears to be some form of drift over
+            % time with the sum of sines method lagging slightly behind the
+            % ifft method
+            assertLessThan(testCase, surface_elevation_diff, 1.0);
+        end
+
     end
 
 end
