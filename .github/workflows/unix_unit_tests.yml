@@ -56,10 +56,25 @@ jobs:
           activate-environment: MHKIT_CONDA_ENV
           channels: conda-forge
 
-      - name: pip install mhkit from pypi
-        shell: bash -l {0}
+      # This is necessary to fix any issues with netcdf4 and hdf5 headers
+      - name: "Conda install netcdf4"
         run: |
           conda activate mhkit_conda_env
+          conda install netcdf4
+
+      # - name: Setup Python ${{ matrix.python-version }}
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda create --name MHKIT_CONDA_ENV python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime openssl --strict-channel-priority
+      #     conda activate MHKIT_CONDA_ENV
+      #     conda install -c conda-forge netcdf4
+      #     export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+      #     pip install -e . --no-deps --force-reinstall
+
+      - name: pip install mhkit module from source
+        shell: bash -l {0}
+        run: |
+          conda activate MHKIT_CONDA_ENV
           pip install -e .
         working-directory: ${{env.mhkit-python-dir}}
 
@@ -163,21 +178,21 @@ jobs:
             python-version: "3.10"
           - matlab-version: R2020b
             python-version: 3.9
-          - matlab-version: R2024a # Segfault in Loads_TestLoads: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850265402
-            python-version: 3.9
-            os: macos-latest
-          - matlab-version: R2023b # Segfault in Loads_TestLoads: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850265833
-            python-version: "3.10"
-            os: macos-latest
-          - matlab-version: R2024a # Segfault in Loads_TestLoads: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850265973
-            python-version: "3.10"
-            os: macos-latest
-          - matlab-version: R2023b # Miniconda/Python _SSL Error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850266138
-            python-version: "3.11"
-            os: macos-latest
-          - matlab-version: R2024a # Miniconda/Python _SSL Error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850266264
-            python-version: "3.11"
-            os: macos-latest
+          # - matlab-version: R2024a # Segfault in Loads_TestLoads: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850265402
+          #   python-version: 3.9
+          #   os: macos-latest
+          # - matlab-version: R2023b # Segfault in Loads_TestLoads: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850265833
+          #   python-version: "3.10"
+          #   os: macos-latest
+          # - matlab-version: R2024a # Segfault in Loads_TestLoads: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850265973
+          #   python-version: "3.10"
+          #   os: macos-latest
+          # - matlab-version: R2023b # Miniconda/Python _SSL Error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850266138
+          #   python-version: "3.11"
+          #   os: macos-latest
+          # - matlab-version: R2024a # Miniconda/Python _SSL Error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8696513054/job/23850266264
+          #   python-version: "3.11"
+          #   os: macos-latest
           # Combinations with failing tests that seem related to GitHub Actions
           # - matlab-version: R2023b
           #   os: macos-latest
@@ -207,13 +222,18 @@ jobs:
           channels: conda-forge
 
       # This is necessary to fix any issues with netcdf4 and hdf5 headers
-      - name: "Conda install netcdf4, hdf5"
-        shell: bash -l {0}
+      - name: "Conda install netcdf4"
         run: |
           conda activate mhkit_conda_env
-          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
-          # conda install netcdf4 hdf5
-          # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+          conda install netcdf4
+
+      # - name: Setup Python ${{ matrix.python-version }}
+        # shell: bash -l {0}
+        # run: |
+        #   conda create --name MHKIT_CONDA_ENV python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
+        #   conda activate MHKIT_CONDA_ENV
+        #   export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+        #   pip install -e . --no-deps --force-reinstall
 
       # - name: Setup Python ${{ matrix.python-version }}
         # shell: bash -l {0}
