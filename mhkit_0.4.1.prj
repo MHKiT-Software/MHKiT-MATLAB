@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.toolbox" plugin-version="1.0">
-  <configuration file="/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/MHKiT-MATLAB-2/mhkit_0.4.1.prj" location="/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/MHKiT-MATLAB-2" name="mhkit_0.4.1" target="target.toolbox" target-name="Package Toolbox">
+  <configuration build-checksum="884956250" file="/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/MHKiT-MATLAB/mhkit_0.4.1.prj" location="/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/MHKiT-MATLAB" name="mhkit_0.4.1" target="target.toolbox" target-name="Package Toolbox">
     <param.appname>mhkit</param.appname>
     <param.authnamewatermark>Rebecca Fao</param.authnamewatermark>
     <param.email>rebecca.fao@nrel.gov</param.email>
@@ -15,7 +15,7 @@ data processing and visualization.  The software package include functionality f
 * Device performance
 * Device loads</param.description>
     <param.screenshot>/Users/asimms/Downloads/58954145.png</param.screenshot>
-    <param.version>0.4.1</param.version>
+    <param.version>0.4.1.1</param.version>
     <param.output>${PROJECT_ROOT}/mhkit.mltbx</param.output>
     <param.products.name />
     <param.products.id />
@@ -41,7 +41,7 @@ data processing and visualization.  The software package include functionality f
 %
 % All files matching a pattern in all subfolders of the toolbox folder:
 % **/*.bak
-% **/*.DS_Store</param.exclude.filters>
+**/*.DS_Store</param.exclude.filters>
     <param.exclude.pcodedmfiles>true</param.exclude.pcodedmfiles>
     <param.examples />
     <param.demosxml />
@@ -102,7 +102,6 @@ data processing and visualization.  The software package include functionality f
       <file>${PROJECT_ROOT}/mhkit</file>
     </fileset.rootdir>
     <fileset.rootfiles>
-      <file>${PROJECT_ROOT}/mhkit/.DS_Store</file>
       <file>${PROJECT_ROOT}/mhkit/dolfyn</file>
       <file>${PROJECT_ROOT}/mhkit/loads</file>
       <file>${PROJECT_ROOT}/mhkit/power</file>
@@ -118,7 +117,7 @@ data processing and visualization.  The software package include functionality f
     <fileset.depfun.excluded />
     <fileset.package />
     <build-deliverables>
-      <file location="${PROJECT_ROOT}" name="mhkit.mltbx" optional="false">/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/MHKiT-MATLAB-2/mhkit.mltbx</file>
+      <file location="${PROJECT_ROOT}" name="mhkit.mltbx" optional="false">/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/MHKiT-MATLAB/mhkit.mltbx</file>
     </build-deliverables>
     <workflow />
     <matlab>
@@ -134,7 +133,7 @@ data processing and visualization.  The software package include functionality f
       <vista>false</vista>
       <linux>false</linux>
       <solaris>false</solaris>
-      <osver>12.7.1</osver>
+      <osver>13.6.6</osver>
       <os32>true</os32>
       <os64>false</os64>
       <arch>maci64</arch>
