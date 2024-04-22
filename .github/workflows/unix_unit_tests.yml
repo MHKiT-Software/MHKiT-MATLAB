@@ -128,8 +128,8 @@ jobs:
 
       # Expecting 2 * 4 * 7 - (13 * 2) = 30 jobs
       matrix:
-        os: [macos-13, ubuntu-latest]
-        python-version: [3.8, 3.9, "3.10", 3.11]
+        os: [macos-latest, ubuntu-latest]
+        python-version: [3.8, 3.9, "3.10", 3.11, 3.12]
         # Note: It is preferred to use an actual release name as opposed to 'latest'
         matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a]
         exclude:
