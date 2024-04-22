@@ -80,12 +80,13 @@ The test matrices below detail the current state of unit testing. An "X" indicat
 
 #### macOS (`macos-latest`)
 
-|      | R2021b | R2022a | R2022b | R2023a | R2023b                     |
-| ---- | ------ | ------ | ------ | ------ | -------------------------- |
-| 3.11 | -      | -      | -      | -      | X[^macos-311-action-error] |
-| 3.10 | -      | -      | ✓      | ✓      | ✓                          |
-| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓                          |
-| 3.8  | ✓      | ✓      | ✓      | ✓      | ✓                          |
+|      | R2021b | R2022a | R2022b | R2023a | R2023b                              | R2024a |
+| ---- | ------ | ------ | ------ | ------ | ----------------------------------- | ------ |
+| 3.12 | -      | -      | -      | -      | -                                   | -      |
+| 3.11 | -      | -      | -      | -      | X[^macos-2023b-2024a-java-segfault] | X      |
+| 3.10 | -      | -      | ✓      | ✓      | X                                   | ✓      |
+| 3.9  | ✓      | ✓      | ✓      | ✓      | X                                   | X      |
+| 3.8  | ✓      | ✓      | ✓      | ✓      | ✓                                   | -      |
 
 #### Windows (`windows-latest`)
 
@@ -151,16 +152,30 @@ See [copyright and license](https://mhkit-software.github.io/MHKiT/license.html)
     For a comprehensive list of compatible MATLAB/Python versions, refer to the [MathWorks Python
     Compatibility Documentation](https://www.mathworks.com/support/requirements/python-compatibility.html).
 
-[^macos-311-action-error]:
+[^macos-2023b-2024a-java-segfault]:
 
-[macOS Python 3.11 action error](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/7143629923/job/19455784365#step:20:3373)
+[macOS MATLAB 2023b,2024a Java Segfault](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24122990377#step:21:126)
 
     ```
-    Python Error: ImportError:
-          dlopen(/usr/local/miniconda/envs/MHKIT_CONDA_ENV/lib/python3.11/site-packages/netCDF4/_netCDF4.cpython-311-darwin.so,
-          0x0002): Symbol not found: (_SSL_get0_group_name)
-            Referenced from:
-            '/usr/local/miniconda/envs/MHKIT_CONDA_ENV/lib/libcurl.4.dylib'
-            Expected in:
-            '/Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/bin/maci64/libssl.3.dylib'
+      --------------------------------------------------------------------------------
+                Segmentation violation detected at 2024-04-22 19:45:41 +0000
+      --------------------------------------------------------------------------------
+
+      Configuration:
+        Crash Decoding           : Disabled - No sandbox or build area path
+        Crash Mode               : continue (default)
+        Default Encoding         : UTF-8
+        Deployed                 : false
+        Graphics Driver          : Uninitialized hardware
+        Java Version             : Java 1.8.0_202-b08 with Oracle Corporation Java HotSpot(TM) 64-Bit Server VM mixed mode
+        MATLAB Architecture      : maci64
+        MATLAB Entitlement ID    : 11174667
+        MATLAB Root              : /Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app
+        MATLAB Version           : 23.2.0.2515942 (R2023b) Update 7
+        OpenGL                   : hardware
+        Operating System         : Mac OS Version 12.7.4 (Build 21H1123)
+        Process ID               : 7316
+        Processor ID             : x86 Family 6 Model 58 Stepping 10, GenuineIntel
+        Session Key              : 72438599-354c-41f0-80ab-a426f58027eb
+        Window System            : Quartz
     ```
