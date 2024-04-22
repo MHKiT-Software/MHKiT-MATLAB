@@ -30,11 +30,11 @@ jobs:
           activate-environment: mhkit_conda_env
           channels: conda-forge
 
-      - name: "Conda install netcdf4"
+      - name: "Conda install netcdf4, hdf5"
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install netcdf4
+          conda install netcdf4 hdf5
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -211,7 +211,7 @@ jobs:
       - name: "Conda install netcdf4"
         run: |
           conda activate mhkit_conda_env
-          conda install netcdf4
+          conda install netcdf4 hdf5
 
       # - name: Setup Python ${{ matrix.python-version }}
         # shell: bash -l {0}
