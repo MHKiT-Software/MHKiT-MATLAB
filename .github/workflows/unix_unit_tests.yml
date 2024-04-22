@@ -45,18 +45,6 @@ jobs:
       #     repository: "MHKiT-Software/MHKiT-Python"
       #     path: ${{env.mhkit-python-dir}}
 
-
-      # This is necessary to fix any issues with netcdf4 and hdf5 headers
-
-      # - name: Setup Python ${{ matrix.python-version }}
-      #   shell: bash -l {0}
-      #   run: |
-      #     conda create --name mhkit_conda_env python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime openssl --strict-channel-priority
-      #     conda activate mhkit_conda_env
-      #     conda install -c conda-forge netcdf4
-      #     export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-      #     pip install -e . --no-deps --force-reinstall
-
       - name: pip install mhkit module from source
         shell: bash -l {0}
         run: |
@@ -212,14 +200,6 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           conda install netcdf4 hdf5
-
-      # - name: Setup Python ${{ matrix.python-version }}
-        # shell: bash -l {0}
-        # run: |
-        #   conda create --name mhkit_conda_env python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
-        #   conda activate mhkit_conda_env
-        #   export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-        #   pip install -e . --no-deps --force-reinstall
 
       # - name: Setup Python ${{ matrix.python-version }}
         # shell: bash -l {0}
