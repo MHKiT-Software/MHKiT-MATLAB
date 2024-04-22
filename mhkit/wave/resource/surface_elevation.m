@@ -35,6 +35,12 @@ function wave_elevation=surface_elevation(S,time_index,options)
 %       Explicit phases for frequency components (overrides seed)
 %       to call: wave_elevation(S,time_index,"phases",phases)
 %
+%    method: str (optional)
+%       Method used to calculate the surface elevation. 'ifft' (Inverse Fast Fourier
+%       Transform) used by default if the given frequency_bins==None. 'sum_of_sines'
+%       explicitly sums each frequency component and used by default if
+%       frequency_bins are provided. The 'ifft' method is significantly faster.
+%
 % Returns
 % ---------
 %    wave_elevation: structure
@@ -54,6 +60,7 @@ arguments
     options.seed {mustBeNumeric} = 123;
     options.frequency_bins = py.None;
     options.phases = py.None;
+    options.method = "ifft";
 end
 
 py.importlib.import_module('mhkit');
@@ -120,8 +127,13 @@ if (isa(options.phases,'py.NoneType')~=1)
 
 end
 
+if ~(strcmp(options.method, "ifft") || strcmp(options.method, "sum_of_sines"))
+    ME = MException('MATLAB:significant_wave_height','Invalid method. method should be either "ifft" or "sum_of_sines"');
+    throw(ME);
+end
+
 eta=py.mhkit.wave.resource.surface_elevation(S,time_index,pyargs('seed',...
-    py.int(options.seed),'frequency_bins',options.frequency_bins,'phases',options.phases));
+    py.int(options.seed),'frequency_bins',options.frequency_bins,'phases',options.phases, 'method', options.method));
 
 
 vals=double(py.array.array('d',py.numpy.nditer(eta.values)));
@@ -140,4 +152,3 @@ wave_elevation.elevation=vals;
 wave_elevation.type='Time Series from Spectra';
 
 wave_elevation.time=double(py.array.array('d',py.numpy.nditer(eta.index)));
-
