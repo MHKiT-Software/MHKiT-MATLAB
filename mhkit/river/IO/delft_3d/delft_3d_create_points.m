@@ -44,5 +44,4 @@ function result = delft_3d_create_points(x, y, waterdepth)
     % Convert Python dataframe to struct
     df = python_result;
     result = convert_numeric_dataframe_to_struct(df);
-    result.df = df;
 end

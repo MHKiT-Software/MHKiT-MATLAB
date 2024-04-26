@@ -49,5 +49,4 @@ function result_struct = delft_3d_calculate_turbulent_intensity(delft_3d_py_obje
     % Convert Python dataframe to struct
     df = python_result;
     result_struct = convert_numeric_dataframe_to_struct(df);
-    result_struct.df = df;
 end

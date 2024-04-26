@@ -100,7 +100,7 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             x_velocity_point_data = delft_3d_get_all_data_points(data, x_velocity_key, seconds_into_simulation_index);
 
             % Fieldnames
-            expected_fieldnames = 7;
+            expected_fieldnames = 6;
             num_fieldnames = length(fieldnames(x_velocity_point_data));
             testCase.assertEqual(num_fieldnames, expected_fieldnames);
 
@@ -141,7 +141,7 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             centerline_points = delft_3d_create_points(x, y, waterdepth);
 
             % Fieldnames
-            expected_fieldnames = 4;
+            expected_fieldnames = 3;
             num_fieldnames = length(fieldnames(centerline_points));
             testCase.assertEqual(num_fieldnames, expected_fieldnames);
 
@@ -203,7 +203,7 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             layer_data = delft_3d_get_layer_data(data, x_velocity_key, layer);
 
             % Fieldnames
-            expected_fieldnames = 7;
+            expected_fieldnames = 6;
             num_fieldnames = length(fieldnames(layer_data));
             testCase.assertEqual(num_fieldnames, expected_fieldnames);
 
@@ -243,10 +243,10 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
 
             contour_points = delft_3d_create_points(x2, y_contour, z2);
 
-            turbulent_intensity = delft_3d_calculate_turbulent_intensity(data, contour_points.df, true);
+            turbulent_intensity = delft_3d_calculate_turbulent_intensity(data, contour_points, true);
 
             % Fieldnames
-            expected_fieldnames = 9;
+            expected_fieldnames = 8;
             num_fieldnames = length(fieldnames(turbulent_intensity));
             testCase.assertEqual(num_fieldnames, expected_fieldnames);
 
@@ -268,7 +268,7 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             var_interpolation = delft_3d_calculate_variable_interpolation(data, variables, "faces", "nearest");
 
             % Fieldnames
-            expected_fieldnames = 8;
+            expected_fieldnames = 7;
             num_fieldnames = length(fieldnames(var_interpolation));
             testCase.assertEqual(num_fieldnames, expected_fieldnames);
 

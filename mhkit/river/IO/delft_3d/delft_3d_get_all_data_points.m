@@ -44,5 +44,4 @@ function result = delft_3d_get_all_data_points(delft_3d_py_object, variable, tim
     % Convert Python dataframe to struct
     df = python_result;
     result = convert_numeric_dataframe_to_struct(df);
-    result.df = df;
 end

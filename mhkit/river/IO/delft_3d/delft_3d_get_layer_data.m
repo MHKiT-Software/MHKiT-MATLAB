@@ -42,5 +42,4 @@ function result_struct = delft_3d_get_layer_data(delft_3d_py_object, variable, l
 
     % Convert Python DataFrame to struct with vectorized conversion
     result_struct = convert_numeric_dataframe_to_struct(python_result);
-    result_struct.df = python_result;
 end
