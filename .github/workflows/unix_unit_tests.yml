@@ -210,9 +210,9 @@ jobs:
         #   export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
         #   pip install -e . --no-deps --force-reinstall
 
-      # - name: Setup MHKiT Dependencies on macOS
-      #   if: ${{ matrix.os == 'macos-13' }}
-      #   run: brew install hdf5 netcdf
+      - name: Setup MHKiT Dependencies on macOS
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: brew install hdf5 netcdf
 
       # - name: Setup MHKiT Dependencies on ubuntu
       #   run: sudo apt install libhdf5-serial-dev libnetcdf-dev
