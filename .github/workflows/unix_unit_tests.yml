@@ -25,6 +25,7 @@ jobs:
       - name: Install & Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
+          miniconda-version: latest
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           activate-environment: mhkit_conda_env
