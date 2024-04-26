@@ -11,7 +11,7 @@ function result_struct = delft_3d_calculate_variable_interpolation(delft_3d_py_o
 %    variables: cell array of strings
 %        Name of variables to interpolate, e.g. 'turkin1', 'ucx', 'ucy', and 'ucz'.
 %        The full list can be found using "data.variables.keys()" in the console.
-%    points: string or DataFrame
+%    points: string or struct or DataFrame
 %        The points to interpolate data onto.
 %          'cells': interpolates all data onto the Delft3D cell coordinate system (Default)
 %          'faces': interpolates all data onto the Delft3D face coordinate system
@@ -37,7 +37,7 @@ function result_struct = delft_3d_calculate_variable_interpolation(delft_3d_py_o
         error('MATLAB:delft_3d_calculate_variable_interpolation:InvalidInput', 'Variables must be a cell array of strings.');
     end
 
-    if ~(isstring(points) || isa(points, 'py.pandas.core.frame.DataFrame'))
+    if ~(isstring(points) || isa(points, 'py.pandas.core.frame.DataFrame') || isstruct(points))
         error('MATLAB:delft_3d_calculate_variable_interpolation:InvalidInput', 'Points must be a string or a DataFrame.');
     end
 
@@ -47,6 +47,11 @@ function result_struct = delft_3d_calculate_variable_interpolation(delft_3d_py_o
 
     if ~isstring(edges) && ~isempty(edges)
         error('MATLAB:delft_3d_calculate_variable_interpolation:InvalidInput', 'Edges must be a string or empty.');
+    end
+
+    % Convert struct to DataFrame if it's a struct
+    if isstruct(points)
+        points = convert_numeric_struct_to_dataframe(points);
     end
 
     % Call Python function to perform variable interpolation

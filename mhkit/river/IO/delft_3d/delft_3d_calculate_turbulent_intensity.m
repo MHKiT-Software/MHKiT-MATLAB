@@ -8,7 +8,7 @@ function result_struct = delft_3d_calculate_turbulent_intensity(delft_3d_py_obje
 % ------------
 %    delft_3d_py_object: py.netCDF4._netCDF4.Dataset
 %       A netCDF python object.
-%    points: string or DataFrame
+%    points: struct or string or DataFrame
 %       Points to interpolate data onto.
 %            'cells': interpolates all data onto velocity coordinate system (Default).
 %            'faces': interpolates all data onto the TKE coordinate system.
@@ -30,12 +30,17 @@ function result_struct = delft_3d_calculate_turbulent_intensity(delft_3d_py_obje
         error('MATLAB:delft_3d_calculate_turbulent_intensity:InvalidInput', 'Input must be a py.netCDF4._netCDF4.Dataset object.');
     end
 
-    if ~(isstring(points) || isa(points, 'py.pandas.core.frame.DataFrame'))
-        error('MATLAB:delft_3d_calculate_turbulent_intensity:InvalidInput', 'Points must be a string or a DataFrame.');
+    if ~(isstring(points) || isa(points, 'py.pandas.core.frame.DataFrame') || isstruct(points))
+        error('MATLAB:delft_3d_calculate_turbulent_intensity:InvalidInput', 'Points must be a string, a struct, or a DataFrame.');
     end
 
     if ~islogical(intermediate_values)
         error('MATLAB:delft_3d_calculate_turbulent_intensity:InvalidInput', 'Intermediate values must be a boolean.');
+    end
+
+    % Convert struct to DataFrame if it's a struct
+    if isstruct(points)
+        points = convert_numeric_struct_to_dataframe(points);
     end
 
     % Call Python function to calculate turbulent intensity
