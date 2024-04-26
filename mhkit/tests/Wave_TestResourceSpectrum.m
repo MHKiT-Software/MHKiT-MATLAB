@@ -148,26 +148,10 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             eta_ifft = surface_elevation(S, t, "seed", 1, "method", "ifft");
             eta_sum_of_sines = surface_elevation(S, t, "seed", 1, "method", "sum_of_sines");
 
-            % figure
-            % plot(eta_ifft.time, eta_ifft.elevation)
-            % hold on
-            % plot(eta_sum_of_sines.time, eta_sum_of_sines.elevation)
-            % hold off
+            surface_elevation_diff = mean(eta_ifft.elevation - eta_sum_of_sines.elevation);
+            disp(surface_elevation_diff);
 
-            % xlabel('Time (s)')
-            % ylabel('Surface Elevation (m)')
-            % title('Surface Elevation over Time')
-            % grid on
-            % legend('IFFT Method', 'Sum of Sines Method')
-
-            surface_elevation_diff = abs(sum(eta_ifft.elevation - eta_sum_of_sines.elevation));
-            % disp(surface_elevation_diff);
-
-            % This difference is suboptimal! The actual difference should be
-            % very close to zero. There appears to be some form of drift over
-            % time with the sum of sines method lagging slightly behind the
-            % ifft method
-            assertLessThan(testCase, surface_elevation_diff, 1.0);
+            assertLessThan(testCase, surface_elevation_diff, 0.01);
         end
 
     end
