@@ -295,12 +295,12 @@ jobs:
           export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
           pip install -e .
 
-      - name: pip install mhkit module from source
+      - name: pip install mhkit
         if: ${{ matrix.os == 'macos-latest' }}
         working-directory: ${{env.mhkit-python-dir}}
         shell: bash -l {0}
         run: |
-          pip install -e .
+          pip3 install mhkit
 
       - name: pip install mhkit-python-utils module from source
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -313,13 +313,20 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         shell: bash -l {0}
         run: |
-          pip install -e .
+          pip3 install -e .
 
-      # - name: List installed pip modules
-      #   shell: bash -l {0}
-      #   run: |
-      #     conda activate mhkit_conda_env
-      #     pip freeze
+      - name: List installed pip modules
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip freeze
+
+      - name: List installed pip modules
+        if: ${{ matrix.os == 'macos-latest' }}
+        shell: bash -l {0}
+        run: |
+          pip3 freeze
 
       - name: Print MHKiT-Python Version
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -332,7 +339,7 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         shell: bash -l {0}
         run: |
-          python -c "import mhkit; print(mhkit.__version__)"
+          python3 -c "import mhkit; print(mhkit.__version__)"
 
       - name: Verify MHKiT-Python Operation
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -345,7 +352,7 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         shell: bash -l {0}
         run: |
-          python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
+          python3 -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
 
       - name: Download mhkit_webread_cache artifact
         uses: actions/download-artifact@v4
@@ -380,7 +387,7 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         shell: bash -l {0}
         run: |
-          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
+          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python3 -c "import sys; print(sys.executable)") > run.m
 
       - name: Add MATLAB test commands
         shell: bash
