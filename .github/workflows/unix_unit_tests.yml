@@ -306,7 +306,14 @@ jobs:
         working-directory: ${{env.mhkit-python-dir}}
         shell: bash -l {0}
         run: |
-          pip3 install mhkit
+          pip install -e .
+
+      # Necessary for mhkit v0.7
+      - name: pip upgrade netcdf4
+        if: ${{ matrix.os == 'macos-latest' }}
+        shell: bash -l {0}
+        run: |
+          pip3 install --upgrade netcdf
 
       - name: pip install mhkit-python-utils module from source
         if: ${{ matrix.os == 'ubuntu-latest' }}
