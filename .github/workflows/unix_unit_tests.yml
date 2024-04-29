@@ -323,7 +323,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
+          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
