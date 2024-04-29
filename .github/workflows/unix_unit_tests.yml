@@ -190,7 +190,14 @@ jobs:
           repository: "MHKiT-Software/MHKiT-Python"
           path: ${{env.mhkit-python-dir}}
 
+      - name: Install Python
+        if: ${{ matrix.os == 'macos-latest' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
       - name: Install & Setup Miniconda
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: conda-incubator/setup-miniconda@v3
         with:
           miniconda-version: latest
@@ -200,13 +207,21 @@ jobs:
           channels: conda-forge
 
       # This is necessary to fix any issues with netcdf4 and hdf5 headers
-      - name: "Conda install netcdf4, hdf5"
+      - name: "Use conda to install mhkit dependencies"
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           # conda install netcdf4 hdf5
           conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
           export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+
+      - name: "Use brew to install mhkit dependencies"
+        if: ${{ matrix.os == 'macos-latest' }}
+        shell: bash -l {0}
+        run: |
+          brew install netcdf
+
 
       # - name: Setup Python ${{ matrix.python-version }}
         # shell: bash -l {0}
@@ -246,18 +261,33 @@ jobs:
         run: echo "LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
 
       - name: Print Python executable
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           python -c "import sys; print(sys.executable)"
 
+      - name: Print Python executable
+        if: ${{ matrix.os == 'macos-latest' }}
+        shell: bash -l {0}
+        run: |
+          python -c "import sys; print(sys.executable)"
+
       - name: Print Python Version
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           python --version
 
+      - name: Print Python Version
+        if: ${{ matrix.os == 'macos-latest' }}
+        shell: bash -l {0}
+        run: |
+          python --version
+
       - name: pip install mhkit module from source
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         working-directory: ${{env.mhkit-python-dir}}
         shell: bash -l {0}
         run: |
@@ -265,28 +295,56 @@ jobs:
           export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
           pip install -e .
 
+      - name: pip install mhkit module from source
+        if: ${{ matrix.os == 'macos-latest' }}
+        working-directory: ${{env.mhkit-python-dir}}
+        shell: bash -l {0}
+        run: |
+          pip install -e .
+
       - name: pip install mhkit-python-utils module from source
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           pip install -e .
 
-      - name: List installed pip modules
+      - name: pip install mhkit-python-utils module from source
+        if: ${{ matrix.os == 'macos-latest' }}
         shell: bash -l {0}
         run: |
-          conda activate mhkit_conda_env
-          pip freeze
+          pip install -e .
+
+      # - name: List installed pip modules
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip freeze
 
       - name: Print MHKiT-Python Version
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           python -c "import mhkit; print(mhkit.__version__)"
 
+      - name: Print MHKiT-Python Version
+        if: ${{ matrix.os == 'macos-latest' }}
+        shell: bash -l {0}
+        run: |
+          python -c "import mhkit; print(mhkit.__version__)"
+
       - name: Verify MHKiT-Python Operation
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
+          python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
+
+      - name: Verify MHKiT-Python Operation
+        if: ${{ matrix.os == 'macos-latest' }}
+        shell: bash -l {0}
+        run: |
           python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
 
       - name: Download mhkit_webread_cache artifact
@@ -304,17 +362,24 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
-      - name: Add Python Dir to Path
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
+      # - name: Add Python Dir to Path
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
 
       # OutOfProcess is required to properly call netcdf/hdf5 and works reliably on macos and ubuntu
       - name: Configure MATLAB Python Environment
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
+          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
+
+      - name: Configure MATLAB Python Environment
+        if: ${{ matrix.os == 'macos-latest' }}
+        shell: bash -l {0}
+        run: |
           printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
 
       - name: Add MATLAB test commands
