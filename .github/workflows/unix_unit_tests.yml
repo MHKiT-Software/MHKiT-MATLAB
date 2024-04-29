@@ -119,7 +119,7 @@ jobs:
 
       # Expecting 2 * 4 * 7 - (13 * 2) = 30 jobs
       matrix:
-        os: [macos-14, ubuntu-latest]
+        os: [macos-13, ubuntu-latest]
         python-version: [3.8, 3.9, "3.10", 3.11]
         # Note: It is preferred to use an actual release name as opposed to 'latest'
         matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a]
@@ -158,22 +158,22 @@ jobs:
           # Specific versions of tests that fail consistently. Most likely due to the GitHub actions environment
           - matlab-version: R2024a # Python netcdf4 pip build error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123413351
             python-version: 3.11
-            os: macos-14
+            os: macos-13
           # - matlab-version: R2024a # Working!
           #   python-version: "3.10"
-          #   os: macos-14
+          #   os: macos-13
           - matlab-version: R2024a # Java Segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123411604
             python-version: 3.9
-            os: macos-14
+            os: macos-13
           - matlab-version: R2023b # Python netcd4 pip build error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123412889
             python-version: 3.11
-            os: macos-14
+            os: macos-13
           - matlab-version: R2023b # Java segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123412352
             python-version: "3.10"
-            os: macos-14
+            os: macos-13
           - matlab-version: R2023b # Java segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123411335
             python-version: 3.9
-            os: macos-14
+            os: macos-13
 
     runs-on: ${{ matrix.os }}
 
@@ -217,7 +217,7 @@ jobs:
         #   pip install -e . --no-deps --force-reinstall
 
       # - name: Setup MHKiT Dependencies on macOS
-      #   if: ${{ matrix.os == 'macos-14' }}
+      #   if: ${{ matrix.os == 'macos-13' }}
       #   run: brew install hdf5 netcdf
 
       # - name: Setup MHKiT Dependencies on ubuntu
