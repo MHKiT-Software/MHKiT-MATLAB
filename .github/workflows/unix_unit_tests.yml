@@ -196,6 +196,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Upgrade pip
+        if: ${{ matrix.os == 'macos-latest' }}
+        shell: bash -l {0}
+        run: |
+          python3 -m pip install --upgrade pip
+
       - name: Install & Setup Miniconda
         if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: conda-incubator/setup-miniconda@v3
