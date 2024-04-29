@@ -256,8 +256,8 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
+          export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
           pip install -e .
-        working-directory: ${{env.mhkit-python-dir}}
 
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
