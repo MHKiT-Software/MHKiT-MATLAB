@@ -1,4 +1,5 @@
 from mhkit_python_utils import pandas_dataframe
+from mhkit_python_utils import scipy_stats
 
 
 # Ignore future warnings
