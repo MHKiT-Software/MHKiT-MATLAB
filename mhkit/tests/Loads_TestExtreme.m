@@ -68,6 +68,55 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             mler_ts = mler_export_time_series(RAO, mler, sim, k.values);
             
             assertEqual(testCase, mler_ts.linear_response, validation.LinearResponse, 'AbsTol', 0.00005)
-         end
+        end
+        
+        function test_global_peaks(testCase)
+            fpath = '../../examples/data/loads/sine_wave.csv';
+            validation = readtable(fpath);
+            Fs = 200;                   % samples per second
+            dt = 1/Fs;                   % seconds per sample
+            StopTime = 0.25;             % seconds
+            t = (0:dt:StopTime-dt)';     % seconds
+            Fc = 60;                     % hertz
+            x = cos(2*pi*Fc*t);
+            [t_peaks, peaks] = global_peaks(t, x);
+
+            assertEqual(testCase, t_peaks, validation.t_peaks', 'AbsTol', 0.00005)
+            assertEqual(testCase, peaks, validation.peaks', 'AbsTol', 0.00005)
+        end
+        
+        function test_number_of_short_term_peaks(testCase)
+            n = 10;
+            t = 100;
+            t_st = 50;
+            n_st = number_of_short_term_peaks(n, t, t_st);
+
+            assertEqual(testCase, n_st, 5)
+        end
+
+        function test_block_maxima(testCase)
+            load('../../examples/data/loads/block_maxima.mat', 'block_max');
+            load('../../examples/data/loads/example_qoi.mat', 'qoi')
+            % time in seconds
+            time = linspace(0, 10800, 2*10801+1);
+            % split time series into 10-minute (600s) segments
+            bm = block_maxima(time, qoi', 600);
+
+            assertEqual(testCase, bm, block_max)
+        end
+
+        function test_ste_block_maxima_gev(testCase)
+            load('../../examples/data/loads/block_maxima.mat', 'block_max');
+            load('../../examples/data/loads/ste.mat', 'ste_gev_pdf')
+            load('../../examples/data/loads/ste.mat', 'ste_gev_cdf')
+            x = linspace(0,3,1000);
+            stegev_pdf = ste_block_maxima_gev(block_max, x, "pdf");
+            stegev_cdf = ste_block_maxima_gev(block_max, x, "cdf");
+
+            assertEqual(testCase, stegev_pdf, ste_gev_pdf)
+            assertEqual(testCase, stegev_cdf, ste_gev_cdf)
+        end
+        
+        
     end
 end
