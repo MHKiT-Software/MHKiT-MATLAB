@@ -47,6 +47,7 @@ jobs:
       # - name: pip install mhkit from source
       - name: pip install mhkit from pypi
         # working-directory: ${{env.mhkit-python-dir}}
+        shell: bash -l {0}
         run: |
           "conda activate mhkit_conda_env && pip install mhkit==$MHKIT-PYTHON-VERSION"
 
@@ -167,16 +168,19 @@ jobs:
 
       # This is necessary to fix any issues with netcdf4 and hdf5 headers
       - name: "Conda install netcdf4, hdf5"
+        shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           conda install netcdf4 hdf5
 
       - name: Output python executable
+        shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           python -c "import sys; print(sys.executable)"
 
       - name: Print Python Version
+        shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           python --version
@@ -192,6 +196,7 @@ jobs:
 
       # - name: pip install mhkit from source
       - name: pip install mhkit from pypi
+        shell: bash -l {0}
         # working-directory: ${{env.mhkit-python-dir}}
         run: |
           "conda activate mhkit_conda_env && pip install mhkit==$MHKIT-PYTHON-VERSION"
@@ -203,11 +208,13 @@ jobs:
       #     pip3 install -e .
 
       - name: pip install mhkit-python-utils module from source
+        shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           pip3 install -e .
 
       - name: List installed pip modules
+        shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           pip3 freeze
