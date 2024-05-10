@@ -42,11 +42,11 @@ jobs:
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
-      - name: Check out MHKiT-Python
-        uses: actions/checkout@v4
-        with:
-          repository: "MHKiT-Software/MHKiT-Python"
-          path: ${{env.mhkit-python-dir}}
+      # - name: Check out MHKiT-Python
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: "MHKiT-Software/MHKiT-Python"
+      #     path: ${{env.mhkit-python-dir}}
 
       # - name: pip install mhkit module from source
       #   shell: bash -l {0}
@@ -191,11 +191,11 @@ jobs:
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
-      - name: Check out MHKiT-Python
-        uses: actions/checkout@v4
-        with:
-          repository: "MHKiT-Software/MHKiT-Python"
-          path: ${{env.mhkit-python-dir}}
+      # - name: Check out MHKiT-Python
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: "MHKiT-Software/MHKiT-Python"
+      #     path: ${{env.mhkit-python-dir}}
 
       - name: Install & Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
