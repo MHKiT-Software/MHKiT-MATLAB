@@ -38,7 +38,7 @@ jobs:
         run: cat run.m
 
       - name: Run code compatibility report
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: run
           startup-options: -noFigureWindows
