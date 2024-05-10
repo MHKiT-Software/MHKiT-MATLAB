@@ -18,7 +18,7 @@ jobs:
 
     env:
       mhkit-python-dir: "MHKiT-Python"
-      MHKIT-PYTHON-VERSION: 0.7
+      MHKIT_PYTHON_VERSION: 0.7
     steps:
       - name: Install/Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -49,7 +49,7 @@ jobs:
         # working-directory: ${{env.mhkit-python-dir}}
         shell: bash -l {0}
         run: |
-          "conda activate mhkit_conda_env && pip install mhkit==$MHKIT-PYTHON-VERSION"
+          "conda activate mhkit_conda_env && pip install mhkit==$MHKIT_PYTHON_VERSION"
 
       - name: pip install mhkit-python-utils module from source
         run: |
@@ -155,7 +155,7 @@ jobs:
 
     env:
       mhkit-python-dir: "MHKiT-Python"
-      MHKIT-PYTHON-VERSION: ${{  matrix.mhkit-python-version }}
+      MHKIT_PYTHON_VERSION: ${{  matrix.mhkit-python-version }}
     steps:
       - name: Install/Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -199,7 +199,7 @@ jobs:
         shell: bash -l {0}
         # working-directory: ${{env.mhkit-python-dir}}
         run: |
-          "conda activate mhkit_conda_env && pip install mhkit==$MHKIT-PYTHON-VERSION"
+          "conda activate mhkit_conda_env && pip install mhkit==$MHKIT_PYTHON_VERSION"
 
       # - name: pip install mhkit from source
       #   working-directory: ${{env.mhkit-python-dir}}
