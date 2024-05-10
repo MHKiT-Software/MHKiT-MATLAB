@@ -20,6 +20,7 @@ jobs:
 
     env:
       mhkit-python-dir: "MHKiT-Python"
+      MHKIT_PYTHON_VERSION: '0.7.0'
     steps:
       - name: Install & Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -47,12 +48,18 @@ jobs:
           repository: "MHKiT-Software/MHKiT-Python"
           path: ${{env.mhkit-python-dir}}
 
-      - name: pip install mhkit module from source
+      # - name: pip install mhkit module from source
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip install -e .
+      #   working-directory: ${{env.mhkit-python-dir}}
+
+      - name: pip install mhkit from pypi
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          pip install -e .
-        working-directory: ${{env.mhkit-python-dir}}
+          pip install mhkit==$MHKIT_PYTHON_VERSION
 
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
@@ -122,6 +129,7 @@ jobs:
         python-version: [3.8, 3.9, "3.10", 3.11]
         # Note: It is preferred to use an actual release name as opposed to 'latest'
         matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a]
+        mhkit-python-version: ["0.7.0"]
         exclude:
           - python-version: "3.10" # cache_population job
             matlab-version: R2022b
@@ -178,6 +186,7 @@ jobs:
 
     env:
       mhkit-python-dir: "MHKiT-Python"
+      MHKIT_PYTHON_VERSION: ${{  matrix.mhkit-python-version }}
     steps:
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -255,13 +264,20 @@ jobs:
           conda activate mhkit_conda_env
           python --version
 
-      - name: pip install mhkit module from source
-        working-directory: ${{env.mhkit-python-dir}}
+      # - name: pip install mhkit module from source
+      #   working-directory: ${{env.mhkit-python-dir}}
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+      #     pip install -e .
+
+      - name: pip install mhkit from pypi
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-          pip install -e .
+          pip install mhkit==$MHKIT_PYTHON_VERSION
 
       - name: pip upgrade netcdf4
         working-directory: ${{env.mhkit-python-dir}}
