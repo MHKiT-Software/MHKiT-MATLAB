@@ -48,8 +48,7 @@ jobs:
       - name: pip install mhkit from pypi
         # working-directory: ${{env.mhkit-python-dir}}
         run: |
-          conda activate mhkit_conda_env
-          pip install mhkit==$MHKIT-PYTHON-VERSION
+          "conda activate mhkit_conda_env && pip install mhkit==$MHKIT-PYTHON-VERSION"
 
       - name: pip install mhkit-python-utils module from source
         run: |
@@ -195,8 +194,7 @@ jobs:
       - name: pip install mhkit from pypi
         # working-directory: ${{env.mhkit-python-dir}}
         run: |
-          conda activate mhkit_conda_env
-          pip install mhkit==$MHKIT-PYTHON-VERSION
+          "conda activate mhkit_conda_env && pip install mhkit==$MHKIT-PYTHON-VERSION"
 
       # - name: pip install mhkit from source
       #   working-directory: ${{env.mhkit-python-dir}}
