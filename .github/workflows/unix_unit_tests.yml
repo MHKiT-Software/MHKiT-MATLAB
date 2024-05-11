@@ -280,7 +280,6 @@ jobs:
           pip install mhkit==$MHKIT_PYTHON_VERSION
 
       - name: pip upgrade netcdf4
-        working-directory: ${{env.mhkit-python-dir}}
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
