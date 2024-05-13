@@ -33,13 +33,22 @@ function result = delft_3d_create_points(x, y, waterdepth)
         error('MATLAB:delft_3d_create_points:InvalidInput', 'waterdepth must be a numeric type.');
     end
 
-    % Convert MATLAB arrays to Python arrays
-    py_x = py.numpy.array(x);
-    py_y = py.numpy.array(y);
-    py_waterdepth = py.numpy.array(waterdepth);
+    % Coerce the double into python types
+    % The inputs have multiple element convert them into numpy arrays
+    if length(x) > 1
+        x = py.numpy.array(x);
+    end
+
+    if length(y) > 1
+        y = py.numpy.array(y);
+    end
+
+    if length(waterdepth) > 1
+        waterdepth = py.numpy.array(waterdepth);
+    end
 
     % Call Python function to create points
-    python_result = py.mhkit.river.io.d3d.create_points(py_x, py_y, py_waterdepth);
+    python_result = py.mhkit.river.io.d3d.create_points(x, y, waterdepth);
 
     % Convert Python dataframe to struct
     df = python_result;
