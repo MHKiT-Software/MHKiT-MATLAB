@@ -34,7 +34,6 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
-
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
@@ -55,12 +54,10 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip install -e .
-
       - name: pip install mhkit-python-utils module from source
         run: |
           conda activate mhkit_conda_env
           pip install -e .
-
       # Create the cache and add a dummy file
       # The dummy file ensures that the artifact download
       - name: Setup mhkit_webread_cache
@@ -69,7 +66,6 @@ jobs:
           mkdir mhkit_webread_cache
           touch mhkit_webread_cache/test.txt
           echo "Hello World" > mhkit_webread_cache/test.txt
-
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
         with:
@@ -80,18 +76,15 @@ jobs:
         shell: pwsh
         run: >
           "pyenv(Version='{0}', ExecutionMode='OutOfProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
-
       - name: Check Python System Path
         shell: bash -l {0}
         run: |
           echo "py.sys.path" >> run.m
-
       - name: Check Python System Path
         # if: ${{ matrix.os == 'windows-latest' }}
         shell: bash -l {0}
         run: |
           echo "py.sys.path" >> run.m
-
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version,
@@ -219,19 +212,16 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
-
       - name: Output python executable
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           python -c "import sys; print(sys.executable)"
-
       - name: Print Python Version
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           python --version
-
       # - name: Output python executable
       #   run: |
       #     conda activate mhkit_conda_env
@@ -267,17 +257,14 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           conda install netcdf4 hdf5
-
       - name: Output python executable
         shell: bash -l {0}
         run: |
           python -c "import sys; print(sys.executable)"
-
       - name: Print Python Version
         shell: bash -l {0}
         run: |
           python --version
-
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
@@ -297,7 +284,6 @@ jobs:
         working-directory: ${{env.mhkit-python-dir}}
         run: |
           pip install -e .
-
       # - name: pip install mhkit-python-utils module from source
       #   run: |
       #     conda activate MHKIT_CONDA_ENV
@@ -307,7 +293,6 @@ jobs:
         working-directory: ${{env.mhkit-python-dir}}
         run: |
           pip install -e .
-
       # - name: pip install mhkit-python-utils module from source
       #   run: |
       #     pip3 install mhkit
@@ -315,7 +300,6 @@ jobs:
       - name: pip install mhkit-python-utils module from source
         run: |
           pip install -e .
-
       # - name: List installed pip modules
       #   run: |
       #     conda activate MHKIT_CONDA_ENV
@@ -324,17 +308,14 @@ jobs:
       - name: List installed pip modules
         run: |
           pip freeze
-
       - name: Print MHKiT-Python Version
         shell: bash -l {0}
         run: |
           python -c "import mhkit; print(mhkit.__version__)"
-
       - name: LS Conda Env Dir
         shell: bash -l {0}
         run: |
           ls C:\Miniconda\envs\MHKIT_CONDA_ENV
-
       # - name: Echo Path
       #   shell: bash -l {0}
       #   run: |
@@ -344,12 +325,10 @@ jobs:
         shell: bash -l {0}
         run: |
           tree C:\Miniconda\envs\MHKIT_CONDA_ENV
-
       - name: Add anaconda env to path
         shell: bash -l {0}
         run: |
           echo C:\Miniconda\envs\MHKIT_CONDA_ENV >> $GITHUB_PATH
-
       # - name: Echo Path
       #   shell: bash -l {0}
       #   run: |
@@ -359,7 +338,6 @@ jobs:
         shell: bash -l {0}
         run: |
           python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
-
       - name: Download mhkit_webread_cache artifact
         uses: actions/download-artifact@v4
         with:
@@ -380,7 +358,6 @@ jobs:
         shell: pwsh
         run: >
           "conda activate MHKIT_CONDA_ENV; setenv('path', ['{0}', getenv('path')]);" -f (python -c "import sys; import os; print(os.path.dirname(sys.executable))") | Out-File -FilePath run.m -Append
-
       # - name: Configure MATLAB pyenv Version and ExecutionMode
       #   if: ${{ matrix.os == 'windows-latest' }}
       #   shell: pwsh
@@ -392,12 +369,10 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')" $(python -c "import sys; print(sys.executable)") >> run.m
-
       - name: Check Python System Path
         shell: bash -l {0}
         run: |
           echo "py.sys.path," >> run.m
-
       # - name: Configure MATLAB pyenv Version and ExecutionMode
       #   if: ${{ matrix.os == 'windows-latest' }}
       #   shell: pwsh
@@ -409,12 +384,10 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')" $(python -c "import sys; print(sys.executable)") >> run.m
-
       - name: Check Python System Path
         shell: bash -l {0}
         run: |
           echo "py.sys.path," >> run.m
-
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version,
