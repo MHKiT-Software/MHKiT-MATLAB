@@ -8,6 +8,19 @@ classdef River_TestIO_Delft < matlab.unittest.TestCase
             testCase.assertEqual(class(data), 'py.netCDF4._netCDF4.Dataset');
         end
 
+        function testInvalidNetCDFCreation(testCase)
+            d3d_file = "../../examples/data/river/d3d/turbineTest_map.nc";
+
+            % Use native, invalid, ncinfo function
+            ds = ncinfo(d3d_file);
+            
+            % Define the expected error message
+            expectedErrorMsg = 'MATLAB:get_delft_3d_keys:InvalidInput';
+            
+            % Verify that the function throws an error with the expected message
+            testCase.verifyError(@() delft_3d_get_keys(ds), expectedErrorMsg);
+        end
+
         function testGetKeys(testCase)
             d3d_file = "../../examples/data/river/d3d/turbineTest_map.nc";
             data = delft_3d_open_netcdf(d3d_file);
