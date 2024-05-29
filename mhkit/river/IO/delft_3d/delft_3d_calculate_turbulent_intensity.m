@@ -7,7 +7,7 @@ function result_struct = delft_3d_calculate_turbulent_intensity(delft_3d_py_obje
 % Parameters
 % ------------
 %    delft_3d_py_object: py.netCDF4._netCDF4.Dataset
-%       A netCDF python object.
+%       A netCDF python object, created with `delft_3d_open_netcdf`
 %    points: struct or string or DataFrame
 %       Points to interpolate data onto.
 %            'cells': interpolates all data onto velocity coordinate system (Default).
@@ -27,7 +27,8 @@ function result_struct = delft_3d_calculate_turbulent_intensity(delft_3d_py_obje
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if ~isa(delft_3d_py_object, 'py.netCDF4._netCDF4.Dataset')
-        error('MATLAB:delft_3d_calculate_turbulent_intensity:InvalidInput', 'Input must be a py.netCDF4._netCDF4.Dataset object.');
+        error('MATLAB:delft_3d_calculate_turbulent_intensity:InvalidInput', ...
+              'Invalid input Delft3D data type: `delft_3d_calculate_turbulent_intensity` expects a `py.netCDF4._netCDF4.Dataset` object. Please use the `delft_3d_open_netcdf` function to convert Delft3D netCDF files for use with this function.');
     end
 
     if ~(isstring(points) || isa(points, 'py.pandas.core.frame.DataFrame') || isstruct(points))

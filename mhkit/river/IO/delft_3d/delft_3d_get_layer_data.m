@@ -7,7 +7,7 @@ function result_struct = delft_3d_get_layer_data(delft_3d_py_object, variable, l
 % Parameters
 % ------------
 %    delft_3d_py_object: py.netCDF4._netCDF4.Dataset
-%       A netCDF python object.
+%       A netCDF python object, created with `delft_3d_open_netcdf`
 %    variable: string
 %       Variable in the Delft3D output
 %    layer: int
@@ -23,7 +23,8 @@ function result_struct = delft_3d_get_layer_data(delft_3d_py_object, variable, l
 
     % Guard to check type of delft_3d_py_object
     if ~isa(delft_3d_py_object, 'py.netCDF4._netCDF4.Dataset')
-        error('MATLAB:delft_3d_get_layer_data:InvalidInput', 'Input must be a py.netCDF4._netCDF4.Dataset object.');
+        error('MATLAB:delft_3d_get_layer_data:InvalidInput', ...
+              'Invalid input Delft3D data type: `delft_3d_get_layer_data` expects a `py.netCDF4._netCDF4.Dataset` object. Please use the `delft_3d_open_netcdf` function to convert Delft3D netCDF files for use with this function.');
     end
 
     % Guard to check type of variable

@@ -7,7 +7,7 @@ function result_struct = delft_3d_calculate_variable_interpolation(delft_3d_py_o
 % Parameters
 % ------------
 %    delft_3d_py_object: py.netCDF4._netCDF4.Dataset
-%       A netCDF python object.
+%       A netCDF python object, created with `delft_3d_open_netcdf`
 %    variables: cell array of strings
 %        Name of variables to interpolate, e.g. 'turkin1', 'ucx', 'ucy', and 'ucz'.
 %        The full list can be found using "data.variables.keys()" in the console.
@@ -30,7 +30,8 @@ function result_struct = delft_3d_calculate_variable_interpolation(delft_3d_py_o
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if ~isa(delft_3d_py_object, 'py.netCDF4._netCDF4.Dataset')
-        error('MATLAB:delft_3d_calculate_variable_interpolation:InvalidInput', 'Input must be a py.netCDF4._netCDF4.Dataset object.');
+        error('MATLAB:delft_3d_calculate_variable_interpolation:InvalidInput', ...
+              'Invalid input Delft3D data type: `delft_3d_calculate_variable_interpolation` expects a `py.netCDF4._netCDF4.Dataset` object. Please use the `delft_3d_open_netcdf` function to convert Delft3D netCDF files for use with this function.');
     end
 
     if ~iscell(variables) || ~all(cellfun(@ischar, variables))

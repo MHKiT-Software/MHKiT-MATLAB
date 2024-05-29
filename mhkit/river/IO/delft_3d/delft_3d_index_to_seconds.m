@@ -7,7 +7,7 @@ function result = delft_3d_index_to_seconds(delft_3d_py_object, index)
 % Parameters
 % ------------
 %    delft_3d_py_object: py.netCDF4._netCDF4.Dataset
-%       A netCDF python object.
+%       A netCDF python object, created with `delft_3d_open_netcdf`
 %    index: numeric
 %       The index for which to retrieve the time in seconds.
 %
@@ -19,7 +19,8 @@ function result = delft_3d_index_to_seconds(delft_3d_py_object, index)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if ~isa(delft_3d_py_object, 'py.netCDF4._netCDF4.Dataset')
-        error('MATLAB:delft_3d_index_to_seconds:InvalidInput', 'Input must be a py.netCDF4._netCDF4.Dataset object.');
+        error('MATLAB:delft_3d_index_to_seconds:InvalidInput', ...
+              'Invalid input Delft3D data type: `delft_3d_index_to_seconds` expects a `py.netCDF4._netCDF4.Dataset` object. Please use the `delft_3d_open_netcdf` function to convert Delft3D netCDF files for use with this function.');
     end
 
     if ~isnumeric(index)

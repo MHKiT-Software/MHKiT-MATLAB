@@ -8,7 +8,7 @@ function result = delft_3d_get_all_data_points(delft_3d_py_object, variable, tim
 % Parameters
 % ------------
 %    delft_3d_py_object: py.netCDF4._netCDF4.Dataset
-%       A netCDF python object.
+%       A netCDF python object, created with `delft_3d_open_netcdf`
 %    variable: string
 %       Variable in the Delft3D output
 %    time_index: int
@@ -26,7 +26,8 @@ function result = delft_3d_get_all_data_points(delft_3d_py_object, variable, tim
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if ~isa(delft_3d_py_object, 'py.netCDF4._netCDF4.Dataset')
-        error('MATLAB:delft_3d_get_all_data_points:InvalidInput', 'Input must be a py.netCDF4._netCDF4.Dataset object.');
+        error('MATLAB:delft_3d_get_all_data_points:InvalidInput', ...
+              'Invalid input Delft3D data type: `delft_3d_get_all_data_points` expects a `py.netCDF4._netCDF4.Dataset` object. Please use the `delft_3d_open_netcdf` function to convert Delft3D netCDF files for use with this function.');
     end
 
     if ~isstring(variable)

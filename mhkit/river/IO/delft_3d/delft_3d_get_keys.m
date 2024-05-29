@@ -6,7 +6,7 @@ function result = delft_3d_get_keys(delft_3d_py_object)
 % Parameters
 % ------------
 %    delft_3d_py_object: py.netCDF4._netCDF4.Dataset
-%       A netCDF python object.
+%       A netCDF python object, created with `delft_3d_open_netcdf`
 %
 % Returns
 % ---------
@@ -16,8 +16,9 @@ function result = delft_3d_get_keys(delft_3d_py_object)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    if ~isa(delft_3d_py_object, 'py.netCDF4._netCDF4.Dataset')
-        error('MATLAB:get_delft_3d_keys:InvalidInput', 'Input must be a py.netCDF4._netCDF4.Dataset object.');
+     if ~isa(delft_3d_py_object, 'py.netCDF4._netCDF4.Dataset')
+        error('MATLAB:get_delft_3d_keys:InvalidInput', ...
+              'Invalid input Delft3D data type: `delft_3d_get_keys` expects a `py.netCDF4._netCDF4.Dataset` object. Please use the `delft_3d_open_netcdf` function to convert Delft3D netCDF files for use with this function.');
     end
 
     % get_d3d_keys returns a list with the following elements:
