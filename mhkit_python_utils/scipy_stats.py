@@ -1,6 +1,6 @@
 
 
-def convert_to_array(obj, x, method):
+def convert_to_array(obj, method, x=None):
     '''
     Function used to convert scipy.stats.rv_continous object into
     dtypes that can be used in matlab
@@ -29,6 +29,11 @@ def convert_to_array(obj, x, method):
         return obj.ppf(x)
     if method=='sf':
         return obj.sf(x)
+    if method=='expect':
+        return obj.expect()
     else:
         print('ERROR: no valid method selected!!!')
         raise
+
+def dict_to_list(obj):
+    return obj.values()

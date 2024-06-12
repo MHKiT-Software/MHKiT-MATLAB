@@ -116,7 +116,49 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             assertEqual(testCase, stegev_pdf, ste_gev_pdf)
             assertEqual(testCase, stegev_cdf, ste_gev_cdf)
         end
+
+        function test_short_term_extremes(testCase)
+            txtfile = readtable("..\..\examples\data\loads\time_series_for_extremes.txt");
+            txtfile = table2array(txtfile);
+            t_st = 1 * 60 * 60;
+            x = 1.6;
+            cdfs_1 = [
+                0.006750456316537166;
+                0.5921659393757381;
+                0.6156789503874247;
+                0.6075807789811315;
+                0.9033574618279865];
+            methods = [
+                "peaks_weibull";
+                "peaks_weibull_tail_fit";
+                "peaks_over_threshold";
+                "block_maxima_gev";
+                "block_maxima_gumbel"];
+            cdfs = zeros(1,length(methods))';
+            for i = 1:length(methods)
+                cdfs(i) = short_term_extreme(txtfile(:,1), txtfile(:,2), t_st, methods(i), x, "cdf");
+            end
+            
+            assertEqual(testCase, cdfs, cdfs_1, 'AbsTol', 0.00005)
+        end
         
-        
+        function test_long_term_extreme(testCase)
+            txtfile = readtable("..\..\examples\data\loads\time_series_for_extremes.txt");
+            txtfile = table2array(txtfile);
+            t_st = 1 * 60 * 60;
+            x = linspace(0,10,1000);
+            z = 0.8;
+            ste1 = short_term_extreme(txtfile(:,1), txtfile(:,2), t_st, "peaks_weibull", z, "cdf");
+            ste{1} = short_term_extreme(txtfile(:,1), txtfile(:,2), t_st, "peaks_weibull", x, "cdf", output_py=true);
+            ste2 = short_term_extreme(txtfile(:,1), txtfile(:,2), t_st, "peaks_weibull", z, "cdf");
+            ste{2} = short_term_extreme(txtfile(:,1), txtfile(:,2), t_st, "peaks_weibull", x, "cdf", output_py=true);
+            pyste = py.list(ste);
+            w = [0.25, 0.75];
+            
+            lte_cdf = full_seastate_long_term_extreme(pyste, w, z, "cdf");
+
+            assertEqual(testCase, lte_cdf, w(1)*ste1 + w(2)*ste2, 'AbsTol', 0.00005)
+        end
+
     end
 end

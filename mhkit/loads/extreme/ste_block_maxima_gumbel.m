@@ -39,7 +39,7 @@ x = py.numpy.array(x);
 
 result = py.mhkit.loads.extreme.ste_block_maxima_gumbel(block_maxima);
 
-stat = py.mhkit_python_utils.scipy_stats.convert_to_array(result, x, method);
+stat = py.mhkit_python_utils.scipy_stats.convert_to_array(result, method, x);
 
 ste = double(stat);
 

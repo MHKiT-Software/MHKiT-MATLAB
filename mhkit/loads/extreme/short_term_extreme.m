@@ -1,4 +1,4 @@
-function ste = short_term_extreme(t, data, t_st, type, x, method)
+function ste = short_term_extreme(t, data, t_st, type, x, method, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -23,12 +23,26 @@ function ste = short_term_extreme(t, data, t_st, type, x, method)
 %         method : str
 %             Statistical method to apply to resulting data. Options to
 %             choose from are: "pdf", "cdf", "ppf", or "sf"
+%         output_py : bool (optional)
+%             Select if you want to return the native python result for use
+%             in long term extreme calculations.
 %
 %      Returns
 %      -------
 %         ste : array or double
 %             Probability distribution of the peaks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments
+    t
+    data
+    t_st
+    type
+    x
+    method
+    options.output_py=false;
+end
+
 
 if ~isa(t,'numeric')
     error('ERROR: t must be a double array')
@@ -42,6 +56,9 @@ end
 if ~isa(type,'string')
     error('ERROR: type must be a string')
 end
+if ~isa(x,'numeric')
+    error('ERROR: x must be a double array')
+end
 if ~isa(method,'string')
     error('ERROR: method must be a string')
 end
@@ -53,8 +70,11 @@ data = py.numpy.array(data);
 
 result = py.mhkit.loads.extreme.short_term_extreme(t, data, t_st, type);
 
-stat = py.mhkit_python_utils.scipy_stats.convert_to_array(result, x, method);
-
-ste = double(stat);
+if options.output_py
+    ste = result;
+else
+    stat = py.mhkit_python_utils.scipy_stats.convert_to_array(result, method, x);
+    ste = double(stat);
+end
 
 end
