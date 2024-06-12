@@ -50,7 +50,7 @@ if exist("threshold", 'var')==1
 else
     result = py.mhkit.loads.extreme.peaks_distribution_peaks_over_threshold(p);
 end
-stat = py.mhkit_python_utils.scipy_stats.convert_to_array(result, x, method);
+stat = py.mhkit_python_utils.scipy_stats.convert_to_array(result, method, x);
 
 pks = double(stat);
 

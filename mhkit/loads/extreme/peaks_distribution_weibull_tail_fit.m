@@ -38,7 +38,7 @@ x = py.numpy.array(x);
 
 result = py.mhkit.loads.extreme.peaks_distribution_weibull_tail_fit(p);
 
-stat = py.mhkit_python_utils.scipy_stats.convert_to_array(result, x, method);
+stat = py.mhkit_python_utils.scipy_stats.convert_to_array(result, method, x);
 
 pks = double(stat);
 

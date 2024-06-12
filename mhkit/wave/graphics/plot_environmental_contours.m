@@ -64,12 +64,10 @@ arguments
     options.savepath = "";
 end
 
-figure=scatter(x1,x2);
+figure=scatter(x1,x2, 30,'blue',"filled","MarkerFaceAlpha",0.25,MarkerEdgeColor="none");
 hold on
-for field = fieldnames(x1_contour)'
-    if ~any(strcmp(field{1} , {'Properties','Row','Variables'} ))
-    p2 = plot(x1_contour.(field{1}), x2_contour.(field{1}));
-    end
+for x = 1:min(size(x1_contour))
+    plot(x1_contour(x,:),x2_contour(x,:))
 end
 grid on
 xlabel(options.x_label)
@@ -80,7 +78,7 @@ len = strlength(options.data_label);
 len2 = strlength(options.contour_label);
 if len > 1 || len2 > 1
     label = [ {options.data_label} , options.contour_label]; 
-    legend(label);
+    legend(label,'Location','bestoutside');
 end
 len = strlength(options.savepath);
 if len > 1
