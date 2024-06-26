@@ -2,18 +2,18 @@ function harmonics=harmonics(x,freq,grid_freq)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Calculates the harmonics from time series of voltage or current based on IEC 61000-4-7.
-%    
+%
 % Parameters
 % -----------
-%     x: structure with x.time and x.current or x.voltage as values 
-%         Time-series of voltage [V] or current [A] 
-% 
+%     x: structure with x.time and x.current or x.voltage as values
+%         Time-series of voltage [V] or current [A]
+%
 %     freq: double
 %         Frequency of the time-series data [Hz]
 %
 %     grid_freq: int
 %         Value indicating if the power supply is 50 or 60 Hz. Options = 50 or 60
-% 
+%
 % Returns
 % -------
 %     harmonics: structure
@@ -23,7 +23,7 @@ function harmonics=harmonics(x,freq,grid_freq)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
+% py.importlib.import_module('numpy');
 py.importlib.import_module('mhkit_python_utils');
 
 time= x.time ;
@@ -34,7 +34,7 @@ if isfield(x, 'current')
 elseif isfield(x,'voltage')
     data = x.voltage;
     dname = 'voltage';
-else 
+else
     ME = MException('MATLAB:harmonics','invalid handles in structure, must contain x.current or x.voltage');
         throw(ME);
 end
@@ -42,11 +42,11 @@ end
 dsize=size(data);
 
 li=py.list();
-if dsize(2)>1 
+if dsize(2)>1
    for i = 1:dsize(2)
       app=py.list(data(:,i));
       li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-            
+
    end
    data_pd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time(:,1),li,int32(dsize(2)));
 elseif dsize(2)==1

@@ -1,6 +1,6 @@
 classdef Power_TestDevice < matlab.unittest.TestCase
 
-    methods (Test) 
+    methods (Test)
 
         function test_harmonics_sine_wave(testCase)
             time = [0;1;2;3];
@@ -30,21 +30,20 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             harmonic_groups = harmonics_vals(1:12:end); %harmonic groups should be equal to every 12th harmonic in this idealized example
 
             harmonics = struct('amplitude',harmonics_vals','harmonic',harmonics_int);
-            
+
             hsg = harmonic_subgroups(harmonics,frequency);
 
             assertEqual(testCase,hsg.amplitude', harmonic_groups,'AbsTol',0.1)
-%             end
         end
 
         function test_TCHD_sine_wave(testCase)
-            thcd = 0.0; %Since this is an idealized sin wave, there should be no distortion 
+            thcd = 0.0; %Since this is an idealized sin wave, there should be no distortion
             frequency = 60;
             harmonics_int = 0:5:60*60;
             harmonics_vals = zeros(size(harmonics_int));
             harmonics_vals(13)= 1.0;  %setting 60th harmonic to amplitude of the signal
             harmonics = struct('amplitude',harmonics_vals','harmonic',harmonics_int);
-            
+
             hsg = harmonic_subgroups(harmonics,frequency);
 
             TCHD = total_harmonic_current_distortion(hsg,18.8); % had to just put a random rated current in here
@@ -63,7 +62,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
 
             inter_harmonics = interharmonics(harmonics,frequency);
 
-%             for i,j in zip(inter_harmonics.values, interharmonic):
+            % for i,j in zip(inter_harmonics.values, interharmonic):
             assertEqual(testCase,inter_harmonics.amplitude', interharmonic,'AbsTol',0.1)
         end
 
@@ -76,21 +75,21 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             voltage = sin(2*pi*frequency*samples);
             si = size(voltage);
             inst_freq = ones(si(2)-1,si(1))*60;
-            
+
             um = struct('voltage',voltage','time',samples);
             freq = instantaneous_frequency(um);
 
             assertEqual(testCase, freq.frequency, inst_freq,'AbsTol',0.1)
         end
 
-        function test_dc_power(testCase)            
+        function test_dc_power(testCase)
             current_data = [1,2,3;4,5,6;7,8,9;10,11,12];
             voltage_data = [1,5,9;2,6,10;3,7,11;4,8,12];
             voltage.voltage = voltage_data;
             voltage.time = [0;1;2;3];
             current.current = current_data;
             current.time = [0;1;2;3];
-            
+
             P = dc_power(voltage,current);
             assertEqual(testCase,sum(P.gross),sum(voltage.voltage.*current.current,'all'))
         end
@@ -113,7 +112,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             assertEqual(testCase,sum(P2.power), 1011.518,'AbsTol', 0.01)
             assertEqual(testCase,sum(P2b.power), 1011.518/2,'AbsTol', 0.01)
         end
-        
+
         function test_gen_test_data(testCase)
             % Sr, Un, In, SCR, fg, & fs
             Sr = 3e6; Un=12e3; In=144; SCR=20; fg=60; fs=50e3;fv=0.5;
@@ -129,7 +128,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             testCase.verifyTrue(max(abs( ...
                 (u_m.data(1:100)-u_m0)./u_m0)) ...
                 <1e-10,opt);
-            
+
             % 2. opt=randi([2,5]) tests generated according to IECTS
             opt = randi([2,5],1);
             if opt==2
@@ -193,7 +192,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             if opt==3
                 % B.3.3 Distorted um with multiple zero crossings
                 method = 'stft';methodopts = {...
-                    'Window',rectwin(50000),'OverlapLength',25000,...
+                    'Window',rectwin(int(50000)),'OverlapLength',25000,...
                     'FFTLength',50e3,'FrequencyRange','onesided'};
             else
                 method = 'ZCD'; methodopts = {};
@@ -220,7 +219,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
         end
 
         function test_calc_Rfic_Lfic(testCase)
-            Sr = 3e6; Un=12e3; fg=60; 
+            Sr = 3e6; Un=12e3; fg=60;
             % 1. SCR = 20:
             SCR = 20;
             [Rfic,Lfic]=calc_Rfic_Lfic(Sr,SCR,Un,fg);
@@ -236,7 +235,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             testCase.verifyTrue(max(abs((Rfic-Rfic0)./Rfic0))<1e-10,string(SCR));
             testCase.verifyTrue(max(abs((Lfic-Lfic0)./Lfic0))<1e-10,string(SCR));
         end
-        
+
         function test_calc_flicker_coefficient(testCase)
             P_stfic = 0.1016;
             S_kfic = 6e7;
@@ -247,7 +246,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
 
         function test_calc_shortterm_flicker_severity(testCase)
             % prep input:
-            P = struct();P.p0p1=0.4073; 
+            P = struct();P.p0p1=0.4073;
             P.p0p7=0.3242; P.p1=0.3236;P.p1p5 = 0.3230;
             P.p2p2=0.2620; P.p3=0.2615;P.p4=0.2610;
             P.p6=0.1628; P.p8=0.1625;P.p10=0.1619;P.p13=0.1613;P.p17=0.161;
@@ -258,9 +257,6 @@ classdef Power_TestDevice < matlab.unittest.TestCase
         end
 
     end
-end  
 
+end
 
-
-
-        

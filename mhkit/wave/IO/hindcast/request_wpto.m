@@ -2,13 +2,13 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Returns data from the WPTO wave hindcast hosted on AWS at the specified latitude and longitude point(s), 
+%     Returns data from the WPTO wave hindcast hosted on AWS at the specified latitude and longitude point(s),
 %     or the closest available pont(s).
-%     Visit https://registry.opendata.aws/wpto-pds-us-wave/ for more information about the dataset and available 
-%     locations and years. 
-%     NOTE: To access the WPTO hindcast data, you will need to configure h5pyd for data access on HSDS. 
-%     Please see the WPTO_hindcast_example notebook for more information.   
-%     
+%     Visit https://registry.opendata.aws/wpto-pds-us-wave/ for more information about the dataset and available
+%     locations and years.
+%     NOTE: To access the WPTO hindcast data, you will need to configure h5pyd for data access on HSDS.
+%     Please see the WPTO_hindcast_example notebook for more information.
+%
 %     Parameters
 %     ----------
 %         data_type : string
@@ -18,22 +18,22 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
 %             Dataset parameter to be downloaded
 %             3-hour dataset options: 'directionality_coefficient', 'energy_period', 'maximum_energy_direction'
 %                 'mean_absolute_period', 'mean_zero-crossing_period', 'omni-directional_wave_power', 'peak_period'
-%                 'significant_wave_height', 'spectral_width', 'water_depth' 
+%                 'significant_wave_height', 'spectral_width', 'water_depth'
 %             1-hour dataset options: 'directionality_coefficient', 'energy_period', 'maximum_energy_direction'
 %                 'mean_absolute_period', 'mean_zero-crossing_period', 'omni-directional_wave_power', 'peak_period'
 %                 'significant_wave_height', 'spectral_width', 'water_depth', 'maximim_energy_direction',
 %                 'mean_wave_direction', 'frequency_bin_edges', 'directional_wave_spectrum'
 %         lat_lon: tuple or list of tuples
-%             Latitude longitude pairs at which to extract data. 
-%         year : float 
+%             Latitude longitude pairs at which to extract data.
+%         year : float
 %             Year to be accessed. The years 1979-2010 available.
 %         api_key : string
 %             API key obtained from https://developer.nrel.gov/signup/
-%      
+%
 %      Returns
 %      -------
-%         data : struct 
-%             Data indexed by datetime with columns named for parameter and cooresponding metadata index 
+%         data : struct
+%             Data indexed by datetime with columns named for parameter and cooresponding metadata index
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -69,9 +69,9 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
 
     % get links to the databases
     baseURL = ['https://developer.nrel.gov/api/hsds/?api_key=' api_key dom];
-    root = webread(baseURL);
+    root = cached_webread(baseURL,options);
     groupsURL = ['https://developer.nrel.gov/api/hsds/groups/' root.root '/links?api_key=' api_key dom];
-    groups = webread(groupsURL);
+    groups = cached_webread(groupsURL,options);
     groups = struct2table(groups.links);
 
     % get standard parameters
@@ -83,7 +83,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
     for i=1:length(vars)
         ID = groups.id(find(strcmpi(vars(i),groups.title)));
         URL = ['https://developer.nrel.gov/api/hsds/datasets/' ID{:} '/value?api_key=' api_key dom];
-        temp = webread(URL,options);
+        temp = cached_webread(URL,options);
         if isequal(vars{i},"time_index")
             standard_params.(vars(i)) = datetime(temp.value,'InputFormat','yyyy-MM-dd HH:mm:ssXXX',...
                 'TimeZone','UTC');
@@ -100,7 +100,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
         idx(y) = find(radius(:,3)==min(radius(:,3))); % find index of closest location
     end
 
-    % create metadata struct & get parameter data 
+    % create metadata struct & get parameter data
     fns_meta = ["water_depth","latitude","longitude","distance_to_shore","timezone","jurisdiction"];
     for y=1:length(idx)
         for x=1:length(fns_meta)
@@ -114,8 +114,8 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
             else
                 paramURL = ['https://developer.nrel.gov/api/hsds/datasets/' paramID{:} '/value?api_key=' api_key '&select=[:,' num2str(idx(y)-1) ']' dom];
             end
-            param = webread(paramURL,options);
-            data(y).(parameter(z)) = param.value; 
+            param = cached_webread(paramURL,options);
+            data(y).(parameter(z)) = param.value;
         end
     end
 
@@ -127,16 +127,16 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
                 i1 = num2str((z-1)*486);
                 i2 = num2str(z*486);
                 paramURL = ['https://developer.nrel.gov/api/hsds/datasets/' paramID{:} '/value?api_key=' api_key '&select=[' i1 ':' i2 ',:,:,' num2str(idx(y)-1) ']' dom];
-                param = webread(paramURL,options);
+                param = cached_webread(paramURL,options);
                 try
-                    dws = cat(1,dws,param.value); 
+                    dws = cat(1,dws,param.value);
                 catch
                     dws = param.value;
                 end
             end
             data(y).directional_wave_spectrum = dws;
             clear dws
-        end  
+        end
     end
 
     % create final output struct for data
@@ -149,3 +149,4 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
         data(i).metadata = meta(i);
     end
 end
+

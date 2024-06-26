@@ -2,10 +2,10 @@ function figure=plot_tidal_phase_probability(data, flood, ebb, ...
                                                           options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Discretizes the tidal series speed by bin size and returns a plot
-%     of the probability for each bin in the flood or ebb tidal phase. 
-%     
+%     of the probability for each bin in the flood or ebb tidal phase.
+%
 % Parameters
-% ------------   
+% ------------
 %    data: structure
 %
 %      data.time: vector
@@ -22,13 +22,13 @@ function figure=plot_tidal_phase_probability(data, flood, ebb, ...
 %
 %    ebb: float
 %        principal ebb direction [degrees]
-% 
+%
 %    bin_size: numeric (optional)
 %       Speed bin size. Default = 0.1 m/s
 %       to call: plot_tidal_phase_probability(data, flood, ebb,"bin_size",bin_size)
 %
 %    title: string (optional)
-%       title for the plot 
+%       title for the plot
 %       to call: plot_tidal_phase_probability(data, flood, ebb,"title",title)
 %
 %    savepath: string (optional)
@@ -37,14 +37,14 @@ function figure=plot_tidal_phase_probability(data, flood, ebb, ...
 %
 % Returns
 % ---------
-%   figure: stacked bar graph of the probability of exceedance in 
-%           flood and ebb directions 
+%   figure: stacked bar graph of the probability of exceedance in
+%           flood and ebb directions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     data
     flood
-	ebb
+    ebb
     options.bin_size = 0.1; % m/s
     options.title = "";
     options.savepath = "";
@@ -70,14 +70,14 @@ end
 
 max_angle = max(ebb, flood);
 min_angle = min(ebb, flood);
-    
+
 lower_split = rem((min_angle + (360 - max_angle + min_angle)/2 ) , 360);
 upper_split = lower_split + 180;
-    
+
 if (lower_split <= ebb) && (ebb < upper_split)
-	isEbb = ((data.d < upper_split) & (data.d >= lower_split));
+    isEbb = ((data.d < upper_split) & (data.d >= lower_split));
 else
-	isEbb = ~((data.d < upper_split) & (data.d >= lower_split));
+    isEbb = ~((data.d < upper_split) & (data.d >= lower_split));
 end
 
 decimals = round(options.bin_size/0.1);
@@ -112,6 +112,7 @@ title(options.title)
 len = strlength(options.savepath);
 if len > 1
     saveas(figure, options.savepath);
-end 
+end
 
 hold off
+

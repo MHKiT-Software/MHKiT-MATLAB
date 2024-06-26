@@ -1,9 +1,9 @@
 classdef Tidal_TestResource < matlab.unittest.TestCase
 
-    methods (Test) 
-        
+    methods (Test)
+
         function test_exceedance_probability(testCase)
-            Q = struct('Discharge',[0;1;2;3;4;5;6;7;8],'time',[1 2 3 4 5 6 7 8 9]);
+            Q = struct('Discharge',[0;1;2;3;4;5;6;7;8], 'time', [0 1 2 3 4 5 6 7 8]);
             f = exceedance_probability(Q);
             assertEqual(testCase,min(f.F), 10);
             assertEqual(testCase,max(f.F), 90);
@@ -14,7 +14,7 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             data = read_noaa_json(full_file_name);
             data.s = data.s/100;
-        
+
             width_direction = 10;
             [direction1, direction2] = principal_flow_directions(data.d, width_direction);
             assertEqual(testCase,direction1,172.0);
@@ -33,7 +33,7 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
             data.s = data.s/100;
             width_direction = 10;
             [direction1, direction2] = principal_flow_directions(data.d, width_direction);
-            
+
             plot_current_timeseries(data,direction1,"savepath",filename);
 
             assertTrue(testCase,isfile(filename));
@@ -45,19 +45,19 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
             if isfile(filename)
                 delete(filename)
             end
-            
+
             relative_file_name = '../../examples/data/tidal/s08010.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             data = read_noaa_json(full_file_name);
             data.s = data.s/100;
             width_direction = 10;
-            
+
             data = rmfield(data,'id');
             data = rmfield(data,'name');
             data = rmfield(data,'lat');
             data = rmfield(data,'lon');
             data = rmfield(data,'b');
-            
+
             plot_joint_probability_distribution(data,width_direction,0.1,"savepath",filename);
 
             assertTrue(testCase,isfile(filename))
@@ -69,65 +69,65 @@ classdef Tidal_TestResource < matlab.unittest.TestCase
             if isfile(filename)
                 delete(filename);
             end
-            
+
             relative_file_name = '../../examples/data/tidal/s08010.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             data = read_noaa_json(full_file_name);
             data.s = data.s/100;
             width_direction = 10;
-            
+
             plot_rose(data,width_direction,1,"savepath",filename);
 
             assertTrue(testCase,isfile(filename))
             delete(filename);
-        end  
+        end
 
         function test_plot_phase_probability(testCase)
             filename = 'tidal_plot_phase_probability.png';
             if isfile(filename)
                 delete(filename);
             end
-            
-            file_name = '../../examples/data/tidal/s08010.json';
-            data = read_noaa_json(file_name);
+
+            relative_file_name = '../../examples/data/tidal/s08010.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = read_noaa_json(full_file_name);
             data.s = data.s/100;
             width_direction = 1;
             [direction1, direction2] = ...
                 principal_flow_directions(data.d,width_direction);
-            flood = direction1 ; 
-            ebb = direction2 ; 
+            flood = direction1 ;
+            ebb = direction2 ;
 
             plot_tidal_phase_probability(data,flood,ebb,"savepath",filename);
 
             assertTrue(testCase,isfile(filename))
             delete(filename);
-        end  
+        end
 
         function test_plot_phase_exceedance(testCase)
+
             filename = 'tidal_plot_phase_exceedance.png';
             if isfile(filename)
                 delete(filename);
             end
-            
-            file_name = '../../examples/data/tidal/s08010.json';
-            data = read_noaa_json(file_name);
+
+            relative_file_name = '../../examples/data/tidal/s08010.json';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = read_noaa_json(full_file_name);
             data.s = data.s/100;
-            data.Discharge = data.s;
             width_direction = 1;
             [direction1, direction2] = ...
                 principal_flow_directions(data.d,width_direction);
-            flood = direction1 ; 
+            flood = direction1 ;
             ebb = direction2 ;
 
             plot_tidal_phase_exceedance(data,flood,ebb,"savepath",filename);
 
             assertTrue(testCase,isfile(filename))
             delete(filename);
-        end  
+        end
+
     end
-end  
 
+end
 
-
-
-        

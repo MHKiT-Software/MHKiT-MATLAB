@@ -1,7 +1,8 @@
 function figure=plot_discharge_timeseries(Q,options)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Plots discharge vs time 
-%     
+%     Plots discharge vs time
+%
 % Parameters
 % ------------
 %     Q: structure
@@ -9,7 +10,7 @@ function figure=plot_discharge_timeseries(Q,options)
 %      Q.Discharge: Discharge [m/s]
 %
 %      Q.time: epoch time [s]
-%         
+%
 %     title: string (optional)
 %       title for the plot
 %       to call: plot_discharge_timeseries(Q,"title",title)
@@ -17,7 +18,7 @@ function figure=plot_discharge_timeseries(Q,options)
 %     savepath: string (optional)
 %         path and filename to save figure.
 %         to call: plot_discharge_timeseries(Q,"savepath",savepath)
-% 
+%
 % Returns
 % ---------
 %     figure: Plot of discharge vs. time
@@ -40,6 +41,7 @@ title(options.title)
 len = strlength(options.savepath);
 if len > 1
     saveas(figure, options.savepath);
-end 
+end
 
 hold off
+

@@ -1,11 +1,12 @@
 function figure=plot_current_timeseries(data, principal_direction, ...
                                        options)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Returns a plot of velocity from an array of direction and speed
-%     data in the direction of the supplied principal_direction. 
-%     
+%     data in the direction of the supplied principal_direction.
+%
 % Parameters
-% ------------   
+% ------------
 %    data: structure
 %
 %      data.time: vector
@@ -21,16 +22,16 @@ function figure=plot_current_timeseries(data, principal_direction, ...
 %        Direction to compute the velocity in [degrees]
 %
 %    title: string (optional)
-%       title for the plot 
+%       title for the plot
 %       to call: plot_current_timeseries(data,principal_direction,"title",title)
 %
 %    savepath: string (optional)
 %       path and filename to save figure.
 %       to call: plot_current_timeseries(data,principal_direction,"savepath",savepath)
-% 
+%
 % Returns
 % ---------
-%   figure: timeseries plot of current-speed velocity 
+%   figure: timeseries plot of current-speed velocity
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
@@ -64,6 +65,7 @@ title(options.title)
 len = strlength(options.savepath);
 if len > 1
     saveas(figure, options.savepath);
-end 
+end
 
 hold off
+

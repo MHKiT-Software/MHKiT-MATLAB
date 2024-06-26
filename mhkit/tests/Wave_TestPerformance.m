@@ -37,10 +37,10 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             %Obj.Hm0 = raylrnd(4, [1,100000]);
             Obj.Hm0_bins = 0:0.5:18.5;
             Obj.Te_bins = 0:1:8;
-            
+
             L = capture_length(Obj.P, Obj.J);
             LM = capture_length_matrix(Obj.Hm0, Obj.Te, L, 'std', Obj.Hm0_bins, Obj.Te_bins);
-            
+
             assertEqual(testCase,size(LM.values), [38 9]);
             assertEqual(testCase,sum(sum(isnan(LM.values))), 34, 'RelTol',0.1);
         end
@@ -63,7 +63,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             Obj.Hm0 = abs(sigma*randn(1,100000)+1i*sigma*randn(1,100000));
             Obj.Hm0_bins = 0:0.5:18.5;
             Obj.Te_bins = 0:1:8;
-            
+
             JM = wave_energy_flux_matrix(Obj.Hm0, Obj.Te,Obj.J, 'mean', Obj.Hm0_bins, Obj.Te_bins);
             assertEqual(testCase,size(JM.values), [38 9]);
             assertEqual(testCase,sum(sum(isnan(JM.values))), 34, 'RelTol',0.1);
@@ -87,7 +87,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             Obj.Hm0 = abs(sigma*randn(1,100000)+1i*sigma*randn(1,100000));
             Obj.Hm0_bins = 0:0.5:18.5;
             Obj.Te_bins = 0:1:8;
-            
+
             L = capture_length(Obj.P, Obj.J);
             LM = capture_length_matrix(Obj.Hm0, Obj.Te,L, 'mean', Obj.Hm0_bins, Obj.Te_bins);
             JM = wave_energy_flux_matrix(Obj.Hm0, Obj.Te,Obj.J, 'mean', Obj.Hm0_bins, Obj.Te_bins);
@@ -100,7 +100,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.TestCase
             import matlab.unittest.constraints.AbsoluteTolerance
-            
+
             a = 40;
             b = 200;
             Obj.P = (b-a).*randn(1,100000) + a;
@@ -108,7 +108,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             a = 10;
             b = 300;
             Obj.J = (b-a).*randn(1,100000) + a;
-            
+
             L = capture_length(Obj.P, Obj.J);
             maep = mean_annual_energy_production_timeseries(L, Obj.J);
             testCase.verifyThat(1754020.077,IsEqualTo(maep,'Within',AbsoluteTolerance(2e+06)))
@@ -119,7 +119,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             if isfile(filename)
                 delete(filename);
             end
-            
+
             seednum = 123;
             rng(seednum);
             a = 0.8;
@@ -144,13 +144,13 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
-        
+
         function test_power_performance_workflow(testCase)
             filename = 'Capture Length Matrix mean.png';
             if isfile(filename)
                 delete(filename);
             end
-            
+
             relative_file_name = './../../examples/data/wave/data.txt';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             S1 = read_NDBC_file(full_file_name);
@@ -174,7 +174,9 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             assertTrue(testCase,isfield(x,"sum"));
             assertTrue(testCase,isfield(x,"freq"));
             assertEqual(testCase,y,401239.4822345051, 'RelTol',0.00001);
-            
+
         end
+
     end
+
 end

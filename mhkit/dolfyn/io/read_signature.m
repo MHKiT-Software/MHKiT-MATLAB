@@ -2,7 +2,7 @@ function ds=read_signature(filename,options)
 
 %%%%%%%%%%%%%%%%%%%%
 %     Read a Nortek Signature (.ad2cp) datafile
-%     
+%
 % Parameters
 % ------------
 %     filename: string
@@ -11,48 +11,48 @@ function ds=read_signature(filename,options)
 %         true, false, or string of userdata.json filename (default true)
 %         Whether to read the '<base-filename>.userdata.json' file.
 %     nens: nan, int, or 2-element array (optional)
-%         nan (default: read entire file), int, or 2-element tuple 
+%         nan (default: read entire file), int, or 2-element tuple
 %         (start, stop) Number of pings to read from the file.
 %
-%     call with options -> read_signature(filename,'userdata',false,'nens',12) 
+%     call with options -> read_signature(filename,'userdata',false,'nens',12)
 %
 % Returns
 % ---------
-%     ds: structure 
+%     ds: structure
 %         Structure from the binary instrument data
-%        
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     arguments
-        filename 
+        filename
         options.userdata = true;
         options.nens = nan;
     end
-    
+
     % check to see if the filename input is a string
     if ~ischar(filename)
         ME = MException('MATLAB:read_signature',['filename must be a' ...
             ' character string']);
         throw(ME);
     end
-    
+
     % check to see if the file exists
     if ~isfile(filename)
         ME = MException('MATLAB:read_signature','file does not exist');
         throw(ME);
     end
-    
+
     % check to make sure userdata is bool or string
     if ~isa(options.userdata, 'logical') && ~isa(options.userdata, 'string')
         ME = MException('MATLAB:read_signature','userdata must be a logical or string');
         throw(ME);
     end
-    
+
     % check to make sure nens is numeric or nan
     if ~all(isa(options.nens, 'numeric'))
         ME = MException('MATLAB:read_signature','nens must be numeric or nan');
         throw(ME);
     end
-    
+
     % check to make sure if nens is numeric that its length is equal to 1 or 2
     nstart = 0;
     if ~isnan(options.nens)
@@ -60,7 +60,7 @@ function ds=read_signature(filename,options)
             ME = MException('MATLAB:read_signature','nens must be a single value or tuple');
             throw(ME);
         end
-        if length(options.nens) == 1            
+        if length(options.nens) == 1
             npings = options.nens(1);
         else
             nstart = options.nens(1);
@@ -71,13 +71,13 @@ function ds=read_signature(filename,options)
     end
 
     % read the user data if it was requested using the read_userdata
-    % function 
+    % function
     userdata = read_userdata(filename, options.userdata);
 
     %% <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                        Initialize Routine
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    % Attempt to read the binary file under the Nortek format    
+    % Attempt to read the binary file under the Nortek format
     fid = fopen(filename,'r', 'n', 'UTF-8');      % open disk file
     % read endian to check if this is a nortek file
     endian1 = fread(fid,2,'uint8','b');
@@ -91,7 +91,7 @@ function ds=read_signature(filename,options)
         % this is not a nortek file. Move to next reader
         ME = MException('MATLAB:read_nortek',['could not determine the '...
             'endianness of the file. Are you sure this is a Nortek file?']);
-        throw(ME);        
+        throw(ME);
     end
     clearvars endian1 endian2;
     frewind(fid);
@@ -114,12 +114,12 @@ function ds=read_signature(filename,options)
     %                        Read File
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     ds = readfile(nstart, npings);
-    fclose(fid);    % close the file 
+    fclose(fid);    % close the file
 
     %% <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                       Post Process
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    ds = sci_data(ds);    
+    ds = sci_data(ds);
     ds = reorg(ds);
     ds = reduce(ds);
 
@@ -162,10 +162,10 @@ function ds=read_signature(filename,options)
         ds.orientmat.data = omat;
         ds.orientmat.dims = { 'time', 'inst', 'earth'};
         ds.orientmat.coords.time = ds.time;
-        ds.orientmat.coords.inst = {'X' 'Y' 'Z'}; 
-        ds.orientmat.coords.earth = {'E' 'N' 'U'};               
+        ds.orientmat.coords.inst = {'X' 'Y' 'Z'};
+        ds.orientmat.coords.earth = {'E' 'N' 'U'};
     end
-    
+
     if ~isnan(declin)
         ds = set_declination(ds, declin);
     end
@@ -196,15 +196,15 @@ function ds=read_signature(filename,options)
         if ens_start == 0
             ens_start = 1;
         end
-        fseek(fid,ens_pos(ens_start),'bof');        
+        fseek(fid,ens_pos(ens_start),'bof');
         while true
-            try 
+            try
                 hdr = read_hdr();
             catch
                 %ds = outdat;
                 ds = assign_ids(outdat);
                 break
-            end            
+            end
             id = hdr.id;
             ky = join(["id",string(id)],"_");
             if any([21, 23, 24, 28] == id) % vel, bt, vel_b5, echo
@@ -265,7 +265,7 @@ function ds=read_signature(filename,options)
                 outdat.(ky).dummy_read(:,c) = read(ky);
                 outdat.(ky).ensemble(c26) = c;
                 c26 = c26 + 1;
-            elseif any([22, 27, 29, 30, 31, 35, 36] == id) % avg record, 
+            elseif any([22, 27, 29, 30, 31, 35, 36] == id) % avg record,
                 % bt record, DVL, alt record, avg alt_raw record, raw echo,
                 % raw echo transmit
                 warning(['Unhandled ID: 0x:%X (%d)\n    This ID is not yet' ...
@@ -291,21 +291,21 @@ function ds=read_signature(filename,options)
                 fseek(fid,hdr.sz,0);
             end
 
-            c = advance_ens_count(c, ens_start, nens_total);            
+            c = advance_ens_count(c, ens_start, nens_total);
             if c > nens
                 %ds = outdat;
                 ds = assign_ids(outdat);
                 break;
             end
-        end         
+        end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 %     function out = read_burst(dat, key, ens)
 %         out = read(key);
 %     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    function out = read(key)        
-        out = zeros([sum([burst_readers.(key).N{:}]),1]);        
+    function out = read(key)
+        out = zeros([sum([burst_readers.(key).N{:}]),1]);
         read_format = join_format_strings(key);
         qq = 1;
         for i = 1:length(read_format)
@@ -330,17 +330,17 @@ function ds=read_signature(filename,options)
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    function out = get_index()        
+    function out = get_index()
         index_file = append(filename , '.index');
         if ~isfile(index_file)
             create_index_slow(index_file, 2^32)
-        end        
+        end
         f = fopen(index_file,'r', 'n', 'UTF-8');
         fseek(f, 0, "eof");
         size = ftell(f);
         frewind(f);
         temp = fread(f,10,'*char',endian);
-        if strcmp(convertCharsToStrings(temp), 'Index Ver:') 
+        if strcmp(convertCharsToStrings(temp), 'Index Ver:')
             index_ver = fread(f,1,'uchar',endian);
             fseek(f,1,0);
             out = struct('ens',zeros((size-12)/37,1),...
@@ -418,12 +418,12 @@ function ds=read_signature(filename,options)
         fclose(f);
         out = check_index(out);
     end
-    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> 
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function idx = check_index(idx_in)
         idx = idx_in;
         uid = unique(idx.ID);
         hwe = idx.hw_ens;
-        period = max(hwe); 
+        period = max(hwe);
         N_id = length(uid);
         flag_ = false;
         % This loop fixes 'skips' inside the file
@@ -457,13 +457,13 @@ function ds=read_signature(filename,options)
                 hwe(id == idx.ID) = hwe(id == idx.ID) + d;
                 idx.ens(id == idx.ID) = idx.ens(id == idx.ID) + d;
             end
-        end 
+        end
 
         if any(diff(idx.ens)> 1) && flag_
             idx.ens = hwe - hwe(1);
         end
     end
-    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> 
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out2 = read_filehead_config_string()
         hdr = read_hdr();
         out = struct;
@@ -476,14 +476,14 @@ function ds=read_signature(filename,options)
             if length(split(splt_str(i),',')) < 2
                 continue
             end
-            temp = split(splt_str(i),',');            
+            temp = split(splt_str(i),',');
             ky = temp(1);
             val = temp(2:end);
             if isfield(out,ky)
                 tmp = out.(ky);
                 out.(ky) = strings(numel(tmp)+numel(val),1);
                 out.(ky)(1:numel(tmp)) = tmp;
-                out.(ky)(numel(tmp)+1:end) = val;              
+                out.(ky)(numel(tmp)+1:end) = val;
             else
                 out.(ky) = val;
             end
@@ -495,9 +495,9 @@ function ds=read_signature(filename,options)
                 dat = out.(fields{i});
                 d = struct();
                 for qq = 1:numel(dat)
-                    temp = split(dat(qq),'=');            
+                    temp = split(dat(qq),'=');
                     k = temp(1);
-                    val = temp(2:end);                   
+                    val = temp(2:end);
                     if ~isnan(str2double(val))
                         val = str2double(val);
                     end
@@ -509,7 +509,7 @@ function ds=read_signature(filename,options)
             end
         end
     end
-    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> 
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out = read_hdr()
         bytes1 = fread(fid,4,'uchar',endian);
         bytes2 = fread(fid,2,'ushort',endian);
@@ -530,7 +530,7 @@ function ds=read_signature(filename,options)
     end
     %% <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                        Helper Functions
-    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> 
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function outdat = init_data(ens_start, ens_stop)
         outdat = struct();
         nens = int32(ens_stop - ens_start);
@@ -553,7 +553,7 @@ function ds=read_signature(filename,options)
             end
             outdat.(ky) = init_burst_data(n, burst_readers.(ky));
             outdat.(ky).ensemble = ens;
-            outdat.(ky).units = burst_readers.(ky).units;     
+            outdat.(ky).units = burst_readers.(ky).units;
             outdat.(ky).dummy_read = ...
                 zeros(sum([burst_readers.(ky).N{:}]),n);
         end
@@ -595,11 +595,11 @@ function ds=read_signature(filename,options)
         eof = 1;
         while N.id_21 < N_ens
             pos = ftell(fin);
-            if pos == size || eof < 0              
+            if pos == size || eof < 0
                 break
             end
             dat1 = fread(fin,4,'uchar',endian);
-            dat2 = fread(fin,3,'short',endian);            
+            dat2 = fread(fin,3,'short',endian);
             if any([21, 23, 24, 26, 28] == dat1(3))
                 idk = dat1(3);
                 idkey = append('id_',num2str(idk));
@@ -607,15 +607,15 @@ function ds=read_signature(filename,options)
                 d_off = fread(fin,1,'uchar',endian);
                 config = fread(fin,1,'ushort',endian);
                 fseek(fin,4,0);
-                yr = fread(fin,1,'uchar', endian);  
-                mo = fread(fin,1,'uchar', endian); 
-                dy = fread(fin,1,'uchar', endian); 
+                yr = fread(fin,1,'uchar', endian);
+                mo = fread(fin,1,'uchar', endian);
+                dy = fread(fin,1,'uchar', endian);
                 h  = fread(fin,1,'uchar', endian);
                 m  = fread(fin,1,'uchar', endian);
                 s  = fread(fin,1,'uchar', endian);
                 u  = fread(fin,1,'ushort',endian);
                 fseek(fin,14,0);
-                beams_cy = fread(fin,1,'ushort',endian); 
+                beams_cy = fread(fin,1,'ushort',endian);
                 if dat1(3) ~= 23
                     fseek(fin,40,0);
                 else
@@ -629,7 +629,7 @@ function ds=read_signature(filename,options)
                 if last_ens.(idkey) > 0 && last_ens.(idkey) ~= ens.(idkey)
                     N.(idkey) = N.(idkey) + 1;
                 end
-                
+
                 fwrite(fout, N.(idkey), 'uint64', 'l');
                 fwrite(fout, ens.(idkey), 'uint', 'l');
                 fwrite(fout, pos, 'uint64', 'l');
@@ -640,7 +640,7 @@ function ds=read_signature(filename,options)
                 if idk ~= 23
                     eof = fseek(fin,dat2(1) - (36 + 40),0);
                 else
-                    eof = fseek(fin,dat2(1) - (36 + 42),0); 
+                    eof = fseek(fin,dat2(1) - (36 + 42),0);
                 end
                 last_ens.(idkey) = ens.(idkey);
             else
@@ -650,7 +650,7 @@ function ds=read_signature(filename,options)
         fclose(fin);
         fclose(fout);
     end
-    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> 
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function size = find_filesize()
         fseek(fid, 0, "eof");
         size = ftell(fid);
@@ -664,7 +664,7 @@ function ds=read_signature(filename,options)
         str = convertCharsToStrings(char(str));
         out_string.str = str;
     end
-    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> 
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out = boolarray_firstensemble_ping()
         if all(index.ens == 0) && all(index.hw_ens == 1)
             out = index.ID(1);
@@ -781,12 +781,12 @@ function ds=read_signature(filename,options)
                     config.(rdr_id).config_, config.(rdr_id).n_cells);
             elseif strcmpi(rdr_id,'id_23')
                 burst_readers.(rdr_id) = calc_bt_struct( ...
-                    config.(rdr_id).config_, config.(rdr_id).n_beams); 
+                    config.(rdr_id).config_, config.(rdr_id).n_beams);
             else
                 burst_readers.(rdr_id) = calc_burst_struct(...
                     config.(rdr_id).config_, config.(rdr_id).n_beams,...
-                    config.(rdr_id).n_cells); 
-            end 
+                    config.(rdr_id).n_cells);
+            end
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -860,7 +860,7 @@ function ds=read_signature(filename,options)
         if flags.amp
             dd.amp = struct('format', 'B', 'shape', [1,nc,nb], 'sci_func',...
                 [0.5, 0], 'units', 'dB', 'N', nb*nc);
-        end    
+        end
         if flags.corr
             dd.corr = struct('format', 'B', 'shape', [1,nc,nb], 'sci_func',...
                 nan, 'units', '%', 'N', nb*nc);
@@ -928,7 +928,7 @@ function ds=read_signature(filename,options)
             'sci_func',cell(size(numel(fields))),...
             'units',cell(size(numel(fields))),...
             'N',cell(size(numel(fields))),...
-            'nbyte',0);        
+            'nbyte',0);
         for i = 1:numel(fields)
             out.names{i} = (fields{i});
             out.format{i} = dd.(fields{i}).format;
@@ -975,9 +975,9 @@ function ds=read_signature(filename,options)
         dd.c_sound = struct('format', 'H', 'shape', [], 'sci_func',...
             [0.1, 0], 'units', 'm/s', 'N', 1); %sci_func -> [scale, offset]
         dd.temp = struct('format', 'H', 'shape', [], 'sci_func',...
-            [0.01, 0], 'units', 'deg C', 'N', 1); 
+            [0.01, 0], 'units', 'deg C', 'N', 1);
         dd.pressure = struct('format', 'I', 'shape', [], 'sci_func',...
-            [0.001, 0], 'units', 'dbar', 'N', 1); 
+            [0.001, 0], 'units', 'dbar', 'N', 1);
         dd.heading = struct('format', 'H', 'shape', [], 'sci_func',...
             [0.01, 0], 'units', 'deg', 'N', 1);
         dd.pitch = struct('format', 'h', 'shape', [], 'sci_func',...
@@ -1051,9 +1051,9 @@ function ds=read_signature(filename,options)
         dd.c_sound = struct('format', 'H', 'shape', [], 'sci_func',...
             [0.1, 0], 'units', 'm/s', 'N', 1); %sci_func -> [scale, offset]
         dd.temp = struct('format', 'H', 'shape', [], 'sci_func',...
-            [0.01, 0], 'units', 'deg C', 'N', 1); 
+            [0.01, 0], 'units', 'deg C', 'N', 1);
         dd.pressure = struct('format', 'I', 'shape', [], 'sci_func',...
-            [0.001, 0], 'units', 'dbar', 'N', 1); 
+            [0.001, 0], 'units', 'dbar', 'N', 1);
         dd.heading = struct('format', 'H', 'shape', [], 'sci_func',...
             [0.01, 0], 'units', 'deg', 'N', 1);
         dd.pitch = struct('format', 'h', 'shape', [], 'sci_func',...
@@ -1129,7 +1129,7 @@ function ds=read_signature(filename,options)
         out = cell(1,numel(n));
         out{1} = {n{1},f{1}};
         kk = 1;
-        for qq = 2:numel(n)            
+        for qq = 2:numel(n)
             if strcmp(f{qq}, out{kk}{2})
                 out{kk}{1} = out{kk}{1} + n{qq};
             else
@@ -1157,7 +1157,7 @@ function ds=read_signature(filename,options)
             if c + ens_start + 1 >= nens_total
                 break
             end
-            try                
+            try
                 posnow = ens_pos(c + ens_start);
             catch
                 posnow = filesize + 1;
@@ -1166,10 +1166,10 @@ function ds=read_signature(filename,options)
         out = c;
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    function out = sci_data(dat) 
+    function out = sci_data(dat)
         out = dat;
         fields = fieldnames(burst_readers);
-        for i = 1:numel(fields)            
+        for i = 1:numel(fields)
             key1 = fields{i};
             f = burst_readers.(key1).names;
             for j = 1:numel(f)
@@ -1185,7 +1185,7 @@ function ds=read_signature(filename,options)
             if isfield(out.(key1),'vel') && isfield(out.(key1),'vel_scale')
                 out.(key1).vel = out.(key1).vel.* 10.^out.(key1).vel_scale;
             end
-        end        
+        end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function outdat = reorg(dat)
@@ -1196,7 +1196,7 @@ function ds=read_signature(filename,options)
             'altraw', struct());
         temp = char(dat.filehead_config.ID(1));
         outdat.attrs.filehead_config = dat.filehead_config;
-        outdat.attrs.inst_model = temp(6:end-1);       
+        outdat.attrs.inst_model = temp(6:end-1);
         outdat.attrs.inst_make = 'Nortek';
         outdat.attrs.inst_type = 'ADCP';
         outdat.attrs.rotate_vars = {'vel'};
@@ -1254,8 +1254,8 @@ function ds=read_signature(filename,options)
             outdat.attrs.(strjoin({'ambig_vel',tag},'')) = ...
                 collapse(dat.(key).ambig_vel, 'ambig_vel',...
                 collapse_exclude);
-                
-            
+
+
             iter_keys = {'SerialNum', 'cell_size', 'blank_dist', ...
                 'nominal_corr','power_level_dB'};
             for j = 1:numel(iter_keys)
@@ -1274,7 +1274,7 @@ function ds=read_signature(filename,options)
                     outdat.data_vars.(strjoin({ky,tag},'')) = ...
                         outdat.data_vars.(strjoin({ky,tag},'')) + 1;
                     outdat.units.(strjoin({ky,tag},'')) = '#';
-                end                
+                end
             end
 
             iter_keys = {'vel', 'amp', 'corr', 'prcnt_gd', 'echo',...
@@ -1285,12 +1285,12 @@ function ds=read_signature(filename,options)
                 'status0', 'fom', 'temp_press', 'press_std',...
                 'pitch_std', 'roll_std', 'heading_std', 'xmit_energy'};
             for j = 1:numel(iter_keys)
-                ky = iter_keys{j};                
+                ky = iter_keys{j};
                 if isfield(dat.(key),ky)
                     outdat.data_vars.(strjoin({ky,tag},'')) =...
                         dat.(key).(ky);
-                end                
-            end 
+                end
+            end
         end
 
         % Move 'altimeter raw' data to its own down-sampled structure
@@ -1318,7 +1318,7 @@ function ds=read_signature(filename,options)
                 outdat.attrs.(ky) = collapse(alt_status.(ky),ky,[]);
             end
             outdat.data_vars = rmfield(outdat.data_vars,'alt_status');
-            
+
             % Power level index
             if outdat.attrs.power_level_idx_alt == 0
                 outdat.attrs.power_level_alt = 'high';
@@ -1390,7 +1390,7 @@ function ds=read_signature(filename,options)
             outdat.data_vars.(ky) = status_data.(ky);
         end
 
-        % Processor idle state - need to save as 1/0 per 
+        % Processor idle state - need to save as 1/0 per
         % netcdf attribute limitations
         status0_fields = fieldnames(status0_data);
         for kk = 1:numel(status0_fields)
@@ -1411,7 +1411,7 @@ function ds=read_signature(filename,options)
             outdat.attrs.coord_sys = 'earth';
         elseif strcmpi(outdat.attrs.coord_sys_axes,'beam')
             outdat.attrs.coord_sys = 'beam';
-        end             
+        end
 
         % Copy appropriate vars to rotate_vars
         keys = {'accel', 'angrt', 'mag'};
@@ -1433,10 +1433,10 @@ function ds=read_signature(filename,options)
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out = reduce(dat)
-        % This function takes the output from `reorg`, and further 
-        % simplifies the data. Mostly this is combining system, 
-        % environmental, and orientation data --- from different data 
-        % structures within the same ensemble --- by averaging.       
+        % This function takes the output from `reorg`, and further
+        % simplifies the data. Mostly this is combining system,
+        % environmental, and orientation data --- from different data
+        % structures within the same ensemble --- by averaging.
 
         % Average these fields
         fields = {'c_sound', 'temp', 'pressure','temp_press',...
@@ -1526,13 +1526,13 @@ function ds=read_signature(filename,options)
                         " but it is not.\n%d values found\nUsing the most"+ ...
                         " common value: %4.4f",name, numel(counts),out])
                 end
-            end            
+            end
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    function out = is_uniform(vec, exclude)        
+    function out = is_uniform(vec, exclude)
         if ~isempty(exclude)
-            vec(vec == exclude(1)) = [];            
+            vec(vec == exclude(1)) = [];
         end
         out = all(vec == vec(1));
     end
@@ -1563,7 +1563,7 @@ function ds=read_signature(filename,options)
             stop = slice(2);
         end
         mask = 2 ^ (stop - start) - 1;
-        out = bitand(bitshift(val,-start),mask); 
+        out = bitand(bitshift(val,-start),mask);
         if mask < 2
             out = logical(out);
         end
@@ -1587,7 +1587,7 @@ function ds=read_signature(filename,options)
         out = data;
         if degrees
             rad_fact = pi/180.;
-        else 
+        else
             rad_fact = 1;
         end
         if isfield(out,ky1)
@@ -1618,11 +1618,11 @@ function ds=read_signature(filename,options)
             out.proc_idle_less_6pct = bitindexer(val, 1);
             out.proc_idle_less_12pct = bitindexer(val, 2);
         end
-    end    
-    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>    
+    end
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function outdat = assign_ids(outdat)
         ids = fieldnames(burst_readers);
-        for i = 1:numel(ids)            
+        for i = 1:numel(ids)
             id = ids{i};
             outdat.(id).dummy_read = outdat.(id).dummy_read';
             fields = fieldnames(outdat.(id));
@@ -1640,3 +1640,4 @@ function ds=read_signature(filename,options)
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 end
+

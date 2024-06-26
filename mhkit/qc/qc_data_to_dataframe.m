@@ -2,7 +2,7 @@ function df = qc_data_to_dataframe(data)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Convert qc data structure to pandas dataframe
-%    
+%
 % Parameters
 % ------------
 %
@@ -12,7 +12,7 @@ function df = qc_data_to_dataframe(data)
 %         data.values
 %
 %         data.time
-%     
+%
 % Returns
 % ---------
 %     results: Pandas DataFrame
@@ -24,11 +24,11 @@ function df = qc_data_to_dataframe(data)
 
   x=size(data.values);
   li=py.list();
-  if x(2)>1 
+  if x(2)>1
     for i = 1:x(2)
       app=py.list(data.values(:,i));
       li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-    end  
+    end
   elseif x(2)==1
     li=data.values;
   end
@@ -39,9 +39,15 @@ function df = qc_data_to_dataframe(data)
   if any(isdatetime(data.time(1)))
     data.time=posixtime(data.time);
   end
+
+  % Convert the data to python lists
+  li = py.list(li);
+  data.time = py.list(data.time);
+
   df=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,data.time,int32(x(2)));
 
   % One final thing to convert index to python DateTimeindex, as required by pecos
   df.index=py.pecos.utils.index_to_datetime(df.index);
 
-end 
+end
+

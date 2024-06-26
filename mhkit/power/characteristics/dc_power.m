@@ -1,7 +1,8 @@
 function P=dc_power(voltage,current)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%     Calculates the real power from DC voltage and current. 
-%     
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     Calculates the real power from DC voltage and current.
+%
 % Parameters
 % ------------
 %     voltage: Time series of  measured voltages [V]
@@ -11,7 +12,7 @@ function P=dc_power(voltage,current)
 %
 %        OR
 %
-%        structure of form: 
+%        structure of form:
 %               voltage.voltage : matrix or vector
 %
 %               voltage.time : time vector
@@ -35,8 +36,8 @@ function P=dc_power(voltage,current)
 %
 %       P.power [W]
 %
-%       P.gross: gross power from all lines [W] 
-%           
+%       P.gross: gross power from all lines [W]
+%
 %       P.time
 %
 %
@@ -50,17 +51,17 @@ if (isa(voltage,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(voltage)==1)
         x=size(voltage.voltage);
         li=py.list();
-        if x(2)> 1 
+        if x(2)> 1
             for i = 1:x(2)
                 app=py.list(double(voltage.voltage(:,i)));
                 li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-            
+
             end
             voltage=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(voltage.time(:,1)),li,int32(x(2)));
         elseif x(2)==1
             voltage=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(voltage.time(:,1)),voltage.voltage,int32(x(2)));
         end
-        
+
     else
         ME = MException('MATLAB:dc_power','voltage needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one or create a structure');
         throw(ME);
@@ -71,17 +72,17 @@ if (isa(current,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(current)==1)
         x=size(current.current);
         li=py.list();
-        if x(2)==3 
+        if x(2)==3
             for i = 1:x(2)
                 app=py.list(double(current.current(:,i)));
                 li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-            
+
             end
             current=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(current.time(:,1)),li,int32(x(2)));
         elseif x(2)==1
             current=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(current.time(:,1)),current.current,int32(x(2)));
         end
-        
+
     else
         ME = MException('MATLAB:dc_power','voltage needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one or create a structure');
         throw(ME);

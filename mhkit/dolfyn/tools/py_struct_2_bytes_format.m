@@ -30,7 +30,7 @@ function [format, bytes] = py_struct_2_bytes_format(py_format, size_only)
                     last_bytes = temp;
                 else
                     if ~size_only
-                        if last_bytes ~= temp                        
+                        if last_bytes ~= temp
                             ME = MException('MATLAB:py_struct_2_bytes_format', ...
                                 ['matlab is not able to mix byte sizes.'...
                                 ' IE it is possible to mix padding(x) ' ...
@@ -48,7 +48,7 @@ function [format, bytes] = py_struct_2_bytes_format(py_format, size_only)
 
     function [fmt, size] = assign_value(input)
         switch input
-            case 'c'        
+            case 'c'
                 fmt = 'char*1';
                 size = 1;
             case 'x'
@@ -89,7 +89,7 @@ function [format, bytes] = py_struct_2_bytes_format(py_format, size_only)
                 size = 4;
             case 'd'
                 fmt = 'double';
-                size = 8;  
+                size = 8;
             otherwise
                 ME = MException('MATLAB:py_struct_2_bytes_format',['Unsupported'...
                     ' python struct charcter: %s',input]);

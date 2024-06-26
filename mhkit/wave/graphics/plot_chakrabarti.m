@@ -3,10 +3,10 @@ function figure=plot_chakrabarti(H, lambda_w, D, options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Plots, in the style of Chakrabarti (2005), relative importance of viscous,
 %     inertia, and diffraction phemonena
-% 
+%
 %     Chakrabarti, Subrata. Handbook of Offshore Engineering (2-volume set).
 %     Elsevier, 2005.
-% 
+%
 % Parameters
 % ------------
 %    H: integer, double or vector
@@ -15,13 +15,13 @@ function figure=plot_chakrabarti(H, lambda_w, D, options)
 %    lambda_w: integer, double or vector
 %         Wave length [m]
 %
-%    D: integer, double or vector of 
+%    D: integer, double or vector of
 %         Characteristic length [m]
 %
 %    savepath: string (optional)
 %         path and filename to save figure.
 %         to call: plot_chakrabarti(H,lambda_w,D,"savepath",savepath)
-%         
+%
 % Returns
 % ---------
 %	 figure: figure
@@ -35,7 +35,7 @@ function figure=plot_chakrabarti(H, lambda_w, D, options)
 %     >> H = 8
 %     >> lambda_w = 200
 %     >> plot_chakrabarti(H,lambda_w,D)
-% 
+%
 %     **Using vector**
 %     >> D = linspace(5,15,5)
 %     >> H = 8*ones(size(D))
@@ -81,13 +81,13 @@ if any(KC>=10) || any(KC<=.02) || any(Diffraction>=50) || any(lambda_w >= 1000)
 else
     xlim([0.01 10])
     ylim([0.01 50])
-    
+
 end
 xDrag = 0.0125;
 xInertiaDrag = 0.02;
 yDrag = 25;
 yInertiaDrag = 8;
-yWaveBreaking1 = 2; 
+yWaveBreaking1 = 2;
 yWaveBreaking2 = 1.25;
 x1 = xlim;
 graphScale_x = x1(1);
@@ -97,7 +97,7 @@ legend('AutoUpdate','off')
 
  if x1(1) >= 0.01
      graphScale_x = 0.01;
-       
+
  end
 
 hold on
@@ -124,7 +124,7 @@ hold on
     line([gs_x,sdh],[sdv,sdv], 'Color','k','LineStyle','--')
     text(gs_x*2.5,yInertiaDrag,'{\it Inertia & Drag}','HorizontalAlignment','center','FontSize',8)
 
-hold on        
+hold on
 % upper bound of negligible drag region
     ndv = 0.25;
     ndh = 0.14*pi/ndv;
@@ -132,7 +132,7 @@ hold on
     text(8*gs_x,0.7,'{\it Large Inertia}','HorizontalAlignment','center','FontSize',8)
 
     text(8*gs_x,8e-2,'{\it All Inertia}','HorizontalAlignment','center','FontSize',8)
-    
+
 hold on
 % left bound of diffraction region
     drh = 0.5;
@@ -145,6 +145,7 @@ axis([gs_x gs2 min(y_breaking) max(y_breaking)])
 len = strlength(options.savepath);
 if len > 1
     saveas(figure, options.savepath);
-end 
+end
 
 hold off
+

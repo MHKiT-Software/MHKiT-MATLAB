@@ -1,0 +1,292 @@
+name: MHKiT-MATLAB Windows Unit Tests
+
+on:
+  push:
+    branches: [master, develop, ebbflood]
+  pull_request:
+    branches: [master, develop, ebbflood]
+
+jobs:
+  cache_population:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        python-version: [3.9]
+        matlab-version: [R2022a]
+    runs-on: ${{ matrix.os }}
+
+    env:
+      mhkit-python-dir: "MHKiT-Python"
+      MHKIT_PYTHON_VERSION: '0.7.0'
+    steps:
+      - name: Install/Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: latest
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          activate-environment: mhkit_conda_env
+          channels: conda-forge
+
+      # This is necessary to fix any issues with netcdf4 and hdf5 headers
+      - name: "Conda install netcdf4, hdf5"
+        run: |
+          conda activate mhkit_conda_env
+          conda install netcdf4 hdf5
+
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v4
+
+      # - name: Check out MHKiT-Python
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: "MHKiT-Software/MHKiT-Python"
+      #     path: ${{env.mhkit-python-dir}}
+
+      # - name: pip install mhkit from source
+      #   working-directory: ${{env.mhkit-python-dir}}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip3 install -e .
+
+      - name: pip install mhkit from pypi
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip install mhkit==$MHKIT_PYTHON_VERSION
+
+      - name: pip install mhkit-python-utils module from source
+        run: |
+          conda activate mhkit_conda_env
+          pip install -e .
+
+      # Create the cache and add a dummy file
+      # The dummy file ensures that the artifact download
+      - name: Setup mhkit_webread_cache
+        shell: bash -l {0}
+        run: |
+          mkdir mhkit_webread_cache
+          touch mhkit_webread_cache/test.txt
+          echo "Hello World" > mhkit_webread_cache/test.txt
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: ${{ matrix.matlab-version }}
+
+      - name: Configure MATLAB pyenv Version and ExecutionMode
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: pwsh
+        run: >
+          "pyenv(Version='{0}', ExecutionMode='OutOfProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
+
+      - name: Check Python System Path
+        shell: bash -l {0}
+        run: |
+          echo "py.sys.path" >> run.m
+
+      - name: Add MATLAB test commands
+        shell: bash
+        run: echo "version,
+          addpath(genpath('mhkit')),
+          import matlab.unittest.TestSuite,
+          import matlab.unittest.TestRunner,
+          testFolder = ['mhkit' filesep 'tests'],
+          suite = TestSuite.fromFolder(testFolder),
+          runner = TestRunner.withTextOutput,
+          results = runner.run(suite),
+          assertSuccess(results)" >> run.m
+
+      - name: Output Run.m
+        shell: bash
+        run: cat run.m
+
+      - name: Run MHKiT-MATLAB Unit Tests
+        uses: matlab-actions/run-command@v2
+        with:
+          command: run
+          startup-options: -noFigureWindows
+
+      - name: Save mhkit_webread_cache directory as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # GitHub Action "Name" of artifact
+          name: mhkit_webread_cache
+          # Filesystem path of directory
+          path: mhkit_webread_cache
+
+  main:
+    needs: cache_population
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        python-version: [3.8, 3.9, "3.10", 3.11]
+        matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a]
+        mhkit-python-version: ["0.7.0"]
+        exclude:
+          - matlab-version: R2022a
+            python-version: 3.9
+          - matlab-version: R2023b
+            python-version: 3.8
+          - matlab-version: R2023a
+            python-version: 3.11
+          - matlab-version: R2022b
+            python-version: 3.11
+          - matlab-version: R2022a
+            python-version: 3.11
+          - matlab-version: R2022a
+            python-version: "3.10"
+          - matlab-version: R2021b
+            python-version: 3.11
+          - matlab-version: R2021b
+            python-version: "3.10"
+          - matlab-version: R2021a
+            python-version: 3.11
+          - matlab-version: R2021a
+            python-version: "3.10"
+          - matlab-version: R2021a
+            python-version: 3.9
+          - matlab-version: R2020b
+            python-version: 3.11
+          - matlab-version: R2020b
+            python-version: "3.10"
+          - matlab-version: R2020b
+            python-version: 3.9
+          - matlab-version: R2024a
+            python-version: 3.8
+    runs-on: ${{ matrix.os }}
+
+    env:
+      mhkit-python-dir: "MHKiT-Python"
+      MHKIT_PYTHON_VERSION: ${{  matrix.mhkit-python-version }}
+    steps:
+      - name: Install/Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: latest
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          activate-environment: mhkit_conda_env
+          channels: conda-forge
+
+      # This is necessary to fix any issues with netcdf4 and hdf5 headers
+      - name: "Conda install netcdf4, hdf5"
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          conda install netcdf4 hdf5
+
+      - name: Output python executable
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python -c "import sys; print(sys.executable)"
+
+      - name: Print Python Version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python --version
+
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v4
+
+      # - name: Check out MHKiT-Python
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: "MHKiT-Software/MHKiT-Python"
+      #     path: ${{env.mhkit-python-dir}}
+
+      # - name: pip install mhkit from source
+      #   working-directory: ${{env.mhkit-python-dir}}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip3 install -e .
+
+      - name: pip install mhkit from pypi
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip install mhkit==$MHKIT_PYTHON_VERSION
+
+      - name: pip install mhkit-python-utils module from source
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip3 install -e .
+
+      - name: List installed pip modules
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip3 freeze
+
+      - name: Print MHKiT-Python Version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python -c "import mhkit; print(mhkit.__version__)"
+
+      - name: Verify MHKiT-Python Operation
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
+
+      - name: Download mhkit_webread_cache artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mhkit_webread_cache
+          path: mhkit_webread_cache
+
+      - name: Display structure mhkit_webread_cache
+        run: ls -R
+        working-directory: .
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: ${{ matrix.matlab-version }}
+
+      - name: Add Python Dir to Path
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
+
+      # OutOfProcess works reliably on linux, macos, and windows
+      - name: Configure MATLAB pyenv Version and ExecutionMode
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')\n" $(python -c "import sys; print(sys.executable)") >> run.m
+
+      - name: Check Python System Path
+        shell: bash -l {0}
+        run: |
+          echo "py.sys.path" >> run.m
+
+      - name: Add MATLAB test commands
+        shell: bash
+        run: echo "version,
+          pyenv,
+          addpath(genpath('mhkit')),
+          import matlab.unittest.TestSuite,
+          import matlab.unittest.TestRunner,
+          testFolder = ['mhkit' filesep 'tests'],
+          suite = TestSuite.fromFolder(testFolder),
+          runner = TestRunner.withTextOutput,
+          results = runner.run(suite),
+          assertSuccess(results)" >> run.m
+
+      - name: Output Run.m
+        shell: bash
+        run: cat run.m
+
+      - name: Run MHKiT-MATLAB Unit Tests
+        uses: matlab-actions/run-command@v2
+        with:
+          command: run
+          startup-options: -noFigureWindows

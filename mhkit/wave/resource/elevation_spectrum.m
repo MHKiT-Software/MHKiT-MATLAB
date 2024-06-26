@@ -61,7 +61,7 @@ arguments
 end
 
 py.importlib.import_module('mhkit');
-py.importlib.import_module('numpy');
+% py.importlib.import_module('numpy');
 py.importlib.import_module('pandas');
 py.importlib.import_module('mhkit_python_utils');
 if (isa(ts,'py.pandas.core.frame.DataFrame')~=1)
@@ -81,7 +81,7 @@ if (isa(ts,'py.pandas.core.frame.DataFrame')~=1)
         ts=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,time,int32(x(2)));        
 
     elseif x(2)==1
-       ts=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,int32(x(2))); 
+       ts=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(py.list(ts),time,int32(x(2))); 
        
     end
     

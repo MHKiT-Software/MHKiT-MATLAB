@@ -2,7 +2,7 @@ function out = calc_beam_orientmat(theta, convex, degrees)
 %%%%%%%%%%%%%%%%%%%%
 %    Calculate the rotation matrix from beam coordinates to
 %    instrument head coordinates for an RDI ADCP.
-%     
+%
 % Parameters
 % ------------
 %    theta : is the angle of the heads (usually 20 or 30 degrees)
@@ -14,9 +14,9 @@ function out = calc_beam_orientmat(theta, convex, degrees)
 %
 % Returns
 % ---------
-%     out: array 
+%     out: array
 %         orientation matrix
-%        
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if degrees
@@ -37,6 +37,6 @@ function out = calc_beam_orientmat(theta, convex, degrees)
            -c*a,    0,  b,   d;
               0, -c*a,  b,  -d;
               0,  c*a,  b,  -d];
-    
+
 end
 

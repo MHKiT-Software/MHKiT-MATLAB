@@ -5,18 +5,18 @@ function userdata = read_userdata(filename, userdata)
     %%%%%%%%%%%%%%%%%%%%
     %     Reads a userdata.json file and returns the data it contains
     %     as a structure
-    %     
+    %
     % Parameters
     % ------------
     %     filename: string
     %         Filename of Nortek file to read.
-    %     userdata: bool or string 
-    %         true, false, or string of userdata.json filename         
+    %     userdata: bool or string
+    %         true, false, or string of userdata.json filename
     %
     % Returns
     % ---------
-    %     userdata: structure          
-    %        
+    %     userdata: structure
+    %
     %%%%%%%%%%%%%%%%%%%%
     if isa(userdata, 'logical')
         if ~userdata
@@ -38,10 +38,10 @@ function userdata = read_userdata(filename, userdata)
         return
     end
     % read the json data
-    fid = fopen(jsonfile); 
-    raw = fread(fid,inf); 
-    str = char(raw'); 
-    fclose(fid); 
+    fid = fopen(jsonfile);
+    raw = fread(fid,inf);
+    str = char(raw');
+    fclose(fid);
     userdata = jsondecode(str);
 
     % quality checks for userdata
@@ -52,7 +52,7 @@ function userdata = read_userdata(filename, userdata)
         nm = nm_list{i};
         if isfield(userdata, nm)
             new_name = append('inst', nm(5:end));
-            userdata.(new_name) = userdata.(nm);                
+            userdata.(new_name) = userdata.(nm);
             userdata = rmfield(userdata, nm);
         end
     end
@@ -73,7 +73,7 @@ function userdata = read_userdata(filename, userdata)
                     end
                 end
             end
-        end            
+        end
     end
     % Make sure that coord_sys is not in the userdata
     if isfield(userdata, 'coord_sys')

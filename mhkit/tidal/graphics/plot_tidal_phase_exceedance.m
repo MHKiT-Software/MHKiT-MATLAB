@@ -1,11 +1,11 @@
 function figure=plot_tidal_phase_exceedance(data, flood, ebb, ...
                                                           options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Returns a stacked area plot of the exceedance probability for the 
-%     flood and ebb tidal phases. 
-%     
+%     Returns a stacked area plot of the exceedance probability for the
+%     flood and ebb tidal phases.
+%
 % Parameters
-% ------------   
+% ------------
 %    data: structure
 %
 %      data.time: vector
@@ -22,13 +22,13 @@ function figure=plot_tidal_phase_exceedance(data, flood, ebb, ...
 %
 %    ebb: float
 %        principal ebb direction [degrees]
-% 
+%
 %    bin_size: numeric (optional)
 %       Speed bin size. Default = 0.1 m/s
 %       to call: plot_tidal_phase_probability(data, flood, ebb,"bin_size",bin_size)
 %
 %    title: string (optional)
-%       title for the plot 
+%       title for the plot
 %       to call: plot_tidal_phase_probability(data, flood, ebb,"title",title)
 %
 %    savepath: string (optional)
@@ -37,14 +37,14 @@ function figure=plot_tidal_phase_exceedance(data, flood, ebb, ...
 %
 % Returns
 % ---------
-%   figure: stacked bar graph of the probability of exceedance in 
-%           flood and ebb directions 
+%   figure: stacked bar graph of the probability of exceedance in
+%           flood and ebb directions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     data
     flood
-	ebb
+    ebb
     options.bin_size = 0.1; % m/s
     options.title = "";
     options.savepath = "";
@@ -68,61 +68,77 @@ if any([~isnumeric(ebb), length(ebb) ~= 1])
     throw(ME);
 end
 
-max_angle = max(ebb, flood);
-min_angle = min(ebb, flood);
-    
-lower_split = rem((min_angle + (360 - max_angle + min_angle)/2 ) , 360);
-upper_split = lower_split + 180;
-    
-if (lower_split <= ebb) && (ebb < upper_split)
-	isEbb = ((data.d < upper_split) & (data.d >= lower_split));
-else
-	isEbb = ~((data.d < upper_split) & (data.d >= lower_split));
+directions = data.d; % degrees
+timestamps = data.time;
+velocities = data.s; % cm per second
+
+    isEbb = flood_or_ebb(directions, flood, ebb);
+
+    ebb_velocities = velocities(isEbb);
+    ebb_timestamps = timestamps(isEbb);
+
+    flood_velocities = velocities(~isEbb);
+    flood_timestamps = timestamps(~isEbb);
+
+    F_struct_total = exceedance_probability(struct('Discharge', velocities, 'time', timestamps));
+    F = F_struct_total.F;
+
+    F_struct_ebb = exceedance_probability(struct('Discharge', ebb_velocities, 'time', ebb_timestamps));
+    F_ebb = F_struct_ebb.F;
+
+    F_struct_flood = exceedance_probability(struct('Discharge', flood_velocities, 'time', flood_timestamps));
+    F_flood = F_struct_flood.F;
+
+    bin_size = options.bin_size;
+
+    % Remove duplicate points before interpolation
+    [ebb_velocities, unique_idx_ebb] = unique(ebb_velocities);
+    [flood_velocities, unique_idx_flood] = unique(flood_velocities);
+    [velocities, unique_idx_velocities] = unique(velocities);
+
+    F_ebb = F_ebb(unique_idx_ebb);
+    F_flood = F_flood(unique_idx_flood);
+    F = F(unique_idx_velocities);
+
+    decimals = round(bin_size/0.1);
+    s_new = round(min(velocities), decimals):bin_size:round(max(velocities), decimals)+bin_size;
+
+    f_total = griddedInterpolant(velocities, F, 'linear', 'nearest');
+    f_ebb = griddedInterpolant(ebb_velocities, F_ebb, 'linear', 'nearest');
+    f_flood = griddedInterpolant(flood_velocities, F_flood, 'linear', 'nearest');
+
+    F_total = f_total(s_new);
+    F_ebb = f_ebb(s_new);
+    F_flood = f_flood(s_new);
+
+    % This differs from the python version but is necessary to keep the exceedance probability between 0 and 100
+    F_max_total = max(max(F_ebb), max(F_flood)) * 2;
+
+    area(s_new, [F_ebb/F_max_total*100; F_flood/F_max_total*100].', 'EdgeColor', 'none');
+
+    xlabel('Velocity [\itm/s\rm]','FontSize',20);
+    ylabel('Probability of Exceedance','FontSize',18);
+    legend('Ebb','Flood')
+    grid on
+    title(options.title)
+
+    len = strlength(options.savepath);
+    if len > 1
+        exportgraphics(gca, options.savepath);
+    end
+
 end
 
-s_ebb = struct('time', {data.time(isEbb)},...
-    'Discharge', {data.Discharge(isEbb)});
-s_flood = struct('time', {data.time(~isEbb)},...
-    'Discharge', {data.Discharge(~isEbb)});
+function isEbb = flood_or_ebb(directions, flood, ebb)
+    max_angle = max(ebb, flood);
+    min_angle = min(ebb, flood);
 
-F = exceedance_probability(data).F;
-F_ebb = exceedance_probability(s_ebb).F;
-F_flood = exceedance_probability(s_flood).F;
+    lower_split = rem((min_angle + (360 - max_angle + min_angle)/2 ), 360);
+    upper_split = lower_split + 180;
 
-decimals = round(options.bin_size/0.1);
-s_new = [round(min(data.s),decimals):options.bin_size:...
-    round(max(data.s),decimals)+options.bin_size];
-s_new = s_new(1:end-1); % this accounts for the difference between matlab 
-                        % and numpy.arange which uses a half open interval
-
-py.importlib.import_module('scipy');
-kwa = pyargs('bounds_error',false);
-
-f_ebb = py.scipy.interpolate.interp1d(s_ebb.Discharge,...
-    F_ebb, kwa);
-f_flood = py.scipy.interpolate.interp1d(s_flood.Discharge,...
-    F_flood, kwa);
-
-F_ebb = double(f_ebb(s_new));
-F_flood = double(f_flood(s_new));
-
-py.importlib.import_module('numpy');
-F_max_total = py.numpy.nanmax(F_ebb) + py.numpy.nanmax(F_flood);
-
-s_plot = repmat(s_new,2,1);
-figure = area(s_plot.', [F_ebb/F_max_total*100; F_flood/F_max_total*100].');
-
-hold on
-
-xlabel('Velocity [\itm/s\rm]','FontSize',20);
-ylabel('Probability of Exceedance','FontSize',18);
-legend('Ebb','Flood')
-grid on
-title(options.title)
-
-len = strlength(options.savepath);
-if len > 1
-    exportgraphics(gca, options.savepath);
-end 
-
-hold off
+    if (lower_split <= ebb) && (ebb < upper_split)
+        isEbb = ((directions < upper_split) & (directions >= lower_split));
+    else
+        isEbb = ~((directions < upper_split) & (directions >= lower_split));
+    end
+end

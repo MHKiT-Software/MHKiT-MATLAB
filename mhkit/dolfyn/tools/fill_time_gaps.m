@@ -4,7 +4,7 @@ function out = fill_time_gaps(epoch, sample_rate_hz)
 % forward/backward by 1/sample_rate_hz.
 
 dt = 1 / sample_rate_hz;
-% using fillgaps to interplolate values which uses nan so we convert 
+% using fillgaps to interplolate values which uses nan so we convert
 % negative values to nan
 missing_data = epoch < 0;
 epoch(missing_data) = nan;

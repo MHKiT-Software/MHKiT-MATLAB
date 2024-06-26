@@ -1,28 +1,28 @@
 function dolfyn_plot(ds, field, options)
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Plot fields from Dolfyn generated data structures
-%     
+%
 % Parameters
 % ------------
-%     ds: structure 
+%     ds: structure
 %         Structure from the binary instrument data
-%     field: string 
+%     field: string
 %         field from ds to be plotted (ex: 'vel')
 %     dim: int (optional)
 %         for higher dimension fields, which dimension should be plotted
 %     title: string (optional)
 %         Title for the plot
 %
-%     call with options -> dolfyn_plot(ds,'vel','dim',1,'title','My plot') 
-%       
+%     call with options -> dolfyn_plot(ds,'vel','dim',1,'title','My plot')
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     arguments
-        ds 
+        ds
         field
         options.dim = -1;
         options.title = '';
     end
-    
+
     assert(isstruct(ds),['ds must be a structure generated from one of '...
         'the dolfyn.io functions'])
 
@@ -36,7 +36,7 @@ function dolfyn_plot(ds, field, options)
 
     if x_d > 2
         assert(options.dim >= 1, ['For this field you must specify ' ...
-            'which dimension you would like to plot'])        
+            'which dimension you would like to plot'])
         assert(options.dim <= max_dim, ['The dimension you have ' ...
             'specified is greater than the maximum dimension, %d'],max_dim)
     end
@@ -45,7 +45,7 @@ function dolfyn_plot(ds, field, options)
         assert(isstring(options.title) || ischar(options.title), ...
             'Title must be character or string')
     end
- 
+
     switch x_d
         case 2
         % Plot 1D data
@@ -64,7 +64,7 @@ function dolfyn_plot(ds, field, options)
             y_label = y_label + " [" + string(ds.(field).units) + "]";
         end
         ylabel(y_label,'Interpreter', 'none');
-        
+
 
         case 3
         % Plot 2D data
@@ -75,7 +75,7 @@ function dolfyn_plot(ds, field, options)
             x_data = ds.(field).coords.(ds.(field).dims{1});
         end
         y_data = ds.(field).data(:,:,options.dim);
-        
+
         plot(x_data, y_data)
         xlabel(ds.(field).dims{1},'Interpreter', 'none')
         y_label = string(field);
@@ -89,7 +89,7 @@ function dolfyn_plot(ds, field, options)
             title(strcat(ds.(field).dims{2}," = ",...
                 ds.(field).coords.(ds.(field).dims{2}){options.dim}))
         end
-        
+
         case 4
         % Plot 3D data
         if contains(string(ds.(field).dims{1}),"time")
@@ -123,7 +123,7 @@ function dolfyn_plot(ds, field, options)
             cb_label = cb_label + " [" + string(ds.(field).units) + "]";
         end
         cb.Label.String = cb_label;
-    end    
+    end
 
 end
 

@@ -5,7 +5,7 @@ function ds = beam2inst(dat,reverse,rmod)
 %    ----------
 %    dat : The adv object containing the data.
 %        The ADCP dataset
-%    reverse : bool 
+%    reverse : bool
 %        If True, this function performs the inverse rotation (inst->beam).
 %    rmod: string
 %        awac, vector, signature, rdi
@@ -20,7 +20,7 @@ if strcmpi(rmod,'vector')
         dat = inst2head(dat, reverse);
         % Now rotate from the head frame to the beam frame
         ds = rotate(dat, reverse);
-    
+
     % inst(ADV battery case|imu)->head(ADV instrument head)->beam
     else
         % First rotate velocities from beam to ADV head frame
@@ -45,7 +45,7 @@ end
             ME = MException('MATLAB:dolfyn:rotate:beam2inst',msgtext);
             throwAsCaller(ME)
         end
-        
+
         if ~isfield(advo, 'beam2inst_orientmat')
             msgtext = ['Data set is missing the beam2inst orientation ' ...
                 'matrix'];
@@ -53,7 +53,7 @@ end
             throwAsCaller(ME)
         end
         rotmat = advo.beam2inst_orientmat.data;
-        
+
         cs = 'inst';
         if reverse
             % Can't use transpose because rotation is not between
@@ -61,7 +61,7 @@ end
             rotmat = inv(rotmat);
             cs = 'beam';
         end
-        
+
         for qq = 1:numel(advo.attrs.rotate_vars)
             nm = advo.attrs.rotate_vars{qq};
             if startsWith(nm, 'vel')
@@ -74,7 +74,7 @@ end
                 end
             end
         end
-        
+
         data = set_coords(advo, cs);
     end
 

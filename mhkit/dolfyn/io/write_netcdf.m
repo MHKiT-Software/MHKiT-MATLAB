@@ -1,10 +1,10 @@
 function write_netcdf(ds, filename)
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Write Dolfyn data set to NetCDF data structure.
-%     
+%
 % Parameters
 % ------------
-%     ds: structure 
+%     ds: structure
 %         Structure from the binary instrument data
 %
 %     filename: string
@@ -40,7 +40,7 @@ function write_netcdf(ds, filename)
         buttonText = questdlg(promptMessage, ...
           titleBarCaption, 'Yes', 'No', 'Yes');
         if strcmpi(buttonText, 'No')
-        % User does not want to overwrite. 
+        % User does not want to overwrite.
         % Set flag to not do the write.
         overwriteFile = false;
         end
@@ -50,7 +50,7 @@ function write_netcdf(ds, filename)
         % an existing file.
         if exist(filename, 'file')
             delete(filename);
-        end        
+        end
 
         if ~isMATLABReleaseOlderThan("R2021b")
             % Older versions of Matlab did not allow strings to be
@@ -58,20 +58,20 @@ function write_netcdf(ds, filename)
             fun_map = struct(  ...
                 'create',{@create_h5},...
                 'write',{@write_h5},...
-                'attribute',{@attr_h5}); 
+                'attribute',{@attr_h5});
         else
             fun_map = struct(  ...
                 'create',{@create_nc},...
                 'write',{@write_nc},...
                 'attribute',{@attr_nc});
-        end            
-        
+        end
+
         % Loop through coords and create netcdf dimensions
         fields = fieldnames(ds.coords);
         dim_map = containers.Map(fields,[1:numel(fields)]);
         for qq = 1:numel(fields)
             key = fields{qq};
-            n = numel(ds.coords.(key));            
+            n = numel(ds.coords.(key));
             if iscell(ds.coords.(key))
                 temp = convertCharsToStrings(ds.coords.(key));
                 type = 'string';
@@ -80,26 +80,26 @@ function write_netcdf(ds, filename)
             end
             feval(fun_map.create, filename, key, {key, n}, type, true, qq);
             if iscell(ds.coords.(key))
-                feval(fun_map.write, filename, key, temp);            
+                feval(fun_map.write, filename, key, temp);
             else
-                feval(fun_map.write, filename, key, ds.coords.(key));                
+                feval(fun_map.write, filename, key, ds.coords.(key));
             end
-        end        
-        
+        end
+
         % List of fields to exclude from the variable write
         exclude = {'coords', 'coord_sys', 'attrs', 'time', 'hdwtime_gps'};
         % Loop through the ds fields and create the variable in the netcdf
         % file then write the data.
         fields = fieldnames(ds);
         for qq = 1:numel(fields)
-            key = fields{qq};            
+            key = fields{qq};
             if ~any(strcmp(exclude,key))
                 dim_fields = fieldnames(ds.(key).coords);
                 dimensions = cell(1,numel(dim_fields)*2);
                 for kk = 1:numel(dim_fields)
                     dimensions{(kk-1)*2 + 1} = dim_fields{kk};
-                    n = numel(ds.(key).coords.(dim_fields{kk}));                    
-                    dimensions{(kk-1)*2 + 2} = n;                        
+                    n = numel(ds.(key).coords.(dim_fields{kk}));
+                    dimensions{(kk-1)*2 + 2} = n;
                 end
                 % dimensions cell can now be used to create the netcdf
                 % variable
@@ -108,7 +108,7 @@ function write_netcdf(ds, filename)
                 end
                 feval(fun_map.create, filename, key, dimensions,...
                     class(ds.(key).data), false);
-                % Now that the variable exists we can write the data to it 
+                % Now that the variable exists we can write the data to it
                 out_data = squeeze(ds.(key).data);
                 feval(fun_map.write, filename, key, out_data);
                 % add the units
@@ -119,8 +119,8 @@ function write_netcdf(ds, filename)
                     feval(fun_map.attribute, filename, key, 'None', false);
                 end
             end
-        end 
-   
+        end
+
         % Attributes
         fields = fieldnames(ds.attrs);
         for qq = 1:numel(fields)
@@ -139,18 +139,18 @@ function write_netcdf(ds, filename)
             end
         end
         % Not currently functional but needed for python counterpart
-        feval(fun_map.attribute, filename, 'complex_vars', [], true);            
-    end   
+        feval(fun_map.attribute, filename, 'complex_vars', [], true);
+    end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % NetCDF Functions 
+    % NetCDF Functions
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function create_nc(filename, key, dim_cell, type, coords, ~)
         if coords
             nccreate(filename, key,'Dimensions',dim_cell,...
-			    'Datatype', type,'Format','netcdf4');
+                'Datatype', type,'Format','netcdf4');
         else
             nccreate(filename, key,'Dimensions',dim_cell,...
-			'Datatype', type,'FillValue', nan, 'Format','netcdf4');
+                'Datatype', type,'FillValue', nan, 'Format','netcdf4');
         end
     end
 
@@ -172,7 +172,7 @@ function write_netcdf(ds, filename)
         loc = join(['/',key],'');
         if coords
             size = dim_cell{2};
-        else            
+        else
             size = zeros(1,numel(dim_cell)/2);
             dims = zeros(numel(dim_cell)/2,1);
             for i = 1:numel(dim_cell)/2
@@ -190,8 +190,8 @@ function write_netcdf(ds, filename)
         end
     end
 
-    function write_h5(filename, key, data)        
-        h5write(filename, join(['/',key],''), data);        
+    function write_h5(filename, key, data)
+        h5write(filename, join(['/',key],''), data);
     end
 
     function attr_h5(filename, key, attribute, attrs)

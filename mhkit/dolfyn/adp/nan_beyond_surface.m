@@ -1,27 +1,27 @@
 function out = nan_beyond_surface(ds, options)
-% Mask the values of 3D data (vel, amp, corr, echo) that are beyond 
+% Mask the values of 3D data (vel, amp, corr, echo) that are beyond
 % the surface.
-% 
+%
 % Parameters
 % ----------
 % ds : Dataset
 %   The adcp dataset to clean
 % val : nan or numeric
 %   Specifies the value to set the bad values to (default np.nan).
-% 
+%
 % Returns
 % -------
 % ds : Dataset
 %   The adcp dataset where relevant arrays with values greater than
 %   `depth` are set to NaN
-% 
+%
 % Notes
 % -----
-% Surface interference expected to happen at 
+% Surface interference expected to happen at
 % distance > range * cos(beam angle) - cell size
 
     arguments
-        ds         
+        ds
         options.val = nan;
     end
 
@@ -50,7 +50,7 @@ function out = nan_beyond_surface(ds, options)
         end
     end
 
-    % Surface interference distance calculated from distance of 
+    % Surface interference distance calculated from distance of
     % transducers to surface
     if isfield(ds.attrs, 'h_deploy')
         range_limit = ((ds.depth.data-ds.attrs.h_deploy).*cos(beam_angle) ...
@@ -60,13 +60,13 @@ function out = nan_beyond_surface(ds, options)
             ds.attrs.cell_size;
     end
 
-    bds = ds.coords.range > range_limit; bds_shape = size(bds); 
+    bds = ds.coords.range > range_limit; bds_shape = size(bds);
     bds = reshape(bds,[bds_shape(1),1,bds_shape(2)]);
 
     % Echosounder data gets trimmed at water surface
     if any(strcmp(r,'echo'))
         bds_echo = ds.coords.range_echo > ds.depth;
-        ech_shape = size(bds_echo); 
+        ech_shape = size(bds_echo);
         bds_echo = reshape(bds_echo,[ech_shape(1),1,ech_shape(2)]);
         ds.echo.data(ech_shape) = options.val;
         r(strncmpi(r,'echo',1)) = [];
@@ -75,7 +75,7 @@ function out = nan_beyond_surface(ds, options)
     % Correct rest of "range" data for surface interference
     for qq = 1:numel(r)
         a = ds.(r{qq}).data;
-        if length(size(a)) > 3 
+        if length(size(a)) > 3
             for kk = 1:size(a,4)
                 sub_list = a(:,:,:,kk);
                 try  % float dtype
@@ -92,7 +92,7 @@ function out = nan_beyond_surface(ds, options)
                 a(bds) = 0;
             end
         end
-        ds.(r{qq}).data = a;        
+        ds.(r{qq}).data = a;
     end
 
     out = ds;

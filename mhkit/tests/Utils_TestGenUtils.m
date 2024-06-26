@@ -1,6 +1,6 @@
 classdef Utils_TestGenUtils < matlab.unittest.TestCase
 
-    methods (Test) 
+    methods (Test)
 
 
 
@@ -12,15 +12,15 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
             data = jsondecode(str); % Using the jsondecode function to parse JSON from string
-            
+
             freq = 50; % Hz
             period = 600; % seconds
             vector_channels = {"WD_Nacelle","WD_NacelleMod"};
-            
+
             % load in file
             loads_data_table = struct2table(data.loads);
             df = table2struct(loads_data_table,'ToScalar',true);
-            
+
             df.Timestamp = datetime(df.Timestamp);
             df.time = df.Timestamp;
             % run function
@@ -32,7 +32,7 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             assertEqual(testCase,stats.std.uWind_80m,1.551,'AbsTol',0.01); % standard deviation3
             assertEqual(testCase,stats.std.WD_Nacelle,36.093,'AbsTol',0.01); % std vector averaging
             assertEqual(testCase,stats.mean.WD_Nacelle,178.1796,'AbsTol',0.01);% mean vector averaging
-        end      
+        end
 
         function test_excel_to_datetime(testCase)
             % store excel timestamp
@@ -75,7 +75,7 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
         end
         function test_read_nc_file_group(testCase)
             % MATLAB version should >= 2021b
-            
+
             %1. Check LongName with group path
             fnm = 'QA4ECV_L2_NO2_OMI_20180301T052400_o72477_fitB_v1.nc';
             res = read_nc_file(strcat('example_ncfiles/',fnm));
@@ -93,7 +93,7 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             vnms = {ginfo.Variables.Name};
             sz = size(ginfo.Variables);
             % 3.1 check Dims
-            idx = randi([1,sz(2)],1); 
+            idx = randi([1,sz(2)],1);
             vname = check_name(vnms{idx});
             val1 = res.groups.PRODUCT.groups.(['SUPPORT_' ...
                 'DATA']).groups.DETAILED_RESULTS.Variables.(vname).Dims;
@@ -105,16 +105,16 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             assertEqual(testCase,val1,val2);
             assertEqual(testCase,val3,val4);
             % 3.2 check Data
-            idx = randi([1,sz(2)],1); 
+            idx = randi([1,sz(2)],1);
             vname = check_name(vnms{idx});
             val1 = res.groups.PRODUCT.groups.(['SUPPORT_' ...
                 'DATA']).groups.DETAILED_RESULTS.Variables.(vname).Data;
             val2 = ncread(strcat('example_ncfiles/',fnm),...
                 strcat('PRODUCT/SUPPORT_DATA/DETAILED_RESULTS/',vnms{idx}));
-            
+
             testCase.verifyTrue(isequaln(val1,val2),vname);
             % 3.3 check Attributes
-            idx = randi([1,sz(2)],1); 
+            idx = randi([1,sz(2)],1);
             vname = check_name(vnms{idx});
             in_names = {ginfo.Variables(idx).Attributes.Name};
             in_vals = {ginfo.Variables(idx).Attributes.Value};
@@ -129,7 +129,7 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                 testCase.verifyTrue(isequaln(in_vals{iattr},out_val));
             end
         end
-        
+
         function test_read_nc_file_nogroup(testCase)
             % MATLAB version should >= 2021b
             fnms = {dir('example_ncfiles/').name};
@@ -145,10 +145,10 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                 vnms = {ginfo.Variables.Name};
                 sz = size(ginfo.Variables);
                 % 1 check Dims
-                idx = randi([1,sz(2)],1); 
+                idx = randi([1,sz(2)],1);
                 count = 0;
                 while (isempty(ginfo.Variables(idx).Dimensions)&&count<10)
-                    idx = randi([1,sz(2)],1); 
+                    idx = randi([1,sz(2)],1);
                     count = count + 1;
                 end
                 if ~isempty(ginfo.Variables(idx).Dimensions)
@@ -161,10 +161,10 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                     assertEqual(testCase,val3,val4);
                 end
                 % 2 check Data
-                idx = randi([1,sz(2)],1); 
+                idx = randi([1,sz(2)],1);
                 count = 0;
                 while (isempty(ginfo.Variables(idx).Dimensions)&&count<10)
-                    idx = randi([1,sz(2)],1); 
+                    idx = randi([1,sz(2)],1);
                     count = count + 1;
                 end
                 vname = check_name(vnms{idx});
@@ -172,10 +172,10 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                 val2 = ncread(strcat('example_ncfiles/',fnm),vnms{idx});
                 testCase.verifyTrue(isequaln(val1,val2),vname);
                 % 3 check Attributes
-                idx = randi([1,sz(2)],1); 
+                idx = randi([1,sz(2)],1);
                 count = 0;
                 while (isempty(ginfo.Variables(idx).Attributes)&&count<10)
-                    idx = randi([1,sz(2)],1); 
+                    idx = randi([1,sz(2)],1);
                     count = count + 1;
                 end
                 vname = check_name(vnms{idx});
@@ -191,10 +191,10 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                         testCase.verifyTrue(isequaln(in_vals{iattr},out_val));
                     end
                 end
-            
+
             end
         end
-        
+
         function test_read_nc_file_var(testCase)
             % MATLAB version should >= 2021b
             fnms = {dir('example_ncfiles/').name};
@@ -209,7 +209,7 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             res = read_nc_file_var(strcat('example_ncfiles/',fnm),...
                 varlst,0);
             res1 = read_nc_file_var(strcat('example_ncfiles/',fnm),...
-                varlst,1);           
+                varlst,1);
             idx = randi([1,length(varlst)],1);
             var2check = varlst{idx}; nstr = split(var2check,'/');
             vname = check_name(nstr{end});
@@ -257,7 +257,7 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                         out_val1),strcat('opt=1,',var2check,': ',in_names{iattr}));
                 end
             end
-            
+
             %2. test on files without group:
             for ifnm = 3:numel(fnms)
                 fnm = fnms{ifnm};
@@ -265,14 +265,14 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                     continue
                 end
                 fprintf("Checking File: %s \n",fnm);
-                ginfo = ncinfo(strcat('example_ncfiles/',fnm));                
+                ginfo = ncinfo(strcat('example_ncfiles/',fnm));
                 vnms = {ginfo.Variables.Name};
                 res = read_nc_file_var(strcat('example_ncfiles/',fnm),...
                     vnms,0);
                 res1 = read_nc_file_var(strcat('example_ncfiles/',fnm),...
                     vnms,1);
                 sz = length(vnms);
-                % 2.1 check Data Field: 
+                % 2.1 check Data Field:
                 idx = randi([1,sz],1);%max([fix(sz*0.1),1]));
                 var2check = vnms{idx};
                 vname = check_name(var2check);
@@ -330,12 +330,11 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                     end
                 end
             end
-            
-            
+
+
         end
+
     end
-end  
 
-
-
+end
 

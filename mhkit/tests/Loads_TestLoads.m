@@ -12,7 +12,7 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
     methods (Test)
 
         function test_bin_statistics(testCase)
-            
+
             % create array containg wind speeds to use as bin edges
             bin_edges = 3:1:25;
             relative_file_name = '../../examples/data/loads/loads_data_dict.json';
@@ -44,10 +44,10 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
             data = jsondecode(str); % Using the jsondecode function to parse JSON from string
-            
+
             fatigue_tower = 3804;
             fatigue_blade = 1388;
-            
+
             loads_data_table = struct2table(data.loads);
             loads_data = table2struct(loads_data_table,'ToScalar',true);
             tower_load = loads_data.TB_ForeAft;
@@ -61,7 +61,7 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
              assertLessThan(testCase,err_tower,0.05)
              assertLessThan(testCase,err_blade,0.05)
         end
-        
+
         function test_blade_moments(testCase)
             format long
             relative_file_name = '../../examples/data/loads/blade_cal.csv';
@@ -70,11 +70,11 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
             flap_offset = 9.19906E-05;
             edge_offset = -0.000310854;
             blade_matrix = [1034671.4,-126487.28,82507.959,1154090.7];
-            
+
             flap_raw = blade_data(:,1);
-            
+
             edge_raw = blade_data(:,2);
-            
+
             [M_flap, M_edge] = blade_moments(blade_matrix,flap_offset,flap_raw,edge_offset,edge_raw);
 
             assertEqual(testCase,M_flap',blade_data(:,3),'RelTol',0.01);
@@ -89,7 +89,7 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
             data = jsondecode(str); % Using the jsondecode function to parse JSON from string
-            
+
             means_data_table = struct2table(data.means);
             means_data = table2struct(means_data_table,'ToScalar',true);
             maxs_data_table = struct2table(data.maxs);
@@ -98,7 +98,7 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
             mins_data = table2struct(mins_data_table,'ToScalar',true);
             std_data_table = struct2table(data.std);
             std_data = table2struct(std_data_table,'ToScalar',true);
-            
+
             % functionine path
             savepath = 'test_scatplotter.png';
             % Generate plot
@@ -116,21 +116,21 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
             str = char(raw'); % Transformation
             fclose(fid); % Closing the file
             data = jsondecode(str); % Using the jsondecode function to parse JSON from string
-            
+
             bin_means_data_table = struct2table(data.bin_means);
             bin_means_data = table2struct(bin_means_data_table,'ToScalar',true);
             bin_maxs_data_table = struct2table(data.bin_maxs);
             bin_maxs_data = table2struct(bin_maxs_data_table,'ToScalar',true);
             bin_mins_data_table = struct2table(data.bin_mins);
             bin_mins_data = table2struct(bin_mins_data_table,'ToScalar',true);
-            
+
             bin_means_std_data_table = struct2table(data.bin_means_std);
             bin_means_std_data = table2struct(bin_means_std_data_table,'ToScalar',true);
             bin_maxs_std_data_table = struct2table(data.bin_maxs_std);
             bin_maxs_std_data = table2struct(bin_maxs_std_data_table,'ToScalar',true);
             bin_mins_std_data_table = struct2table(data.bin_mins_std);
             bin_mins_std_data = table2struct(bin_mins_std_data_table,'ToScalar',true);
-            
+
             % functionine signal name, path, and bin centers
             savepath = 'test_binplotter.png';
 %             bin_centers = np.arange(3.5,25.5,step=1)
@@ -151,10 +151,8 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
             assertTrue(testCase,isfile(savepath));
             delete(savepath);
         end
+
     end
-end  
 
+end
 
-
-
-        
