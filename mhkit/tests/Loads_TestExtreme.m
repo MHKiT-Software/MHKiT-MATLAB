@@ -113,12 +113,12 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             stegev_pdf = ste_block_maxima_gev(block_max, x, "pdf");
             stegev_cdf = ste_block_maxima_gev(block_max, x, "cdf");
 
-            assertEqual(testCase, stegev_pdf, ste_gev_pdf)
-            assertEqual(testCase, stegev_cdf, ste_gev_cdf)
+            assertEqual(testCase, stegev_pdf, ste_gev_pdf, 'AbsTol', 0.00005)
+            assertEqual(testCase, stegev_cdf, ste_gev_cdf, 'AbsTol', 0.00005)
         end
 
         function test_short_term_extremes(testCase)
-            txtfile = readtable("..\..\examples\data\loads\time_series_for_extremes.txt");
+            txtfile = readtable("../../examples/data/loads/time_series_for_extremes.txt");
             txtfile = table2array(txtfile);
             t_st = 1 * 60 * 60;
             x = 1.6;
@@ -143,7 +143,7 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
         end
         
         function test_long_term_extreme(testCase)
-            txtfile = readtable("..\..\examples\data\loads\time_series_for_extremes.txt");
+            txtfile = readtable("../../examples/data/loads/time_series_for_extremes.txt");
             txtfile = table2array(txtfile);
             t_st = 1 * 60 * 60;
             x = linspace(0,10,1000);

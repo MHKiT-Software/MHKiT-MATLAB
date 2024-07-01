@@ -12,7 +12,7 @@ classdef Wave_TestContours < matlab.unittest.TestCase
         % Test methods
         
         function test_samples_contour(testCase)
-            file_loc = "..\..\examples\data\wave\WDRT_caluculated_countours.json";
+            file_loc = "../../examples/data/wave/WDRT_caluculated_countours.json";
             str = fileread(file_loc); % dedicated for reading files as text 
             data = jsondecode(str); % Using the jsondecode function to parse JSON from string 
             te_samples = [10, 15, 20];
@@ -29,7 +29,7 @@ classdef Wave_TestContours < matlab.unittest.TestCase
             te_0 = [14.24199604, 8.25383556, 6.03901866, 16.9836369, 9.51967777, 3.46969355];
             w_0 = [2.18127398e-01,2.18127398e-01,2.18127398e-01,2.45437862e-07,2.45437862e-07,2.45437862e-07];
 
-            file_loc = "..\..\examples\data\wave\Hm0_Te_46022.json";
+            file_loc = "../../examples/data/wave/Hm0_Te_46022.json";
             str = fileread(file_loc); % dedicated for reading files as text 
             data = jsondecode(str); % Using the jsondecode function to parse JSON from string
             Hm0 = cell2mat(struct2cell(data.Hm0));
