@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase       
+   
+    methods (Test)
+
+        % ADV Rotation Cases  
+        function test_heading(testCase) 
+            td = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01.nc'); 
+=======
 classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
 
     methods (Test)
@@ -5,17 +14,26 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
         % ADV Rotation Cases
         function test_heading(testCase)
             td = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01.nc');
+>>>>>>> master
             [head, pitch, roll] = orient2euler(td);
             td.pitch.data = pitch;
             td.roll.data = roll;
             td.heading.data = head;
 
             cd = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01_head_pitch_roll.nc');
+<<<<<<< HEAD
+            
+            Obj.diff = Dolfyn_Test_Rotate.compare_structures(...
+                td, cd);
+            testCase.assertLessThan(Obj.diff, 1e-6);
+        end    
+=======
 
             Obj.diff = Dolfyn_Test_Rotate.compare_structures(...
                 td, cd);
             testCase.assertLessThan(Obj.diff, 1e-6);
         end
+>>>>>>> master
 
         function test_inst2head_rotmat(testCase)
             td = read_netcdf('../../examples/data/dolfyn/control/vector_data01.nc');
@@ -41,7 +59,11 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
         function adv_rotate_inst2earth(testCase)
             td = read_netcdf('../../examples/data/dolfyn/control/vector_data01.nc');
             td = rotate2(td,'earth');
+<<<<<<< HEAD
+            tdm = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01.nc'); 
+=======
             tdm = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01.nc');
+>>>>>>> master
             tdm = rotate2(tdm, 'earth');
             tdo = read_netcdf('../../examples/data/dolfyn/control/vector_data01.nc');
             omat = tdo.orientmat;
@@ -69,11 +91,19 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
 
             cd = read_netcdf('../../examples/data/dolfyn/control/vector_data01.nc');
             cdm = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01.nc');
+<<<<<<< HEAD
+            % The heading/pitch/roll data gets modified during rotation, 
+            % so it doesn't go back to what it was.
+            cdm = rmfield(cdm, {'heading', 'pitch', 'roll'});
+            tdm = rmfield(tdm, {'heading', 'pitch', 'roll'});
+            
+=======
             % The heading/pitch/roll data gets modified during rotation,
             % so it doesn't go back to what it was.
             cdm = rmfield(cdm, {'heading', 'pitch', 'roll'});
             tdm = rmfield(tdm, {'heading', 'pitch', 'roll'});
 
+>>>>>>> master
             diff1 = Dolfyn_Test_Rotate.compare_structures(td, cd);
             diff2 = Dolfyn_Test_Rotate.compare_structures(tdm, cdm);
             testCase.assertLessThan(diff1, 1e-6);
@@ -92,7 +122,11 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             diff1 = Dolfyn_Test_Rotate.compare_structures(td, cd);
             diff2 = Dolfyn_Test_Rotate.compare_structures(tdm, cdm);
             testCase.assertLessThan(diff1, 1e-6);
+<<<<<<< HEAD
+            testCase.assertLessThan(diff2, 1e-6); 
+=======
             testCase.assertLessThan(diff2, 1e-6);
+>>>>>>> master
         end
 
         function adv_rotate_beam2inst(testCase)
@@ -107,7 +141,11 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             diff1 = Dolfyn_Test_Rotate.compare_structures(td, cd);
             diff2 = Dolfyn_Test_Rotate.compare_structures(tdm, cdm);
             testCase.assertLessThan(diff1, 1e-6);
+<<<<<<< HEAD
+            testCase.assertLessThan(diff2, 1e-6); 
+=======
             testCase.assertLessThan(diff2, 1e-6);
+>>>>>>> master
         end
 
         function adv_rotate_earth2principal(testCase)
@@ -122,11 +160,19 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
 
             cd = read_netcdf('../../examples/data/dolfyn/control/vector_data01_rotate_earth2principal.nc');
             cdm = read_netcdf('../../examples/data/dolfyn/control/vector_data_imu01_rotate_earth2principal.nc');
+<<<<<<< HEAD
+            
+            diff1 = Dolfyn_Test_Rotate.compare_structures(td, cd);
+            diff2 = Dolfyn_Test_Rotate.compare_structures(tdm, cdm);
+            testCase.assertLessThan(diff1, 1e-6);
+            testCase.assertLessThan(diff2, 1e-6); 
+=======
 
             diff1 = Dolfyn_Test_Rotate.compare_structures(td, cd);
             diff2 = Dolfyn_Test_Rotate.compare_structures(tdm, cdm);
             testCase.assertLessThan(diff1, 1e-6);
             testCase.assertLessThan(diff2, 1e-6);
+>>>>>>> master
         end
 
         function test_rotate_earth2principal_set_declination(testCase)
@@ -151,7 +197,11 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
 
         %##################################################################
 
+<<<<<<< HEAD
+        % ADP Rotation Cases  
+=======
         % ADP Rotation Cases
+>>>>>>> master
         function adp_rotate_beam2inst(testCase)
             td_rdi = read_netcdf('../../examples/data/dolfyn/control/RDI_test01.nc');
             td_sig = read_netcdf('../../examples/data/dolfyn/control/BenchFile01.nc');
@@ -175,7 +225,11 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             diff4 = Dolfyn_Test_Rotate.compare_structures(...
                 td_sig_ieb, cd_sig_ieb);
             testCase.assertLessThan(diff1, 1e-6);
+<<<<<<< HEAD
+            testCase.assertLessThan(diff2, 1e-6);            
+=======
             testCase.assertLessThan(diff2, 1e-6);
+>>>>>>> master
             testCase.assertLessThan(diff3, 1e-6);
             testCase.assertLessThan(diff4, 1e-6);
         end
@@ -211,7 +265,11 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             diff5 = ...
                 Dolfyn_Test_Rotate.compare_structures(td_sig_ie,cd_sig_ie);
             testCase.assertLessThan(diff1, 1e-6);
+<<<<<<< HEAD
+            testCase.assertLessThan(diff2, 1e-6);            
+=======
             testCase.assertLessThan(diff2, 1e-6);
+>>>>>>> master
             testCase.assertLessThan(diff3, 1e-6);
             testCase.assertLessThan(diff4, 1e-6);
             testCase.assertLessThan(diff5, 1e-6);
@@ -224,7 +282,11 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             td_sig_ie = read_netcdf('../../examples/data/dolfyn/control/Sig500_Echo.nc');
             td_sig_ie = rotate2(td_sig_ie, 'inst');
             td_sig_o = td_sig_ie;
+<<<<<<< HEAD
+    
+=======
 
+>>>>>>> master
             td = read_netcdf('../../examples/data/dolfyn/control/RDI_test01.nc');
             td = rotate2(td, 'earth');
             tdwr2 = read_netcdf('../../examples/data/dolfyn/control/winriver02.nc');
@@ -266,6 +328,16 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             tmp = tmp1|tmp2;
 
             dt1 = double(cd_sig_ie.vel.data);
+<<<<<<< HEAD
+            dt1(tmp) = 0.0;                        
+            dt2 = double(td_sig_o.vel.data);
+            dt2(tmp) = 0.0;  
+            diff7 = abs(sum(abs(dt1 - dt2),...
+                    1:numel(size(dt1)))/length(dt1));
+            
+            testCase.assertLessThan(diff1, 1e-5);
+            testCase.assertLessThan(diff2, 1e-5);            
+=======
             dt1(tmp) = 0.0;
             dt2 = double(td_sig_o.vel.data);
             dt2(tmp) = 0.0;
@@ -274,6 +346,7 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
 
             testCase.assertLessThan(diff1, 1e-5);
             testCase.assertLessThan(diff2, 1e-5);
+>>>>>>> master
             testCase.assertLessThan(diff3, 1e-5);
             testCase.assertLessThan(diff4, 1e-5);
             testCase.assertLessThan(diff5, 1e-5);
@@ -286,7 +359,11 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             td_rdi = rotate2(td_rdi, 'inst');
             tdwr2 = read_netcdf('../../examples/data/dolfyn/control/winriver02_rotate_ship2earth.nc');
             tdwr2 = rotate2(tdwr2, 'inst');
+<<<<<<< HEAD
+            
+=======
 
+>>>>>>> master
             td_awac = read_netcdf('../../examples/data/dolfyn/control/AWAC_test01.nc');
             td_awac = rotate2(td_awac, 'inst');
             td_sig = read_netcdf('../../examples/data/dolfyn/control/BenchFile01_rotate_inst2earth.nc');
@@ -295,10 +372,17 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             warning('off','all')
             td_sig_i = rotate2(td_sig_i, 'inst');
             warning('on','all')
+<<<<<<< HEAD
+                        
+            cd_rdi = read_netcdf('../../examples/data/dolfyn/control/RDI_test01_rotate_beam2inst.nc');
+            cd_wr2 = read_netcdf('../../examples/data/dolfyn/control/winriver02.nc');
+            % ship and inst are considered equivalent in dolfy  
+=======
 
             cd_rdi = read_netcdf('../../examples/data/dolfyn/control/RDI_test01_rotate_beam2inst.nc');
             cd_wr2 = read_netcdf('../../examples/data/dolfyn/control/winriver02.nc');
             % ship and inst are considered equivalent in dolfy
+>>>>>>> master
             cd_wr2.attrs.coord_sys = 'inst'; cd_wr2.coord_sys = 'inst';
             cd_awac = read_netcdf('../../examples/data/dolfyn/control/AWAC_test01_earth2inst.nc');
             cd_sig = read_netcdf('../../examples/data/dolfyn/control/BenchFile01_rotate_beam2inst.nc');
@@ -312,12 +396,26 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
                 Dolfyn_Test_Rotate.compare_structures(td_sig, cd_sig);
             diff5 = ...
                 Dolfyn_Test_Rotate.compare_structures(td_sig_i, cd_sig_i);
+<<<<<<< HEAD
+            
+=======
 
+>>>>>>> master
             tmp1 = isnan(cd_sig_i.accel.data);
             tmp2 = isnan(td_sig_i.accel.data);
             tmp = tmp1|tmp2;
 
             dt1 = double(cd_sig_i.accel.data);
+<<<<<<< HEAD
+            dt1(tmp) = 0.0;                        
+            dt2 = double(td_sig_i.accel.data);
+            dt2(tmp) = 0.0;  
+            diff6 = abs(sum(abs(dt1 - dt2),...
+                    1:numel(size(dt1)))/length(dt1));
+            
+            testCase.assertLessThan(diff1, 1e-5);
+            testCase.assertLessThan(diff2, 1e-5);            
+=======
             dt1(tmp) = 0.0;
             dt2 = double(td_sig_i.accel.data);
             dt2(tmp) = 0.0;
@@ -326,6 +424,7 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
 
             testCase.assertLessThan(diff1, 1e-5);
             testCase.assertLessThan(diff2, 1e-5);
+>>>>>>> master
             testCase.assertLessThan(diff3, 1e-5);
             testCase.assertLessThan(diff4, 1e-5);
             % known failure due to orientmat, see test_vs_nortek
@@ -340,11 +439,19 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             td_awac = read_netcdf('../../examples/data/dolfyn/control/AWAC_test01.nc');
 
             avg_td_rdi_vel = Dolfyn_Test_Rotate.xarray_mean(...
+<<<<<<< HEAD
+                td_rdi.vel.data, 2);      
+            avg_td_sig_vel = Dolfyn_Test_Rotate.xarray_mean(...
+                td_sig.vel.data, 2); 
+            avg_td_awac_vel = Dolfyn_Test_Rotate.xarray_mean(...
+                td_awac.vel.data, 2); 
+=======
                 td_rdi.vel.data, 2);
             avg_td_sig_vel = Dolfyn_Test_Rotate.xarray_mean(...
                 td_sig.vel.data, 2);
             avg_td_awac_vel = Dolfyn_Test_Rotate.xarray_mean(...
                 td_awac.vel.data, 2);
+>>>>>>> master
 
             td_rdi.attrs.principal_heading = calc_principal_heading(...
                 avg_td_rdi_vel, true);
@@ -353,7 +460,11 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             td_awac.attrs.principal_heading = calc_principal_heading(...
                 avg_td_awac_vel, false);
 
+<<<<<<< HEAD
+            td_rdi  = rotate2(td_rdi ,'principal'); 
+=======
             td_rdi  = rotate2(td_rdi ,'principal');
+>>>>>>> master
             td_sig  = rotate2(td_sig ,'principal');
             td_awac = rotate2(td_awac,'principal');
 
@@ -366,8 +477,13 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             diff3 = Dolfyn_Test_Rotate.compare_structures(td_sig, cd_sig);
 
             testCase.assertLessThan(diff1, 1e-6);
+<<<<<<< HEAD
+            testCase.assertLessThan(diff2, 1e-6); 
+            testCase.assertLessThan(diff3, 1e-6); 
+=======
             testCase.assertLessThan(diff2, 1e-6);
             testCase.assertLessThan(diff3, 1e-6);
+>>>>>>> master
         end
 
     end
@@ -378,6 +494,15 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             %%%%%%%%%%%%%%%%%%%%
             %     Compare the data between two structures and determine
             %     if it is within the tolerance atol.
+<<<<<<< HEAD
+            %     
+            % Parameters
+            % ------------
+            %     ds_read: structure 
+            %         Structure from the binary instrument data
+            %
+            %     ds_cntrl: structure 
+=======
             %
             % Parameters
             % ------------
@@ -385,11 +510,16 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             %         Structure from the binary instrument data
             %
             %     ds_cntrl: structure
+>>>>>>> master
             %         Control structure read from python generated NetCDF
             %
             % Returns
             % ---------
+<<<<<<< HEAD
+            %     diff: float 
+=======
             %     diff: float
+>>>>>>> master
             %         difference between the data in the two structures
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             oldFmt = get(0,'Format');
@@ -400,7 +530,11 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
             % Check coords first
             fields = fieldnames(ds_read.coords);
             for qq = 1:numel(fields)
+<<<<<<< HEAD
+                field = fields{qq};            
+=======
                 field = fields{qq};
+>>>>>>> master
                 if ~any(contains(field, exclude))
                     if iscell(ds_cntrl.coords.(field))
                         for kk = 1:length(ds_cntrl.coords.(field))
@@ -423,13 +557,21 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
                     end
                 end
             end
+<<<<<<< HEAD
+    
+=======
 
+>>>>>>> master
             % Check Attributes
             fields = fieldnames(ds_cntrl.attrs);
             for qq = 1:numel(fields)
                 field = fields{qq};
                 if ~any(contains(field, exclude))
+<<<<<<< HEAD
+                    if iscell(ds_cntrl.attrs.(field))                
+=======
                     if iscell(ds_cntrl.attrs.(field))
+>>>>>>> master
                         for kk = 1:numel(ds_cntrl.attrs.(field))
                             chk_nm = ds_cntrl.attrs.(field){kk};
                             diff = diff + ...
@@ -451,7 +593,11 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
                                 ds_read.attrs.(field));
                     elseif isnumeric(ds_cntrl.attrs.(field))
                         if contains(class(ds_cntrl.attrs.(field)),'int')
+<<<<<<< HEAD
+                            diff = diff + ... 
+=======
                             diff = diff + ...
+>>>>>>> master
                                 sum(double(ds_cntrl.attrs.(field) ~=...
                                 ds_read.attrs.(field)));
                         else
@@ -469,11 +615,19 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
                     end
                 end
             end
+<<<<<<< HEAD
+    
+            % Now check the remaining fields
+            fields = fieldnames(ds_cntrl);
+            for qq = 1:numel(fields)
+                field = fields{qq};                
+=======
 
             % Now check the remaining fields
             fields = fieldnames(ds_cntrl);
             for qq = 1:numel(fields)
                 field = fields{qq};
+>>>>>>> master
                 if ~any(contains(field, exclude))
                     cls = class(ds_cntrl.(field));
                     if strcmp(cls,'struct')
@@ -484,12 +638,21 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
                         tmp = tmp1|tmp2;
 
                         dt1 = double(ds_cntrl.(field).data);
+<<<<<<< HEAD
+                        dt1(tmp) = 0.0;                        
+                        dt2 = double(ds_read.(field).data);
+                        dt2(tmp) = 0.0;                       
+                          
+                        diff = diff + abs(sum(abs(dt1 - dt2),...
+                                1:numel(size(dt1)))/length(dt1)); 
+=======
                         dt1(tmp) = 0.0;
                         dt2 = double(ds_read.(field).data);
                         dt2(tmp) = 0.0;
 
                         diff = diff + abs(sum(abs(dt1 - dt2),...
                                 1:numel(size(dt1)))/length(dt1));
+>>>>>>> master
                         % Dims
                         for kk = 1:length(ds_cntrl.(field).dims)
                             diff = diff + double(~strcmpi(...
@@ -517,8 +680,13 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
                                 double(~strcmpi(ds_cntrl.(field),...
                                 ds_read.(field)));
                     end
+<<<<<<< HEAD
+                end 
+            end  
+=======
                 end
             end
+>>>>>>> master
             %fprintf('Final Diff = %f\n',diff)
             format(oldFmt);
         end
@@ -533,7 +701,11 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
                 end
             end
             mean = zeros(mean_shape);
+<<<<<<< HEAD
+            for qq = 1:mean_shape(1)   
+=======
             for qq = 1:mean_shape(1)
+>>>>>>> master
                 for jj = 1:mean_shape(end)
                     ind = ~isnan(data(qq,:,jj));
                     temp = data(qq,:,jj);
@@ -545,6 +717,9 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
         end
 
     end
+<<<<<<< HEAD
+=======
 
+>>>>>>> master
 end
 

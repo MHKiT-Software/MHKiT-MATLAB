@@ -3,7 +3,11 @@ function out = set_range_offset(ds, h_deploy)
 % or depth below water surface (for a down-facing instrument) to the range
 % coordinate. Also adds an attribute to the Dataset with the current
 % "h_deploy" distance.
+<<<<<<< HEAD
+% 
+=======
 %
+>>>>>>> master
 % Parameters
 % ----------
 % ds : xarray.Dataset
