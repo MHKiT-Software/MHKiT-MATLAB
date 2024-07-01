@@ -113,6 +113,21 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             assertLessThan(testCase,errorHm0, 0.01);
             assertLessThan(testCase,errorTp0, 0.01);
         end
+
+        function test_jonswap_spectrum_gamma(testCase)
+            Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
+            Obj.Tp = 8;
+            Obj.Hs = 2.5;
+            Obj.gamma = 2.0
+
+            S = jonswap_spectrum(Obj.f, Obj.Tp, Obj.Hs, Obj.gamma);
+            Hm0 = significant_wave_height(S);
+            Tp0 = peak_period(S);
+            errorHm0 = abs(Obj.Tp - Tp0)/Obj.Tp;
+            errorTp0 = abs(Obj.Hs - Hm0)/Obj.Hs;
+            assertLessThan(testCase,errorHm0, 0.01);
+            assertLessThan(testCase,errorTp0, 0.01);
+        end
         
         function test_plot_spectrum(testCase)
             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
