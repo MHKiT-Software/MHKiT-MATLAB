@@ -1,0 +1,367 @@
+name: MHKiT-MATLAB Unix Unit Tests
+
+on:
+  push:
+    branches: [master, develop, ebbflood]
+  pull_request:
+    branches: [master, develop, ebbflood]
+
+jobs:
+  cache_population:
+    strategy:
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10"]
+        matlab-version: [R2022b]
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      mhkit-python-dir: "MHKiT-Python"
+      MHKIT_PYTHON_VERSION: '0.7.0'
+    steps:
+      - name: Install & Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: latest
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          activate-environment: mhkit_conda_env
+          channels: conda-forge
+
+      - name: "Conda install netcdf4, hdf5"
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
+          # conda install netcdf4 hdf5
+          # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v4
+
+      # - name: Check out MHKiT-Python
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: "MHKiT-Software/MHKiT-Python"
+      #     path: ${{env.mhkit-python-dir}}
+
+      # - name: pip install mhkit module from source
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip install -e .
+      #   working-directory: ${{env.mhkit-python-dir}}
+
+      - name: pip install mhkit from pypi
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip install mhkit==$MHKIT_PYTHON_VERSION
+
+      - name: pip install mhkit-python-utils module from source
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip install -e .
+
+      # Create the cache and add a dummy file
+      # The dummy file ensures that the artifact download
+      - name: Setup mhkit_webread_cache
+        shell: bash -l {0}
+        run: |
+          mkdir mhkit_webread_cache
+          touch mhkit_webread_cache/test.txt
+          echo "Hello World" > mhkit_webread_cache/test.txt
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: ${{ matrix.matlab-version }}
+
+      # OutOfProcess is required to properly call netcdf/hdf5 and works reliably on macos and ubuntu
+      - name: Configure MATLAB Python Environment
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
+
+      - name: Add MATLAB test commands
+        shell: bash
+        run: echo "version,
+          addpath(genpath('mhkit')),
+          import matlab.unittest.TestSuite,
+          import matlab.unittest.TestRunner,
+          testFolder = ['mhkit' filesep 'tests'],
+          suite = TestSuite.fromFolder(testFolder),
+          runner = TestRunner.withTextOutput,
+          results = runner.run(suite),
+          assertSuccess(results)" >> run.m
+
+      - name: Output run.m
+        shell: bash
+        run: cat run.m
+
+      - name: Run MATLAB Unit Tests
+        uses: matlab-actions/run-command@v2
+        with:
+          command: run
+          startup-options: -noFigureWindows
+
+      - name: Save mhkit_webread_cache directory as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # GitHub Action "Name" of artifact
+          name: mhkit_webread_cache
+          # Filesystem path of directory
+          path: mhkit_webread_cache
+
+  main:
+    needs: cache_population
+    strategy:
+      fail-fast: false
+
+      # Expecting 2 * 4 * 7 - (13 * 2) = 30 jobs
+      matrix:
+        os: [macos-13, ubuntu-latest]
+        python-version: [3.8, 3.9, "3.10", 3.11]
+        # Note: It is preferred to use an actual release name as opposed to 'latest'
+        matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a]
+        mhkit-python-version: ["0.7.0"]
+        exclude:
+          - python-version: "3.10" # cache_population job
+            matlab-version: R2022b
+            os: ubuntu-latest
+          - matlab-version: R2024a # Non compatiable versions of Python and MATLAB
+            python-version: 3.8
+          - matlab-version: R2023b
+            python-version: 3.8
+          - matlab-version: R2023a
+            python-version: 3.11
+          - matlab-version: R2022b
+            python-version: 3.11
+          - matlab-version: R2022a
+            python-version: 3.11
+          - matlab-version: R2022a
+            python-version: "3.10"
+          - matlab-version: R2021b
+            python-version: 3.11
+          - matlab-version: R2021b
+            python-version: "3.10"
+          - matlab-version: R2021a
+            python-version: 3.11
+          - matlab-version: R2021a
+            python-version: "3.10"
+          - matlab-version: R2021a
+            python-version: 3.9
+          - matlab-version: R2020b
+            python-version: 3.11
+          - matlab-version: R2020b
+            python-version: "3.10"
+          - matlab-version: R2020b
+            python-version: 3.9
+          # Specific versions of tests that fail consistently. Most likely due to the GitHub actions environment
+          - matlab-version: R2024a # Python netcdf4 pip build error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123413351
+            python-version: 3.11
+            os: macos-13
+          # - matlab-version: R2024a # Working!
+          #   python-version: "3.10"
+          #   os: macos-13
+          - matlab-version: R2024a # Java Segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123411604
+            python-version: 3.9
+            os: macos-13
+          - matlab-version: R2023b # Python netcd4 pip build error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123412889
+            python-version: 3.11
+            os: macos-13
+          - matlab-version: R2023b # Java segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123412352
+            python-version: "3.10"
+            os: macos-13
+          - matlab-version: R2023b # Java segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123411335
+            python-version: 3.9
+            os: macos-13
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      mhkit-python-dir: "MHKiT-Python"
+      MHKIT_PYTHON_VERSION: ${{  matrix.mhkit-python-version }}
+    steps:
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v4
+
+      # - name: Check out MHKiT-Python
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: "MHKiT-Software/MHKiT-Python"
+      #     path: ${{env.mhkit-python-dir}}
+
+      - name: Install & Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: latest
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          activate-environment: mhkit_conda_env
+          channels: conda-forge
+
+      # This is necessary to fix any issues with netcdf4 and hdf5 headers
+      - name: "Conda install netcdf4, hdf5"
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
+          # conda install netcdf4 hdf5
+          # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+
+      # - name: Setup Python ${{ matrix.python-version }}
+        # shell: bash -l {0}
+        # run: |
+        #   conda create --name mhkit_conda_env python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
+        #   conda activate mhkit_conda_env
+        #   export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+        #   pip install -e . --no-deps --force-reinstall
+
+      # - name: Setup MHKiT Dependencies on macOS
+      #   if: ${{ matrix.os == 'macos-13' }}
+      #   run: brew install hdf5 netcdf
+
+      # - name: Setup MHKiT Dependencies on ubuntu
+      #   run: sudo apt install libhdf5-serial-dev libnetcdf-dev
+      #   if: ${{ matrix.os == 'ubuntu-latest' }}
+
+      # - name: Setup MHKiT Dependencies on ubuntu
+      #   if: ${{ matrix.os == 'ubuntu-latest' }}
+      #   run: |
+      #     sudo apt update
+      #     sudo apt upgrade
+      #     sudo apt install build-essential
+
+      # - name: Print GCC Version
+      #   if: ${{ matrix.os == 'ubuntu-latest' }}
+      #   run: |
+      #     gcc --version
+      #     g++ --version
+
+      # - name: Setup MATLAB Path on Ubuntu
+      #   if: ${{ matrix.os == 'ubuntu-latest' }}
+      #   run: echo "export LD_LIBRARY_PATH=/usr/local/MATLAB/${{ matrix.matlab-version }}/sys/os/glnxa64" >> "$GITHUB_ENV"
+
+      - name: Setup MATLAB Path on Ubuntu
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: echo "LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+
+      - name: Print Python executable
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python -c "import sys; print(sys.executable)"
+
+      - name: Print Python Version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python --version
+
+      # - name: pip install mhkit module from source
+      #   working-directory: ${{env.mhkit-python-dir}}
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+      #     pip install -e .
+
+      - name: pip install mhkit from pypi
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+          pip install mhkit==$MHKIT_PYTHON_VERSION
+
+      - name: pip upgrade netcdf4
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
+          pip install --upgrade netcdf4
+
+      - name: pip install mhkit-python-utils module from source
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip install -e .
+
+      - name: List installed pip modules
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip freeze
+
+      - name: Print MHKiT-Python Version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python -c "import mhkit; print(mhkit.__version__)"
+
+      - name: Verify MHKiT-Python Operation
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
+
+      - name: Download mhkit_webread_cache artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mhkit_webread_cache
+          path: mhkit_webread_cache
+
+      - name: Display structure mhkit_webread_cache
+        run: ls -R
+        working-directory: .
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: ${{ matrix.matlab-version }}
+
+      - name: Add Python Dir to Path
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
+
+      # OutOfProcess is required to properly call netcdf/hdf5 and works reliably on macos and ubuntu
+      - name: Configure MATLAB Python Environment
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") >> run.m
+
+      - name: Add MATLAB test commands
+        shell: bash
+        run: echo "version,
+          addpath(genpath('mhkit')),
+          import matlab.unittest.TestSuite,
+          import matlab.unittest.TestRunner,
+          testFolder = ['mhkit' filesep 'tests'],
+          suite = TestSuite.fromFolder(testFolder),
+          runner = TestRunner.withTextOutput,
+          results = runner.run(suite),
+          assertSuccess(results)" >> run.m
+
+      - name: Output run.m
+        shell: bash
+        run: cat run.m
+
+      # This is a good idea but does not work because you cannot explicitly set the python execution mode
+      #   - name: Run MHKiT-MATLAB Unit Tests
+      #     uses: matlab-actions/run-tests@v1
+      #     with:
+      #         select-by-folder: mhkit/tests
+
+      - name: Run MATLAB Unit Tests
+        uses: matlab-actions/run-command@v2
+        with:
+          command: run
+          startup-options: -noFigureWindows
