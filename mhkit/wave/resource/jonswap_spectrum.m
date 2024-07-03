@@ -47,11 +47,10 @@ end
 if nargin == 3
         S_py=py.mhkit.wave.resource.jonswap_spectrum(frequency,Tp,Hs);
 elseif nargin == 4
-        S_py=py.mhkit.wave.resource.jonswap_spectrum(frequency,Tp,varargin{1},pyargs('gamma',varargin{1}));
+        S_py=py.mhkit.wave.resource.jonswap_spectrum(frequency, Tp, Hs, pyargs('gamma', varargin{1}));
 end
 
 S.spectrum=double(py.array.array('d',py.numpy.nditer(S_py.values))).';
 char_arr=char(S_py.index.values);
 S.frequency=double(py.array.array('d',py.numpy.nditer(S_py.index))).';
 S.Tp=Tp;
-
