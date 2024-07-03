@@ -35,7 +35,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.26.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
+          conda install scipy==1.12.0 numpy==1.26.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
           # conda install netcdf4 hdf5
           # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
 
@@ -211,7 +211,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.26.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
+          conda install scipy==1.12.0 numpy==1.26.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
           # conda install netcdf4 hdf5
           # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
 
