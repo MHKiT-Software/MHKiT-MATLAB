@@ -33,7 +33,7 @@ jobs:
       - name: "Conda install netcdf4, hdf5"
         run: |
           conda activate mhkit_conda_env
-          conda install scipy==1.12.0 numpy==1.24.4 netcdf4 hdf5
+          conda install scipy==1.11.4 numpy==1.24.4 netcdf4 hdf5
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
@@ -65,7 +65,7 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip uninstall -y scipy
-          pip install scipy==1.12.0
+          pip install scipy==1.11.4
 
       # Create the cache and add a dummy file
       # The dummy file ensures that the artifact download
@@ -179,7 +179,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install scipy==1.12.0 numpy==1.24.4 netcdf4 hdf5
+          conda install scipy==1.11.4 numpy==1.24.4 netcdf4 hdf5
       - name: Output python executable
         shell: bash -l {0}
         run: |
@@ -221,7 +221,7 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip uninstall -y scipy
-          pip install scipy==1.12.0
+          pip install scipy==1.11.4
 
       - name: List installed pip modules
         shell: bash -l {0}
