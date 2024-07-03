@@ -64,7 +64,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          pip uninstall scipy
+          pip uninstall -y scipy
           pip install scipy==1.12.0
 
       # Create the cache and add a dummy file
@@ -220,7 +220,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          pip uninstall scipy
+          pip uninstall -y scipy
           pip install scipy==1.12.0
 
       - name: List installed pip modules
