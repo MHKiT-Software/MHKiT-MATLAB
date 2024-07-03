@@ -1,56 +1,58 @@
 classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
 
-    methods (Test) 
+    methods (Test)
 
         function test_pierson_moskowitz_spectrum(testCase)
             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
-            
+
             S = pierson_moskowitz_spectrum(Obj.f,Obj.Tp,Obj.Hs);
             Tp0 = peak_period(S);
             error = abs(Obj.Tp - Tp0)/Obj.Tp;
             assertLessThan(testCase,error, 0.01);
         end
-        
-% This test and function no longer in corresponding Python code
-%         function test_bretschneider_spectrum(testCase)
-%             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
-%             Obj.Tp = 8;
-%             Obj.Hs = 2.5;
-%             
-%             S = create_spectra('bretschneider_spectrum',Obj.f,Obj.Tp,Obj.Hs);
-%             Tp0 = peak_period(S);
-%             Hm0 = significant_wave_height(S);
-%             errorHm0 = abs(Obj.Tp - Tp0)/Obj.Tp;
-%             errorTp0 = abs(Obj.Hs - Hm0)/Obj.Hs;        
-%             assertLessThan(testCase,errorHm0, 0.01);
-%             assertLessThan(testCase,errorTp0, 0.01);
-%         end
-        
+
+         % This test and function no longer in corresponding Python code
+         % function test_bretschneider_spectrum(testCase)
+         %     Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
+         %     Obj.Tp = 8;
+         %     Obj.Hs = 2.5;
+
+         %     S = create_spectra('bretschneider_spectrum',Obj.f,Obj.Tp,Obj.Hs);
+         %     Tp0 = peak_period(S);
+         %     Hm0 = significant_wave_height(S);
+         %     errorHm0 = abs(Obj.Tp - Tp0)/Obj.Tp;
+         %     errorTp0 = abs(Obj.Hs - Hm0)/Obj.Hs;
+         %     assertLessThan(testCase,errorHm0, 0.01);
+         %     assertLessThan(testCase,errorTp0, 0.01);
+         % end
+
         function test_surface_elevation_seed(testCase)
-            Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
+
+            Obj.f = 0.0:0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
             df = 0.01/(2*pi);
             Trep = 1/df;
             Obj.t = 0:0.05:Trep;
-            
+
             S = jonswap_spectrum(Obj.f, Obj.Tp, Obj.Hs);
             seednum = 123;
             eta0 = surface_elevation(S, Obj.t);
-            eta1 = surface_elevation(S, Obj.t,"seed",seednum);               
-            assertEqual(testCase,eta0, eta1); 
+            eta1 = surface_elevation(S, Obj.t,"seed",seednum);
+            assertEqual(testCase,eta0, eta1);
         end
-        
+
         function test_surface_elevation_phasing(testCase)
-            Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
+
+            Obj.f = 0.0:0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
             df = 0.01/(2*pi);
             Trep = 1/df;
             Obj.t = 0:0.05:Trep;
-            
+
             S = jonswap_spectrum(Obj.f, Obj.Tp, Obj.Hs);
             eta0 = surface_elevation(S, Obj.t);
             seednum = 123;
@@ -59,16 +61,17 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             eta1 = surface_elevation(S, Obj.t,"phases",phases);
             assertEqual(testCase,eta0, eta1);
         end
-        
-        function test_surface_elevation_moments(testCase)         
-            Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
+
+        function test_surface_elevation_moments(testCase)
+
+            Obj.f = 0.0:0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
-            df = 0.01/(2*pi);   
+            df = 0.01/(2*pi);
             Trep = 1/df;
             Obj.t = 0:0.05:Trep;
             dt = Obj.t(2)-Obj.t(1);
-            
+
             S = jonswap_spectrum(Obj.f, Obj.Tp, Obj.Hs);
             wave_elevation = surface_elevation(S, Obj.t);
             Sn = elevation_spectrum(wave_elevation.elevation, 1/dt,length(wave_elevation.elevation),Obj.t,"window","boxcar","detrend",false,"noverlap",0);
@@ -81,7 +84,7 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             errorm1 = abs((m1 - m1n)/m1);
             assertLessThan(testCase,errorm1, 0.01);
         end
-% 
+%
 %         function test_surface_elevation_rmse(testCase)
 %             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
 %             Obj.Tp = 8;
@@ -90,7 +93,7 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
 %             Trep = 1/df;
 %             Obj.t = 0:0.05:Trep;
 %             import matlab.unittest.qualifications.Assertable
-%             
+%
 %             S = jonswap_spectrum(Obj.f, Obj.Tp, Obj.Hs);
 %             wave_elevation = surface_elevation(S, Obj.t);
 %             Sn = elevation_spectrum(wave_elevation.elevation,1/df,length(wave_elevation.elevation),Obj.t,"window","boxcar","detrend",false,"noverlap",0);
@@ -99,17 +102,17 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
 % %             rmse_sum = (sum(rmse)/length(rmse))^0.5;
 % %             assertLessThan(testCase,rmse_sum, 0.02);
 %         end
-    
+
         function test_jonswap_spectrum(testCase)
             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
-            
+
             S = jonswap_spectrum(Obj.f, Obj.Tp, Obj.Hs);
             Hm0 = significant_wave_height(S);
-            Tp0 = peak_period(S);     
+            Tp0 = peak_period(S);
             errorHm0 = abs(Obj.Tp - Tp0)/Obj.Tp;
-            errorTp0 = abs(Obj.Hs - Hm0)/Obj.Hs;      
+            errorTp0 = abs(Obj.Hs - Hm0)/Obj.Hs;
             assertLessThan(testCase,errorHm0, 0.01);
             assertLessThan(testCase,errorTp0, 0.01);
         end
@@ -128,17 +131,17 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             assertLessThan(testCase,errorHm0, 0.01);
             assertLessThan(testCase,errorTp0, 0.01);
         end
-        
+
         function test_plot_spectrum(testCase)
             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
-            
+
             filename = 'wave_plot_matrix.png';
             if isfile(filename)
                 delete(filename);
             end
-            
+
             S = pierson_moskowitz_spectrum(Obj.f,Obj.Tp,Obj.Hs);
 
             plot_spectrum(S,"savepath",filename);
@@ -146,5 +149,26 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
+
+        function testSurfaceElevationMethod(testCase)
+            Trep = 600;
+            df = 1 / Trep;
+            f = 0:df:1;
+            Hs = 2.5;
+            Tp = 8;
+            t = 0:0.05:Trep;
+
+            S = pierson_moskowitz_spectrum(f, Tp, Hs);
+
+            eta_ifft = surface_elevation(S, t, "seed", 1, "method", "ifft");
+            eta_sum_of_sines = surface_elevation(S, t, "seed", 1, "method", "sum_of_sines");
+
+            surface_elevation_diff = mean(eta_ifft.elevation - eta_sum_of_sines.elevation);
+            disp(surface_elevation_diff);
+
+            assertLessThan(testCase, surface_elevation_diff, 0.01);
+        end
+
     end
+
 end

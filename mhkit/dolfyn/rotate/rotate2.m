@@ -1,18 +1,18 @@
 function ds = rotate2(data_set, out_frame)
     % Rotate a dataset to a new coordinate system.
-    % 
+    %
     % Parameters
     % ----------
     % ds : xr.Dataset
     %   The dolfyn dataset (ADV or ADCP) to rotate.
     % out_frame : string {'beam', 'inst', 'earth', 'principal'}
     %   The coordinate system to rotate the data into.
-    % 
+    %
     % Returns
     % -------
     % ds : xarray.Dataset
     %   The rotated dataset
-    % 
+    %
     % Notes
     % -----
     % This function rotates all variables in ds.attrs.rotate_vars
@@ -53,7 +53,7 @@ function ds = rotate2(data_set, out_frame)
 
     rmod = '';
     make_model = lower(join([data_set.attrs.inst_make,' ',...
-        data_set.attrs.inst_model]));       
+        data_set.attrs.inst_model]));
     for qq = 1:numel(rot_module_dict)
         ky = rot_module_dict{qq};
         if (contains(make_model,ky))
@@ -68,7 +68,7 @@ function ds = rotate2(data_set, out_frame)
             ,msgtext);
         throwAsCaller(ME)
     end
-    
+
     % Get the 'indices' of the rotation chain
     iframe_in = find(strcmp(rc,csin));
     iframe_out = find(strcmpi(rc,out_frame));
@@ -120,3 +120,4 @@ function ds = rotate2(data_set, out_frame)
     end
     ds = data_set;
 end
+

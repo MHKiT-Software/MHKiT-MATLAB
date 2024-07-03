@@ -1,10 +1,11 @@
 function f = plot_compendium(Hs, Tp, Dp, time, options)
-%PLOT_COMPENDIUM Creates subplots of wave height, peak period and direction
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   PLOT_COMPENDIUM Creates subplots of wave height, peak period and direction
 %   Creates subplots showing: Significant Wave Height (Hs),
 %   Peak Period (Tp), and Direction (Dp). Developed based on:
 %   http://cdip.ucsd.edu/themes/media/docs/documents/html_pages/compendium.html
-%   
+%
 %   Parameters
 %   ----------
 %       Hs: double array
@@ -17,7 +18,7 @@ function f = plot_compendium(Hs, Tp, Dp, time, options)
 %           timestamps
 %       buoy_title: string (optional)
 %           figure suptitle (super title)
-%   
+%
 %   Returns
 %   -------
 %       f : figure object
@@ -78,3 +79,4 @@ if options.buoy_title ~= ""
 end
 
 hold off
+

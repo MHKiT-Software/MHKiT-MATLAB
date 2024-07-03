@@ -2,17 +2,17 @@ function result=uninstall_all_toolboxes()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Uninstall all currently installed toolboxes
-%     
+%
 % Parameters
 % ------------
-%     none 
+%     none
 %
 % Returns
 % ---------
 %     result: boolean
 %         0 = success, 1 = failure, not all toolboxes uninstalled
 %
-%         
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%
@@ -29,7 +29,7 @@ function result=uninstall_all_toolboxes()
 
 % toolboxes = matlab.addons.toolbox.installedToolboxes;
 % addons = matlab.addons.installedAddons;
-% 
+%
 % if height(addons) < 1
 %     result = 0;
 % else
@@ -152,3 +152,4 @@ toggleToolbox(toolboxes, 'off');
 result = 0;
 
 %%
+

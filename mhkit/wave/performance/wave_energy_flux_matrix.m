@@ -1,12 +1,12 @@
 function WEFM=wave_energy_flux_matrix(Hm0,Te,J,statistic,Hm0_bins,Te_bins)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
+%
 %     Generates a wave eneergy flux matrix for a given statistic
-%    
-%     Note that IEC/TS 62600-100 requires capture length matrices for 
+%
+%     Note that IEC/TS 62600-100 requires capture length matrices for
 %     the mean, std, count, min, and max.
-%     
+%
 % Parameters
 % ------------
 %     Hm0: numpy array or vector
@@ -19,8 +19,8 @@ function WEFM=wave_energy_flux_matrix(Hm0,Te,J,statistic,Hm0_bins,Te_bins)
 %         wave energy flux from spectra [W/m]
 %
 %     statistic: string
-%         Statistic for each bin, options include: 'mean', 'std', 'median', 
-%         'count', 'sum', 'min', 'max', and 'frequency'.  Note that 'std' uses 
+%         Statistic for each bin, options include: 'mean', 'std', 'median',
+%         'count', 'sum', 'min', 'max', and 'frequency'.  Note that 'std' uses
 %         a degree of freedom of 1 in accordance with IEC/TS 62600-100.
 %
 %     Hm0_bins: numpy array or vector
@@ -28,7 +28,7 @@ function WEFM=wave_energy_flux_matrix(Hm0,Te,J,statistic,Hm0_bins,Te_bins)
 %
 %     Te_bins: numpy array or vector
 %         Bin centers for Te [s]
-%         
+%
 % Returns
 % ---------
 %     WEFM: Structure
@@ -65,3 +65,4 @@ WEFM.values=vals;
 WEFM.stat=statistic;
 WEFM.Hm0_bins=double(Hm0_bins);
 WEFM.Te_bins=double(Te_bins);
+

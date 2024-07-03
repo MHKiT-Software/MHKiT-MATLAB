@@ -1,7 +1,7 @@
 function out = correlation_filter(ds, options)
 % Filters out velocity data where correlation is below a
 % threshold in the beam correlation data.
-% 
+%
 % Parameters
 % ----------
 % ds : Dataset
@@ -11,18 +11,18 @@ function out = correlation_filter(ds, options)
 %   50
 % val : numeric
 %   Value to set masked correlation data to, default is nan
-% 
+%
 % Returns
 % -------
 % ds : xarray.Dataset
 %  Velocity data with low correlation values set to `val`
-% 
+%
 % Notes
 % -----
 % Does not edit correlation or amplitude data.
 
     arguments
-        ds;     
+        ds;
         options.thresh = 50;
         options.val = nan;
     end

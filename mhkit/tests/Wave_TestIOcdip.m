@@ -3,7 +3,7 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
     %   The Coastal Data Information Program (CDIP) measures, analyzes,
     %   archives and disseminates coastal environment data.
     %   https://cdip.ucsd.edu/
-    
+
     methods (Test)
 
         function test_get_netcdf_variables_all2Dvars(testCase)
@@ -27,7 +27,7 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
                 'station_number', '067', ...
                 'years', 1996, ...
                 'parameters', parameters);
-            
+
             assertTrue(testCase, all(ismember({'waveHs', 'waveTp'}, ...
                 fieldnames(data.data.wave))));
             assertTrue(testCase, all(ismember({'waveMeanDirection'}, ...
@@ -45,7 +45,7 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
                 'start_date', start_date, ...
                 'end_date', end_date, ...
                 'parameters', {'waveHs'});
-            
+
             start_dt = datetime(start_date, ...
                 'InputFormat', 'yyyy-MM-dd', ...
                 'TimeZone', 'UTC');
@@ -141,6 +141,8 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
             assertTrue(testCase, isfile(filename));
             delete(filename);
         end
+
     end
+
 end
 

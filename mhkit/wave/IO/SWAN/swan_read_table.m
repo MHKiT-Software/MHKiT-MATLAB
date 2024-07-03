@@ -2,16 +2,16 @@ function data=swan_read_table(swan_file)
 
 %%%%%%%%%%%%%%%%%%%%
 %     Reads in SWAN ASCII table format output and returns a Matlab
-%     structure with modeled data and assocaited metadata. 
-%     
+%     structure with modeled data and assocaited metadata.
+%
 % Parameters
 % ------------
 %     swan_file : string
-%         SWAN file name to import    
-%     
+%         SWAN file name to import
+%
 % Returns
 % ---------
-%     data: Structure 
+%     data: Structure
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -23,7 +23,7 @@ while ischar(indata)
          break
      end
      indata = fgetl(fid);
-     
+
 end
 fclose(fid);
 
@@ -47,6 +47,4 @@ for j=1:max(size(meta))
       data.metadata.(m(1)) = m(2);
     end
 end
-
-
 

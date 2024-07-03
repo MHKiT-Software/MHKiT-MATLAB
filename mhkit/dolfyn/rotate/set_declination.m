@@ -37,7 +37,7 @@ function ds = set_declination(data_set, declin)
 %      data object in the principal coordinate system, then calling
 %      dat.rotate2('earth') will yield a data object in the new
 %      'True' earth coordinate system)
-%  
+%
     if isfield(data_set.attrs, 'declination')
         angle = declin - data_set.attrs.declination;
     else
@@ -58,7 +58,7 @@ function ds = set_declination(data_set, declin)
     end
 
     data_set.orientmat.data = tensorproduct(data_set.orientmat.data, ...
-        rdec, 'edbc,ab->edac');  
+        rdec, 'edbc,ab->edac');
 
     if isfield(data_set,'heading')
         data_set.heading.data = data_set.heading.data + angle;

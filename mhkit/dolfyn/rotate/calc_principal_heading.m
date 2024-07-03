@@ -3,9 +3,9 @@ function p_heading = calc_principal_heading(vel, tidal_mode)
 %
 %    Parameters
 %    ----------
-%    vel : array 
-%      The 2D or 3D velocity array 
-%    tidal_mode : bool 
+%    vel : array
+%      The 2D or 3D velocity array
+%    tidal_mode : bool
 %
 %    Returns
 %    -------

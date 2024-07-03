@@ -25,7 +25,7 @@ function newmap = bluewhitered(m)
 %   colormap(bluewhitered)
 %   axis tight
 %
-%   See also HSV, HOT, COOL, BONE, COPPER, PINK, FLAG, 
+%   See also HSV, HOT, COOL, BONE, COPPER, PINK, FLAG,
 %   COLORMAP, RGBPLOT.
 if nargin < 1
    m = size(get(gcf,'colormap'),1);
@@ -44,34 +44,34 @@ if (lims(1) < 0) & (lims(2) > 0)
     ratio = abs(lims(1)) / (abs(lims(1)) + lims(2));
     neglen = round(m*ratio);
     poslen = m - neglen;
-    
+
     % Just negative
     new = [bottom; botmiddle; middle];
     len = length(new);
     oldsteps = linspace(0, 1, len);
     newsteps = linspace(0, 1, neglen);
     newmap1 = zeros(neglen, 3);
-    
+
     for i=1:3
         % Interpolate over RGB spaces of colormap
         newmap1(:,i) = min(max(interp1(oldsteps, new(:,i), newsteps)', 0), 1);
     end
-    
+
     % Just positive
     new = [middle; topmiddle; top];
     len = length(new);
     oldsteps = linspace(0, 1, len);
     newsteps = linspace(0, 1, poslen);
     newmap = zeros(poslen, 3);
-    
+
     for i=1:3
         % Interpolate over RGB spaces of colormap
         newmap(:,i) = min(max(interp1(oldsteps, new(:,i), newsteps)', 0), 1);
     end
-    
+
     % And put 'em together
     newmap = [newmap1; newmap];
-    
+
 elseif lims(1) >= 0
     % Just positive
     new = [middle; topmiddle; top];
@@ -79,12 +79,12 @@ elseif lims(1) >= 0
     oldsteps = linspace(0, 1, len);
     newsteps = linspace(0, 1, m);
     newmap = zeros(m, 3);
-    
+
     for i=1:3
         % Interpolate over RGB spaces of colormap
         newmap(:,i) = min(max(interp1(oldsteps, new(:,i), newsteps)', 0), 1);
     end
-    
+
 else
     % Just negative
     new = [bottom; botmiddle; middle];
@@ -92,10 +92,11 @@ else
     oldsteps = linspace(0, 1, len);
     newsteps = linspace(0, 1, m);
     newmap = zeros(m, 3);
-    
+
     for i=1:3
         % Interpolate over RGB spaces of colormap
         newmap(:,i) = min(max(interp1(oldsteps, new(:,i), newsteps)', 0), 1);
     end
-    
+
 end
+

@@ -1,8 +1,8 @@
 function ds=read_nortek(filename,options)
 
-%%%%%%%%%%%%%%%%%%%%
-%     Read a classic Nortek (AWAC and Vector) datafile 
-%     
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     Read a classic Nortek (AWAC and Vector) datafile
+%
 % Parameters
 % ------------
 %     filename: string
@@ -14,55 +14,55 @@ function ds=read_nortek(filename,options)
 %         Whether to perform the checksum of each data block. (default
 %         false)
 %     nens: nan, int, or 2-element array (optional)
-%         nan (default: read entire file), int, or 2-element tuple 
+%         nan (default: read entire file), int, or 2-element tuple
 %         (start, stop) Number of pings to read from the file.
 %
-%     call with options -> read_nortek(filename,'userdata',false,'do_checksum',true,'nens',12) 
+%     call with options -> read_nortek(filename,'userdata',false,'do_checksum',true,'nens',12)
 %
 % Returns
 % ---------
-%     ds: structure 
+%     ds: structure
 %         Structure from the binary instrument data
-%        
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     arguments
-        filename 
+        filename
         options.userdata = true;
         options.do_checksum = false;
         options.nens = nan;
     end
-    
+
     % check to see if the filename input is a string
     if ~ischar(filename)
         ME = MException('MATLAB:read_nortek',['filename must be a ' ...
             'character string']);
         throw(ME);
     end
-    
+
     % check to see if the file exists
     if ~isfile(filename)
         ME = MException('MATLAB:read_nortek','file does not exist');
         throw(ME);
     end
-    
+
     % check to make sure userdata is bool or string
     if ~isa(options.userdata, 'logical') && ~isa(options.userdata, 'string')
         ME = MException('MATLAB:read_nortek','userdata must be a logical or string');
         throw(ME);
     end
-    
+
     % check to make sure do_checksum is bool
-    if ~isa(options.do_checksum, 'logical') 
+    if ~isa(options.do_checksum, 'logical')
         ME = MException('MATLAB:read_nortek','do_checksum must be a logical');
         throw(ME);
     end
-    
+
     % check to make sure nens is numeric or nan
     if ~all(isa(options.nens, 'numeric'))
         ME = MException('MATLAB:read_nortek','nens must be numeric or nan');
         throw(ME);
     end
-    
+
     % check to make sure if nens is numeric that its length is equal to 1 or 2
     nstart = 0;
     if ~isnan(options.nens)
@@ -70,7 +70,7 @@ function ds=read_nortek(filename,options)
             ME = MException('MATLAB:read_nortek','nens must be a single value or tuple');
             throw(ME);
         end
-        if length(options.nens) == 1            
+        if length(options.nens) == 1
             npings = options.nens(1);
         else
             nstart = options.nens(1);
@@ -81,14 +81,14 @@ function ds=read_nortek(filename,options)
     end
 
     % read the user data if it was requested using the read_userdata
-    % function 
+    % function
     userdata = read_userdata(filename, options.userdata);
 
     %% <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                        Initialize Routine
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    
-    % Attempt to read the binary file under the Nortek format    
+
+    % Attempt to read the binary file under the Nortek format
     fid = fopen(filename,'r', 'n', 'UTF-8');      % open disk file
     % read endian to check if this is a nortek file
     endian1 = fread(fid,2,'uint16','b');
@@ -102,7 +102,7 @@ function ds=read_nortek(filename,options)
         % this is not a nortek file. Move to next reader
         ME = MException('MATLAB:read_nortek',['could not determine the ' ...
             'endianness of the file. Are you sure this is a Nortek file?']);
-        throw(ME);        
+        throw(ME);
     end
     clearvars endian1 endian2;
     frewind(fid);
@@ -112,7 +112,7 @@ function ds=read_nortek(filename,options)
     n_samp_guess = 1;
     filesize = find_filesize();
     c = 1;
-    dtypes = {}; 
+    dtypes = {};
     lastread = {{},{},{},{},{}};
     vec_data = struct();
     vec_sysdata = struct();
@@ -181,11 +181,11 @@ function ds=read_nortek(filename,options)
     end
     burst_start = false([n_samp_guess,1]);
     data.('attrs').('fs') = config.('fs');
-    if config.('coord_sys_axes') == 'XYZ'        
+    if config.('coord_sys_axes') == 'XYZ'
         data.('attrs').('coord_sys') = 'inst';
-    elseif config.('coord_sys_axes') == 'ENU'        
+    elseif config.('coord_sys_axes') == 'ENU'
         data.('attrs').('coord_sys') = 'earth';
-    elseif config.('coord_sys_axes') == 'beam'        
+    elseif config.('coord_sys_axes') == 'beam'
         data.('attrs').('coord_sys') = 'beam';
     end
     data.('attrs').("has_imu") = 0;
@@ -197,12 +197,12 @@ function ds=read_nortek(filename,options)
     %                        Read File
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     readfile();
-    fclose(fid);    % close the file 
+    fclose(fid);    % close the file
 
     %% <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     %                       Post Process
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    
+
     dat2sci();
 
     rotmat = nan;
@@ -210,7 +210,7 @@ function ds=read_nortek(filename,options)
     fn = fieldnames(userdata);
     for k=1:numel(fn)
         if( contains(fn{k},'rotmat') )
-            rotmat = userdata.(fn{k});        
+            rotmat = userdata.(fn{k});
         elseif( contains(fn{k},'dec') )
             declin = userdata.(fn{k});
         else
@@ -219,7 +219,7 @@ function ds=read_nortek(filename,options)
     end
 
     handle_nan();
-    ds = create_dataset(data);    
+    ds = create_dataset(data);
     ds = set_coords(ds,ds.coord_sys);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -237,8 +237,8 @@ function ds=read_nortek(filename,options)
         ds.orientmat.dims = { 'time', 'inst', 'earth' };
         ds.orientmat.coords.time = ds.time;
         ds.orientmat.coords.inst = {'X' 'Y' 'Z'};
-        ds.orientmat.coords.earth = {'E' 'N' 'U'};        
-        
+        ds.orientmat.coords.earth = {'E' 'N' 'U'};
+
     end
 
     if ~isnan(rotmat)
@@ -252,13 +252,13 @@ function ds=read_nortek(filename,options)
     %                        End Post Process
     %                        End Function
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-      
+
     function readfile()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Loops through the file to read data              
+        % Loops through the file to read data
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         retval = false;
         nlines = nan;
         try
@@ -284,7 +284,7 @@ function ds=read_nortek(filename,options)
                 break
                 end
             end
-        catch 
+        catch
             fprintf("End of file at %d bytes.\n",ftell(fid))
         end
         c = c - 1;
@@ -295,9 +295,9 @@ function ds=read_nortek(filename,options)
     function out = readnext()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Reads the next id in the file              
+        % Reads the next id in the file
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         id = read_id();
         id = dec2hex(id);
         if length(id)==1
@@ -321,24 +321,24 @@ function ds=read_nortek(filename,options)
 
     function id = read_id()
         %%%%%%%%%%%%%%%%%%%%
-        %     Read the next 'ID' from the file.              
+        %     Read the next 'ID' from the file.
         %
         % Returns
         % ---------
-        %     id: int          
-        %        
+        %     id: int
+        %
         %%%%%%%%%%%%%%%%%%%%
         read_bytes = fread(fid,2,'uchar',endian);
         if read_bytes(1) ~= 165
-            % corrupted block            
+            % corrupted block
 %             warning("Corrupted data block sync code (%d, %d) found" + ...
 %                 " in ping %d. Searching for next valid code", read_bytes(1),...
 %                 read_bytes(2), c);
             id = findnext(false);
-            fseek(fid, 2, 0);            
+            fseek(fid, 2, 0);
         else
             id = read_bytes(2);
-        end        
+        end
     end
 
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -348,9 +348,9 @@ function ds=read_nortek(filename,options)
     function read_hw_cfg()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Read hardware configuration              
+        % Read hardware configuration
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         fseek(fid, 2, 0); % skip size of structure
         temp = fread(fid,8,'char',endian);
         config.('serialNum') = convertCharsToStrings(char(temp));
@@ -374,30 +374,30 @@ function ds=read_nortek(filename,options)
     function read_head_cfg()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Read head configuration              
+        % Read head configuration
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         fseek(fid, 4, 0);   % skip size of structure then config (2,2)
         config.('freq') = fread(fid,1,'ushort',endian);
-        fseek(fid, 22, 0);  % 2 for head type, 12 for serial #, 
-        % 8 for beginning of system data        
+        fseek(fid, 22, 0);  % 2 for head type, 12 for serial #,
+        % 8 for beginning of system data
         temp = fread(fid,9,'int16',endian);
         temp = temp./4096.;
         config.('beam2inst_orientmat') = reshape(temp,[3,3]);
-        fseek(fid, 174, 0); % skip the rest of system data [150], 
+        fseek(fid, 174, 0); % skip the rest of system data [150],
         % skip spare [22], skip #beams [2]
         do_checksum;
-    end 
+    end
 
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
     function read_user_cfg()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Read user configuration             
+        % Read user configuration
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-        % 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
         Profile_Timing = {'single', 'continuous'};
         sync_out = {'middle', 'end'};
         coord_sys_axes = {'ENU', 'XYZ', 'beam'};
@@ -416,9 +416,9 @@ function ds=read_nortek(filename,options)
         config.('Transmit').('time_between_pings')  = temp(4);
         config.('Transmit').('time_between_bursts') = temp(5);
         config.('Npings') = temp(6);
-        config.('AvgInterval') = temp(7);  
-        config.('NBeams') = temp(8); 
-        config.('TimCtrlReg') = int2binarray(temp(9),16); 
+        config.('AvgInterval') = temp(7);
+        config.('NBeams') = temp(8);
+        config.('TimCtrlReg') = int2binarray(temp(9),16);
         % From the nortek system integrator manual
         % (note: bit numbering is zero-based)
         treg = int16(config.('TimCtrlReg'));
@@ -431,14 +431,14 @@ function ds=read_nortek(filename,options)
         config.('PwrCtrlReg') = int2binarray(...
             fread(fid,1,'ushort',endian),16);
         temp = fread(fid,8,'ushort',endian);
-        config.('A1') = temp(1); 
-        config.('B0') = temp(2); 
-        config.('B1') = temp(3); 
-        config.('CompassUpdRate') = temp(4); 
+        config.('A1') = temp(1);
+        config.('B0') = temp(2);
+        config.('B1') = temp(3);
+        config.('CompassUpdRate') = temp(4);
         config.('coord_sys_axes') = ...
-            coord_sys_axes{temp(5) + 1}; 
-        config.('NBins') = temp(6); 
-        config.('BinLength') = temp(7); 
+            coord_sys_axes{temp(5) + 1};
+        config.('NBins') = temp(6);
+        config.('BinLength') = temp(7);
         config.('MeasInterval') = temp(8);
         temp = fread(fid,6,'char',endian);
         config.('DeployName') = convertCharsToStrings(char(temp(1:4)));
@@ -448,17 +448,17 @@ function ds=read_nortek(filename,options)
         config.('DiagInterval') = fread(fid,1,'ulong',endian);
         temp = fread(fid,8,'ushort',endian);
         config.('Mode0') = int2binarray(temp(1), 16);
-        config.('AdjSoundSpeed')    = temp(2); 
-        config.('NSampDiag')        = temp(3); 
-        config.('NBeamsCellDiag')   = temp(4); 
-        config.('NPingsDiag')       = temp(5); 
-        config.('ModeTest') = int2binarray(temp(6), 16); 
-        config.('AnaInAddr') = temp(7); 
-        config.('SWVersion') = temp(8); 
+        config.('AdjSoundSpeed')    = temp(2);
+        config.('NSampDiag')        = temp(3);
+        config.('NBeamsCellDiag')   = temp(4);
+        config.('NPingsDiag')       = temp(5);
+        config.('ModeTest') = int2binarray(temp(6), 16);
+        config.('AnaInAddr') = temp(7);
+        config.('SWVersion') = temp(8);
         fseek(fid, 2, 0);   % skip salinity
         config.('VelAdjTable') = fread(fid,90,'ushort',endian);
         temp = fread(fid,80,'char',endian);
-        config.('Comments') = deblank(convertCharsToStrings(char(temp))); 
+        config.('Comments') = deblank(convertCharsToStrings(char(temp)));
         fseek(fid, 100, 0);   % skip spare, prcoessing method, spare
         temp = fread(fid,6,'ushort',endian);
         config.('Mode1') = int2binarray(temp(1), 16);
@@ -496,16 +496,16 @@ function ds=read_nortek(filename,options)
             config.('Mode1')(2)+1};
         config.('mode').('dynamic_pos_type') = dynamic_pos_type{...
             config.('Mode1')(3)+1}; % noqa
-    end 
+    end
 
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
     function out = read_vec_checkdata()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Read Code: 0x07              
+        % Read Code: 0x07
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         checknow = struct();
         fseek(fid, 2, 0);   % skip size of structure
         checknow.Samples = fread(fid,1,'ushort',endian);
@@ -514,13 +514,13 @@ function ds=read_nortek(filename,options)
         checknow.Amp1 = fread(fid,n,'uint8',endian);
         checknow.Amp2 = fread(fid,n,'uint8',endian);
         checknow.Amp3 = fread(fid,n,'uint8',endian);
-        do_checksum()        
+        do_checksum()
         if ~isfield(data.attrs.config,'checkdata')
             data.attrs.config.checkdata = checknow;
         else
             temp = concat_struct(data.attrs.config.checkdata, checknow);
             data.attrs.config.checkdata = temp;
-        end 
+        end
         out = false;
     end
 
@@ -529,16 +529,16 @@ function ds=read_nortek(filename,options)
     function out = read_vec_data()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Read Code: 0x10              
+        % Read Code: 0x10
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if ~isfield(data.data_vars,'vel')
             init_data(vec_data);
             if ~any(strcmp(dtypes,'vec_data'))
                 dtypes{end+1} = 'vec_data';
-            end             
+            end
         end
-        
+
         temp = fread(fid,4,'uint8',endian);
         data.sys.AnaIn2LSB(c) = temp(1);
         data.sys.Count(c) = temp(2);
@@ -569,9 +569,9 @@ function ds=read_nortek(filename,options)
     function out = read_vec_sysdata()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Read Code: 0x11             
+        % Read Code: 0x11
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if lastread{1} == "vec_checkdata" && lastread{2} == "vec_hdr"
             burst_start(c) = true;
         end
@@ -579,16 +579,16 @@ function ds=read_nortek(filename,options)
             init_data(vec_sysdata);
             if ~any(strcmp(dtypes,'vec_sysdata'))
                 dtypes{end+1} = 'vec_sysdata';
-            end             
+            end
         end
-        fseek(fid, 2, 0); % skip size of structure    
+        fseek(fid, 2, 0); % skip size of structure
         data.coords.time(c) = rd_time();
         temp = fread(fid,2,'ushort',endian);
         data.data_vars.batt(c) = temp(1);
         data.data_vars.c_sound(c) = temp(2);
-        temp = fread(fid,3,'short',endian); 
-        data.data_vars.heading(c) = temp(1);       
-        data.data_vars.pitch(c) = temp(2);        
+        temp = fread(fid,3,'short',endian);
+        data.data_vars.heading(c) = temp(1);
+        data.data_vars.pitch(c) = temp(2);
         data.data_vars.roll(c) = temp(3);
         data.data_vars.temp(c) = fread(fid,1,'ushort',endian);
         temp = fread(fid,2,'uint8',endian);
@@ -604,17 +604,17 @@ function ds=read_nortek(filename,options)
     function out = read_vec_hdr()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Read Code: 0x12              
+        % Read Code: 0x12
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         hdrnow = struct();
-        fseek(fid, 2, 0); % skip size of structure        
+        fseek(fid, 2, 0); % skip size of structure
         hdrnow.time = rd_time();
         hdrnow.NRecords = fread(fid,1,'ushort',endian);
         temp = fread(fid,7,'uint8',endian);
         hdrnow.Noise1   = temp(1);
         hdrnow.Noise2   = temp(2);
-        hdrnow.Noise3   = temp(3); 
+        hdrnow.Noise3   = temp(3);
         hdrnow.Spare0   = temp(4);
         hdrnow.Corr1    = temp(5);
         hdrnow.Corr2    = temp(6);
@@ -635,9 +635,9 @@ function ds=read_nortek(filename,options)
     function out = read_microstrain()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Read Code: 0x71             
+        % Read Code: 0x71
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if c == 1
             warning(['First "microstrain data" block is before first ' ...
                 '"vector system data" block.'])
@@ -671,7 +671,7 @@ function ds=read_nortek(filename,options)
                     for i = 1:length(rv)
                         if ~any(strcmp(data.attrs.rotate_vars,rv{i}))
                             data.attrs.rotate_vars{end+1} = rv{i};
-                        end 
+                        end
                     end
                     data.units.accel = "m/s^2";
                     data.units.angrt = "rad/s";
@@ -687,7 +687,7 @@ function ds=read_nortek(filename,options)
                     for i = 1:length(rv)
                         if ~any(strcmp(data.attrs.rotate_vars,rv{i}))
                             data.attrs.rotate_vars{end+1} = rv{i};
-                        end 
+                        end
                     end
                     if ahrsid == 204
                         data.data_vars.orientmat = nan([n_samp_guess,1,3,3],...
@@ -708,7 +708,7 @@ function ds=read_nortek(filename,options)
                     for i = 1:length(rv)
                         if ~any(strcmp(data.attrs.rotate_vars,rv{i}))
                             data.attrs.rotate_vars{end+1} = rv{i};
-                        end 
+                        end
                     end
                     data.units.accel = "m/s^2";
                     data.units.angrt = "rad/s";
@@ -756,20 +756,20 @@ function ds=read_nortek(filename,options)
     function out = read_awac_profile()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
-        % Read Code: 0x20 (AWAC velocity data)            
+        % Read Code: 0x20 (AWAC velocity data)
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         nbins = config.NBins;
         if ~isfield(data.data_vars,'temp')
             init_data(awac_profile);
             if ~any(strcmp(dtypes,'awac_profile'))
                 dtypes{end+1} = 'awac_profile';
-            end 
+            end
         end
         % Note: docs state there is 'fill' byte at the end, if nbins is odd,
         % but doesn't appear to be the case
         n = config.NBeams;
-        fseek(fid, 2, 0); % skip size of structure        
+        fseek(fid, 2, 0); % skip size of structure
         data.coords.time(c) = rd_time();
         temp = fread(fid,7,'ushort',endian);
         data.data_vars.error(c)     = temp(1);
@@ -787,7 +787,7 @@ function ds=read_nortek(filename,options)
         data.data_vars.temp(c) = temp(2);
         data.data_vars.pressure(c) = (65536 * p_msb + p_lsw);
         % The nortek system integrator manual specifies an 88byte 'spare'
-        fseek(fid, 88, 0); % skip size of structure 
+        fseek(fid, 88, 0); % skip size of structure
         temp_vel = fread(fid,n * nbins,'int16',endian);
         temp_amp = fread(fid,n * nbins,'uint8',endian);
         for i = 1:n
@@ -850,7 +850,7 @@ function ds=read_nortek(filename,options)
         else
             n_samp_guess = int32(filesize / space + 1);
         end
-    end 
+    end
 
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
@@ -888,9 +888,9 @@ function ds=read_nortek(filename,options)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %
         % Find the next data block by checking
-        % the checksum and the sync byte(0xa5)          
+        % the checksum and the sync byte(0xa5)
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         sum = hex2dec('0xb58c');
         cs = 0;
         while ftell(fid) ~= filesize
@@ -914,9 +914,9 @@ function ds=read_nortek(filename,options)
         %
         % Find the spacing, in bytes, between a specific hardware code.
         % Repeat this * iternum * times(default 50).
-        % Returns the average spacing, in bytes, between the code.            
+        % Returns the average spacing, in bytes, between the code.
         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         p0 = findnextid(searchcode);
         for i = 1:50
             try
@@ -932,18 +932,18 @@ function ds=read_nortek(filename,options)
 
     function out = int2binarray(val, n)
         %%%%%%%%%%%%%%%%%%%%
-        %        
+        %
         % Parameters
         % ------------
         %     val: integer
         %         integer to convert.
         %     n: integer
-        %         number of bits         
+        %         number of bits
         %
         % Returns
         % ---------
-        %     out: array of boolean           
-        %        
+        %     out: array of boolean
+        %
         %%%%%%%%%%%%%%%%%%%%
         out = false(1,n);
         for i = 1 : n
@@ -963,11 +963,11 @@ function ds=read_nortek(filename,options)
 
     function init_data(varstruct)
         %%%%%%%%%%%%%%%%%%%%
-        %        
+        %
         % Parameters
         % ------------
         %     varstruct: structure
-        %         The variable definitions loaded in the init phase that               
+        %         The variable definitions loaded in the init phase that
         %         describe how to initialize each data variable.
         %         options ("vec_data", "vec_sysdata", "awac_profile")
         %%%%%%%%%%%%%%%%%%%%
@@ -993,7 +993,7 @@ function ds=read_nortek(filename,options)
                     data.("units").(nm) = va.("units");
                 end
             end
-        end 
+        end
     end
 
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -1045,7 +1045,7 @@ function ds=read_nortek(filename,options)
         data.data_vars.pressure = (single(data.data_vars.PressureMSB)*...
             65536 + single(data.data_vars.PressureLSW) ) / 1000.;
         data.units.pressure = "dbar";
-        
+
         data.data_vars = rmfield(data.data_vars, "PressureMSB");
         data.data_vars = rmfield(data.data_vars, "PressureLSW");
 
@@ -1055,7 +1055,7 @@ function ds=read_nortek(filename,options)
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
     function sci_vec_sysdata()
-        % Translate the data in the vec_sysdata structure into 
+        % Translate the data in the vec_sysdata structure into
         % scientific units.
         sci_data(vec_sysdata);
         data.sys.sysi = ~isnan(data.coords.time);
@@ -1145,7 +1145,7 @@ function ds=read_nortek(filename,options)
             temp = zeros(size(data.data_vars.orientmat));
             temp(:,:,1,:) = data.data_vars.orientmat(:,:,2,:);
             temp(:,:,2,:) = data.data_vars.orientmat(:,:,1,:);
-            temp(:,:,3,:) = data.data_vars.orientmat(:,:,3,:) * -1;  
+            temp(:,:,3,:) = data.data_vars.orientmat(:,:,3,:) * -1;
             data.data_vars.orientmat = temp;
         end
         if isfield(data.data_vars,"accel")
@@ -1161,11 +1161,11 @@ function ds=read_nortek(filename,options)
 
     function sci_data(varstruct)
         % Convert the data to scientific units accordint to vardict.
-        % 
+        %
         % Parameters
         % ----------
         %     varstruct: structure
-        %         The variable definitions loaded in the init phase that               
+        %         The variable definitions loaded in the init phase that
         %         describe how to initialize each data variable.
         %         options ("vec_data", "vec_sysdata", "awac_profile")
         fn = fieldnames(varstruct);
@@ -1188,18 +1188,18 @@ function ds=read_nortek(filename,options)
                     data.(va.group).(nm) = double(...
                         data.(va.group).(nm)*va.factor);
                 end
-            end            
+            end
         end
     end
 
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    
+
     function out = empty_array(shape_args, dims, dtype)
         if isempty(dims)
             shape = [shape_args.("n"), 1];
         else
             shape = [shape_args.("n"), 1, dims{1}];
-            if any(strcmp(dims,"nbins")) 
+            if any(strcmp(dims,"nbins"))
                 shape = [shape(1:2),shape_args.("nbins"),shape(end)];
             end
         end
@@ -1224,9 +1224,9 @@ function ds=read_nortek(filename,options)
         minutes = bcd2char(temp(1));
         seconds = bcd2char(temp(2));
         day     = bcd2char(temp(3));
-        hour    = bcd2char(temp(4)); 
-        year    = bcd2char(temp(5)); 
-        month   = bcd2char(temp(6));   
+        hour    = bcd2char(temp(4));
+        year    = bcd2char(temp(5));
+        month   = bcd2char(temp(6));
         if year < 100
             year = year + 1900 + 100 * (year < 90);
         end
@@ -1242,7 +1242,7 @@ function ds=read_nortek(filename,options)
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
     function rtrn = bcd2char(cBCD)
-        % Taken from the Nortek System Integrator 
+        % Taken from the Nortek System Integrator
         % Manual "Example Program" Chapter.
         cBCD = min(cBCD, 153);
         rtrn = bitand(cBCD, 15);
@@ -1271,26 +1271,26 @@ function ds=read_nortek(filename,options)
     % """
     % Fill gaps (NaN values) in ``a`` by linear interpolation along
     % dimension ``dim`` with the point spacing specified in ``t``.
-    % 
+    %
     % Parameters
     % ----------
     % a : array
     %   The array containing NaN values to be filled.
     % t : array (len(t) == a.shape[dim])
-    %   Independent variable of the points in ``a``, e.g. timestep 
-    % extrapFlg : bool 
+    %   Independent variable of the points in ``a``, e.g. timestep
+    % extrapFlg : bool
     %   Whether to extrapolate if NaNs are found at the ends of the
     %   array.
-    % 
+    %
     % See Also
     % --------
     % dolfyn.io.fillgaps : Linearly interpolates in array-index space.
-        
+
         gd = find(~isnan(a));
-    
+
         % Extrapolate if requested
         if extrapFlg && ~isempty(gd)
-            if gd(1) ~= 1 
+            if gd(1) ~= 1
                 a(1:gd(1)) = a(gd(1));
             end
             if gd(end) ~= length(a)
@@ -1315,10 +1315,10 @@ function ds=read_nortek(filename,options)
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
     function handle_nan()
-    % 
+    %
     % Finds nan's that cause issues in running the rotation algorithms
     % and deletes them.
-    % 
+    %
         not_nums = false(size(data.coords.time));
         l = length(data.coords.time);
 
@@ -1335,7 +1335,7 @@ function ds=read_nortek(filename,options)
                     if length(shp) == 2
                         if any(isnan(data.data_vars.(fn{k})))
                             temp = (isnan(data.data_vars.(fn{k})))';
-                            not_nums = not_nums | temp;                                
+                            not_nums = not_nums | temp;
                         end
                     elseif length(shp) == 3
                         if any(isnan(data.data_vars.(fn{k})(:,:,end)))
@@ -1363,7 +1363,7 @@ function ds=read_nortek(filename,options)
                         size_(1) = sum(~not_nums,'all');
                         fill = zeros(size_);
                         otherdims = repmat({':'},1,length(dims)-2);
-                        for qq = 1:dim                            
+                        for qq = 1:dim
                             for jj = 1:dim2
                                 temp = data.data_vars.(fn{k})(otherdims{:},jj,qq);
                                 fill(otherdims{:},jj,qq) = temp(~not_nums);
@@ -1377,6 +1377,7 @@ function ds=read_nortek(filename,options)
 
     end
 
-    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>    
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 end
+

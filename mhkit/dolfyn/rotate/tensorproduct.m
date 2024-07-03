@@ -31,7 +31,7 @@ function R = tensorproduct( A , B , subscripts) %ind_R , A , ind_A , B , ind_B)
 %                                                 %  size(R) = [10,1,5,8]
 %
 % Note:
-%   Provided indices in (ind_R), (ind_A) and (ind_B) are case-sensitive,    
+%   Provided indices in (ind_R), (ind_A) and (ind_B) are case-sensitive,
 %   i.e. 'a' and 'A' are different indices.
 %
 % Version compatibility:
@@ -47,14 +47,14 @@ function R = tensorproduct( A , B , subscripts) %ind_R , A , ind_A , B , ind_B)
 %     for i = 1:size(A,3)
 %         R(:,:,i) = A(:,:,i) * B(:,:,i);
 %     end
-%   
-%   While it will still work, performance (wall-clock time) might be 
+%
+%   While it will still work, performance (wall-clock time) might be
 %   degraded.
 %
 % Benchmarking:
 %   The performance of tensorproduct can be assessed by calling the
 %   function tensorproduct_benchmark.
- 
+
 % Copyright 2021 - by David Codony, PhD (dcodony@cimne.upc.edu)
 % This software is distributed without any warranty.
 % Permission is granted for anyone to copy, use, or modify this
@@ -74,8 +74,8 @@ R = tensorproduct_core(A,B,...
         %split input indices
         in=s{1};
         ind_R=s{2};
-        in=split(in,',');        
+        in=split(in,',');
         ind_A=in{1};
-        ind_B=in{2};       
+        ind_B=in{2};
     end
 end

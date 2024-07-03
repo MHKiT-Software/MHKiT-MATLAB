@@ -1,20 +1,20 @@
 function ds = earth2principal(advo,reverse)
 %     Rotate data in an ADV dataset to/from principal axes. Principal
 %     heading must be within the dataset.
-% 
+%
 %     All data in the advo.attrs['rotate_vars'] list will be
 %     rotated by the principal heading, and also if the data objet has an
 %     orientation matrix (orientmat) it will be rotated so that it
 %     represents the orientation of the ADV in the principal
 %     (reverse:earth) frame.
-% 
+%
 %     Parameters
 %     ----------
 %     advo : The adv object containing the data.
 %     reverse : bool (default: False)
 %            If True, this function performs the inverse rotation
 %            (principal->earth).
-% 
+%
 
 % This is in degrees CW from North
 ang = deg2rad(90 - advo.attrs.principal_heading);
@@ -60,7 +60,7 @@ for qq = 1:numel(rotate_vars)
     nm = rotate_vars{qq};
     shape = size(advo.(nm).data);
     l = length(shape);
-    otherdims = repmat({':'},1,l-1);    
+    otherdims = repmat({':'},1,l-1);
     if l == 4
         sumstr = 'da,cba->cbd';
     elseif l == 3
@@ -69,7 +69,7 @@ for qq = 1:numel(rotate_vars)
     rot = tensorproduct(rotmat(1:2,1:2),...
         squeeze(advo.(nm).data(otherdims{:},1:2)),sumstr);
     shape(end) = 2;
-    ds.(nm).data(otherdims{:},1:2) = reshape(rot,shape);    
+    ds.(nm).data(otherdims{:},1:2) = reshape(rot,shape);
 end
 
 ds = set_coords(ds, cs_new);

@@ -1,14 +1,14 @@
 function datast=read_usgs_file(file_name)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Reads a USGS JSON data file (from https://waterdata.usgs.gov/nwis) 
-%     into a structure 
-% 
+%     Reads a USGS JSON data file (from https://waterdata.usgs.gov/nwis)
+%     into a structure
+%
 % Parameters
 % ----------
 %     file_name : str
 %         Name of USGS JSON data file
-%         
+%
 % Returns
 % -------
 %     datast : structure
@@ -46,10 +46,11 @@ for i=1:si(2)
     datast.(newname(1))=vals(:,i);
     datast.units.(newname(1))=newname(2);
 end
- 
+
 times = double(    ...
      py.mhkit_python_utils.pandas_dataframe.datetime_index_to_ordinal(datapd));
 
 datast.time = posixtime(datetime(times,                        ...
                                  'ConvertFrom', 'datenum',     ...
                                  'TimeZone','UTC'));
+

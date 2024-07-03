@@ -10,10 +10,10 @@ function omat = euler2orient(heading, pitch, roll, options)
     %     roll: array
     %     units: string (optional)
     %         radians or degrees (default degrees)
-    %         Whether heading, pitch, and roll are in degrees or radians.    
+    %         Whether heading, pitch, and roll are in degrees or radians.
     % Returns
     % ---------
-    %     omat: 
+    %     omat:
     %       a rotation matrix that rotates earth (ENU) -> inst.
     %       This is based on the Nortek `Transforms.m` file, available in
     %       the refs folder.

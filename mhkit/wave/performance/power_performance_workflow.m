@@ -1,9 +1,9 @@
 function [clmat,maep_matrix] = power_performance_workflow(S, h, P, statistic, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     High-level function to compute power performance quantities of 
+%     High-level function to compute power performance quantities of
 %     interest following IEC TS 62600-100 for given wave spectra.
-% 
+%
 % Parameters
 % ------------
 %   S: structure with fields:
@@ -20,12 +20,12 @@ function [clmat,maep_matrix] = power_performance_workflow(S, h, P, statistic, op
 %   statistic: string or array of strings
 %        Capture length statistics for plotting
 %        options include: "mean", "std", "median",
-%        "count", "sum", "min", "max", and "frequency". 
+%        "count", "sum", "min", "max", and "frequency".
 %        Note that "std"
 %        uses a degree of freedom of 1 in accordance with IEC/TS 62600-100.
 %        To output capture length matrices for multiple binning parameters,
 %        define as a string array: statistic = ["", "", ""];
-%        
+%
 %   savepath: string (optional)
 %        Path to save figure.
 %        to call: power_performance_wave(S,h,P,statistic,"savepath",savepath)
@@ -38,7 +38,7 @@ function [clmat,maep_matrix] = power_performance_workflow(S, h, P, statistic, op
 %        Gravitational acceleration [m/s^2]
 %        to call: power_performance_wave(S,h,P,statistic,"g",g)
 %
-%   frequency_bins: vector (optional) 
+%   frequency_bins: vector (optional)
 %      Bin widths for frequency of S. Required for unevenly sized bins
 %
 % Returns
@@ -71,11 +71,11 @@ if any([~isnumeric(h), ~isnumeric(P)])
     throw(ME);
 end
 
-% Compute the enegy periods from spectra data 
+% Compute the enegy periods from spectra data
 Te = energy_period(S);
 
-% Compute the significant wave height from spectra data 
-Hm0 = significant_wave_height(S) ;                                               
+% Compute the significant wave height from spectra data
+Hm0 = significant_wave_height(S) ;
 
 % Compute the energy flux from spectra data and water depth
 J = energy_flux(S,h);
@@ -85,7 +85,7 @@ L = capture_length(P,J);
 
 % Need to set our Hm0 and Te bins for the capture length matrix
 Hm0_bins = -0.5:0.5:max(fix(Hm0))+0.5; % Input is min, max, and n indecies for vector
-Hm0_bins = Hm0_bins+0.25 ; 
+Hm0_bins = Hm0_bins+0.25 ;
 Te_bins = 0:1:max(fix(Te));
 Te_bins = Te_bins+0.5;
 
@@ -110,20 +110,21 @@ stats_cell = {'mean', 'std', 'median','count', 'sum', 'min', 'max','frequency'};
 cl_matrix = [];
 len = strlength(options.savepath);
 for i = 1:length(statistic)
-    if any(strcmp(stats_cell,statistic(i))) 
+    if any(strcmp(stats_cell,statistic(i)))
         figure('Name',sprintf('Capture Length Matrix %s', statistic(i)),'NumberTitle','off')
         cl_matrix(i) = plot_matrix(clmat.(statistic(i)),"Capture Length");
         name = [options.savepath, filesep, sprintf('Capture Length Matrix %s', statistic(i)), '.png'];
 
         if len > 1
             saveas(cl_matrix(i), name);
-        end 
+        end
     else
          ME = MException('MATLAB:power_performance_wave',...
              'statistic must be a string or string array defined', ...
              'by one or multiple of the following: "mean", "std", "median","count", "sum", "min", "max", "frequency"');
          throw(ME);
     end
-end        
+end
 
-end      
+end
+

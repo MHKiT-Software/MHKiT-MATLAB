@@ -1,5 +1,5 @@
 function out = set_coords(ds, ref_frame)
-%     Checks the current reference frame and adjusts xarray coords/dims 
+%     Checks the current reference frame and adjusts xarray coords/dims
 %     as necessary. Makes sure assigned dataarray coordinates match what
 %     DOLfYN is reading in.
     make = join([ds.attrs.inst_make," ", ds.attrs.inst_model]);
@@ -55,7 +55,7 @@ function out = set_coords(ds, ref_frame)
     % In xarray this is adequate. When you change ds.coords.dir it
     % propogates that change to each field that has dir as a coordinate.
     % Here, however, we must manaully propogate that change
-    fn = fieldnames(ds); 
+    fn = fieldnames(ds);
     for qq = 1:numel(fn)
         field = fn{qq};
         if isfield(ds.(field),'coords')
@@ -70,7 +70,7 @@ function out = set_coords(ds, ref_frame)
             end
         end
     end
-         
+
     tag = {'', '_echo', '_bt'};
     for qq = 1:3
         if isfield(ds.attrs, join(["coord_sys_axes",tag{qq}],''))

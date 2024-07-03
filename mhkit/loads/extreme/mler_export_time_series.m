@@ -1,10 +1,10 @@
 function mler_ts = mler_export_time_series(RAO, mler, sim, k)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
+%
 %     Generate the wave amplitude time series at X0 from the calculated
 %     MLER coefficients
-% 
+%
 %     Parameters
 %     ----------
 %     RAO: array
@@ -16,7 +16,7 @@ function mler_ts = mler_export_time_series(RAO, mler, sim, k)
 %         'mler_simulation'.
 %     k: array
 %         Wave number.
-% 
+%
 %     Returns
 %     -------
 %     mler_ts: struct

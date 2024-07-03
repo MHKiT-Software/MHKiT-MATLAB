@@ -2,7 +2,7 @@ function Cg=wave_celerity(k,h,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Calculates wave celerity (group velocity)
-%    
+%
 % Parameters
 % ------------
 %    k: wave number (1/m)
@@ -21,7 +21,7 @@ function Cg=wave_celerity(k,h,options)
 %    depth_check: bool (optional)
 %         If True check depth regime. Default False.
 %         to call: energy_flux(k,h,"depth_check",py.True)
-% 
+%
 %    ratio: double or int (optional)
 %         Only applied if depth_check=True. If h/l > ratio,
 %         water depth will be set to deep. Default ratio = 2
@@ -30,7 +30,7 @@ function Cg=wave_celerity(k,h,options)
 % Returns
 % -------
 %     Cg: structure
-% 
+%
 %
 %       Cg.values: water celerity
 %
@@ -47,7 +47,7 @@ arguments
     options.g = 9.80665;
     options.depth_check = py.False;
     options.ratio = 2;
-    
+
 end
 
 py.importlib.import_module('mhkit');
@@ -73,3 +73,4 @@ Cgdf=py.mhkit.wave.resource.wave_celerity(k,h,pyargs('g',options.g,...
 Cg.values=double(py.array.array('d',py.numpy.nditer(Cgdf.values)));
 Cg.frequency=double(py.array.array('d',py.numpy.nditer(Cgdf.index)));
 Cg.h=h;
+

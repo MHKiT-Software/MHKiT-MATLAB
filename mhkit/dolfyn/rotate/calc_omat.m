@@ -18,7 +18,7 @@ function omat = calc_omat(hh, pp, rr, orientation_down)
     if ~isnan(orientation_down)
         % For Nortek Vector ADVs: 'down' configuration means the head was
         % pointing 'up', where the 'up' orientation corresponds to the
-        % communication cable being up.  
+        % communication cable being up.
         rr(orientation_down) = rr(orientation_down) + 180;
     end
 

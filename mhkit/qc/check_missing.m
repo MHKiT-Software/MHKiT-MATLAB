@@ -1,16 +1,17 @@
 function results = check_missing(data,options)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Check for missing data
-%    
+%  Check for missing data
+%
 % Parameters
 % ------------
 %
 %     data: pandas dataframe or qcdata structure
-%          Pandas dataframe indexed by datetime (use 
+%          Pandas dataframe indexed by datetime (use
 %          py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(ts,time,x))
 %
 %          OR
-%     
+%
 %          data structure of form:
 %
 %             data.values: 2D array of doubles with arbitrary number of columns
@@ -27,25 +28,25 @@ function results = check_missing(data,options)
 %         default = 1
 %         to call: check_missing(data,"min_failures",min_failures)
 %
-%     
+%
 % Returns
 % ---------
 %     results: qcdata structure of form:
 %
 %         results.values: array of doubles
 %            Same shape as input data.values
-%            Elements that failed QC test replaced with NaN 
+%            Elements that failed QC test replaced with NaN
 %
 %         results.mask: array of int64
 %            Same shape as input data.values
-%            Logical mask of QC results (1 = passed, 0 = failed QC test) 
+%            Logical mask of QC results (1 = passed, 0 = failed QC test)
 %
 %         results.time: array of datetimes
-%            Same as input times 
+%            Same as input times
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-arguments 
+arguments
     data
     options.key = py.None;
     options.min_failures = 1;
@@ -69,4 +70,5 @@ r = struct(py.pecos.monitoring.check_missing(data,...
   ptime = double(py.array.array('d',py.numpy.nditer(r.cleaned_data.index.values)))/1e9;
   results.time=datetime(ptime,'ConvertFrom','posix');
 
-end 
+end
+

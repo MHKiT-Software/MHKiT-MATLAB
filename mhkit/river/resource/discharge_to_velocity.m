@@ -1,13 +1,14 @@
 function V=discharge_to_velocity(Q,polynomial_coefficients)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Calculates velocity given discharge data and the relationship between 
+%     Calculates velocity given discharge data and the relationship between
 %     discharge and velocity at an individual turbine
-%     
+%
 % Parameters
 % ------------
 %     Q : Discharge data [m3/s]
 %
-%         Pandas dataframe indexed by time [datetime or s]:  
+%         Pandas dataframe indexed by time [datetime or s]:
 %
 %           To make a pandas data frame from user supplied frequency and spectra
 %           use py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(timeseries,time,x)
@@ -19,14 +20,14 @@ function V=discharge_to_velocity(Q,polynomial_coefficients)
 %            Q.Discharge
 %
 %            Q.time
-% 
+%
 %     polynomial_coefficients : numpy polynomial
-%         List of polynomial coefficients that discribe the relationship between 
+%         List of polynomial coefficients that discribe the relationship between
 %         discharge and velocity at an individual turbine
-%     
-% Returns   
+%
+% Returns
 % ------------
-%     V: Structure  
+%     V: Structure
 %
 %
 %         V.V: Velocity [m/s]
@@ -36,30 +37,30 @@ function V=discharge_to_velocity(Q,polynomial_coefficients)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 py.importlib.import_module('mhkit');
 py.importlib.import_module('mhkit_python_utils');
 
 if (isa(Q,'py.pandas.core.frame.DataFrame')~=1)
     x=size(Q.Discharge);
     li=py.list();
-    if x(2)>1 
+    if x(2)>1
         for i = 1:x(2)
             app=py.list(Q.Discharge(:,i));
             li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-            
+
         end
-    elseif x(2) ==1 
+    elseif x(2) ==1
         li=Q.Discharge;
     end
-    
+
     if any(isdatetime(Q.time(1)))
         si=size(Q.time);
         for i=1:si(2)
         Q.time(i)=posixtime(Q.time(i));
         end
     end
-    Q=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,Q.time,int32(x(2)));
+    % Q=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,Q.time,int32(x(2)));
+    Q = py.mhkit_python_utils.pandas_dataframe.list_to_series(Q.Discharge, Q.time);
 end
 
 polynomial_coefficients=py.numpy.poly1d(polynomial_coefficients);
@@ -83,8 +84,9 @@ si=size(vals);
  for i=1:si(2)
     test=string(py.str(vv{i}));
     newname=split(test,",");
-    
+
     V.(newname(1))=vals(:,i);
-    
+
  end
  V.time=double(py.array.array('d',py.numpy.nditer(Vdf.index)));
+

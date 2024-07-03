@@ -1,9 +1,9 @@
 function [D_E,projected_capture_area]=rectangular(h,w)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Calculates the equivalent diameter and projected capture area of a 
+%     Calculates the equivalent diameter and projected capture area of a
 %     retangular turbine
-%     
+%
 % Parameters
 % ------------
 %     h : float
@@ -11,7 +11,7 @@ function [D_E,projected_capture_area]=rectangular(h,w)
 %
 %     w : float
 %         Turbine width [m]
-%         
+%
 % Returns
 % ---------
 %     D_E : float
@@ -29,3 +29,4 @@ result=py.mhkit.river.performance.rectangular(h,w);
 resultc=cell(result);
 D_E=resultc{1};
 projected_capture_area=resultc{2};
+

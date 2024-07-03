@@ -1,25 +1,25 @@
 function out = fillgaps(a, extrapFlg)
 % Linearly fill NaN value in an array.
-% 
+%
 % Parameters
 % ----------
 % a : array
-%   The array to be filled.    
-% extrapFlg : bool 
+%   The array to be filled.
+% extrapFlg : bool
 %   Whether to extrapolate if NaNs are found at the ends of the
-%   array.    
-% 
+%   array.
+%
 % Notes
 % -----
 % This function interpolates assuming spacing/timestep between
 % successive points is constant. If the spacing is not constant, use
 % interpgaps.
-% 
+%
     gd = find(~isnan(a));
 
     % Extrapolate if requested
     if extrapFlg && ~isempty(gd)
-        if gd(1) ~= 1 
+        if gd(1) ~= 1
             a(1:gd(1)) = a(gd(1));
         end
         if gd(end) ~= length(a)

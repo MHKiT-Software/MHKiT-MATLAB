@@ -1,10 +1,10 @@
 function data=request_noaa_data(station, parameter, start_date, end_date, options)
 
-%     Loads NOAA current data directly from https://tidesandcurrents.noaa.gov/api/ using a 
+%     Loads NOAA current data directly from https://tidesandcurrents.noaa.gov/api/ using a
 %     GET request into a structure. NOAA sets max of 31 days between start and end date.
 %     See https://co-ops.nos.noaa.gov/api/ for options. All times are reported as GMT and metric
 %     units are returned for data.
-% 
+%
 %     Parameters
 %     ----------
 %     station : str
@@ -17,7 +17,7 @@ function data=request_noaa_data(station, parameter, start_date, end_date, option
 %         Start date in the format yyyyMMdd
 %
 %     end_date : str
-%         End date in the format yyyyMMdd 
+%         End date in the format yyyyMMdd
 %
 %     proxy : None
 %         Parameter is now deprecated.
@@ -32,10 +32,10 @@ function data=request_noaa_data(station, parameter, start_date, end_date, option
 %     write_json : str or None (optional)
 %         Name of json file to write data
 %         to call: request_noaa_data(station,parameter,start_date,end_date,"write_json",write_json)
-%         
+%
 %     Returns
 %     -------
-%     data : structure 
+%     data : structure
 %
 %
 %         data.id: station ID
@@ -46,10 +46,10 @@ function data=request_noaa_data(station, parameter, start_date, end_date, option
 %
 %         data.lon: station Longitude
 %
-%         data.vars: this will vary depending on parameter input. 
+%         data.vars: this will vary depending on parameter input.
 %
 %         data.time: epoch time [s]
-% 
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
@@ -84,13 +84,12 @@ while start_period_datetime <= end_datetime
     [data_in_period, timeseries_fields] = request_noaa_data_restricted_duration( ...
         station, parameter, start_period, end_period, ...
         MAX_RETRIES, REQUIRED_FIELDS, MAX_DAYS_PER_QUERY);
-    
+
     if isempty(fieldnames(data_in_period)) || isempty(timeseries_fields)
         % do nothing
     elseif is_first_query
         data = data_in_period;
         is_first_query = false;
-
     else
         % Append to existing data structure
         for i = 1:length(timeseries_fields)
@@ -100,7 +99,6 @@ while start_period_datetime <= end_datetime
                 data_in_period.(timeseries_fields{i}));
         end
     end
-
 
     start_period_datetime = end_period_datetime + days(1);
 end
@@ -141,10 +139,10 @@ function [data, timeseries_fields] = request_noaa_data_restricted_duration( ...
                 + "time_zone=gmt&" ...
                 + "application=web_services&" ...
                 + "format=xml";
-    
+
     % Display query
     disp("Data request URL: " + data_url + api_query)
-    
+
     % Submit query and get data
     for i = 0:MAX_RETRIES
         try
@@ -159,7 +157,7 @@ function [data, timeseries_fields] = request_noaa_data_restricted_duration( ...
             end
         end
     end
-    
+
     % Organize a structure containing the metadata and timeseries data
     is_metadata_found = false;
     is_timeseries_keys_found = false;
@@ -180,7 +178,7 @@ function [data, timeseries_fields] = request_noaa_data_restricted_duration( ...
                     end
                 end
                 is_metadata_found = true;
-    
+
                 % Verify all required metadata is present
                 for j = 1:length(REQUIRED_FIELDS)
                     if ~isfield(data, REQUIRED_FIELDS{j})
@@ -208,7 +206,7 @@ function [data, timeseries_fields] = request_noaa_data_restricted_duration( ...
                 end
                 is_timeseries_keys_found = true;
             end
-    
+
             % Parse data from current line and add to respective arrays in structure
             for j = 1:length(ts_keys)
                 regex_pattern = strcat('(?<=', ts_keys{j}, '\=")(.*?)(?=")');
@@ -233,3 +231,4 @@ function [data, timeseries_fields] = request_noaa_data_restricted_duration( ...
         end
     end
 end
+

@@ -1,11 +1,11 @@
 function figure=plot_statistics(x,y_mean,y_min,y_max,options)
 
-%%%%%%%%%%%%%%%%%%%%
-%     Plot showing standard raw statistics of variable 
-%     
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     Plot showing standard raw statistics of variable
+%
 % Parameters
 % ------------
-%     x: vector  
+%     x: vector
 %         vector of x-axis values
 %
 %     y_mean: vector
@@ -18,7 +18,7 @@ function figure=plot_statistics(x,y_mean,y_min,y_max,options)
 %         Vector of min values
 %
 %     y_stdev: vector (optional)
-%         Vector of stand drviations 
+%         Vector of stand drviations
 %         to call: statplotter(x,y_mean,y_max,y_min,"y_stdev",vstdev)
 %
 %     xlabel: string (optional)
@@ -39,14 +39,14 @@ function figure=plot_statistics(x,y_mean,y_min,y_max,options)
 %
 % Returns
 % ---------
-%     figure: figure 
-%         scatter plot of statistics 
+%     figure: figure
+%         scatter plot of statistics
 %
-%         
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
-    x 
+    x
     y_mean
     y_min
     y_max
@@ -76,8 +76,7 @@ ylabel(options.ylabel)
 len = strlength(options.savepath);
 if len > 1
     saveas(figure, options.savepath);
-end 
+end
 
 hold off
-
 
