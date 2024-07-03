@@ -67,6 +67,19 @@ jobs:
           conda activate mhkit_conda_env
           pip install -e .
 
+      - name: Pin scipy version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip uninstall scipy
+          pip install scipy==1.12.0
+
+      - name: List installed pip modules
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip freeze
+
       # Create the cache and add a dummy file
       # The dummy file ensures that the artifact download
       - name: Setup mhkit_webread_cache
@@ -291,6 +304,13 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip install -e .
+
+      - name: Pin scipy version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip uninstall scipy
+          pip install scipy==1.12.0
 
       - name: List installed pip modules
         shell: bash -l {0}
