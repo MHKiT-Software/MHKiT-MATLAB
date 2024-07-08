@@ -153,31 +153,3 @@ See [copyright and license](https://mhkit-software.github.io/MHKiT/license.html)
 [^1]:
     For a comprehensive list of compatible MATLAB/Python versions, refer to the [MathWorks Python
     Compatibility Documentation](https://www.mathworks.com/support/requirements/python-compatibility.html).
-
-[^macos-2023b-2024a-java-segfault]:
-
-[macOS MATLAB 2023b,2024a Java Segfault](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24122990377#step:21:126)
-
-    ```
-      --------------------------------------------------------------------------------
-                Segmentation violation detected at 2024-04-22 19:45:41 +0000
-      --------------------------------------------------------------------------------
-
-      Configuration:
-        Crash Decoding           : Disabled - No sandbox or build area path
-        Crash Mode               : continue (default)
-        Default Encoding         : UTF-8
-        Deployed                 : false
-        Graphics Driver          : Uninitialized hardware
-        Java Version             : Java 1.8.0_202-b08 with Oracle Corporation Java HotSpot(TM) 64-Bit Server VM mixed mode
-        MATLAB Architecture      : maci64
-        MATLAB Entitlement ID    : 11174667
-        MATLAB Root              : /Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app
-        MATLAB Version           : 23.2.0.2515942 (R2023b) Update 7
-        OpenGL                   : hardware
-        Operating System         : Mac OS Version 12.7.4 (Build 21H1123)
-        Process ID               : 7316
-        Processor ID             : x86 Family 6 Model 58 Stepping 10, GenuineIntel
-        Session Key              : 72438599-354c-41f0-80ab-a426f58027eb
-        Window System            : Quartz
-    ```
