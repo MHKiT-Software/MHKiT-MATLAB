@@ -21,20 +21,22 @@ currently version `0.7.0`. You can achieve this by executing the following comma
 environment where MHKiT-Python is installed:
 
 1. Uninstall the current version of MHKiT-Python:
-    ```bash
-    pip uninstall mhkit
-    ```
+
+```bash
+pip uninstall mhkit
+```
 
 2. Install MHKiT-Python version `0.7.0`:
-    ```bash
-    pip install mhkit==0.7.0
-    ```
+
+```bash
+pip install mhkit==0.7.0
+```
 
 3. Verify the MHKiT-Python version:
-    ```bash
-    python -c "import mhkit; print(mhkit.__version__)"
-    ```
 
+```bash
+python -c "import mhkit; print(mhkit.__version__)"
+```
 
 ### Software Requirements
 
