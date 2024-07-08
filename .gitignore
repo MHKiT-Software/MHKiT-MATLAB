@@ -1,3 +1,10 @@
+# MHKiT-MATLAB Specific Files
+# Test results
+mhkit/tests/test_results/*
+
+# Hindcast data cache
+mhkit_webread_cache
+
 *.xlsm
 *.xlsx
 *.pyc
@@ -31,10 +38,3 @@ Thumbs.db
 *egg-info
 *build
 .gitignore
-
-# Test results
-mhkit/tests/test_results/*
-
-# MHKiT-MATLAB Specific Files
-# Hindcast data cache
-mhkit_webread_cache
