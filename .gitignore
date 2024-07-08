@@ -4,37 +4,3 @@ mhkit/tests/test_results/*
 
 # Hindcast data cache
 mhkit_webread_cache
-
-*.xlsm
-*.xlsx
-*.pyc
-test.egg-info/*
-*.exe
-*.spec
-**/build
-**./dist/
-**/cache/
-**/static/
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-*.log
-*.sql
-*.sqlite
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
-*.zip
-*~
-*.json
-*egg-info
-*build
-.gitignore
