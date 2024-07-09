@@ -2,9 +2,9 @@ name: MHKiT-MATLAB Windows Unit Tests
 
 on:
   push:
-    branches: [master, develop, ebbflood]
+    branches: [ master, develop ]
   pull_request:
-    branches: [master, develop, ebbflood]
+    branches: [ master, develop ]
 
 jobs:
   cache_population:
@@ -33,8 +33,7 @@ jobs:
       - name: "Conda install netcdf4, hdf5"
         run: |
           conda activate mhkit_conda_env
-          conda install netcdf4 hdf5
-
+          conda install numpy==1.24.4 netcdf4 hdf5
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
@@ -61,6 +60,13 @@ jobs:
           conda activate mhkit_conda_env
           pip install -e .
 
+      - name: Pin scipy version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip uninstall -y scipy
+          pip install scipy==1.10.1
+
       # Create the cache and add a dummy file
       # The dummy file ensures that the artifact download
       - name: Setup mhkit_webread_cache
@@ -69,7 +75,6 @@ jobs:
           mkdir mhkit_webread_cache
           touch mhkit_webread_cache/test.txt
           echo "Hello World" > mhkit_webread_cache/test.txt
-
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
         with:
@@ -80,12 +85,10 @@ jobs:
         shell: pwsh
         run: >
           "pyenv(Version='{0}', ExecutionMode='OutOfProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
-
       - name: Check Python System Path
         shell: bash -l {0}
         run: |
           echo "py.sys.path" >> run.m
-
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version,
@@ -126,6 +129,7 @@ jobs:
         matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a]
         mhkit-python-version: ["0.7.0"]
         exclude:
+          # Cache population job
           - matlab-version: R2022a
             python-version: 3.9
           - matlab-version: R2023b
@@ -176,20 +180,17 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install netcdf4 hdf5
-
+          conda install numpy==1.24.4 netcdf4 hdf5
       - name: Output python executable
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           python -c "import sys; print(sys.executable)"
-
       - name: Print Python Version
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           python --version
-
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
@@ -210,31 +211,34 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip install mhkit==$MHKIT_PYTHON_VERSION
-
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           pip3 install -e .
 
+      - name: Pin scipy version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip uninstall -y scipy
+          pip install scipy==1.10.1
+
       - name: List installed pip modules
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           pip3 freeze
-
       - name: Print MHKiT-Python Version
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           python -c "import mhkit; print(mhkit.__version__)"
-
       - name: Verify MHKiT-Python Operation
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
-
       - name: Download mhkit_webread_cache artifact
         uses: actions/download-artifact@v4
         with:
@@ -255,19 +259,16 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
-
       # OutOfProcess works reliably on linux, macos, and windows
       - name: Configure MATLAB pyenv Version and ExecutionMode
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')\n" $(python -c "import sys; print(sys.executable)") >> run.m
-
       - name: Check Python System Path
         shell: bash -l {0}
         run: |
           echo "py.sys.path" >> run.m
-
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version,
