@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.toolbox" plugin-version="1.0">
-  <configuration build-checksum="4269953764" file="/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/prep-v0.5-release/MHKiT-MATLAB/mhkit.prj" location="/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/prep-v0.5-release/MHKiT-MATLAB" name="mhkit" target="target.toolbox" target-name="Package Toolbox">
+  <configuration build-checksum="381625427" file="/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/prep-v0.5-release/MHKiT-MATLAB/mhkit.prj" location="/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/prep-v0.5-release/MHKiT-MATLAB" name="mhkit" target="target.toolbox" target-name="Package Toolbox">
     <param.appname>mhkit</param.appname>
     <param.authnamewatermark>Rebecca Fao</param.authnamewatermark>
     <param.email>rebecca.fao@nrel.gov</param.email>
@@ -49,7 +49,21 @@ data processing and visualization.  The software package include functionality f
     <param.registered.apps />
     <param.docs />
     <param.getting.started.guide />
-    <param.matlabpath.excludes />
+    <param.matlabpath.excludes>
+      <item>/</item>
+      <item>/tests</item>
+      <item>/tests/coverage_report</item>
+      <item>/tests/coverage_report/release</item>
+      <item>/tests/coverage_report/release/coverageData</item>
+      <item>/tests/coverage_report/release/derived</item>
+      <item>/tests/coverage_report/release/derived/3p</item>
+      <item>/tests/coverage_report/release/derived/3p/ui</item>
+      <item>/tests/coverage_report/release/derived/3p/ui/dojo</item>
+      <item>/tests/coverage_report/release/images</item>
+      <item>/tests/coverage_report/release/matlab_codecov_js-ui</item>
+      <item>/tests/coverage_report/release/rights</item>
+      <item>/tests/example_ncfiles</item>
+    </param.matlabpath.excludes>
     <param.javaclasspath.excludes />
     <param.exported.on.package>false</param.exported.on.package>
     <param.required.addons />
@@ -81,7 +95,6 @@ data processing and visualization.  The software package include functionality f
       <param.registered.apps />
       <param.docs />
       <param.getting.started.guide />
-      <param.matlabpath.excludes />
       <param.javaclasspath.excludes />
       <param.exported.on.package />
       <param.required.addons />
