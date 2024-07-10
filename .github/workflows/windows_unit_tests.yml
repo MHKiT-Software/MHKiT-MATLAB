@@ -33,7 +33,7 @@ jobs:
       - name: "Conda install netcdf4, hdf5"
         run: |
           conda activate mhkit_conda_env
-          conda install netcdf4 hdf5
+          conda install numpy==1.24.4 netcdf4 hdf5
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
@@ -54,10 +54,19 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip install mhkit==$MHKIT_PYTHON_VERSION
+
       - name: pip install mhkit-python-utils module from source
         run: |
           conda activate mhkit_conda_env
           pip install -e .
+
+      - name: Pin scipy version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip uninstall -y scipy
+          pip install scipy==1.10.1
+
       # Create the cache and add a dummy file
       # The dummy file ensures that the artifact download
       - name: Setup mhkit_webread_cache
@@ -120,6 +129,7 @@ jobs:
         matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a]
         mhkit-python-version: ["0.7.0"]
         exclude:
+          # Cache population job
           - matlab-version: R2022a
             python-version: 3.9
           - matlab-version: R2023b
@@ -170,7 +180,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install netcdf4 hdf5
+          conda install numpy==1.24.4 netcdf4 hdf5
       - name: Output python executable
         shell: bash -l {0}
         run: |
@@ -206,6 +216,14 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip3 install -e .
+
+      - name: Pin scipy version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip uninstall -y scipy
+          pip install scipy==1.10.1
+
       - name: List installed pip modules
         shell: bash -l {0}
         run: |

@@ -35,7 +35,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
+          conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
           # conda install netcdf4 hdf5
           # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
 
@@ -66,6 +66,19 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip install -e .
+
+      - name: Pin scipy version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip uninstall -y scipy
+          pip install scipy==1.10.1
+
+      - name: List installed pip modules
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip freeze
 
       # Create the cache and add a dummy file
       # The dummy file ensures that the artifact download
@@ -163,24 +176,24 @@ jobs:
           - matlab-version: R2020b
             python-version: 3.9
           # Specific versions of tests that fail consistently. Most likely due to the GitHub actions environment
-          - matlab-version: R2024a # Python netcdf4 pip build error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123413351
-            python-version: 3.11
-            os: macos-13
+          # - matlab-version: R2024a # Python netcdf4 pip build error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123413351
+          #   python-version: 3.11
+          #   os: macos-13
           # - matlab-version: R2024a # Working!
           #   python-version: "3.10"
           #   os: macos-13
-          - matlab-version: R2024a # Java Segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123411604
-            python-version: 3.9
-            os: macos-13
-          - matlab-version: R2023b # Python netcd4 pip build error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123412889
-            python-version: 3.11
-            os: macos-13
-          - matlab-version: R2023b # Java segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123412352
-            python-version: "3.10"
-            os: macos-13
-          - matlab-version: R2023b # Java segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123411335
-            python-version: 3.9
-            os: macos-13
+          # - matlab-version: R2024a # Java Segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123411604
+          #   python-version: 3.9
+          #   os: macos-13
+          # - matlab-version: R2023b # Python netcd4 pip build error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123412889
+          #   python-version: 3.11
+          #   os: macos-13
+          # - matlab-version: R2023b # Java segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123412352
+          #   python-version: "3.10"
+          #   os: macos-13
+          # - matlab-version: R2023b # Java segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123411335
+          #   python-version: 3.9
+          #   os: macos-13
 
     runs-on: ${{ matrix.os }}
 
@@ -211,14 +224,14 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
+          conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
           # conda install netcdf4 hdf5
           # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
 
       # - name: Setup Python ${{ matrix.python-version }}
         # shell: bash -l {0}
         # run: |
-        #   conda create --name mhkit_conda_env python=${{ matrix.python-version }} numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
+        #   conda create --name mhkit_conda_env python=${{ matrix.python-version }} numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
         #   conda activate mhkit_conda_env
         #   export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
         #   pip install -e . --no-deps --force-reinstall
@@ -291,6 +304,13 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip install -e .
+
+      - name: Pin scipy version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip uninstall -y scipy
+          pip install scipy==1.10.1
 
       - name: List installed pip modules
         shell: bash -l {0}
