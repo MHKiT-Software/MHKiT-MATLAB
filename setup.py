@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from distutils.core import Extension
 
 DISTNAME = 'mhkit_python_utils'
-VERSION = '0.2.0'
+VERSION = '0.5.0'
 PACKAGES = ['mhkit_python_utils']
 EXTENSIONS = []
 DESCRIPTION = ''
