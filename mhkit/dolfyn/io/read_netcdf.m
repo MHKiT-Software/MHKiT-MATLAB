@@ -114,9 +114,18 @@ function ds = read_netcdf(filename)
             end
             if ~isempty(attrs)
                 for ii = 1:numel(attrs)
-                    if strcmpi(attrs(ii).Name,'units')
-                        ds.(name).units = attrs(ii).Value;
+                    % Specify what we are accessing
+                    this_name = attrs(ii).Name;
+                    this_field_name = stringToValidFieldname(this_name);
+                    this_value = attrs(ii).Value;
+                    % Specifically assign units above attributes
+                    % Not sure if this is technically correct
+                    if strcmpi(this_name, 'units')
+                        ds.(name).units = this_value;
                     end
+
+                    % Assign all attributes to `attrs`
+                    ds.(name).attrs.(this_field_name) = this_value;
                 end
             end
         end
@@ -140,5 +149,22 @@ function ds = read_netcdf(filename)
     ds.coord_sys = ds.attrs.coord_sys;
     ds.time = ds.coords.time;
 
-end
+    function fieldname = stringToValidFieldname(str)
+        % Ensure first character is a letter
+        if ~isletter(str(1))
+            str = ['_' str];
+        end
 
+        % Trim leading and trailing whitespace
+        str = strtrim(str);
+
+        % Replace double underscores
+        str = strrep(str, '__', '');
+
+        % % Replace invalid characters with underscore
+        str = regexprep(str, '[^a-zA-Z0-9_]', '_');
+
+        fieldname = str;
+    end
+
+end
