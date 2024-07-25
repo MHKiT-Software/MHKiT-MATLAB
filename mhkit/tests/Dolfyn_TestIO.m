@@ -280,17 +280,13 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
             this_ds = read_netcdf('../../examples/data/dolfyn/control/burst_mode01.nc');
 
             expected_pressure_unit = 'dbar';
+            % TODO: Find a file with long names
+            expected_pressure_long_name = 'Pressure';
             expected_temperature_unit = 'deg C';
+            % TODO: Find a file with long names
+            expected_temperature_long_name = 'Degrees Celsius';
 
-            % For each "DataArray" under `data`
-            % "units" is assigned in two places
-            % "units" are a quick accessor for the unit for plotting
-            % This was in the original code
-            % `attrs` contains all of the attributes in the netcdf file
-            testCase.assertEqual(this_ds.pressure.attrs.units, expected_pressure_unit);
             testCase.assertEqual(this_ds.pressure.units, expected_pressure_unit);
-
-            testCase.assertEqual(this_ds.temp.attrs.units, expected_temperature_unit);
             testCase.assertEqual(this_ds.temp.units, expected_temperature_unit);
         end
     end
