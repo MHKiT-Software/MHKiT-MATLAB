@@ -114,18 +114,11 @@ function ds = read_netcdf(filename)
             end
             if ~isempty(attrs)
                 for ii = 1:numel(attrs)
-                    % Specify what we are accessing
                     this_name = attrs(ii).Name;
                     this_field_name = stringToValidFieldname(this_name);
                     this_value = attrs(ii).Value;
-                    % Specifically assign units above attributes
-                    % Not sure if this is technically correct
-                    if strcmpi(this_name, 'units')
-                        ds.(name).units = this_value;
-                    end
 
-                    % Assign all attributes to `attrs`
-                    ds.(name).attrs.(this_field_name) = this_value;
+                    ds.(name).(this_field_name) = this_value;
                 end
             end
         end

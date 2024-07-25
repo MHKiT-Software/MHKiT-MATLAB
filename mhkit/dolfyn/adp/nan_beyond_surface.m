@@ -104,4 +104,3 @@ function out = nan_beyond_surface(ds, options)
     out = ds;
 
 end
-
