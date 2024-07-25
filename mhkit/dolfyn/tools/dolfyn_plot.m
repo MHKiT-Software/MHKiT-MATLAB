@@ -1,4 +1,4 @@
-function dolfyn_plot(ds, field, options)
+function dolfyn_plot(ds, field, varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Plot fields from Dolfyn generated data structures
 %
@@ -12,16 +12,27 @@ function dolfyn_plot(ds, field, options)
 %         for higher dimension fields, which dimension should be plotted
 %     title: string (optional)
 %         Title for the plot
+%     plotArgs: cell array (optional)
+%         Additional options to be passed to the plot function
 %
-%     call with options -> dolfyn_plot(ds,'vel','dim',1,'title','My plot')
+%     call with options -> dolfyn_plot(ds,'vel','dim',1,'title','My plot','plotArgs',{'Color','r'})
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     arguments
         ds
         field
-        options.dim = -1;
-        options.title = '';
     end
+    arguments (Repeating)
+        varargin
+    end
+
+    % Parse name-value pairs from varargin
+    p = inputParser;
+    addParameter(p, 'dim', -1);
+    addParameter(p, 'title', '');
+    addParameter(p, 'plotArgs', {});
+    parse(p, varargin{:});
+    options = p.Results;
 
     assert(isstruct(ds),['ds must be a structure generated from one of '...
         'the dolfyn.io functions'])
@@ -57,7 +68,7 @@ function dolfyn_plot(ds, field, options)
         end
         y_data = ds.(field).data;
 
-        plot(x_data, y_data)
+        plot(x_data, y_data, options.plotArgs{:})
         xlabel(ds.(field).dims{1},'Interpreter', 'none')
         y_label = string(field);
         if isfield(ds.(field),'units') && ~isempty(ds.(field).units)
@@ -74,15 +85,18 @@ function dolfyn_plot(ds, field, options)
         else
             x_data = ds.(field).coords.(ds.(field).dims{1});
         end
+
         y_data = ds.(field).data(:,:,options.dim);
 
-        plot(x_data, y_data)
+        plot(x_data, y_data, options.plotArgs{:})
         xlabel(ds.(field).dims{1},'Interpreter', 'none')
         y_label = string(field);
         if isfield(ds.(field),'units') && ~isempty(ds.(field).units)
             y_label = y_label + " [" + string(ds.(field).units) + "]";
         end
+
         ylabel(y_label,'Interpreter', 'none');
+
         if ~isempty(options.title)
             title(options.title);
         else
@@ -101,7 +115,7 @@ function dolfyn_plot(ds, field, options)
         y_dat = ds.(field).coords.(ds.(field).dims{2});
         z_dat = squeeze(ds.(field).data(:,:,:,options.dim))';
 
-        surf(x_data, y_dat, z_dat, 'edgecolor','none')
+        surf(x_data, y_dat, z_dat, 'edgecolor','none', options.plotArgs{:})
         view(2)
         xlabel(ds.(field).dims{1},'Interpreter', 'none')
         ylabel(strcat(ds.(field).dims{2}," [m]"),'Interpreter', 'none')
@@ -126,4 +140,3 @@ function dolfyn_plot(ds, field, options)
     end
 
 end
-
