@@ -145,6 +145,33 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             assertEqual(testCase,expected_meta.distance_to_shore(2),hindcast_data(2).metadata.distance_to_shore,'RelTol',0.000001);
         end
 
+        function test_WPTO_omnidirectional(testCase)
+
+            % assumeFail(testCase, "API key usage saturated - temporarily disabling")
+
+            api_key = '3K3JQbjZmWctY0xmIfSYvYgtIcM3CN0cb1Y2w9bf';
+            hindcast_data = request_wpto('1-hour',...
+                ["omni-directional_wave_power"],[44.624076,-124.280097;43.489171,-125.152137],...
+                2010,api_key);
+
+            % Verify that the hindcast data is not empty
+            testCase.verifyNotEmpty(hindcast_data, 'Hindcast data should not be empty.');
+
+            % Convert hindcast data to a table if needed
+            if istable(hindcast_data)
+                hindcast_table = hindcast_data;
+            else
+                % Assuming hindcast_data is a struct array or similar
+                hindcast_table = struct2table(hindcast_data);
+            end
+
+            % Define the output CSV file path
+            output_csv_file = fullfile(pwd, 'hindcast_test_data.csv');
+
+            % Save the hindcast data to a CSV file
+            writetable(hindcast_table, output_csv_file);
+        end
+
         function test_WPTO_point_multiparm(testCase)
 
             % assumeFail(testCase, "API key usage saturated - temporarily disabling")
