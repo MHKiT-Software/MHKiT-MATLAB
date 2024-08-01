@@ -154,22 +154,26 @@ classdef Wave_TestIO < matlab.unittest.TestCase
                 ["omni-directional_wave_power"],[44.624076,-124.280097;43.489171,-125.152137],...
                 2010,api_key);
 
-            % Verify that the hindcast data is not empty
+            % Verify hindcast data is not empty
             testCase.verifyNotEmpty(hindcast_data, 'Hindcast data should not be empty.');
 
-            % Convert hindcast data to a table if needed
-            if istable(hindcast_data)
-                hindcast_table = hindcast_data;
-            else
-                % Assuming hindcast_data is a struct array or similar
-                hindcast_table = struct2table(hindcast_data);
-            end
+            expected_point_1_file = "../../examples/data/wave/hindcast/hindcast_test_omni_point_1.csv";
+            expected_point_1 = readtable(expected_point_1_file,'delimiter',',');
 
-            % Define the output CSV file path
-            output_csv_file = fullfile(pwd, 'hindcast_test_data.csv');
+            expected_point_2_file = "../../examples/data/wave/hindcast/hindcast_test_omni_point_2.csv";
+            expected_point_2 = readtable(expected_point_2_file,'delimiter',',');
 
-            % Save the hindcast data to a CSV file
-            writetable(hindcast_table, output_csv_file);
+            % Convert missing csv timezone to UTC
+            expected_point_1.time = datetime(expected_point_1.time, 'TimeZone', 'UTC');
+            expected_point_2.time = datetime(expected_point_2.time, 'TimeZone', 'UTC');
+
+            % Verify downloaded omni-directional_wave_power matches the expected values
+            assertEqual(testCase, expected_point_1.omni_directional_wave_power,hindcast_data(1).omni_directional_wave_power, 'RelTol',0.000001);
+            assertEqual(testCase, expected_point_2.omni_directional_wave_power,hindcast_data(2).omni_directional_wave_power, 'RelTol',0.000001);
+
+            % Verify time matches the expected values
+            assertEqual(testCase, expected_point_1.time,hindcast_data(1).time);
+            assertEqual(testCase, expected_point_2.time,hindcast_data(2).time);
         end
 
         function test_WPTO_point_multiparm(testCase)
