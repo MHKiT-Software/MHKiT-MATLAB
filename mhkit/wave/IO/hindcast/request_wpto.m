@@ -115,7 +115,8 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
                 paramURL = ['https://developer.nrel.gov/api/hsds/datasets/' paramID{:} '/value?api_key=' api_key '&select=[:,' num2str(idx(y)-1) ']' dom];
             end
             param = cached_webread(paramURL,options);
-            data(y).(parameter(z)) = param.value;
+            param_fieldname = strrep(parameter(z), "-", "_");
+            data(y).(param_fieldname) = param.value;
         end
     end
 
@@ -149,4 +150,3 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
         data(i).metadata = meta(i);
     end
 end
-
