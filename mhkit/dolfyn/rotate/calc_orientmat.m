@@ -70,4 +70,3 @@ function rotmat = calc_orientmat(adcpo)
 
     rotmat = permute(rotmat, [1 2 4 3]);
 end
-

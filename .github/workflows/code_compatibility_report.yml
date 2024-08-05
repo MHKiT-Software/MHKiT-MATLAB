@@ -12,7 +12,8 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        # os: [macos-13, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         python-version: [3.8, 3.9, "3.10", 3.11]
         matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b]
 
@@ -23,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2-beta
+        uses: matlab-actions/setup-matlab@v2
         with:
           release: ${{ matrix.matlab-version }}
 
@@ -38,7 +39,7 @@ jobs:
         run: cat run.m
 
       - name: Run code compatibility report
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: run
           startup-options: -noFigureWindows

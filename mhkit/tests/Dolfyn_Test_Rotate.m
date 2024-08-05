@@ -547,4 +547,3 @@ classdef Dolfyn_Test_Rotate < matlab.unittest.TestCase
     end
 
 end
-

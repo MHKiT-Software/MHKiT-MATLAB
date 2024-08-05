@@ -16,6 +16,28 @@ See the [documentation](https://mhkit-software.github.io/MHKiT/) for more inform
 
 ## Installation
 
+**NOTE:** MHKiT-MATLAB now requires the user to install a specific version of MHKiT-Python,
+currently version `0.7.0`. You can achieve this by executing the following commands in the Anaconda
+environment where MHKiT-Python is installed:
+
+1. Uninstall the current version of MHKiT-Python:
+
+```bash
+pip uninstall mhkit
+```
+
+2. Install MHKiT-Python version `0.7.0`:
+
+```bash
+pip install mhkit==0.7.0
+```
+
+3. Verify the MHKiT-Python version:
+
+```bash
+python -c "import mhkit; print(mhkit.__version__)"
+```
+
 ### Software Requirements
 
 MHKiT-MATLAB utilizes Python functions from MHKiT-Python and requires the user to have
@@ -23,12 +45,13 @@ compatible versions of Python and MHKiT-Python installed.
 
 MHKiT-MATLAB supports the following combinations of MATLAB and Python versions.[^1]
 
-|      | R2021b | R2022a | R2022b | R2023a | R2023b |
-| ---- | ------ | ------ | ------ | ------ | ------ |
-| 3.11 | -      | -      | -      | -      | ✓      |
-| 3.10 | -      | -      | ✓      | ✓      | ✓      |
-| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓      |
-| 3.8  | ✓      | ✓      | ✓      | ✓      | -      |
+|      | R2021b | R2022a | R2022b | R2023a | R2023b | R2024a |
+| ---- | ------ | ------ | ------ | ------ | ------ | ------ |
+| 3.12 | -      | -      | -      | -      | -      | -      |
+| 3.11 | -      | -      | -      | -      | ✓      | ✓      |
+| 3.10 | -      | -      | ✓      | ✓      | ✓      | ✓      |
+| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
+| 3.8  | ✓      | ✓      | ✓      | ✓      | -      | -      |
 
 - ✓: MATLAB/Python versions compatible
 - `-`: MATLAB/Python versions not compatible
@@ -49,30 +72,33 @@ The test matrices below detail the current state of unit testing. An "X" indicat
 
 #### Linux (`ubuntu-latest`)
 
-|      | R2021b | R2022a | R2022b | R2023a | R2023b |
-| ---- | ------ | ------ | ------ | ------ | ------ |
-| 3.11 | -      | -      | -      | -      | ✓      |
-| 3.10 | -      | -      | ✓      | ✓      | ✓      |
-| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓      |
-| 3.8  | ✓      | ✓      | ✓      | ✓      | -      |
+|      | R2021b | R2022a | R2022b | R2023a | R2023b | R2024a |
+| ---- | ------ | ------ | ------ | ------ | ------ | ------ |
+| 3.12 | -      | -      | -      | -      | -      | -      |
+| 3.11 | -      | -      | -      | -      | ✓      | ✓      |
+| 3.10 | -      | -      | ✓      | ✓      | ✓      | ✓      |
+| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
+| 3.8  | ✓      | ✓      | ✓      | ✓      | -      | -      |
 
 #### macOS (`macos-latest`)
 
-|      | R2021b | R2022a | R2022b | R2023a | R2023b                     |
-| ---- | ------ | ------ | ------ | ------ | -------------------------- |
-| 3.11 | -      | -      | -      | -      | X[^macos-311-action-error] |
-| 3.10 | -      | -      | ✓      | ✓      | ✓                          |
-| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓                          |
-| 3.8  | ✓      | ✓      | ✓      | ✓      | ✓                          |
+|      | R2021b | R2022a | R2022b | R2023a | R2023b | R2024a |
+| ---- | ------ | ------ | ------ | ------ | ------ | ------ |
+| 3.12 | -      | -      | -      | -      | -      | -      |
+| 3.11 | -      | -      | -      | -      | ✓      | ✓      |
+| 3.10 | -      | -      | ✓      | ✓      | ✓      | ✓      |
+| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
+| 3.8  | ✓      | ✓      | ✓      | ✓      | -      | -      |
 
 #### Windows (`windows-latest`)
 
-|      | R2021b | R2022a | R2022b | R2023a | R2023b                            |
-| ---- | ------ | ------ | ------ | ------ | --------------------------------- |
-| 3.11 | -      | -      | -      | -      | X[^windows-gt-2022a-action-error] |
-| 3.10 | -      | -      | X      | X      | X                                 |
-| 3.9  | ✓      | ✓      | X      | X      | X                                 |
-| 3.8  | ✓      | ✓      | X      | X      | X                                 |
+|      | R2021b | R2022a | R2022b | R2023a | R2023b | R2024a |
+| ---- | ------ | ------ | ------ | ------ | ------ | ------ |
+| 3.12 | -      | -      | -      | -      | -      | -      |
+| 3.11 | -      | -      | -      | -      | ✓      | ✓      |
+| 3.10 | -      | -      | ✓      | ✓      | ✓      | ✓      |
+| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
+| 3.8  | ✓      | ✓      | ✓      | ✓      | -      | -      |
 
 ### Legend
 
@@ -127,29 +153,3 @@ See [copyright and license](https://mhkit-software.github.io/MHKiT/license.html)
 [^1]:
     For a comprehensive list of compatible MATLAB/Python versions, refer to the [MathWorks Python
     Compatibility Documentation](https://www.mathworks.com/support/requirements/python-compatibility.html).
-
-[^macos-311-action-error]:
-
-[macOS Python 3.11 action error](https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/7143629923/job/19455784365#step:20:3373)
-
-    ```
-    Python Error: ImportError:
-          dlopen(/usr/local/miniconda/envs/MHKIT_CONDA_ENV/lib/python3.11/site-packages/netCDF4/_netCDF4.cpython-311-darwin.so,
-          0x0002): Symbol not found: (_SSL_get0_group_name)
-            Referenced from:
-            '/usr/local/miniconda/envs/MHKIT_CONDA_ENV/lib/libcurl.4.dylib'
-            Expected in:
-            '/Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/bin/maci64/libssl.3.dylib'
-    ```
-
-[^windows-gt-2022a-action-error]:
-    [Windows MATLAB > 2022a action error](https://github.com/MHKiT-Software/MHKiT-MATLAB/pull/108/commits/63fbf91543392e2fc673a67af52e152ff15f2980)
-
-    ```
-    Error: Caught "std::exception" Exception message is:
-      Unable to launch Simple server: Unable to launch C:\Program Files\MATLAB\R2023b\interprocess\bin\win64\pycli\MATLABPyHost.exe
-      because: Peer process exited before transport type handshake. Exit status: 3221226505
-
-      ERROR: MATLAB error Exit Status: 0x00000001
-      exit status 1
-    ```
