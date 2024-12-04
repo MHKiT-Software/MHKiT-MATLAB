@@ -33,7 +33,7 @@ jobs:
       - name: "Conda install netcdf4, hdf5"
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.24.4 netcdf4 hdf5
+          conda install numpy==1.26.4 netcdf4 hdf5
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
@@ -180,7 +180,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.24.4 netcdf4 hdf5
+          conda install numpy==1.26.4 netcdf4 hdf5
       - name: Output python executable
         shell: bash -l {0}
         run: |
