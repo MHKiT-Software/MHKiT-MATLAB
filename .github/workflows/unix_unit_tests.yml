@@ -35,7 +35,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
+          conda install numpy==1.26.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
           # conda install netcdf4 hdf5
           # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
 
@@ -224,14 +224,14 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
+          conda install numpy==1.26.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
           # conda install netcdf4 hdf5
           # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
 
       # - name: Setup Python ${{ matrix.python-version }}
         # shell: bash -l {0}
         # run: |
-        #   conda create --name mhkit_conda_env python=${{ matrix.python-version }} numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
+        #   conda create --name mhkit_conda_env python=${{ matrix.python-version }} numpy==1.26.4 cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
         #   conda activate mhkit_conda_env
         #   export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
         #   pip install -e . --no-deps --force-reinstall
