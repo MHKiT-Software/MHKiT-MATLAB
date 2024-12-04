@@ -23,5 +23,5 @@ end
 
     python_result = py.mhkit.river.io.d3d.get_all_time(delft_3d_py_object);
 
-    result = double(python_result);
+    result = double(py.list(python_result));
 end
