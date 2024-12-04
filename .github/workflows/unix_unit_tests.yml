@@ -358,13 +358,13 @@ jobs:
           export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$OPENSSL_LIB_PATH:$DYLD_LIBRARY_PATH"
           echo "export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
 
-      # Step 4: Disable MATLAB OpenSSL Libraries
-      - name: Disable MATLAB OpenSSL Libraries
-        if: matrix.os == 'macos-13'
-        run: |
-          MATLABROOT=$(matlab -batch "disp(matlabroot)" | tail -1)
-          mv "$MATLABROOT/bin/maci64/libcrypto.3.dylib" "$MATLABROOT/bin/maci64/libcrypto.3.dylib.bak"
-          mv "$MATLABROOT/bin/maci64/libssl.3.dylib" "$MATLABROOT/bin/maci64/libssl.3.dylib.bak"
+      # # Step 4: Disable MATLAB OpenSSL Libraries
+      # - name: Disable MATLAB OpenSSL Libraries
+      #   if: matrix.os == 'macos-13'
+      #   run: |
+      #     MATLABROOT=$(matlab -batch "disp(matlabroot)" | tail -1)
+      #     mv "$MATLABROOT/bin/maci64/libcrypto.3.dylib" "$MATLABROOT/bin/maci64/libcrypto.3.dylib.bak"
+      #     mv "$MATLABROOT/bin/maci64/libssl.3.dylib" "$MATLABROOT/bin/maci64/libssl.3.dylib.bak"
 
       - name: Add Python Dir to Path
         shell: bash -l {0}
