@@ -345,6 +345,20 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
+      - name: Configure Dynamic Library Paths for macOS and Ubuntu
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          CONDA_LIB_PATH=$(python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
+          CONDA_PREFIX=$(conda info --base)
+          if [[ "$(uname)" == "Darwin" ]]; then
+            export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$CONDA_PREFIX/envs/mhkit_conda_env/lib:$DYLD_LIBRARY_PATH"
+            echo "export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          else
+            export LD_LIBRARY_PATH="$CONDA_LIB_PATH:$CONDA_PREFIX/envs/mhkit_conda_env/lib:$LD_LIBRARY_PATH"
+            echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          fi
+
       - name: Add Python Dir to Path
         shell: bash -l {0}
         run: |
@@ -357,6 +371,15 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") >> run.m
+          # Pass dynamic library paths to MATLAB
+          echo "setenv('DYLD_LIBRARY_PATH', getenv('DYLD_LIBRARY_PATH'));" >> run.m
+          echo "setenv('LD_LIBRARY_PATH', getenv('LD_LIBRARY_PATH'));" >> run.m
+
+      # - name: Configure MATLAB Python Environment
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
