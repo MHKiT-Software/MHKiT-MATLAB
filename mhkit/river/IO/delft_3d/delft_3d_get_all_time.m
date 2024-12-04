@@ -23,7 +23,7 @@ end
 
     python_result = py.mhkit.river.io.d3d.get_all_time(delft_3d_py_object);
 
-    python_result = py.list(python_result);
+    python_result = py.numpy.ndarray(python_result);
 
 disp(python_result);
 disp(class(python_result));
