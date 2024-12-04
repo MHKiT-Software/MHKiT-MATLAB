@@ -23,5 +23,8 @@ function result = delft_3d_get_all_time(delft_3d_py_object)
 
     python_result = py.mhkit.river.io.d3d.get_all_time(delft_3d_py_object);
 
+    disp(python_result);
+    disp(class(python_result));
+
     result = double(python_result);
 end
