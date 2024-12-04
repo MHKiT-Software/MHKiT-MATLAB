@@ -346,12 +346,12 @@ jobs:
           release: ${{ matrix.matlab-version }}
 
       - name: Install OpenSSL
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-13'
         run: brew install openssl
 
       # Step 3: Set DYLD_LIBRARY_PATH for Python's OpenSSL
       - name: Configure DYLD_LIBRARY_PATH for MATLAB
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-13'
         run: |
           OPENSSL_LIB_PATH=$(brew --prefix openssl)/lib
           CONDA_LIB_PATH=$(python -c "import sys; import os; print(os.path.join(os.path.dirname(sys.executable), 'lib'))")
@@ -360,7 +360,7 @@ jobs:
 
       # Step 4: Disable MATLAB OpenSSL Libraries
       - name: Disable MATLAB OpenSSL Libraries
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-13'
         run: |
           MATLABROOT=$(matlab -batch "disp(matlabroot)" | tail -1)
           mv "$MATLABROOT/bin/maci64/libcrypto.3.dylib" "$MATLABROOT/bin/maci64/libcrypto.3.dylib.bak"
