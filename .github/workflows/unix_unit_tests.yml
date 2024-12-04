@@ -224,7 +224,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
+          conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4 openssl
           # conda install netcdf4 hdf5
           # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
 
