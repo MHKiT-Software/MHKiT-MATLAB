@@ -23,5 +23,17 @@ end
 
     python_result = py.mhkit.river.io.d3d.get_all_time(delft_3d_py_object);
 
-    result = double(py.list(python_result));
+    % Handle masked arrays using numpy.ma.getdata
+    if isa(python_result, 'py.numpy.ma.MaskedArray')
+        % Extract the underlying data
+        data_array = py.numpy.ma.getdata(python_result);
+    else
+        % Convert directly if not masked
+        data_array = py.numpy.array(python_result);
+    end
+
+    % Ensure data is of type float
+    float_array = data_array.astype('float');
+
+    result = double(float_array);
 end
