@@ -224,7 +224,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
+          conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4 openssl=3.0.0
           # conda install netcdf4 hdf5
           # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
 
@@ -355,9 +355,10 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          OPENSSL_LIB_PATH=$(brew --prefix openssl)/lib
+          # OPENSSL_LIB_PATH=$(brew --prefix openssl)/lib
           CONDA_LIB_PATH=$(python -c "import sys; import os; print(os.path.join(os.path.dirname(sys.executable), 'lib'))")
-          export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$OPENSSL_LIB_PATH:$DYLD_LIBRARY_PATH"
+          # export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$OPENSSL_LIB_PATH:$DYLD_LIBRARY_PATH"
+          export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$DYLD_LIBRARY_PATH"
           echo "export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
 
       # # Step 4: Disable MATLAB OpenSSL Libraries
