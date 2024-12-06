@@ -352,7 +352,9 @@ jobs:
       # Step 3: Set DYLD_LIBRARY_PATH for Python's OpenSSL
       - name: Configure DYLD_LIBRARY_PATH for MATLAB
         if: matrix.os == 'macos-13'
+        shell: bash -l {0}
         run: |
+          conda activate mhkit_conda_env
           OPENSSL_LIB_PATH=$(brew --prefix openssl)/lib
           CONDA_LIB_PATH=$(python -c "import sys; import os; print(os.path.join(os.path.dirname(sys.executable), 'lib'))")
           export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$OPENSSL_LIB_PATH:$DYLD_LIBRARY_PATH"
