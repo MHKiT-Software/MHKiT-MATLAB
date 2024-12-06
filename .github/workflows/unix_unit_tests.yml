@@ -36,24 +36,9 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
-          # conda install netcdf4 hdf5
-          # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
-
-      # - name: Check out MHKiT-Python
-      #   uses: actions/checkout@v4
-      #   with:
-      #     repository: "MHKiT-Software/MHKiT-Python"
-      #     path: ${{env.mhkit-python-dir}}
-
-      # - name: pip install mhkit module from source
-      #   shell: bash -l {0}
-      #   run: |
-      #     conda activate mhkit_conda_env
-      #     pip install -e .
-      #   working-directory: ${{env.mhkit-python-dir}}
 
       - name: pip install mhkit from pypi
         shell: bash -l {0}
@@ -204,12 +189,6 @@ jobs:
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
-      # - name: Check out MHKiT-Python
-      #   uses: actions/checkout@v4
-      #   with:
-      #     repository: "MHKiT-Software/MHKiT-Python"
-      #     path: ${{env.mhkit-python-dir}}
-
       - name: Install & Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -225,41 +204,6 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
-          # conda install netcdf4 hdf5
-          # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-
-      # - name: Setup Python ${{ matrix.python-version }}
-        # shell: bash -l {0}
-        # run: |
-        #   conda create --name mhkit_conda_env python=${{ matrix.python-version }} numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4 --strict-channel-priority
-        #   conda activate mhkit_conda_env
-        #   export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-        #   pip install -e . --no-deps --force-reinstall
-
-      # - name: Setup MHKiT Dependencies on macOS
-      #   if: ${{ matrix.os == 'macos-13' }}
-      #   run: brew install hdf5 netcdf
-
-      # - name: Setup MHKiT Dependencies on ubuntu
-      #   run: sudo apt install libhdf5-serial-dev libnetcdf-dev
-      #   if: ${{ matrix.os == 'ubuntu-latest' }}
-
-      # - name: Setup MHKiT Dependencies on ubuntu
-      #   if: ${{ matrix.os == 'ubuntu-latest' }}
-      #   run: |
-      #     sudo apt update
-      #     sudo apt upgrade
-      #     sudo apt install build-essential
-
-      # - name: Print GCC Version
-      #   if: ${{ matrix.os == 'ubuntu-latest' }}
-      #   run: |
-      #     gcc --version
-      #     g++ --version
-
-      # - name: Setup MATLAB Path on Ubuntu
-      #   if: ${{ matrix.os == 'ubuntu-latest' }}
-      #   run: echo "export LD_LIBRARY_PATH=/usr/local/MATLAB/${{ matrix.matlab-version }}/sys/os/glnxa64" >> "$GITHUB_ENV"
 
       - name: Setup MATLAB Path on Ubuntu
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -276,14 +220,6 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           python --version
-
-      # - name: pip install mhkit module from source
-      #   working-directory: ${{env.mhkit-python-dir}}
-      #   shell: bash -l {0}
-      #   run: |
-      #     conda activate mhkit_conda_env
-      #     export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-      #     pip install -e .
 
       - name: pip install mhkit from pypi
         shell: bash -l {0}
@@ -371,12 +307,6 @@ jobs:
           if [[ $OSTYPE == "darwin"* ]]; then
             echo "setenv('DYLD_LIBRARY_PATH', getenv('DYLD_LIBRARY_PATH'));" >> run.m
           fi
-
-      # - name: Configure MATLAB Python Environment
-      #   shell: bash -l {0}
-      #   run: |
-      #     conda activate mhkit_conda_env
-      #     printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
