@@ -39,10 +39,8 @@ arguments
     options.rho = 1025;
     options.g = 9.80665;
 end
-py.importlib.import_module('mhkit');
 
 f=py.numpy.array(f);
-
 
 kdf=py.mhkit.wave.resource.wave_number(f,h,pyargs('rho',options.rho,'g',options.rho));
 

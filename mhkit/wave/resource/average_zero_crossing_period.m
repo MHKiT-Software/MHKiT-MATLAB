@@ -30,10 +30,6 @@ function Tz=average_zero_crossing_period(S,varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-py.importlib.import_module('mhkit');
-py.importlib.import_module('mhkit_python_utils');
-
 if nargin == 2
     freq_bins = py.numpy.array(varargin{1});
 elseif nargin == 1

@@ -64,8 +64,6 @@ if ~isa(bin_size,'double')
     error('ERROR: bin_size must be an integer')
 end
 
-py.importlib.import_module('mhkit');
-
 x1 = py.numpy.array(x1);
 x2 = py.numpy.array(x2);
 points_per_interval = int32(points_per_interval);
