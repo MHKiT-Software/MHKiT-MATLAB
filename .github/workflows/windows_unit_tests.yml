@@ -33,7 +33,7 @@ jobs:
       - name: Conda install mhkit
         run: |
           conda activate mhkit_conda_env
-          conda mhkit
+          conda install mhkit
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
