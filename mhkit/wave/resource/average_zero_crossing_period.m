@@ -61,5 +61,5 @@ end
 
 Tz=py.mhkit.wave.resource.average_zero_crossing_period(S,pyargs('frequency_bins',freq_bins));
 
-Tz=double(Tz.values);
+Tz=double(Tz);
 

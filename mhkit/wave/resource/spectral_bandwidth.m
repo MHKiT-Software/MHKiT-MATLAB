@@ -63,5 +63,5 @@ end
 
 
 e0=py.mhkit.wave.resource.spectral_bandwidth(S,pyargs('frequency_bins',freq_bins));
-e=double(e0.values);
+e=double(e0);
 

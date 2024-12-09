@@ -61,5 +61,5 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
 end
 
 Tavg=py.mhkit.wave.resource.average_crest_period(S,pyargs('frequency_bins',freq_bins));
-Tavg=double(Tavg.values);
+Tavg=double(Tavg);
 

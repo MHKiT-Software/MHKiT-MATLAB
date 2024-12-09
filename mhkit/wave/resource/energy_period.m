@@ -70,5 +70,5 @@ end
 
 % calculate enegery_period here
 Te=py.mhkit.wave.resource.energy_period(S,pyargs('frequency_bins',freq_bins));
-Te=double(Te.values);
+Te=double(Te);
 

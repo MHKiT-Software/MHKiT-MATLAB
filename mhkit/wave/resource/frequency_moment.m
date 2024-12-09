@@ -68,5 +68,5 @@ else
         throw(ME);
 end
 
-m=double(m.values);
+m=double(m);
 

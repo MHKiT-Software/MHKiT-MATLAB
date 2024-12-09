@@ -62,5 +62,5 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
 end
 
 Tm=py.mhkit.wave.resource.average_wave_period(S,pyargs('frequency_bins',freq_bins));
-Tavg=double(Tm.values);
+Tavg=double(Tm);
 

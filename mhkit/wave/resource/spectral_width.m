@@ -61,5 +61,5 @@ if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
 end
 
 e0=py.mhkit.wave.resource.spectral_width(S,pyargs('frequency_bins',freq_bins));
-v=double(e0.values);
+v=double(e0);
 

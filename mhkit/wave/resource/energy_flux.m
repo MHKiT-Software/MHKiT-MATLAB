@@ -86,5 +86,5 @@ J=py.mhkit.wave.resource.energy_flux(S,h,pyargs('rho',options.rho,'g',options.g,
 
 
 
-J=double(J.values);
+J=double(J);
 

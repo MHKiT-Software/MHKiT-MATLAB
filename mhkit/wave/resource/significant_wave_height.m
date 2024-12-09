@@ -63,5 +63,5 @@ end
 
 % calculate significant wave height
 Hm0=py.mhkit.wave.resource.significant_wave_height(S,pyargs('frequency_bins',freq_bins));
-Hm0=double(Hm0.values);
+Hm0=double(Hm0);
 
