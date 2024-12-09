@@ -30,10 +30,10 @@ jobs:
           channels: conda-forge
 
       # This is necessary to fix any issues with netcdf4 and hdf5 headers
-      - name: "Conda install netcdf4, hdf5"
+      - name: Conda install mhkit
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.24.4 netcdf4 hdf5
+          conda mhkit
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
@@ -60,12 +60,12 @@ jobs:
           conda activate mhkit_conda_env
           pip install -e .
 
-      - name: Pin scipy version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip uninstall -y scipy
-          pip install scipy==1.10.1
+      # - name: Pin scipy version
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip uninstall -y scipy
+      #     pip install scipy==1.10.1
 
       # Create the cache and add a dummy file
       # The dummy file ensures that the artifact download
@@ -176,11 +176,11 @@ jobs:
           channels: conda-forge
 
       # This is necessary to fix any issues with netcdf4 and hdf5 headers
-      - name: "Conda install netcdf4, hdf5"
+      - name: Conda install mhkit
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.24.4 netcdf4 hdf5
+          conda install mhkit
       - name: Output python executable
         shell: bash -l {0}
         run: |
@@ -217,13 +217,13 @@ jobs:
           conda activate mhkit_conda_env
           pip3 install -e .
 
-      - name: Pin scipy version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip uninstall -y scipy
-          pip install scipy==1.10.1
-
+      # - name: Pin scipy version
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip uninstall -y scipy
+      #     pip install scipy==1.10.1
+      #
       - name: List installed pip modules
         shell: bash -l {0}
         run: |

@@ -35,7 +35,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
+          conda install mhkit
           # conda install netcdf4 hdf5
           # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
 
@@ -55,11 +55,11 @@ jobs:
       #     pip install -e .
       #   working-directory: ${{env.mhkit-python-dir}}
 
-      - name: pip install mhkit from pypi
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip install mhkit==$MHKIT_PYTHON_VERSION
+      # - name: pip install mhkit from pypi
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip install mhkit==$MHKIT_PYTHON_VERSION
 
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
@@ -67,12 +67,12 @@ jobs:
           conda activate mhkit_conda_env
           pip install -e .
 
-      - name: Pin scipy version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip uninstall -y scipy
-          pip install scipy==1.10.1
+      # - name: Pin scipy version
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip uninstall -y scipy
+      #     pip install scipy==1.10.1
 
       - name: List installed pip modules
         shell: bash -l {0}
@@ -224,7 +224,8 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
+          conda install mhkit
+          # conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
           # conda install netcdf4 hdf5
           # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
 
@@ -305,12 +306,12 @@ jobs:
           conda activate mhkit_conda_env
           pip install -e .
 
-      - name: Pin scipy version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip uninstall -y scipy
-          pip install scipy==1.10.1
+      # - name: Pin scipy version
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip uninstall -y scipy
+      #     pip install scipy==1.10.1
 
       - name: List installed pip modules
         shell: bash -l {0}
