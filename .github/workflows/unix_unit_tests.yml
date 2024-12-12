@@ -204,12 +204,6 @@ jobs:
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
-      # - name: Check out MHKiT-Python
-      #   uses: actions/checkout@v4
-      #   with:
-      #     repository: "MHKiT-Software/MHKiT-Python"
-      #     path: ${{env.mhkit-python-dir}}
-
       - name: Install & Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -278,14 +272,6 @@ jobs:
           conda activate mhkit_conda_env
           python --version
 
-      # - name: pip install mhkit module from source
-      #   working-directory: ${{env.mhkit-python-dir}}
-      #   shell: bash -l {0}
-      #   run: |
-      #     conda activate mhkit_conda_env
-      #     export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-      #     pip install -e .
-
       - name: pip install mhkit from pypi
         shell: bash -l {0}
         run: |
@@ -346,6 +332,16 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
+      - name: Configure OpenSSL for MacOS/MATLAB
+        if: matrix.os == 'macos-13'
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          conda install openssl=="3.0.*"
+          CONDA_LIB_PATH=$(python -c "import sys; import os; print(os.path.join(os.path.dirname(sys.executable), 'lib'))")
+          export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$DYLD_LIBRARY_PATH"
+          echo "export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+
       - name: Add Python Dir to Path
         shell: bash -l {0}
         run: |
@@ -358,6 +354,10 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") >> run.m
+          # Pass dynamic library paths to MATLAB only on macOS
+          if [[ $OSTYPE == "darwin"* ]]; then
+            echo "setenv('DYLD_LIBRARY_PATH', getenv('DYLD_LIBRARY_PATH'));" >> run.m
+          fi
 
       - name: Add MATLAB test commands
         shell: bash
