@@ -32,10 +32,6 @@ function Te=energy_period(S,varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% py.importlib.import_module('numpy');
-py.importlib.import_module('mhkit');
-py.importlib.import_module('mhkit_python_utils');
-
 % assign feq_bin
 if nargin == 2
     freq_bins = py.numpy.array(varargin{1});

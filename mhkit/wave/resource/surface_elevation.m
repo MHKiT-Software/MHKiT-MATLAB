@@ -63,10 +63,6 @@ arguments
     options.method = "ifft";
 end
 
-py.importlib.import_module('mhkit');
-% py.importlib.import_module('numpy');
-py.importlib.import_module('mhkit_python_utils');
-
 frequency= S.frequency ;
 
 if (isa(time_index,'py.numpy.ndarray') ~= 1)

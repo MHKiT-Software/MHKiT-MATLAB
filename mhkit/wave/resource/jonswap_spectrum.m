@@ -36,10 +36,6 @@ function S=jonswap_spectrum(frequency,Tp,Hs,varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-py.importlib.import_module('mhkit');
-% py.importlib.import_module('numpy');
-
 if (isa(frequency,'py.numpy.ndarray') ~= 1)
     frequency = py.numpy.array(frequency);
 end

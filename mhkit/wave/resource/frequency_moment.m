@@ -34,11 +34,6 @@ function m=frequency_moment(S,N,varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-py.importlib.import_module('mhkit');
-py.importlib.import_module('mhkit_python_utils');
-
 if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(S)==1)
         x=size(S.spectrum);

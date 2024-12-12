@@ -34,10 +34,6 @@ function S=pierson_moskowitz_spectrum(frequency,Tp,Hs)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-py.importlib.import_module('mhkit');
-% py.importlib.import_module('numpy');
-
 if (isa(frequency,'py.numpy.ndarray') ~= 1)
     frequency = py.numpy.array(frequency);
 end

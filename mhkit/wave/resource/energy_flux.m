@@ -54,9 +54,6 @@ arguments
 
 end
 
-py.importlib.import_module('mhkit');
-py.importlib.import_module('mhkit_python_utils');
-
 % convert to dataframe
 if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
     if (isstruct(S)==1)
