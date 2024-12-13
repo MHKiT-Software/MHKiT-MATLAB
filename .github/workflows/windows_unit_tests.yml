@@ -31,6 +31,7 @@ jobs:
 
       # This is necessary to fix any issues with netcdf4 and hdf5 headers
       - name: Conda install mhkit
+        shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           conda install mhkit==$MHKIT_PYTHON_VERSION
