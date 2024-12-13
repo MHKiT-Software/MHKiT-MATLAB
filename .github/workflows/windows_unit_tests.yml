@@ -44,6 +44,21 @@ jobs:
           conda activate mhkit_conda_env
           pip install -e .
 
+      - name: List Installed Python Packages using Conda
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          conda list
+
+      - name: List Installed Python Packages using pip
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip list
+
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v4
+
       # - name: Pin scipy version
       #   shell: bash -l {0}
       #   run: |
