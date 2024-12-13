@@ -13,7 +13,7 @@ jobs:
 
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.10"]
+        python-version: ["3.11"]
         matlab-version: [R2023b]
 
     runs-on: ${{ matrix.os }}
@@ -147,7 +147,7 @@ jobs:
           # - python-version: "3.10" # cache_population job
           #   matlab-version: R2022b
           #   os: ubuntu-latest
-          - python-version: "3.10" # cache_population job
+          - python-version: "3.11" # cache_population job
             matlab-version: R2023b
             os: ubuntu-latest
           - matlab-version: R2024a # Non compatiable versions of Python and MATLAB
