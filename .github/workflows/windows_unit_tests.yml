@@ -12,8 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        python-version: [3.9]
-        matlab-version: [R2022a]
+        python-version: [3.10]
+        matlab-version: [R2023b]
     runs-on: ${{ matrix.os }}
 
     env:
@@ -118,8 +118,11 @@ jobs:
         mhkit-python-version: ["0.8.2"]
         exclude:
           # Cache population job
-          - matlab-version: R2022a
-            python-version: 3.9
+          # - matlab-version: R2022a
+          #   python-version: 3.9
+          # Cache population job
+          - matlab-version: R2023b
+            python-version: 3.10
           - matlab-version: R2023b
             python-version: 3.8
           - matlab-version: R2023a
