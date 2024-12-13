@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        python-version: [3.10]
+        python-version: ["3.10"]
         matlab-version: [R2023b]
     runs-on: ${{ matrix.os }}
 
@@ -116,7 +116,7 @@ jobs:
           #   python-version: 3.9
           # Cache population job
           - matlab-version: R2023b
-            python-version: 3.10
+            python-version: "3.10"
           - matlab-version: R2023b
             python-version: 3.8
           - matlab-version: R2023a
