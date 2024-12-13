@@ -33,15 +33,9 @@ jobs:
       - name: Conda install mhkit
         run: |
           conda activate mhkit_conda_env
-          conda install mhkit
+          conda install mhkit==$MHKIT_PYTHON_VERSION
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
-
-      - name: pip install mhkit from pypi
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip install mhkit==$MHKIT_PYTHON_VERSION
 
       - name: pip install mhkit-python-utils module from source
         run: |
@@ -171,7 +165,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install mhkit
+          conda install mhkit==$MHKIT_PYTHON_VERSION
       - name: Output python executable
         shell: bash -l {0}
         run: |
@@ -185,11 +179,6 @@ jobs:
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
-      - name: pip install mhkit from pypi
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip install mhkit==$MHKIT_PYTHON_VERSION
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
         run: |
