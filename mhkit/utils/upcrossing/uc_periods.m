@@ -13,5 +13,5 @@ function periods = uc_periods(t, data, inds)
         inds = upcrossing(t, data);
     end
 
-    periods = up_apply_(t, data, @(ind1, ind2) t(ind2) - t(ind1), inds);
+    periods = uc_apply_(t, data, @(ind1, ind2) t(ind2) - t(ind1), inds);
 end

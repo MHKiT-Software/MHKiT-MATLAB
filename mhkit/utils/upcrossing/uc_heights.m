@@ -16,6 +16,6 @@ function heights = uc_heights(t, data, inds)
         inds = upcrossing(t, data);
     end
 
-    heights = up_apply_(t, data, @(ind1, ind2) max(data(ind1:ind2)) - min(data(ind1:ind2)), inds);
+    heights = uc_apply_(t, data, @(ind1, ind2) max(data(ind1:ind2)) - min(data(ind1:ind2)), inds);
 end
 
