@@ -1,5 +1,4 @@
 classdef upcrossing_Test < matlab.unittest.TestCase
-    % Methods that ends with _ are private
     properties
         t
         signal
@@ -49,7 +48,7 @@ classdef upcrossing_Test < matlab.unittest.TestCase
             end
         end
 
-        function [crests, troughs, heights, periods] = exampleAnalysis_(testCase, t, signal)
+        function [crests, troughs, heights, periods] = exampleAnalysis_(testCase, signal)
             % NB: This only works due to the construction
             % of our test signal. It is not suitable as
             % a general approach.
@@ -79,38 +78,39 @@ classdef upcrossing_Test < matlab.unittest.TestCase
     end
 
     methods (Test)
-        function testPeaks(testCase)
-            [want, ~, ~, ~] = testCase.exampleAnalysis_(testCase.t, testCase.signal);
+        %% Test functions without indices (inds)
+        function test_peaks(testCase)
+            [want, ~, ~, ~] = testCase.exampleAnalysis_(testCase.signal);
             got = uc_peaks(testCase.t, testCase.signal);
 
             testCase.verifyEqual(got, want, 'AbsTol', 1e-3);
         end
 
-        function testTroughs(testCase)
-            [~, want, ~, ~] = testCase.exampleAnalysis_(testCase.t, testCase.signal);
+        function test_troughs(testCase)
+            [~, want, ~, ~] = testCase.exampleAnalysis_(testCase.signal);
             got = uc_troughs(testCase.t, testCase.signal);
 
             testCase.verifyEqual(got, want, 'AbsTol', 1e-3);
         end
 
-        function testHeights(testCase)
-            [~, ~, want, ~] = testCase.exampleAnalysis_(testCase.t, testCase.signal);
+        function test_heights(testCase)
+            [~, ~, want, ~] = testCase.exampleAnalysis_(testCase.signal);
 
             got = uc_heights(testCase.t, testCase.signal);
 
             testCase.verifyEqual(got, want, 'AbsTol', 1e-3);
         end
 
-        function testPeriods(testCase)
-            [~, ~, ~, want] = testCase.exampleAnalysis_(testCase.t, testCase.signal);
+        function test_periods(testCase)
+            [~, ~, ~, want] = testCase.exampleAnalysis_(testCase.signal);
 
             got = uc_periods(testCase.t, testCase.signal);
 
             testCase.verifyEqual(got, want, 'AbsTol', 2e-3);
         end
 
-        function testCustom(testCase)
-            [want, ~, ~, ~] = testCase.exampleAnalysis_(testCase.t, testCase.signal);
+        function test_custom(testCase)
+            [want, ~, ~, ~] = testCase.exampleAnalysis_(testCase.signal);
 
             % create a similar function to finding the peaks
             f = @(ind1, ind2) max(testCase.signal(ind1:ind2));
@@ -120,9 +120,9 @@ classdef upcrossing_Test < matlab.unittest.TestCase
             testCase.verifyEqual(got, want, 'AbsTol', 1e-3);
         end
 
-        %% Test functions with indexs
+        %% Test functions with indcies
         function test_peaks_with_inds(testCase)
-            [want, ~, ~, ~] = testCase.exampleAnalysis_(testCase.t, testCase.signal);
+            [want, ~, ~, ~] = testCase.exampleAnalysis_(testCase.signal);
 
             inds = upcrossing(testCase.t, testCase.signal);
 
@@ -132,7 +132,7 @@ classdef upcrossing_Test < matlab.unittest.TestCase
         end
 
         function test_trough_with_inds(testCase)
-            [~, want, ~, ~] = testCase.exampleAnalysis_(testCase.t, testCase.signal);
+            [~, want, ~, ~] = testCase.exampleAnalysis_(testCase.signal);
 
             inds = upcrossing(testCase.t, testCase.signal);
 
@@ -142,7 +142,7 @@ classdef upcrossing_Test < matlab.unittest.TestCase
         end
 
         function test_heights_with_inds(testCase)
-            [~, ~, want, ~] = testCase.exampleAnalysis_(testCase.t, testCase.signal);
+            [~, ~, want, ~] = testCase.exampleAnalysis_(testCase.signal);
 
             inds = upcrossing(testCase.t, testCase.signal);
 
@@ -152,7 +152,7 @@ classdef upcrossing_Test < matlab.unittest.TestCase
         end
 
         function test_periods_with_inds(testCase)
-            [~, ~, ~, want] = testCase.exampleAnalysis_(testCase.t, testCase.signal);
+            [~, ~, ~, want] = testCase.exampleAnalysis_(testCase.signal);
             inds = upcrossing(testCase.t, testCase.signal);
 
             got = uc_periods(testCase.t, testCase.signal,inds);
@@ -161,7 +161,7 @@ classdef upcrossing_Test < matlab.unittest.TestCase
         end
 
         function test_custom_with_inds(testCase)
-            [want, ~, ~, ~] = testCase.exampleAnalysis_(testCase.t, testCase.signal);
+            [want, ~, ~, ~] = testCase.exampleAnalysis_(testCase.signal);
             inds = upcrossing(testCase.t, testCase.signal);
 
             % create a similar function to finding the peaks
