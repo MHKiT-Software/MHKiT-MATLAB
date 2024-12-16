@@ -13,7 +13,7 @@ function troughs = uc_troughs(t, data, inds)
         inds = upcrossing(t, data);
     end
 
-    troughs = up_apply_(t, data, @(ind1, ind2) min(data(ind1:ind2)), inds);
+    troughs = uc_apply_(t, data, @(ind1, ind2) min(data(ind1:ind2)), inds);
 end
 
 

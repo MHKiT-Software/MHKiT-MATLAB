@@ -1,4 +1,4 @@
-function peaks = peaks(t, data, inds)
+function peaks = uc_peaks(t, data, inds)
     % Finds the peaks between zero crossings.
     %
     % Parameters:
@@ -13,6 +13,6 @@ function peaks = peaks(t, data, inds)
         inds = upcrossing(t, data);
     end
 
-    peaks = apply_(t, data, @(ind1, ind2) max(data(ind1:ind2)), inds);
+    peaks = uc_apply_(t, data, @(ind1, ind2) max(data(ind1:ind2)), inds);
 end
 
