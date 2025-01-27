@@ -65,12 +65,12 @@ data.rosetteName = {'top', 'bottom', 'left', 'right'};
 
 %% Convert microstrain to strain
 
-microstrain_scaling_factor = 1e-6;
+microstrain_to_strain_scaling_factor = 1e-6;
 
 % Add microstrain to data struct
-data.ea = ea * microstrain_scaling_factor;
-data.eb = eb * microstrain_scaling_factor;
-data.ec = ec * microstrain_scaling_factor;
+data.ea = ea * microstrain_to_strain_scaling_factor;
+data.eb = eb * microstrain_to_strain_scaling_factor;
+data.ec = ec * microstrain_to_strain_scaling_factor;
 
 %%
 % Define the geometry of the cuboid in the blade root where strain gauges are attached.
