@@ -28,10 +28,11 @@
 % <<./data/strain/img/global_cs_resized.png>>
 %
 % First we will load strain data and map rosettes to TBLR (top, bottom, left,
-% right). The strain data is contained in a CSV file. Time is the first column.
-% Strain data is ordered by rosette and each rosette corresponds to three
-% strain measurements (ea, eb, ec). Rosettes 1, 2, 3, 4 correspond to the top,
-% bottom, left, and right rosettes in the global coordinate system.
+% right). The strain data is contained in a CSV file
+% |./examples/data/strain/R17.csv|. Time is the first column. Strain data is
+% ordered by rosette and each rosette corresponds to three strain measurements
+% (ea, eb, ec). Rosettes 1, 2, 3, 4 correspond to the top, bottom, left, and
+% right rosettes in the global coordinate system.
 
 % Original csv has no header
 raw_data = readtable('data/strain/R17.csv', 'ReadVariableNames', false);
