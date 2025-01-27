@@ -27,6 +27,10 @@
 %
 % <<./data/strain/img/global_cs_resized.png>>
 %
+% Due to the highly variable nature of experimental configurations, these
+% functions are not included in an MHKiT module. This example can be used as a
+% guide to process strain data from other experimental configurations.
+%
 % First we will load strain data and map rosettes to TBLR (top, bottom, left,
 % right). The strain data is contained in a CSV file
 % |./examples/data/strain/R17.csv|. Time is the first column. Strain data is
