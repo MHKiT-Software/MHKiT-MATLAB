@@ -54,6 +54,48 @@ raw_data.Properties.VariableNames = {'time', ...
 
 time = raw_data.time;
 
+%% Visualize Original Measurement
+
+% Create figure
+figure('Position', [100, 100, 1200, 800])
+
+% Number of channels (excluding time)
+num_channels = size(raw_data, 2) - 1;
+
+% Create subplot for each channel
+for i = 1:num_channels
+    subplot(4, 3, i)
+
+    % Get channel name and data
+    channel_name = raw_data.Properties.VariableNames{i+1};
+    channel_data = raw_data{:, i+1};
+
+    % Create plot
+    plot(time, channel_data, 'LineWidth', 1.5)
+
+    % Add grid
+    grid on
+
+    % Add labels
+    xlabel('Time Elapsed [s]')
+    ylabel('$\mathrm{Microstrain}\ [\mu\varepsilon]$', 'Interpreter', 'latex')
+
+    % Add title (format the channel name for better readability)
+    channel_name = strrep(channel_name, '_', ' ');
+    title(upper(channel_name), 'FontWeight', 'bold')
+
+    % Customize appearance
+    set(gca, 'FontSize', 12)
+    set(gca, 'Box', 'on')
+
+    % Add minor grid lines
+    grid minor
+end
+
+% Adjust spacing between subplots
+sgtitle('Strain Measurements Across All Channels', 'FontSize', 14, 'FontWeight', 'bold')
+set(gcf, 'Color', 'white')
+
 %% Initialize Data Structures
 %
 % Organize strain data into matrices for easier handling
