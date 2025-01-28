@@ -1,4 +1,6 @@
-%% Strain Measurement Example
+%% MHKiT Strain Measurement Example
+%
+%% Introduction
 %
 % This example demonstrates how to process experimental strain data and
 % calculate forces. This notebook is based on the laboratory testing of a tidal
@@ -31,6 +33,8 @@
 % functions are not included in an MHKiT module. This example can be used as a
 % guide to process strain data from other experimental configurations.
 %
+%% Loading and Organizing Original Data
+%
 % First we will load strain data and map rosettes to TBLR (top, bottom, left,
 % right). The strain data is contained in a CSV file
 % |./examples/data/strain/R17.csv|. Time is the first column. Strain data is
@@ -50,20 +54,20 @@ raw_data.Properties.VariableNames = {'time', ...
 
 time = raw_data.time;
 
+%% Initialize Data Structures
+%
 % Organize strain data into matrices for easier handling
 ea = [raw_data.ea_1, raw_data.ea_2, raw_data.ea_3, raw_data.ea_4];  % ea_1 through ea_4
 eb = [raw_data.eb_1, raw_data.eb_2, raw_data.eb_3, raw_data.eb_4];  % eb_1 through eb_4
 ec = [raw_data.ec_1, raw_data.ec_2, raw_data.ec_3, raw_data.ec_4];  % ec_1 through ec_4
 
-%%
 % Create a structure to store all data
-
 data = struct();
 data.time = time;
 data.rosette = 1:4;
 data.rosetteName = {'top', 'bottom', 'left', 'right'};
 
-%% Convert microstrain to strain
+%% Conversion From Microstrain, $\mu \epsilon$ to Strain, $\epsilon$,
 
 microstrain_to_strain_scaling_factor = 1e-6;
 
@@ -88,7 +92,8 @@ shear_modulus = 77.4e9;     % [Pa]
 
 %% Calculating Axial and Shear Strain
 %
-% 90 degree rosettes
+%% 90 Degree Rosettes
+%
 % We now have all strain data contained in a struct with fieldnames
 % corresponding to measured strain. The local y-axis of each rosette
 % corresponds to the global z-axis. Each rosette is locally oriented like the
@@ -103,8 +108,8 @@ data.axial_strain_x = data.ea;
 data.axial_strain_y = data.ec;
 data.shear_strain = data.eb - (data.ea + data.ec) / 2;
 
-%%
-% Alternate equations for 120 degree rosettes
+%% Alternate Equations for 120 Degree Rosettes
+%
 % If we had 120 degree rosettes, we could calculate the axial and shear strains
 % from the measured strains in a similar manner using the respective equations:
 
@@ -114,7 +119,8 @@ data.shear_strain = data.eb - (data.ea + data.ec) / 2;
 
 %% Calculate Loads From Strain
 %
-% Define equations for normal force, moment, and torsion
+%% Define Equations for Normal Force, Moment, and Torsion
+%
 % Because the strain is measured on a rectangular prism, the normal force,
 % moment and torsion use similar equations. We first create three functions
 % that calculate the normal force, moment, and torsion given some strain and
@@ -140,7 +146,7 @@ function torsion = calculate_torsion(shear_strain, shear_modulus, width, height,
     torsion = shear_strain * shear_modulus * polar_moment_of_inertia / (height / 2);
 end
 
-%% Calculate normal force and bending moments
+%% Calculate Normal Force and Bending Moments
 %
 % We will use the three custom functions to calculate the normal force and
 % bending moments with the top and bottom rosette pair, and then based on the
@@ -162,6 +168,7 @@ data.moment_y = calculate_moment(data.axial_strain_y(:,3), ...
     data.axial_strain_y(:,4), elastic_modulus, shear_modulus, height, width, radius);
 
 %% Calculate Torsion
+%
 % Next we will calculate the torsion using the shear strain of each rosette and
 % find the average torsion load.
 
@@ -195,6 +202,7 @@ data.moment_flapwise = data.moment_x * cos(angle) - data.moment_y * sin(angle);
 data.moment_edgewise = data.moment_x * sin(angle) + data.moment_y * cos(angle);
 
 %% Visualize Loads
+%
 % We can now plot various quantities of interest, including the normal force at
 % the blade root, flapwise and edgewise bending moments, equivalent load
 % applied to the blade, and torsion. These quantities are then used to validate
@@ -202,8 +210,8 @@ data.moment_edgewise = data.moment_x * sin(angle) + data.moment_y * cos(angle);
 % open-water test campaign.
 
 
-% Create plots
-% Normal forces
+%% Normal Forces
+
 figure;
 plot(data.time, data.normal_topBottom/1000, ...
      data.time, data.normal_leftRight/1000, ...
@@ -213,7 +221,8 @@ ylabel('Normal force [kN]');
 xlabel('Time [s]');
 grid on;
 
-% Moments
+%% Moments
+
 figure;
 plot(data.time, data.moment_x/1000, ...
      data.time, data.moment_y/1000);
@@ -222,7 +231,8 @@ ylabel('Moment [kN*m]');
 xlabel('Time [s]');
 grid on;
 
-% Blade load
+%% Blade Load
+
 figure;
 plot(data.time, data.moment_y/(blade_span * 1000), ...
      data.time, data.moment_x/(blade_span * 1000));
@@ -231,7 +241,8 @@ ylabel('Load [kN]');
 xlabel('Time [s]');
 grid on;
 
-% Torsion
+%% Torsion
+
 figure;
 plot(data.time, data.torsion_top/1000, ...
      data.time, data.torsion_bottom/1000, ...
