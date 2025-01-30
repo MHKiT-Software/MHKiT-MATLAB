@@ -97,8 +97,10 @@ if ~(strcmp(options.method, "ifft") || strcmp(options.method, "sum_of_sines"))
     throw(ME);
 end
 
-eta=py.mhkit.wave.resource.surface_elevation(S_py, time_index);
+eta_py=py.mhkit.wave.resource.surface_elevation(S_py, time_index);
+
+eta = typecast_from_mhkit_python(eta_py);
 
 wave_elevation.type='Time Series from Spectra';
-wave_elevation.time=double(eta.index);
-wave_elevation.elevation = double(eta.values);
+wave_elevation.time=eta.index.data;
+wave_elevation.elevation = eta.data;
