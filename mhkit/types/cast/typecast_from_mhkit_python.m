@@ -27,8 +27,6 @@ function output = typecast_from_mhkit_python(mhkit_python_output)
     data = py_output{'data'};
     index = py_output{'index'};
 
-    disp(dataType);
-
     % Initialize output structure
     output = struct();
 
