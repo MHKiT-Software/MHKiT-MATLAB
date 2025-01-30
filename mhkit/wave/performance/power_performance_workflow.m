@@ -71,14 +71,30 @@ if any([~isnumeric(h), ~isnumeric(P)])
     throw(ME);
 end
 
-% Compute the enegy periods from spectra data
-Te = energy_period(S);
+% Check dimensions of the spectrum data
+[num_frequencies, num_spectra] = size(S.spectrum);
 
-% Compute the significant wave height from spectra data
-Hm0 = significant_wave_height(S) ;
+% Initialize arrays to store results
+Te = zeros(num_spectra, 1);
+Hm0 = zeros(num_spectra, 1);
+J = zeros(num_spectra, 1);
 
-% Compute the energy flux from spectra data and water depth
-J = energy_flux(S,h);
+% Process each spectrum separately
+for i = 1:num_spectra
+    % Create a temporary structure for the current spectrum
+    S_temp = struct();
+    S_temp.spectrum = S.spectrum(:,i);
+    S_temp.frequency = S.frequency;
+
+    % Compute the energy periods from spectra data
+    Te(i) = energy_period(S_temp);
+
+    % Compute the significant wave height from spectra data
+    Hm0(i) = significant_wave_height(S_temp);
+
+    % Compute the energy flux from spectra data and water depth
+    J(i) = energy_flux(S_temp, h);
+end
 
 % calculating capture length with power and wave flux in vectors
 L = capture_length(P,J);
@@ -127,4 +143,3 @@ for i = 1:length(statistic)
 end
 
 end
-
