@@ -86,6 +86,18 @@ jobs:
           conda activate mhkit_conda_env
           pip list
 
+      - name: Print MHKiT-Python Version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python -c "import mhkit; print(mhkit.__version__)"
+
+      - name: Verify MHKiT-Python Operation
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
+
       # Create the cache and add a dummy file
       # The dummy file ensures that the artifact download
       - name: Setup mhkit_webread_cache
