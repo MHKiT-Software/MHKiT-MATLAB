@@ -44,4 +44,4 @@ S_py = typecast_spectra_to_mhkit_python(S);
 
 Tavg = py.mhkit.wave.resource.average_wave_period(S_py, pyargs('frequency_bins',freq_bins));
 
-Tavg = double(Tavg);
+Tavg = typecast_from_mhkit_python(Tavg).data;

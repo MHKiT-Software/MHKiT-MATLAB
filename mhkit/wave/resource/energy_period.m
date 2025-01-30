@@ -46,4 +46,4 @@ S_py = typecast_spectra_to_mhkit_python(S);
 
 Te = py.mhkit.wave.resource.energy_period(S_py, pyargs('frequency_bins',freq_bins));
 
-Te = double(Te);
+Te = typecast_from_mhkit_python(Te).data;

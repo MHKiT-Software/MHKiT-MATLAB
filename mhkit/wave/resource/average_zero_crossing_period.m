@@ -42,4 +42,4 @@ end
 S_py = typecast_spectra_to_mhkit_python(S);
 
 Tz = py.mhkit.wave.resource.average_zero_crossing_period(S_py ,pyargs('frequency_bins',freq_bins));
-Tz = double(Tz);
+Tz = typecast_from_mhkit_python(Tz).data;

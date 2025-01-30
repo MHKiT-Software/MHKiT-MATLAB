@@ -44,4 +44,4 @@ S_py = typecast_spectra_to_mhkit_python(S);
 
 Hm0 = py.mhkit.wave.resource.significant_wave_height(S_py, pyargs('frequency_bins',freq_bins));
 
-Hm0 = double(Hm0);
+Hm0 = typecast_from_mhkit_python(Hm0).data;

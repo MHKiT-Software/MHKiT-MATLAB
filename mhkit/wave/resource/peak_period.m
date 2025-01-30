@@ -31,4 +31,4 @@ function Tp=peak_period(S)
 S_py = typecast_spectra_to_mhkit_python(S);
 
 Tp = py.mhkit.wave.resource.peak_period(S_py);
-Tp = double(Tp);
+Tp = typecast_from_mhkit_python(Tp).data;

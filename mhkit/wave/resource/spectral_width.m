@@ -42,4 +42,4 @@ end
 S_py = typecast_spectra_to_mhkit_python(S);
 
 v = py.mhkit.wave.resource.spectral_width(S_py,pyargs('frequency_bins',freq_bins));
-v = double(v);
+v = typecast_from_mhkit_python(v).data;
