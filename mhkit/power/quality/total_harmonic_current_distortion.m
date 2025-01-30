@@ -34,5 +34,5 @@ elseif dsize(2)==1
    data_pd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(harmonic_subgroups.harmonic,py.numpy.array(data),int32(dsize(2)));
 end
 
-thcd_pd = py.mhkit.power.quality.total_harmonic_current_distortion(data_pd,rated_current);
+thcd_pd = py.mhkit.power.quality.total_harmonic_current_distortion(data_pd);
 THCD = double(py.array.array('d',py.numpy.nditer(thcd_pd.values)));
