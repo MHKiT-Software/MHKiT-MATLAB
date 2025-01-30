@@ -44,9 +44,5 @@ f=py.numpy.array(f);
 
 kdf=py.mhkit.wave.resource.wave_number(f,h,pyargs('rho',options.rho,'g',options.rho));
 
-
-
-k.values=double(py.array.array('d',py.numpy.nditer(kdf.values)));
-k.frequency=double(py.array.array('d',py.numpy.nditer(kdf.index)));
-k.h=h;
-
+k.values=double(kdf.values);
+k.frequency=double(kd.index);
