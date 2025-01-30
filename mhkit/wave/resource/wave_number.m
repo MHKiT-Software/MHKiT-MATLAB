@@ -40,9 +40,14 @@ arguments
     options.g = 9.80665;
 end
 
-f=py.numpy.array(f);
+f_py = py.numpy.array(f);
 
-kdf=py.mhkit.wave.resource.wave_number(f,h,pyargs('rho',options.rho,'g',options.rho));
+k_py = py.mhkit.wave.resource.wave_number(f_py, h, pyargs('rho', options.rho, 'g', options.rho));
 
-k.values=double(kdf.values);
-k.frequency=double(kd.index);
+k_py = typecast_from_mhkit_python(k_py);
+
+k = struct();
+
+k.values = k_py.data;
+% MHKiT Python does not output frequency
+k.frequency = f;
