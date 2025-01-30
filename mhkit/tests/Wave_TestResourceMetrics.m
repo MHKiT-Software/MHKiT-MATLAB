@@ -18,6 +18,8 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
             f1 = valdata1.Data1.w/(2*pi);
             f2 = valdata1.Data11.w/(2*pi);
+            f1 = f1';
+            f2 = f2';
             h1 = Data1_valdata1.h;
             h2 = Data11_valdata1.h;
             rho1 = Data1_valdata1.rho;
