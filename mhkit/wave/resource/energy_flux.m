@@ -54,34 +54,9 @@ arguments
 
 end
 
-% convert to dataframe
-if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
-    if (isstruct(S)==1)
-        x=size(S.spectrum);
-        li=py.list();
-        if x(2)>1
-            for i = 1:x(2)
-                app=py.list(S.spectrum(:,i));
-                li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
+S_py = typecast_spectra_to_mhkit_python(S);
 
-            end
-
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency(:,1),li,int32(x(2)));
-        elseif x(2)==1
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency,py.numpy.array(S.spectrum),int32(x(2)));
-        end
-    else
-        ME = MException('MATLAB:energy_flux','S needs to be structure or a Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
-        throw(ME);
-    end
-end
-
-
-% calculate energy flux
-J=py.mhkit.wave.resource.energy_flux(S,h,pyargs('rho',options.rho,'g',options.g,...
+J = py.mhkit.wave.resource.energy_flux(S_py,h,pyargs('rho',options.rho,'g',options.g,...
     'deep',options.deep, 'ratio',options.ratio));
 
-
-
-J=double(J);
-
+J = double(J);

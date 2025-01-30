@@ -42,29 +42,8 @@ else
         throw(ME);
 end
 
-% convert matlab structure to pandas.dataframe
-if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
-    if (isstruct(S)==1)
-        x=size(S.spectrum);
-        li=py.list();
-        if x(2)>1
-            for i = 1:x(2)
-                app=py.list(double(S.spectrum(:,i)));
-                li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
+S_py = typecast_spectra_to_mhkit_python(S);
 
-            end
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(S.frequency(:,1)),li,x(2));
-        elseif x(2)==1
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(S.frequency),py.numpy.array(S.spectrum),x(2));
-        end
+Te = py.mhkit.wave.resource.energy_period(S_py, pyargs('frequency_bins',freq_bins));
 
-    else
-        ME = MException('MATLAB:energy_period','S needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
-        throw(ME);
-    end
-end
-
-% calculate enegery_period here
-Te=py.mhkit.wave.resource.energy_period(S,pyargs('frequency_bins',freq_bins));
-Te=double(Te);
-
+Te = double(Te);
