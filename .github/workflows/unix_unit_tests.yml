@@ -115,6 +115,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libstdc++6
 
+      - name: Setup Library Paths
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          CONDA_LIB_PATH=$(conda info --base)/lib
+          echo "LD_LIBRARY_PATH=$CONDA_LIB_PATH:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "DYLD_LIBRARY_PATH=$CONDA_LIB_PATH:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
         with:
