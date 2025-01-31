@@ -9,6 +9,7 @@ The module is designed to work with the MHKiT-MATLAB typecast_from_mhkit_python 
 to ensure reliable data transfer between the two environments.
 """
 
+import array
 from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, Union, Any, Optional
@@ -103,7 +104,7 @@ def convert_scalar(data: NumericType) -> ConversionResult:
     )
 
 
-def convert_numpy_array(data: np.ndarray) -> ConversionResult:
+def convert_numpy_array(data: Union[np.ndarray, array.array]) -> ConversionResult:
     """Convert numpy arrays to MATLAB-compatible format.
 
     Parameters
@@ -121,7 +122,7 @@ def convert_numpy_array(data: np.ndarray) -> ConversionResult:
     - Arrays are converted to column-major order for MATLAB compatibility
     - Complex arrays are preserved
     """
-    return ConversionResult(type=str(type(data)), data=data, index=None)
+    return ConversionResult(type=str(type(data)), data=np.array(data), index=None)
 
 
 def convert_index(index: pd.Index) -> np.ndarray:
@@ -383,7 +384,7 @@ def convert_to_matlab_compatible(
 
     if np.isscalar(data):
         result = convert_scalar(data)
-    elif isinstance(data, np.ndarray):
+    elif isinstance(data, np.ndarray, array.array):
         result = convert_numpy_array(data)
     elif isinstance(data, pd.Series):
         result = convert_series(data)

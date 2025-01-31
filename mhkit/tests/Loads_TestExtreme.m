@@ -3,14 +3,6 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
     methods (Test)
 
         function test_mler_coefficients(testCase)
-            % Error using type_conversion>convert_dataframe
-            % Python Error: TypeError: 'float' object is not subscriptable
-            %
-            % Error in type_conversion>convert_to_matlab_compatible (line 389)
-            %
-            % Error in frequency_moment (line 48)
-            % m = typecast_from_mhkit_python(m).data;
-            assumeFail(testCase, "Temporarily Disabled - Need to fix error above")
             % create inputs and load validation data
             fpath = '../../examples/data/loads/mler.csv';
             validation = readtable(fpath);
