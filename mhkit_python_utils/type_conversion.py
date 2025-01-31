@@ -122,7 +122,11 @@ def convert_numpy_array(data: Union[np.ndarray, array.array]) -> ConversionResul
     - Arrays are converted to column-major order for MATLAB compatibility
     - Complex arrays are preserved
     """
-    return ConversionResult(type=str(type(data)), data=np.array(data), index=None)
+
+    # Cast array.array to numpy array
+    data = np.array(data)
+
+    return ConversionResult(type=str(type(data)), data=data, index=None)
 
 
 def convert_index(index: pd.Index) -> np.ndarray:
