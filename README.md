@@ -25,13 +25,12 @@ compatible versions of Python and MHKiT-Python installed.
 
 MHKiT-MATLAB supports the following combinations of MATLAB and Python versions.[^1]
 
-|      | R2021b | R2022a | R2022b | R2023a | R2023b | R2024a |
-| ---- | ------ | ------ | ------ | ------ | ------ | ------ |
-| 3.12 | -      | -      | -      | -      | -      | -      |
-| 3.11 | -      | -      | -      | -      | ✓      | ✓      |
-| 3.10 | -      | -      | ✓      | ✓      | ✓      | ✓      |
-| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
-| 3.8  | ✓      | ✓      | ✓      | ✓      | -      | -      |
+|      | R2022b | R2023a | R2023b | R2024a | R2024b |
+| ---- | ------ | ------ | ------ | ------ | ------ |
+| 3.13 | -      | -      | -      | -      | -      |
+| 3.12 | -      | -      | -      | -      | ✓      |
+| 3.11 | -      | -      | ✓      | ✓      | ✓      |
+| 3.10 | ✓      | ✓      | ✓      | ✓      | ✓      |
 
 - ✓: MATLAB/Python versions compatible
 - `-`: MATLAB/Python versions not compatible
