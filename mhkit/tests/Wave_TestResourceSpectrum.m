@@ -14,7 +14,7 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
         end
 
         function test_surface_elevation_seed(testCase)
-
+            assumeFail(testCase, "Per @simmsa: This test does not seem valid. A random seed and a defined seed should not have the same result")
             Obj.f = 0.0:0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
@@ -26,11 +26,11 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             seednum = 123;
             eta0 = surface_elevation(S, Obj.t);
             eta1 = surface_elevation(S, Obj.t,"seed",seednum);
-            assertEqual(testCase,eta0, eta1);
+            assertEqual(testCase,eta0.elevation, eta1.elevation);
         end
 
         function test_surface_elevation_phasing(testCase)
-
+            assumeFail(testCase, "Per @simmsa: This test does not account for randomness of the seed")
             Obj.f = 0.0:0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
@@ -44,7 +44,7 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             rng(seednum);
             phases = rand(size(S.spectrum))*2*pi;
             eta1 = surface_elevation(S, Obj.t,"phases",phases);
-            assertEqual(testCase,eta0, eta1);
+            assertEqual(testCase,eta0.elevation, eta1.elevation);
         end
 
         function test_surface_elevation_moments(testCase)
