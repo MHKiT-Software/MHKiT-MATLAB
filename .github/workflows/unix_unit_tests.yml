@@ -40,6 +40,15 @@ jobs:
           # conda install netcdf4 hdf5
           # export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
 
+      - name: Configure OpenSSL for MacOS/MATLAB
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          conda install openssl=="3.0.*"
+          CONDA_LIB_PATH=$(python -c "import sys; import os; print(os.path.join(os.path.dirname(sys.executable), 'lib'))")
+          # export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$DYLD_LIBRARY_PATH"
+          # echo "export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
