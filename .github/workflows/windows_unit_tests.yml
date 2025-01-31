@@ -27,7 +27,7 @@ jobs:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           activate-environment: mhkit_conda_env
-          channels: conda-forge
+          channels: conda-forge,defaults
 
       # This is necessary to fix any issues with netcdf4 and hdf5 headers
       - name: Conda install mhkit
@@ -163,7 +163,7 @@ jobs:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           activate-environment: mhkit_conda_env
-          channels: conda-forge
+          channels: conda-forge,defaults
 
       # This is necessary to fix any issues with netcdf4 and hdf5 headers
       - name: Conda install mhkit
