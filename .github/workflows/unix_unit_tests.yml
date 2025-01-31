@@ -57,7 +57,7 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip uninstall -y scipy
-          pip install scipy==1.11.4
+          pip install scipy==1.12.0
 
       - name: List installed pip modules
         shell: bash -l {0}
@@ -262,7 +262,7 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip uninstall -y scipy
-          pip install scipy==1.11.4
+          pip install scipy==1.12.0
 
       - name: List installed pip modules
         shell: bash -l {0}
