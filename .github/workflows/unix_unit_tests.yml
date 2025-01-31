@@ -125,40 +125,55 @@ jobs:
       matrix:
         os: [macos-13, ubuntu-latest]
         # python-version: [3.8, 3.9, "3.10", 3.11]
-        python-version: ["3.10", 3.11]
+        python-version: ["3.10", 3.11, 3.12]
         # Note: It is preferred to use an actual release name as opposed to 'latest'
-        matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a]
+        # matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a, R2024b]
+        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
         mhkit-python-version: ["0.9.0"]
         exclude:
           - python-version: "3.10" # cache_population job
             matlab-version: R2022b
             os: ubuntu-latest
-          # - matlab-version: R2024a # Non compatiable versions of Python and MATLAB
-          #   python-version: 3.8
-          # - matlab-version: R2023b
-          #   python-version: 3.8
+          # Python 3.12 + MATLAB incompatability
+          - matlab-version: R2024a
+            python-version: 3.12
+          - matlab-version: R2023b
+            python-version: 3.12
+          - matlab-version: R2023a
+            python-version: 3.12
+          - matlab-version: R2022b
+            python-version: 3.12
+          # Python 3.11 + MATLAB incompatability
           - matlab-version: R2023a
             python-version: 3.11
           - matlab-version: R2022b
             python-version: 3.11
-          - matlab-version: R2022a
-            python-version: 3.11
-          - matlab-version: R2022a
-            python-version: "3.10"
-          - matlab-version: R2021b
-            python-version: 3.11
-          - matlab-version: R2021b
-            python-version: "3.10"
-          - matlab-version: R2021a
-            python-version: 3.11
-          - matlab-version: R2021a
-            python-version: "3.10"
+          # - matlab-version: R2024a # Non compatiable versions of Python and MATLAB
+          #   python-version: 3.8
+          # - matlab-version: R2023b
+          #   python-version: 3.8
+          # - matlab-version: R2023a
+          #   python-version: 3.11
+          # - matlab-version: R2022b
+          #   python-version: 3.11
+          # - matlab-version: R2022a
+          #   python-version: 3.11
+          # - matlab-version: R2022a
+          #   python-version: "3.10"
+          # - matlab-version: R2021b
+          #   python-version: 3.11
+          # - matlab-version: R2021b
+          #   python-version: "3.10"
+          # - matlab-version: R2021a
+          #   python-version: 3.11
+          # - matlab-version: R2021a
+          #   python-version: "3.10"
           # - matlab-version: R2021a
           #   python-version: 3.9
-          - matlab-version: R2020b
-            python-version: 3.11
-          - matlab-version: R2020b
-            python-version: "3.10"
+          # - matlab-version: R2020b
+          #   python-version: 3.11
+          # - matlab-version: R2020b
+          #   python-version: "3.10"
           # - matlab-version: R2020b
           #   python-version: 3.9
           # Specific versions of tests that fail consistently. Most likely due to the GitHub actions environment
