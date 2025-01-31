@@ -313,7 +313,7 @@ def convert_dataframe(data: pd.DataFrame) -> ConversionResult:
                 if isinstance(this_value[0], (float, np.floating))
                 else int(this_value[0])
             )
-            types.append(f"scalar_{get_numeric_type(this_value[0])}")
+            types.append(f"scalar_{get_numeric_type(this_value)}")
         else:
             types.append(f"array_{get_numeric_type(this_value[0])}")
 
