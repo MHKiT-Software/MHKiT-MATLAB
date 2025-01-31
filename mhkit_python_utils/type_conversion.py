@@ -384,7 +384,7 @@ def convert_to_matlab_compatible(
 
     if np.isscalar(data):
         result = convert_scalar(data)
-    elif isinstance(data, np.ndarray, array.array):
+    elif isinstance(data, (np.ndarray, array.array)):
         result = convert_numpy_array(data)
     elif isinstance(data, pd.Series):
         result = convert_series(data)
