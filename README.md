@@ -16,27 +16,7 @@ See the [documentation](https://mhkit-software.github.io/MHKiT/) for more inform
 
 ## Installation
 
-**NOTE:** MHKiT-MATLAB now requires the user to install a specific version of MHKiT-Python,
-currently version `0.7.0`. You can achieve this by executing the following commands in the Anaconda
-environment where MHKiT-Python is installed:
-
-1. Uninstall the current version of MHKiT-Python:
-
-```bash
-pip uninstall mhkit
-```
-
-2. Install MHKiT-Python version `0.7.0`:
-
-```bash
-pip install mhkit==0.7.0
-```
-
-3. Verify the MHKiT-Python version:
-
-```bash
-python -c "import mhkit; print(mhkit.__version__)"
-```
+See the [MHKiT MATLAB Installation Instructions](https://mhkit-software.github.io/MHKiT/matlab_installation.html).
 
 ### Software Requirements
 
