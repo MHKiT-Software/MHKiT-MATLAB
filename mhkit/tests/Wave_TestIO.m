@@ -111,7 +111,7 @@ classdef Wave_TestIO < matlab.unittest.TestCase
         % WPTO multiple locations
         function test_WPTO_point_multiloc(testCase)
 
-            assumeFail(testCase, "API key usage saturated - temporarily disabling")
+            % assumeFail(testCase, "API key usage saturated - temporarily disabling")
             % Error using matlab.internal.webservices.HTTPConnector/copyContentToByteArray (line 373)
             % The server returned the status 503 with message "Service Unavailable" in response to the request to URL
             % https://developer.nrel.gov/api/hsds/?api_key=3K3JQbjZmWctY0xmIfSYvYgtIcM3CN0cb1Y2w9bf&domain=%2Fnrel%2FUS_wave%2Fvirtual_buoy%2FWest_Coast%2FWest_Coast_virtual_buoy_2010.h5.
@@ -147,7 +147,7 @@ classdef Wave_TestIO < matlab.unittest.TestCase
 
         function test_WPTO_omnidirectional(testCase)
 
-            assumeFail(testCase, "API key usage saturated - temporarily disabling")
+            % assumeFail(testCase, "API key usage saturated - temporarily disabling")
 
             api_key = '3K3JQbjZmWctY0xmIfSYvYgtIcM3CN0cb1Y2w9bf';
             hindcast_data = request_wpto('1-hour',...
@@ -178,7 +178,7 @@ classdef Wave_TestIO < matlab.unittest.TestCase
 
         function test_WPTO_point_multiparm(testCase)
 
-            assumeFail(testCase, "API key usage saturated - temporarily disabling")
+            % assumeFail(testCase, "API key usage saturated - temporarily disabling")
 
             api_key = '3K3JQbjZmWctY0xmIfSYvYgtIcM3CN0cb1Y2w9bf';
             hindcast_data = request_wpto('3-hour',...
