@@ -129,7 +129,7 @@ jobs:
         os: [windows-latest]
         python-version: [3.8, 3.9, "3.10", 3.11]
         matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a]
-        mhkit-python-version: ["0.8.2"]
+        mhkit-python-version: ["0.9.0"]
         exclude:
           # Cache population job
           # - matlab-version: R2022a
