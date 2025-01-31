@@ -178,6 +178,7 @@ def convert_series(data: pd.Series) -> ConversionResult:
 
     values = np.array(data.values)
     series_name = data.name
+    this_type = get_numeric_type(values[0])
 
     # Handle single value series
     if values.size == 1:
@@ -186,13 +187,14 @@ def convert_series(data: pd.Series) -> ConversionResult:
             if isinstance(values[0], (float, np.floating))
             else int(values[0])
         )
+        this_type = get_numeric_type(values)
 
     # Always include index information
     index_name = data.index.name if data.index.name is not None else "index"
     index_data = convert_index(data.index)
 
     return ConversionResult(
-        type=f"array_{get_numeric_type(values[0])}",
+        type=f"array_{this_type}",
         data={series_name: values},
         index={
             "name": index_name,
