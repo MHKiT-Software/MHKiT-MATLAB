@@ -12,7 +12,8 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-latest]
+        # os: [ubuntu-latest]
+        os: [macos-13]
         python-version: ["3.11"]
         matlab-version: [R2023b]
 
