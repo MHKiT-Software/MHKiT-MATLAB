@@ -1,14 +1,5 @@
 classdef Loads_TestExtreme < matlab.unittest.TestCase
 
-    methods (Test, TestTags = {'DebuggingActions'})
-
-        function test_mhkit_import(testCase)
-            py.importlib.import_module('mhkit');
-            assertTrue(testCase, true);
-        end
-
-    end
-
     methods (Test)
 
         function test_mler_coefficients(testCase)
