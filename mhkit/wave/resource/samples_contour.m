@@ -23,6 +23,8 @@ arguments
     hs_contour {mustBeNumeric}
 end
 
+py.importlib.import_module('mhkit');
+
 t_samples = py.numpy.array(t_samples);
 t_contour = py.numpy.array(t_contour);
 hs_contour = py.numpy.array(hs_contour);
