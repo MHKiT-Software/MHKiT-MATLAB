@@ -106,7 +106,7 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
-            Obj.gamma = 2.0
+            Obj.gamma = 2.0;
 
             S = jonswap_spectrum(Obj.f, Obj.Tp, Obj.Hs, Obj.gamma);
             Hm0 = significant_wave_height(S);
@@ -149,7 +149,6 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             eta_sum_of_sines = surface_elevation(S, t, "seed", 1, "method", "sum_of_sines");
 
             surface_elevation_diff = mean(eta_ifft.elevation - eta_sum_of_sines.elevation);
-            disp(surface_elevation_diff);
 
             assertLessThan(testCase, surface_elevation_diff, 0.01);
         end
