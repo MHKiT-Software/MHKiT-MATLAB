@@ -45,4 +45,4 @@ else
         throw(ME);
 end
 
-m = double(m);
+m = typecast_from_mhkit_python(m).data;
