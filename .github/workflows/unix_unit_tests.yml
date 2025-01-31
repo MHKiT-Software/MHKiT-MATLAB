@@ -130,13 +130,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libstdc++6
 
-      - name: Setup Library Paths
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          CONDA_LIB_PATH=$(conda info --base)/lib
-          echo "LD_LIBRARY_PATH=$CONDA_LIB_PATH:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-          echo "DYLD_LIBRARY_PATH=$CONDA_LIB_PATH:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+      # - name: Setup Library Paths
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     CONDA_LIB_PATH=$(conda info --base)/lib
+      #     echo "LD_LIBRARY_PATH=$CONDA_LIB_PATH:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+      #     echo "DYLD_LIBRARY_PATH=$CONDA_LIB_PATH:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
 
 
       # OutOfProcess is required to properly call netcdf/hdf5 and works reliably on macos and ubuntu
@@ -150,19 +150,19 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          echo "clear classes;" >> run.m
-          echo "try; pe = pyenv; clear pe; end" >> run.m
+          # echo "clear classes;" >> run.m
+          # echo "try; pe = pyenv; clear pe; end" >> run.m
           printf 'pyenv("Version","%s", "ExecutionMode","OutOfProcess");\n' $(python -c "import sys; print(sys.executable)") >> run.m
-          echo "pe = pyenv; assert(pe.Status==\"Loaded\", 'Python environment not loaded');" >> run.m
-          echo "setenv('PYTHONPATH', '$(python -c "import sys; print(':'.join(sys.path))")');" >> run.m
+          # echo "pe = pyenv; assert(pe.Status==\"Loaded\", 'Python environment not loaded');" >> run.m
+          # echo "setenv('PYTHONPATH', '$(python -c "import sys; print(str(':'.join(sys.path[1:])[1:]))")');" >> run.m
 
-      - name: Add Debug Commands
-        shell: bash
-        run: |
-          echo "disp('Python Environment:');" >> run.m
-          echo "pe = pyenv; disp(pe);" >> run.m
-          echo "disp('Python Path:');" >> run.m
-          echo "disp(getenv('PYTHONPATH'));" >> run.m
+      # - name: Add Debug Commands
+      #   shell: bash
+      #   run: |
+      #     echo "disp('Python Environment:');" >> run.m
+      #     echo "pe = pyenv; disp(pe);" >> run.m
+      #     echo "disp('Python Path:');" >> run.m
+      #     echo "disp(getenv('PYTHONPATH'));" >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
