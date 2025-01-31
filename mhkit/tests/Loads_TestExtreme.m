@@ -20,12 +20,13 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             this_wave = pierson_moskowitz_spectrum(wave_freq, 15.1, 9);
             response_desired = 1;
             RAO = validation.RAO;
+            RAO = RAO';
             % execute function
             % mler = mler_coefficients(RAO, js, response_desired);
             mler = mler_coefficients(RAO, this_wave, response_desired);
             % assertions
-            assertEqual(testCase, mler.conditioned_spectrum, validation.Res_Spec, 'RelTol',0.005)
-            assertEqual(testCase, mler.phase, validation.phase, 'RelTol',0.001)
+            assertEqual(testCase, mler.conditioned_spectrum, validation.Res_Spec', 'RelTol',0.005)
+            assertEqual(testCase, mler.phase, validation.phase', 'RelTol',0.001)
         end
 
         function test_mler_simulation(testCase)
