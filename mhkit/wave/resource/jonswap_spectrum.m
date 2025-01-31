@@ -48,8 +48,6 @@ end
 
 S_py = typecast_from_mhkit_python(S_py);
 
-disp(S_py);
-
 S = struct();
 
 S.frequency = S_py.index.data;
