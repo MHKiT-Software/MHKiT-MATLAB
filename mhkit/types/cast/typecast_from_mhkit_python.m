@@ -85,7 +85,7 @@ function output = typecast_from_mhkit_python(mhkit_python_output)
             output.columns = cellfun(@char, keys, 'UniformOutput', false);
 
             if length(keys) == 1
-                output.data = double(data{keys{1}})
+                output.data = double(data{keys{1}});
             else
                 for i = 1:length(keys)
                     key = char(keys{i});
