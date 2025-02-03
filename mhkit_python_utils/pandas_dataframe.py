@@ -3,8 +3,8 @@ from datetime import datetime
 
 import pandas as pd
 import numpy as np
-
-
+import scipy.io
+import pdb
 def timeseries_to_pandas(ts,ind,x):
     
     if x>1:
@@ -52,14 +52,42 @@ def list_to_series(input_list, index=None):
 
 def spectra_to_pandas(frequency,spectra,x,cols=None):
     if x>1:       
-        ts=list(map(list,zip(*spectra)))       
+        ts=list(map(list,zip(*spectra)))  
+        print("ts = ", ts)     
         df=pd.DataFrame(data=ts,index=frequency)  
+        print("df = ", df)     
+
     else:
         df=pd.DataFrame(data=spectra,index=frequency)
         df.indexname='(Hz)'
         c_name=['PM']
     if cols is not None: 
         df.columns = cols
+        print("df.astype('float64') = ", df.astype('float64'))
+    return df.astype('float64')
+
+def spectra_to_pandas_v2(frequency, spectra, x, cols=None):
+    """
+    Convert frequency and spectra data to pandas DataFrame.
+    """
+    frequency = np.squeeze(frequency)  # Ensure frequency is 1D
+    spectra = np.squeeze(spectra)      # Ensure spectra has correct dimensions
+    
+    # Transpose if x > 1 (multiple columns in spectra)
+    if x > 1:
+        spectra = np.array(spectra)
+        if spectra.shape[1] != len(frequency):
+            spectra = spectra.T  # Transpose if dimensions mismatch
+        ts = list(map(list, zip(*spectra)))
+        df = pd.DataFrame(data=ts, index=frequency)
+    else:
+        if len(spectra) != len(frequency):
+            raise ValueError("Spectra length does not match frequency length.")
+        df = pd.DataFrame(data=spectra, index=frequency)
+        df.index.name = '(Hz)'
+        df.columns = ['PM'] if cols is None else cols
+
+    print(df)
     return df.astype('float64')
 
 
@@ -77,3 +105,4 @@ def datetime_index_to_ordinal(df):
         return day + fraction + 366
     
     return np.array(list(map(to_ordinal_fraction, df.index)))
+

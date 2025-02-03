@@ -20,18 +20,6 @@ classdef upcrossing_Test < matlab.unittest.TestCase
 
     end
 
-    methods (TestMethodSetup)
-        % Setup for each test
-    end
-
-    % methods (Test)
-    %     % Test methods
-    %
-    %     function unimplementedTest(testCase)
-    %         testCase.verifyFail("Unimplemented test");
-    %     end
-    % end
-
     methods
         function signal = exampleWaveform_(~, t)
             % Generate a simple waveform form to analyse

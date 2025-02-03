@@ -83,7 +83,9 @@ Applies a custom user-defined function between zero upcrossing points.
 ---
 
 ## Author(s)
-- **mshabara**
+- **mbruggs** - Python
+- **akeeste** - Python
+- **mshabara** - Matlab
 
 ## Date
 - 12/12/2024
