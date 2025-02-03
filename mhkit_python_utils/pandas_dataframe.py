@@ -66,31 +66,6 @@ def spectra_to_pandas(frequency,spectra,x,cols=None):
         print("df.astype('float64') = ", df.astype('float64'))
     return df.astype('float64')
 
-def spectra_to_pandas_v2(frequency, spectra, x, cols=None):
-    """
-    Convert frequency and spectra data to pandas DataFrame.
-    """
-    frequency = np.squeeze(frequency)  # Ensure frequency is 1D
-    spectra = np.squeeze(spectra)      # Ensure spectra has correct dimensions
-    
-    # Transpose if x > 1 (multiple columns in spectra)
-    if x > 1:
-        spectra = np.array(spectra)
-        if spectra.shape[1] != len(frequency):
-            spectra = spectra.T  # Transpose if dimensions mismatch
-        ts = list(map(list, zip(*spectra)))
-        df = pd.DataFrame(data=ts, index=frequency)
-    else:
-        if len(spectra) != len(frequency):
-            raise ValueError("Spectra length does not match frequency length.")
-        df = pd.DataFrame(data=spectra, index=frequency)
-        df.index.name = '(Hz)'
-        df.columns = ['PM'] if cols is None else cols
-
-    print(df)
-    return df.astype('float64')
-
-
 def lis(li,app):
     li.append(app)
     return li
