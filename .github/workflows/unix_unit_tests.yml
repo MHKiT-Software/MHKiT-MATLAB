@@ -145,6 +145,14 @@ jobs:
             python-version: 3.11
           - matlab-version: R2022b
             python-version: 3.11
+          # Specific MATLAB/Python/OS Errors
+          # Error using _cythonized_array_utils>init
+          # scipy.linalg._cythonized_array_utils (line 1)
+          # Python Error: ValueError: numpy.dtype size changed, may indicate binary
+          # incompatibility. Expected 96 from C header, got 88 from PyObject
+          - matlab-version: R2024b
+            python-version: 3.12
+            os: macos-13
 
     runs-on: ${{ matrix.os }}
 
