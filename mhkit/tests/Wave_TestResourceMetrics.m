@@ -288,7 +288,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
         function test_environmental_contour(testCase)
 
-            assumeFail(testCase, "Not compatible with latest MHKIT-Python")
+            % assumeFail(testCase, "Not compatible with latest MHKIT-Python")
 
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
@@ -321,24 +321,24 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             dt = (time2-time1)/1000.;
             time_R = 100;
 
-            contour = environmental_contour(Hm0, Te, dt, time_R);
+            contour = environmental_contours(Hm0, Te, dt, time_R, 'PCA');
 
             relative_file_name= '../../examples/data/wave/Hm0_Te_contours_46022.csv';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             expected_contours = readmatrix(full_file_name);
 
-            Hm0_expected = expected_contours(:,2);
-            Te_expected = expected_contours(:,1);
+            Hm0_expected = expected_contours(:,1);
+            Te_expected = expected_contours(:,2);
 
-            assertEqual(testCase,table2array(contour.contour2),Hm0_expected,'RelTol',0.01);
-            assertEqual(testCase,table2array(contour.contour1),Te_expected,'RelTol',0.01);
+            assertEqual(testCase,contour.contour1,Hm0_expected','RelTol',0.01);
+            assertEqual(testCase,contour.contour2,Te_expected','RelTol',0.01);
 
 
         end
 
         function test_plot_environmental_contour(testCase)
 
-            assumeFail(testCase, "Not compatible with latest MHKIT-Python")
+            %assumeFail(testCase, "Not compatible with latest MHKIT-Python")
 
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
@@ -371,7 +371,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             dt = (time2-time1)/1000.;
             time_R = 100;
 
-            contour = environmental_contour(Hm0, Te, dt, time_R);
+            contour = environmental_contours(Hm0, Te, dt, time_R, 'PCA');
 
             filename = 'wave_plot_env_contour.png';
             if isfile(filename)
@@ -390,7 +390,8 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
         function test_plot_environmental_contour_multiyear(testCase)
 
             assumeFail(testCase, "Not compatible with latest MHKIT-Python")
-
+            % not sure about why this test exists...return period has to be float or
+            % int and cannot be a list...
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
 
@@ -422,7 +423,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             dt = (time2-time1)/1000.;
             time_R = [100, 120, 130];
 
-            contour = environmental_contour(Hm0, Te, dt, time_R);
+            contour = environmental_contours(Hm0, Te, dt, time_R, 'PCA');
 
             filename = 'wave_plot_env_contour_multiyear.png';
             if isfile(filename)
