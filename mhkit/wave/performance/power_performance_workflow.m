@@ -94,7 +94,7 @@ for i = 1:num_spectra
 
     % Compute the energy flux from spectra data and water depth
     J(i) = energy_flux(S_temp, h);
-end
+end; clear S_temp
 
 % calculating capture length with power and wave flux in vectors
 L = capture_length(P,J);
