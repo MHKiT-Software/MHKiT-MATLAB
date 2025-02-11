@@ -7,7 +7,7 @@ function out = remove_surface_interference(ds, options)
 % ds : Dataset
 %   The adcp dataset to clean
 % val : nan or numeric
-%   Specifies the value to set the bad values to (default np.nan).
+%   Specifies the value to set the bad values to (default nan).
 %
 % Returns
 % -------
