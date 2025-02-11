@@ -1,4 +1,4 @@
-function out = nan_beyond_surface(ds, options)
+function out = remove_surface_interference(ds, options)
 % Mask the values of 3D data (vel, amp, corr, echo) that are beyond
 % the surface.
 %
