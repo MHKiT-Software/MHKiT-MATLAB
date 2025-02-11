@@ -60,29 +60,6 @@ arguments
     options.noverlap = py.None;
 end
 
-% if (isa(ts,'py.pandas.core.frame.DataFrame')~=1)
-%     if (isa(ts,'table')==1)
-%         ts=table2array(ts);
-%     end
-%     if (isa(time,'table')==1)
-%         time=table2array(time);
-%     end
-%     x=size(ts);
-%     li=py.list();
-%     if x(2)>1
-%         for i = 1:x(2)
-%             app=py.list(ts(:,i));
-%             li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-%         end
-%         ts=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,time,int32(x(2)));
-%
-%     elseif x(2)==1
-%        ts=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(py.list(ts),time,int32(x(2)));
-%
-%     end
-%
-% end
-
 ts = py.pandas.DataFrame(py.numpy.array(ts));
 
 nnft = int32(nnft);
