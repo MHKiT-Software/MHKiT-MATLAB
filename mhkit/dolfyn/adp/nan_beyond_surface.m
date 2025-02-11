@@ -63,11 +63,9 @@ function out = nan_beyond_surface(ds, options)
     % Create a 2d matrix of to compare each range against the range limit
     ds_coords_range_rep = repmat(ds.coords.range', numel(range_limit), 1);
 
-    % Create a 2d matrix of binary values
-    % 1: Below the surface interference distance
-    % 0: Above the surface interference distance
-    bds = (ds_coords_range_rep > range_limit);
-
+    bds = ds.coords.range > range_limit;
+    bds_shape = size(bds);
+    bds = reshape(bds,[bds_shape(1),1,bds_shape(2)]);
 
     % Echosounder data gets trimmed at water surface
     if any(strcmp(r,'echo'))
