@@ -20,7 +20,7 @@ jobs:
 
     env:
       mhkit-python-dir: "MHKiT-Python"
-      MHKIT_PYTHON_VERSION: '0.7.0'
+      MHKIT_PYTHON_VERSION: '0.9.0'
     steps:
       - name: Install & Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -29,13 +29,13 @@ jobs:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           activate-environment: mhkit_conda_env
-          channels: conda-forge
+          channels: conda-forge,defaults
 
       - name: "Conda install netcdf4, hdf5"
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
+          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip uninstall -y scipy
-          pip install scipy==1.10.1
+          pip install scipy==1.12.0
 
       - name: List installed pip modules
         shell: bash -l {0}
@@ -121,64 +121,38 @@ jobs:
     strategy:
       fail-fast: false
 
-      # Expecting 2 * 4 * 7 - (13 * 2) = 30 jobs
       matrix:
         os: [macos-13, ubuntu-latest]
-        python-version: [3.8, 3.9, "3.10", 3.11]
+        python-version: ["3.10", 3.11, 3.12]
         # Note: It is preferred to use an actual release name as opposed to 'latest'
-        matlab-version: [R2021b, R2022a, R2022b, R2023a, R2023b, R2024a]
-        mhkit-python-version: ["0.7.0"]
+        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
+        mhkit-python-version: ["0.9.0"]
         exclude:
           - python-version: "3.10" # cache_population job
             matlab-version: R2022b
             os: ubuntu-latest
-          - matlab-version: R2024a # Non compatiable versions of Python and MATLAB
-            python-version: 3.8
+          # Python 3.12 + MATLAB incompatability
+          - matlab-version: R2024a
+            python-version: 3.12
           - matlab-version: R2023b
-            python-version: 3.8
+            python-version: 3.12
+          - matlab-version: R2023a
+            python-version: 3.12
+          - matlab-version: R2022b
+            python-version: 3.12
+          # Python 3.11 + MATLAB incompatability
           - matlab-version: R2023a
             python-version: 3.11
           - matlab-version: R2022b
             python-version: 3.11
-          - matlab-version: R2022a
-            python-version: 3.11
-          - matlab-version: R2022a
-            python-version: "3.10"
-          - matlab-version: R2021b
-            python-version: 3.11
-          - matlab-version: R2021b
-            python-version: "3.10"
-          - matlab-version: R2021a
-            python-version: 3.11
-          - matlab-version: R2021a
-            python-version: "3.10"
-          - matlab-version: R2021a
-            python-version: 3.9
-          - matlab-version: R2020b
-            python-version: 3.11
-          - matlab-version: R2020b
-            python-version: "3.10"
-          - matlab-version: R2020b
-            python-version: 3.9
-          # Specific versions of tests that fail consistently. Most likely due to the GitHub actions environment
-          # - matlab-version: R2024a # Python netcdf4 pip build error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123413351
-          #   python-version: 3.11
-          #   os: macos-13
-          # - matlab-version: R2024a # Working!
-          #   python-version: "3.10"
-          #   os: macos-13
-          # - matlab-version: R2024a # Java Segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123411604
-          #   python-version: 3.9
-          #   os: macos-13
-          # - matlab-version: R2023b # Python netcd4 pip build error: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123412889
-          #   python-version: 3.11
-          #   os: macos-13
-          # - matlab-version: R2023b # Java segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123412352
-          #   python-version: "3.10"
-          #   os: macos-13
-          # - matlab-version: R2023b # Java segfault on Python initialization: https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/runs/8789749433/job/24123411335
-          #   python-version: 3.9
-          #   os: macos-13
+          # Specific MATLAB/Python/OS Errors
+          # Error using _cythonized_array_utils>init
+          # scipy.linalg._cythonized_array_utils (line 1)
+          # Python Error: ValueError: numpy.dtype size changed, may indicate binary
+          # incompatibility. Expected 96 from C header, got 88 from PyObject
+          - matlab-version: R2024b
+            python-version: 3.12
+            os: macos-13
 
     runs-on: ${{ matrix.os }}
 
@@ -196,14 +170,14 @@ jobs:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           activate-environment: mhkit_conda_env
-          channels: conda-forge
+          channels: conda-forge,defaults
 
       # This is necessary to fix any issues with netcdf4 and hdf5 headers
       - name: "Conda install netcdf4, hdf5"
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy==1.24.4 cython pip pytest hdf5 libnetcdf cftime netcdf4
+          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
 
       - name: Setup MATLAB Path on Ubuntu
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -246,7 +220,7 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip uninstall -y scipy
-          pip install scipy==1.10.1
+          pip install scipy==1.12.0
 
       - name: List installed pip modules
         shell: bash -l {0}

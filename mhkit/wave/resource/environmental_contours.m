@@ -102,8 +102,6 @@ arguments
     options.return_fit = py.False;
 end
 
-py.importlib.import_module('mhkit');
-
 if options.PCA ~= py.None
    options.PCA = py.dict(options.PCA);
 end
