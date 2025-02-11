@@ -109,8 +109,8 @@ Te_bins = Te_bins+0.5;
 % on IEC/TS 62600-100
 clmat.mean   = capture_length_matrix(Hm0, Te, L, "mean", Hm0_bins, Te_bins);
 clmat.std    = capture_length_matrix(Hm0, Te, L, "std", Hm0_bins, Te_bins);
-clmat.median = capture_length_matrix(Hm0 ,Te, L,"median", Hm0_bins, Te_bins);
-clmat.count  = capture_length_matrix(Hm0 ,Te, L,"count", Hm0_bins, Te_bins);
+clmat.median = capture_length_matrix(Hm0 ,Te, L, "median", Hm0_bins, Te_bins);
+clmat.count  = capture_length_matrix(Hm0 ,Te, L, "count", Hm0_bins, Te_bins);
 clmat.sum    = capture_length_matrix(Hm0 ,Te, L, "sum", Hm0_bins, Te_bins);
 clmat.min    = capture_length_matrix(Hm0 ,Te, L, "min", Hm0_bins, Te_bins);
 clmat.max    = capture_length_matrix(Hm0 ,Te, L, "max", Hm0_bins, Te_bins);
