@@ -45,27 +45,18 @@ function clm=capture_length_matrix(Hm0,Te,L,statistic,Hm0_bins,Te_bins)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+Hm0 = py.numpy.array(Hm0);
+Te = py.numpy.array(Te);
+L = py.numpy.array(L);
 
-py.importlib.import_module('mhkit');
+py_Hm0_bins = py.numpy.array(Hm0_bins);
+py_Te_bins = py.numpy.array(Te_bins);
 
-Hm0=py.numpy.array(Hm0);
-Te=py.numpy.array(Te);
-L=py.numpy.array(L);
-Hm0_bins=py.numpy.array(Hm0_bins);
-Te_bins=py.numpy.array(Te_bins);
+LM = py.mhkit.wave.performance.capture_length_matrix(Hm0, Te, L, statistic, py_Hm0_bins, py_Te_bins);
 
-LM=py.mhkit.wave.performance.capture_length_matrix(Hm0,Te,L,statistic,Hm0_bins,Te_bins);
+LM = typecast_from_mhkit_python(LM);
 
-% convert vals1d to original shape
-vals=double(py.array.array('d',py.numpy.nditer(LM.values)));
-sha=cell(LM.values.shape);
-x=int64(sha{1,1});
-y=int64(sha{1,2});
-vals=reshape(vals,[y,x]);
-vals=transpose(vals);
-
-clm.values=vals;
-clm.stat=statistic;
-clm.Hm0_bins=double(Hm0_bins);
-clm.Te_bins=double(Te_bins);
-
+clm.values = LM.capture_length_matrix;
+clm.stat = statistic;
+clm.Hm0_bins = Hm0_bins;
+clm.Te_bins = Te_bins;

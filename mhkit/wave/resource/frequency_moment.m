@@ -34,39 +34,15 @@ function m=frequency_moment(S,N,varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-py.importlib.import_module('mhkit');
-py.importlib.import_module('mhkit_python_utils');
-
-if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
-    if (isstruct(S)==1)
-        x=size(S.spectrum);
-        li=py.list();
-        if x(2)>1
-            for i = 1:x(2)
-                app=py.list(S.spectrum(:,i));
-                li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-            end
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency(:,1),li,x(2));
-        elseif x(2)==1
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency,py.numpy.array(S.spectrum),x(2));
-        end
-    else
-        ME = MException('MATLAB:frequency_moment','S needs to be a Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
-        throw(ME);
-    end
-end
+S_py = typecast_spectra_to_mhkit_python(S);
 
 if nargin == 3
-    m=py.mhkit.wave.resource.frequency_moment(S,int32(N),pyargs('frequency_bins',py.numpy.array(varargin{1})));
+    m = py.mhkit.wave.resource.frequency_moment(S_py, int32(N),pyargs('frequency_bins',py.numpy.array(varargin{1})));
 elseif nargin == 2
-    m=py.mhkit.wave.resource.frequency_moment(S,int32(N));
+    m = py.mhkit.wave.resource.frequency_moment(S_py, int32(N));
 else
     ME = MException('MATLAB:frequency_moment','Incorrect number of arguments');
         throw(ME);
 end
 
-m=double(m.values);
-
+m = typecast_from_mhkit_python(m).data;

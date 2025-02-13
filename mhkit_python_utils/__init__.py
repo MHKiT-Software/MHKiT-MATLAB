@@ -1,5 +1,5 @@
 from mhkit_python_utils import pandas_dataframe, delft_3d_helper
-from mhkit_python_utils import scipy_stats
+from mhkit_python_utils import scipy_stats, type_conversion
 
 # Ignore future warnings
 import warnings as _warn
