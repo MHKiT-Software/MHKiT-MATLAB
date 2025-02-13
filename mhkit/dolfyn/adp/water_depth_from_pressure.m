@@ -1,4 +1,6 @@
 function out = water_depth_from_pressure(ds, options)
+
+%%%%%%%%%%%%%%%%%%%%
 % Calculates the distance to the water surface. Temperature and salinity
 % are used to calculate seawater density, which is in turn used with the
 % pressure data to calculate depth.
@@ -20,9 +22,7 @@ function out = water_depth_from_pressure(ds, options)
 % Requires that the instrument's pressure sensor was calibrated/zeroed
 % before deployment to remove atmospheric pressure.
 %
-% Calculates seawater density at normal atmospheric pressure according
-% to the UNESCO 1981 equation of state. Does not include hydrostatic
-% pressure.
+%%%%%%%%%%%%%%%%%%%%
 
     arguments
         ds
