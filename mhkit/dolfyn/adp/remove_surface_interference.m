@@ -1,4 +1,6 @@
 function out = remove_surface_interference(ds, options)
+
+%%%%%%%%%%%%%%%%%%%%
 % Mask the values of 3D data (vel, amp, corr, echo) that are beyond
 % the surface.
 %
@@ -19,6 +21,7 @@ function out = remove_surface_interference(ds, options)
 % -----
 % Surface interference expected to happen at
 % distance > range * cos(beam angle) - cell size
+%%%%%%%%%%%%%%%%%%%%
 
     arguments
         ds
