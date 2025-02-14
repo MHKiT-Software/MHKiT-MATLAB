@@ -1,4 +1,5 @@
 %% MHKiT SWAN Example
+%
 % This example notebook demonstrates the input and plotting of output data from
 % the software <http://swanmodel.sourceforge.net/ Simulating WAves Nearshore (SWAN)>
 % using MHKiT. In this example the <https://github.com/SNL-WaterPower/SNL-SWAN
@@ -16,7 +17,7 @@
 % # An ASCII block file ('SWANOUTBlock.DAT')
 % # A binary block file ('SWANOUT.mat')
 
-swan_path = "./data/wave/SWAN/";
+swan_path = "./examples/data/wave/SWAN/";
 swan_table_file = append(swan_path,"SWANOUT.DAT");
 swan_block_file = append(swan_path,"SWANOUTBlock.DAT");
 swan_block_mat_file = append(swan_path,"SWANOUT.mat") ;
@@ -38,6 +39,7 @@ swan_block_mat_file = append(swan_path,"SWANOUT.mat") ;
 % peak period), 'TDir' (direction of the energy transport).
 
 swan_table = swan_read_table(swan_table_file)
+
 %%
 % In the cell below, metadata is written to screen and can be seen to be a structure
 % of keywords which contains the SWAN run name, the type of table written, and
@@ -46,6 +48,7 @@ swan_table = swan_read_table(swan_table_file)
 
 swan_table.metadata
 swan_table.units
+
 %% SWAN Block (ASCII) Data and Metadata
 % MHKiT will read in block data as a structure. The structure swan_block (shown
 % below) is read using |swan_read_block| on the ASCII block data, and has the
