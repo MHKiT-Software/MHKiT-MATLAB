@@ -105,4 +105,4 @@ maep_matrix = mean_annual_energy_production_matrix(clmat.mean, jmat , clmat.freq
 % to be linear.
 
 % Plot the capture length matrix
-p1 = plot_matrix(clmat.mean,"Capture Length");
+p1 = plot_matrix(clmat.mean,"Capture Length", "annotate", false);
