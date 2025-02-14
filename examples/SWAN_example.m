@@ -78,7 +78,16 @@ xx = linspace(min(swan_table.Xp),max(swan_table.Xp),20);
 yy = linspace(min(swan_table.Yp),max(swan_table.Yp),20);
 [X,Y] = meshgrid(xx,yy);
 Z = griddata(swan_table.Xp,swan_table.Yp,swan_table.Hsig,X,Y);
-plot_table = contourf(Z);
+figure('Position', [100, 100, 1600, 600]);
+plot_table = pcolor(X,Y,Z); % Note: you should include X,Y coordinates
+shading interp;
+colormap(viridis_colormap(256)); % Default MATLAB colormap
+colorbar; % Add a colorbar to show the scale
+
 % Plotting SWAN block data
 
-plot_block = contourf(swan_block.Significant_wave_height.values)
+figure('Position', [100, 100, 1600, 600]);
+colormap(viridis_colormap(256));
+plot_block = pcolor(swan_block.Significant_wave_height.values)
+shading interp;
+colorbar;
