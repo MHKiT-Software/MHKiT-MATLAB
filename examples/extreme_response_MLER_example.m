@@ -1,11 +1,12 @@
 %% MLER example
+%
 % Extreme conditions modeling consists of identifying the expected extreme (e.g.
 % 100-year) response of some quantity of interest, such as WEC motions or mooring
 % loads. Three different methods of estimating extreme conditions were adapted
 % from <https://github.com/WEC-Sim/WDRT WDRT>: full sea state approach, contour
-% approach, and MLER design wave. This noteboook presents the MLER approach.
+% approach, and MLER design wave. This livescript presents the MLER approach.
 %
-% This example notebook shows users how to utilze the most likely extreme response
+% This example notebook shows users how to utilize the most likely extreme response
 % (MLER) method. This method is an alternative to exhaustive Monte Carlo or long-term
 % simulations for finding and evaluating wave energy converter response events
 % at extreme loads. To accomplish this, a given RAO is combined with a wave spectrum
@@ -19,12 +20,13 @@
 % doi: 10.1115/OMAE2016-54751._
 %
 % In this example, a simple ellipsoid shaped WEC device was modeled in WEC-Sim.
-% We will focus on anayzing the heave response of this device. The code below
+% We will focus on analyzing the heave response of this device. The code below
 % simply imports RAO data as it is needed for one of the inputs.
 
-wave_freq = linspace( 0,1,500);
+wave_freq = linspace(0, 1, 500);
 mfile = readtable('data/loads/mler.csv');
-RAO = mfile.RAO
+RAO = mfile.RAO;
+
 %%
 % Next, we need to generate a wave environment that corresponds to a chosen
 % extreme sea state. The associated parameters are selected in different ways.
@@ -44,6 +46,7 @@ plot(js.frequency, js.spectrum); xlabel('frequency [Hz]'); ylabel('response m^2/
 mler_data = mler_coefficients(RAO, js, 1);
 plot(mler_data.frequency, mler_data.conditioned_spectrum); xlabel('Frequency [Hz]'); ylabel('Conditoned wave spectrum [m^2-s]')
 plot(mler_data.frequency, mler_data.phase); xlabel('Frequency [Hz]'); ylabel('Phase [rad]')
+
 %%
 % From here, we can choose to export these coefficients to feed into other high
 % fidelity software. However, if we wanted to get a specific height of the incoming
@@ -66,12 +69,10 @@ sim.T0 = 0.0;  % .s Time of maximum event
 
 sim.startX = -300.0;  % .m Start of simulation space
 sim.endX = 300.0;  % .m End of simulation space
-sim.dX = 1.0;  % .m Horiontal spacing
+sim.dX = 1.0;  % .m Horizontal spacing
 sim.X0 = 0.0;  % .m Position of maximum event
 
 sim = mler_simulation(sim)
-%%
-%
 
 k = wave_number(wave_freq, 70);
 k.values = fillmissing(k.values,'constant',0);
@@ -87,9 +88,3 @@ mler_norm = mler_wave_amp_normalize(peakHeightDesired, mler_data, sim, k.values)
 mler_ts = mler_export_time_series(RAO, mler_norm, sim, k.values);
 plot(mler_ts.time, mler_ts.linear_response, mler_ts.time, mler_ts.wave_height);
 xlabel('Time (s)'); ylabel('[*] / [m]'); grid on; legend('Linear Response', 'Wave Height')
-%%
-%
-%
-%
-%
-%
