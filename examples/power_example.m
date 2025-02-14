@@ -42,7 +42,8 @@ power_factor = 0.96;
 ac_power = ac_power_three_phase(voltage, current, power_factor);
 
 % Display the result
-plot(ac_power.time, ac_power.power);
+figure('Position', [100, 100, 1600, 600]);
+plot(datetime(ac_power.time, "ConvertFrom", "posixtime"), ac_power.power);
 title('AC Power');
 ylabel('Power [W]');
 xlabel('Time');
@@ -94,7 +95,8 @@ if license('test', 'Signal_Toolbox')
 
     % Display the result
     hold off;
-    plot(fund_freq.time, fund_freq.data);
+    figure('Position', [100, 100, 1600, 600]);
+    plot(datetime(fund_freq.time, "ConvertFrom", "posixtime"), fund_freq.data);
     title('Fundamental Frequency: STFT');
     ylabel('Frequency [Hz]');
     xlabel('Time');
@@ -127,7 +129,9 @@ end
 fund_freq
 
 hold off;
-plot(fund_freq.time, fund_freq.data);
+
+figure('Position', [100, 100, 1600, 600]);
+plot(datetime(fund_freq.time, "ConvertFrom", "posixtime"), fund_freq.data);
 title('Fundamental Frequency: ZCD');
 ylabel('Frequency [Hz]');
 xlabel('Time');
@@ -156,6 +160,7 @@ rated_current = 18.8; % [Amps]
 h = harmonics(current, sample_freq, grid_freq);
 
 % Display the results
+figure('Position', [100, 100, 1600, 600]);
 plot(h.harmonic, h.amplitude);
 title('Current Harmonics');
 xlabel('Frequency [Hz]');
@@ -235,9 +240,11 @@ out
 
 % Check u0
 hold off;
-plot(u_m.time, u_m.data);
+figure('Position', [100, 100, 1600, 600]);
+plot(datetime(u_m.time, "ConvertFrom", "posixtime"), u_m.data);
 hold on;
-plot(u_m.time, u0);
+figure('Position', [100, 100, 1600, 600]);
+plot(datetime(u_m.time, "ConvertFrom", "posixtime"), u0);
 legend('u_m', 'u_0');
 
 %%
@@ -286,9 +293,11 @@ disp(size(u_fic));
 
 % Check u0
 hold off;
-plot(u_m.time, u_m.data);
+figure('Position', [100, 100, 1600, 600]);
+plot(datetime(u_m.time, "ConvertFrom", "posixtime"), u_m.data);
 hold on;
-plot(u_m.time, u0);
+figure('Position', [100, 100, 1600, 600]);
+plot(datetime(u_m.time, "ConvertFrom", "posixtime"), u0);
 legend('u_m', 'u_0');
 
 %% Calculate the flicker emission value (P_stfic) from u_fic
@@ -372,5 +381,16 @@ DeltaI_I = [4.763 5.726 7.640 9.488];
 % The generated i_m(ntime, nphi_k) has 4 time-series, corresponding to phi_k
 % = 30, 50, 70, 85. While u_m is always the same, thus has only one time series.
 
-hold off; plot(i_m.time,i_m.data(:,1));xlim([0 1]);xlabel("time");ylabel("i_m")
-plot(u_m.time,u_m.data);xlim([0 0.1]);xlabel("time");ylabel("u_m");grid on;
+figure('Position', [100, 100, 1600, 600]);
+hold off;
+plot(datetime(i_m.time, "ConvertFrom", "posixtime"),i_m.data(:,1));
+xlim([0 1]);
+xlabel("Time");
+ylabel("i_m");
+
+figure('Position', [100, 100, 1600, 600]);
+plot(datetime(u_m.time, "ConvertFrom", "posixtime"),u_m.data);
+xlim([0 0.1]);
+xlabel("Time");
+ylabel("u_m");
+grid on;
