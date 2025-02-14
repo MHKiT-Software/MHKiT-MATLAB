@@ -6,7 +6,7 @@
 % We can use MHKiT to load data downloaded from <https://www.ndbc.noaa.gov/
 % https://www.ndbc.noaa.gov>.
 
-relative_file_name = 'data/wave/data.txt';
+relative_file_name = './examples/data/wave/data.txt';
 current_dir = fileparts(matlab.desktop.editor.getActiveFilename);
 full_file_name = fullfile(current_dir, relative_file_name);
 % height
@@ -47,7 +47,7 @@ disp(Power)
 L = capture_length(Power,J)
 
 % Need to set our Hm0 and Te bins for the capture length matrix
-Hm0_bins = -0.5:0.5:max(fix(Hm0))+0.5; % Input is min, max, and n indecies for vector
+Hm0_bins = -0.5:0.5:max(fix(Hm0))+0.5; % Input is min, max, and n indices for vector
 Hm0_bins = Hm0_bins+0.25 ;
 Te_bins = 0:1:max(fix(Te));
 Te_bins = Te_bins+0.5;
