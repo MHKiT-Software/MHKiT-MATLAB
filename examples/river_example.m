@@ -30,7 +30,7 @@ disp(data) % data is a structure with Discharge data
 
 %%
 % A MATLAB structure was returned with 10 years of daily discharge data. MHKiT
-% expects all units to be in SI, so the discharge unti should be converted to
+% expects all units to be in SI, so the discharge units should be converted to
 % m^3/s. We can then plot the discharge time series.
 
 % converting units to m^3/s
