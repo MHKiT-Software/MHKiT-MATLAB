@@ -120,15 +120,12 @@ end
 period = 100 ;
 
 % Remove Hm0 Outliers and NaNs
-filter = Hm0 < 20;
-Hm0 = Hm0(filter);
-Te = Te(filter);
-[row, col] = find(~isnan(Te));
-Hm0 = Hm0(row);
-Te = Te(row);
-[row, col] = find(~isnan(Hm0));
-Hm0 = Hm0(row);
-Te = Te(row);
+% Create a logical filter for all conditions
+valid_data = ~isnan(Hm0) & ~isnan(Te) & (Hm0 < 15) & (Te > 3);
+
+% Apply filter to both arrays
+Hm0 = Hm0(valid_data);
+Te = Te(valid_data);
 
 % Delta time of sea-states in seconds
 dt = ndbc_requested_data.year_1996.time(2)- ndbc_requested_data.year_1996.time(1);
