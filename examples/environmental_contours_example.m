@@ -74,11 +74,25 @@ ndbc_requested_data = NDBC_request_data(parameter, filenames_of_interest);
 % calculate these variables using MHKiT. Both Hm0 and Te return a single value
 % for a given time (e.g., DateTime index).
 
+% Get list of year fields
+year_fields = fieldnames(ndbc_requested_data);
+
+% Initialize as empty arrays
 Hm0 = [];
 Te = [];
-for field = fieldnames(ndbc_requested_data)'
-    Hm0 = [Hm0 ; significant_wave_height(ndbc_requested_data.(field{1}))];
-    Te = [Te ; energy_period(ndbc_requested_data.(field{1}))];
+
+% Process and concatenate each year
+for i = 1:length(year_fields)
+    fprintf('Processing %s\n', year_fields{i});
+
+    S = struct();
+    S.frequency = ndbc_requested_data.(year_fields{i}).frequency;
+    S.spectrum = ndbc_requested_data.(year_fields{i}).spectrum;
+    S.type = 'time series';
+
+    % Concatenate results horizontally
+    Hm0 = [Hm0, significant_wave_height(S)];
+    Te = [Te, energy_period(S)];
 end
 
 %% 3. Find the 100-year contour line
