@@ -383,13 +383,13 @@ DeltaI_I = [4.763 5.726 7.640 9.488];
 
 figure('Position', [100, 100, 1600, 600]);
 hold off;
-plot(datetime(i_m.time, "ConvertFrom", "posixtime"),i_m.data(:,1));
+plot(i_m.time, i_m.data(:,1));
 xlim([0 1]);
 xlabel("Time");
 ylabel("i_m");
 
 figure('Position', [100, 100, 1600, 600]);
-plot(datetime(u_m.time, "ConvertFrom", "posixtime"),u_m.data);
+plot(u_m.time, u_m.data);
 xlim([0 0.1]);
 xlabel("Time");
 ylabel("u_m");
