@@ -117,10 +117,13 @@ for p = 1:length(levels)
     Te_contours(p,:) = contour.contour2;
 end
 
+figure('Position', [100, 100, 1600, 600]);
 plot_environmental_contours(sample_te,sample_hs,Te_contours,Hm0_contours,"x_label",...
     'Energy Period (s)', "y_label",'Significant Wave Height (m)',"data_label",'NDBC 46022',...
     "contour_label",string(levels'));
+
 %% 2. Short-Term Extreme Distributions
+%
 % Many different methods for short-term extremes were adapted from WDRT, and
 % a summary and examples can be found in |short_term_extremes_example.mlx|.
 % The response quantity of interest is typically related to the WEC itself, e.g.
@@ -205,7 +208,9 @@ fprintf("100-year elevation: %.3f meters", x_t)
 % plot survival function
 x = linspace(0, 20, 1000);
 lte_sf = full_seastate_long_term_extreme(ste_all, sample_weights, x, "sf");
-figure;
+
+figure('Position', [100, 100, 1600, 1600]);
+
 semilogy(x, lte_sf);
 xlabel('elevation [m]'); ylabel('survival function (1-cdf)'); ylim([1e-10, 1]); xlim([0, x(end)]);
 
