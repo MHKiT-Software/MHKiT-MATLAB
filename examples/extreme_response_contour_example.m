@@ -1,4 +1,5 @@
 %% Extreme Conditions Modeling - Contour Approach
+%
 % Extreme conditions modeling consists of identifying the expected  extreme
 % (e.g. 100-year) response of some quantity of interest, such as  WEC motions
 % or mooring loads. Three different methods of estimating extreme conditions were
@@ -20,7 +21,8 @@
 % with |environmental_contours_example.ipynb| and |short_term_extremes_example.ipynb|
 % since some code blocks are adapted from those examples and used here without
 % the additional description.
-%% Obtain and Process NDBC Buouy Data
+%
+%% Obtain and Process NDBC Buoy Data
 % The first step will be obtaining the environmental data and creating the contours.
 % See |environmental_contours_example.ipynb| for more details and explanations
 % of how this is being done in the following code block.
@@ -57,7 +59,9 @@ Te = Te(row);
 % Delta time of sea-states in seconds
 dt = ndbc_requested_data.year_1996.time(2)- ndbc_requested_data.year_1996.time(1);
 dt = seconds(dt);
+
 %% 1. Sampling
+%
 % The first step is to create the environmental contour for the return period
 % of interest, which is 100-years in this case, using the |wave.contours.environmental_contours|.
 % See  |environmental_contours_example.ipynb| for more details on using this function.
@@ -84,7 +88,9 @@ plot_environmental_contours(Te,Hm0,te_contour,hs_contour,"x_label",...
 hold on;
 scatter(te_samples, hs_samples,"red","filled","o"); legend("data","100-year contour","samples")
 hold off;
+
 %% 2. Short-Term Extreme Distributions
+%
 % Many different methods for short-term extremes were adapted from WDRT, and
 % a summary and examples can be found in |short_term_extremes_example.ipynb|.
 % The response quantity of interest is typically related to the WEC  itself, e.g.
@@ -139,7 +145,9 @@ for i=1:length(hs_samples)
     ste_all(i) = short_term_extreme(time, data.elevation, t_st, "peaks_weibull_tail_fit", 1, "expect");
     ste_95(i) = short_term_extreme(time, data.elevation, t_st, "peaks_weibull_tail_fit", 0.95, "ppf");
 end
+
 %% 3. Select Design Sea State and Design Response
+%
 % Finally, we will choose the sea state with the largest expected value as the
 % design sea state. In the code snippet above, we stored the expected value for
 % each sea state in |ste_all|. We will then use the 95th percentile of the short-term
@@ -152,6 +160,7 @@ end
 hs_design = hs_samples(max_ind);
 te_design = te_samples(max_ind);
 fprintf("Design sea state (Hs, Te): (%.2f m, %.2f s)", hs_design, te_design)
+
 %%
 % Next, we choose the 95th percentile of the short-term extreme distribution
 % at this sea state as the extreme design response.
