@@ -1,4 +1,5 @@
-%% Example: MHKiT-MATLAB WEC-Sim
+%% MHKiT WEC-Sim Example
+%
 % This example loads simulated data from a WEC-Sim run for a two-body point absorber
 % (Reference Model 3) and demonstrates the application of the MHKiT wave module to
 % interact with the simulated data. The analysis is broken down into three parts:
