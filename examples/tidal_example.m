@@ -1,11 +1,11 @@
 %% Example: MHKiT-MATLAB Tidal Module
 % The following example will familiarize the user with the <https://mhkit-software.github.io/MHKiT/mhkit-matlab/api.tidal.html
 % MHKiT tidal module> by stepping through the calculation of the velocity duration
-% curve. The data file used in this example is stored in the <https://github.com/MHKiT-Code-Hub/MHKiT-MATLAB/tree/master/examples/data
-% \MHKiT\examples\data> directory.
+% curve. The data file used in this example is stored in the <https://github.com/MHKiT-Software/MHKiT-MATLAB/tree/master/examples/data/tidal
+% /mhkit/examples/data/river> directory.
 %% Load Data from NOAA-Currents
 % This example uses 1 year of data from the NOAA-Currents sites. A map of available
-% currents stations is available at <https://tidesandcurrents.noaa.gov/map/ https://tidesandcurrents.noaa.gov/map/>.
+% currents stations is available at <https://tidesandcurrents.noaa.gov/map/ https://tidesandcurrents.noaa.gov/map>.
 % The tidal io module includes two functions to import data: |request_noaa_data|
 % which pulls data from the website, and |read_noaa_json| which loads a json file.
 % The request function can save the json file for later use.
@@ -15,7 +15,7 @@
 % Channel LB 6 (Station Number: s08010) in San Francisco Bay. The data includes
 % 6-minute averaged direction [degrees] and speed [cm/s] indexed by time. The
 % structure names returned by NOAA are 'd' for direction and 's' for speed. Since
-% MHKIT uses SI units, speed is converted to m/s.
+% MHKiT uses SI units, speed is converted to m/s.
 
 % Create a file name to save the requested data to
 relative_file_name = "data/tidal/s08010.json"; % South Hampton Shoal LB
@@ -30,7 +30,7 @@ data = read_noaa_json(full_file_name)
 % Convert discharge data from cm/s to m/s
 data.s = data.s/100.;
 %%
-% The request_noaa_data has returned a Matlab Structure of time series data
+% The request_noaa_data has returned a MATLAB Structure of time series data
 % between November of 2016 and March of 2018. The time series data points are
 % 6-minute averaged direction [degrees] and speed [cm/s] data indexed by time.
 % The structure key names returned by NOAA are 'd' for direction and 's' for speed.
@@ -62,7 +62,9 @@ ebb = direction2 ; % flow out
 
 
 %plot the time series of current data using the flood direction
+figure('Position', [100, 100, 1600, 600]);
 plot_current_timeseries(data,flood);
+
 %%
 % The plot above shows that the NOAA site request did not return data for most
 % of early and mid-2017. The IEC standard recommends a minimum of 1 year of 10-minute
@@ -78,6 +80,7 @@ datadec.time = data.time(index);
 datadec.s = data.s(index);
 datadec.d = data.d(index);
 
+figure('Position', [100, 100, 1600, 600]);
 plot_current_timeseries(datadec,flood);
 %% Joint Probability Distribution
 % Direction and velocity can be viewed as a joint probability distribution on
@@ -116,4 +119,5 @@ F = exceedance_probability(data);
 
 % Plot the VDC
 
+figure('Position', [100, 100, 1600, 600]);
 plot_velocity_duration_curve(data.s,F.F);
