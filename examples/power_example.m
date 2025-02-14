@@ -9,7 +9,7 @@
 % will only look at a fraction of that.
 
 % Read in timeseries data of voltage (V) and current (I)
-power_table = readtable('../examples/data/power/2020224_181521_PowRaw.csv');
+power_table = readtable('./examples/data/power/2020224_181521_PowRaw.csv');
 power_table
 %%
 % To use the MHKiT-MATLAB power module we need to create structures of current
