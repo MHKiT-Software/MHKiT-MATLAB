@@ -93,6 +93,7 @@ hs_samples = samples_contour(te_samples, te_contour, hs_contour);
 %%
 % We now plot the contour and samples.
 
+figure('Position', [100, 100, 1600, 600]);
 plot_environmental_contours(Te,Hm0,te_contour,hs_contour,"x_label",...
     'Energy Period (s)', "y_label",'Significant Wave Height (m)',"data_label",'NDBC 46022',...
     "contour_label",'100 Year Contour');
