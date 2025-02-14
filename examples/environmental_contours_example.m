@@ -174,6 +174,8 @@ nongauss = environmental_contours(Hm0, Te, dt, period, "nonparametric_gaussian")
 Tes = [contour.contour2; gauss.contour2; nongauss.contour2];
 Hm0s = [contour.contour1; gauss.contour1; nongauss.contour1];
 
+figure('Position', [100, 100, 1600, 600]);
+
 plot_environmental_contours(Te,Hm0,Tes,Hm0s,"x_label",...
     'Energy Period (s)', "y_label",'Significant Wave Height (m)',"data_label",'NDBC 46022',...
     "contour_label",["PCA","Gaussian","Nonparametric Gaussian"]);
