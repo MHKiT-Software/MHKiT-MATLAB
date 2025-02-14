@@ -36,7 +36,10 @@ RAO = mfile.RAO;
 Hs = 9.0; % significant wave height
 Tp = 15.1; % time period of waves
 js = jonswap_spectrum(wave_freq, Tp, Hs);
-plot(js.frequency, js.spectrum); xlabel('frequency [Hz]'); ylabel('response m^2/Hz')
+
+figure('Position', [100, 100, 1600, 600]);
+plot(js.frequency, js.spectrum); xlabel('frequency [Hz]'); ylabel('response [m^2/Hz]')
+
 %%
 % Now that we have both the RAO and the spectrum of the wave environment, we
 % can calculate the MLER conditioned wave spectrum and phase. In this case, we
@@ -86,5 +89,7 @@ mler_norm = mler_wave_amp_normalize(peakHeightDesired, mler_data, sim, k.values)
 % wave height [m] and the linear response [*] indexed by time.
 
 mler_ts = mler_export_time_series(RAO, mler_norm, sim, k.values);
+
+figure('Position', [100, 100, 1600, 600]);
 plot(mler_ts.time, mler_ts.linear_response, mler_ts.time, mler_ts.wave_height);
 xlabel('Time (s)'); ylabel('[*] / [m]'); grid on; legend('Linear Response', 'Wave Height')
