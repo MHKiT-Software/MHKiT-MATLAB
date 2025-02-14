@@ -38,23 +38,34 @@ filenames_of_interest = available_data.file(rows);
 
 ndbc_requested_data = NDBC_request_data(parameter, filenames_of_interest);
 
+% Get list of year fields
+year_fields = fieldnames(ndbc_requested_data);
+
+% Initialize as empty arrays
 Hm0 = [];
 Te = [];
-for field = fieldnames(ndbc_requested_data)'
-    Hm0 = [Hm0 ; significant_wave_height(ndbc_requested_data.(field{1}))];
-    Te = [Te ; energy_period(ndbc_requested_data.(field{1}))];
+
+% Process and concatenate each year
+for i = 1:length(year_fields)
+    fprintf('Processing %s\n', year_fields{i});
+
+    S = struct();
+    S.frequency = ndbc_requested_data.(year_fields{i}).frequency;
+    S.spectrum = ndbc_requested_data.(year_fields{i}).spectrum;
+    S.type = 'time series';
+
+    % Concatenate results horizontally
+    Hm0 = [Hm0, significant_wave_height(S)];
+    Te = [Te, energy_period(S)];
 end
 
 % Remove Hm0 Outliers and NaNs
-filter = Hm0 < 20;
-Hm0 = Hm0(filter);
-Te = Te(filter);
-[row, ~] = find(~isnan(Te));
-Hm0 = Hm0(row);
-Te = Te(row);
-[row, col] = find(~isnan(Hm0));
-Hm0 = Hm0(row);
-Te = Te(row);
+% Create a logical filter for all conditions
+valid_data = ~isnan(Hm0) & ~isnan(Te) & (Hm0 < 15) & (Te > 3);
+
+% Apply filter to both arrays
+Hm0 = Hm0(valid_data);
+Te = Te(valid_data);
 
 % Delta time of sea-states in seconds
 dt = ndbc_requested_data.year_1996.time(2)- ndbc_requested_data.year_1996.time(1);
