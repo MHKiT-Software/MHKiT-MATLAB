@@ -9,9 +9,9 @@
 relative_file_name = './examples/data/wave/data.txt';
 current_dir = fileparts(matlab.desktop.editor.getActiveFilename);
 full_file_name = fullfile(current_dir, relative_file_name);
-% height
 ndbc_data = read_NDBC_file(full_file_name);
 disp(ndbc_data)
+
 %% Compute Wave Metrics
 % We will now use MHKiT to compute the significant wave height, energy period,
 % and energy flux.
