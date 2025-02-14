@@ -81,7 +81,14 @@ k = wave_number(wave_freq, 70);
 k.values = fillmissing(k.values,'constant',0);
 
 peakHeightDesired = Hs/2 * 1.9;
+
+% Transpose MLER output
+mler_data.conditioned_spectrum = mler_data.conditioned_spectrum';
+mler_data.phase = mler_data.phase';
+mler_data.frequency = mler_data.frequency';
+
 mler_norm = mler_wave_amp_normalize(peakHeightDesired, mler_data, sim, k.values);
+
 %%
 % As a final step, a user might need to convert the MLER coefficients into a
 % time series for input into higher fidelity software. We can do this by using
