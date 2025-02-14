@@ -266,7 +266,8 @@ u_fic_in
 
 % prep input for the statistical tool
 % out.S5 is the result generated from the digital flickermeter.
-S5 = out.S5;
+% S5 = out.S5;
+
 %%
 % After getting the instantaneous flicker levels, double-click the digital flickermeter
 % to open statistical tools to calculate P_stfic.
