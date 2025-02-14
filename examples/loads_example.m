@@ -80,10 +80,10 @@ disp(stats.mean)
 % was already done so we just need to import the results.
 
 % load statistics results from csv
-dmeans = table2struct(readtable('../examples/data/loads/data_loads_means.csv'),'ToScalar',true)
-dmaxs = table2struct(readtable('../examples/data/loads/data_loads_maxs.csv'),'ToScalar',true);
-dmins = table2struct(readtable('../examples/data/loads/data_loads_mins.csv'),'ToScalar',true);
-dstd = table2struct(readtable('../examples/data/loads/data_loads_std.csv'),'ToScalar',true);
+dmeans = table2struct(readtable('./examples/data/loads/data_loads_means.csv'),'ToScalar',true)
+dmaxs = table2struct(readtable('./examples/data/loads/data_loads_maxs.csv'),'ToScalar',true);
+dmins = table2struct(readtable('./examples/data/loads/data_loads_mins.csv'),'ToScalar',true);
+dstd = table2struct(readtable('./examples/data/loads/data_loads_std.csv'),'ToScalar',true);
 
 %%
 % *Visualizing Load Statistics*
