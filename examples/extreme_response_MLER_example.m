@@ -43,7 +43,7 @@ plot(js.frequency, js.spectrum); xlabel('frequency [Hz]'); ylabel('response m^2/
 % would like to find the wave profile that will generate a heave response of 1
 % meter for our WEC device.
 
-mler_data = mler_coefficients(RAO, js, 1);
+mler_data = mler_coefficients(RAO', js, 1);
 plot(mler_data.frequency, mler_data.conditioned_spectrum); xlabel('Frequency [Hz]'); ylabel('Conditoned wave spectrum [m^2-s]')
 plot(mler_data.frequency, mler_data.phase); xlabel('Frequency [Hz]'); ylabel('Phase [rad]')
 
