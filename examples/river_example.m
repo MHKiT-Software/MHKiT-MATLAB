@@ -3,12 +3,12 @@
 % MHKiT River Module> by stepping through the calculation of annual energy produced
 % for one turbine in the Tanana river near Nenana, Alaska. The data file used
 % in this example is retrieved from the USGS website, additional data is stored
-% in the <https://github.com/MHKiT-Code-Hub/MHKiT-MATLAB/tree/master/examples/data
-% \MHKiT\examples\data> directory.
+% in the <https://github.com/MHKiT-Software/MHKiT-MATLAB/tree/master/examples/data/river
+% /mhkit/examples/data/river> directory.
 %% Importing Data from USGS
 % We will start by requesting daily discharge data from USGS for the Tanana
-% River near Nenana. The function request_usgs_data in the MHKiT river IO module
-% returns a Matlab structure. To use the request_usgs_data function we will need
+% River near Nenana Alaska. The function request_usgs_data in the MHKiT river IO module
+% returns a MATLAB structure. To use the request_usgs_data function we will need
 % a station number, parameter number, time frame and type of data.
 %
 % The station ID can be found on the USGS website though this is more difficult
@@ -27,8 +27,9 @@
 % Use the request method to obtain 10 years of daily discharge data
 data=request_usgs_data("15515500",'00060','2009-08-01','2019-08-01',"data_type",'Daily');
 disp(data) % data is a structure with Discharge data
+
 %%
-% A Matlab structure was returned with 10 years of daily discharge data. MHKiT
+% A MATLAB structure was returned with 10 years of daily discharge data. MHKiT
 % expects all units to be in SI, so the discharge unti should be converted to
 % m^3/s. We can then plot the discharge time series.
 
@@ -38,6 +39,7 @@ data.Discharge = data.Discharge./ (3.28084^3);
 data.units = "meters cubed per second"
 % plot the daily discharge
 plot_discharge_timeseries(data);
+
 %% Flow Duration Curve
 % The flow duration curve (FDC) quantifies the percentage of time that the discharge
 % in a river exceeds a particular magnitude typically compiled on a monthly or
@@ -52,6 +54,7 @@ F = exceedance_probability(data);
 
 % plotting the flow duration curve from Discharge and Exceedance Probability vectors
 plot_flow_duration_curve(data.Discharge,F.F);
+
 %% Velocity Duration Curve
 % At each river energy converter location, we must provide a curve that relates
 % the velocity at the turbine location to the river discharge levels. IEC 301
@@ -75,6 +78,7 @@ p = polynomial_fit(DV_curve.D,DV_curve.V,2); % Input of discharge, velocity, ord
 
 % Plot the polynomial curve
 plt=plot_discharge_vs_velocity(DV_curve.D,DV_curve.V,"polynomial_coeff",p.coef); % Input of Discharge vector, velocity vector, and polynomial coefficients
+
 %%
 % The IEC standard recommends a polynomial fit of order 3. By changing the order
 % above and replotting the polynomial fit to the curve data it can be seen this
@@ -84,11 +88,12 @@ plt=plot_discharge_vs_velocity(DV_curve.D,DV_curve.V,"polynomial_coeff",p.coef);
 % using the polynomial and plot the VDC.
 
 % Use polynomial fit from DV curve to calculate velocity('V') from
-%  discharge at turbine location
-V = discharge_to_velocity(data, p.coef); % Input of discharge structure and polynomial coeficients
+% discharge at turbine location
+V = discharge_to_velocity(data, p.coef); % Input of discharge structure and polynomial coefficients
 
 % Plot the velocity duration curve (VDC)
 p2 = plot_velocity_duration_curve(V.V, F.F); % Input velocity vector and exceedance probability vector
+
 %% Power Duration Curve
 % The power duration curve is created in a nearly identical manner to the VDC.
 % Here a velocity to power curve will be used to create a polynomial fit. The
