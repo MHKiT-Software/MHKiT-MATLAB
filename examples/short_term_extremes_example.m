@@ -86,12 +86,14 @@ qoi = qoi_timeseries.elevation;
 % different time-series. Below we plot both the full 3 hours time series and the
 % first 2 minutes to get a better look at the behavior of the response.
 
-figure;
+figure('Position', [100, 100, 1600, 600]);
+
 plot(time, qoi)
 title("Full 3 hours"); xlabel("time [s]"); ylabel("elevation [m]")
 xlim([0 time(end)])
 [~, two_min_index] = min(abs(time - 120));
-figure;
+figure('Position', [100, 100, 1600, 600]);
+
 plot(time(1:two_min_index), qoi(1:two_min_index))
 title("First 2 minutes"); xlabel("time [s]"); ylabel("elevation [m]")
 
@@ -114,7 +116,7 @@ block_max = block_maxima(time, qoi', 600);
 % We can also visualize this result, which represents the maximum elevation
 % of each 10-minute segment for the 3 hour period we are analyzing.
 
-figure;
+figure('Position', [100, 100, 1600, 600]);
 plot(block_max, 'o'); grid on; xticks(0:1:19); ylim([0,2])
 xlabel('block #'); ylabel('block max elevation [m]'); title('Block maxima')
 % 2. Fit a distribution to the block maxima
@@ -131,6 +133,8 @@ ste_gum_cdf = ste_block_maxima_gumbel(block_max, x, "cdf");
 %%
 % The outputs of these functions are probability distributions. Here we will
 % plot the CDF and PDF and print the 95% interval for both methods.
+
+figure('Position', [100, 100, 1600, 600]);
 
 % plot cdf and pdf
 subplot(1,2,1); hold on;
@@ -161,7 +165,8 @@ t_end = 1.0 * 60.0 * 60.0;
 qoi_1hr = qoi(1:one_hour_index);
 time_1hr = time(1:one_hour_index);
 % visualize
-figure;
+
+figure('Position', [100, 100, 1600, 600]);
 plot(time_1hr, qoi_1hr)
 title("1 hour"); xlabel("time [s]"); ylabel("elevation [m]")
 xlim([0 time_1hr(end)])
@@ -178,14 +183,16 @@ npeaks = length(qoi_peaks)
 % We will plot the entire time-series and the global peaks and then zoom in
 % on the first 2 minutes.
 
-figure; hold on;
+figure('Position', [100, 100, 1600, 600]);
+hold on;
 plot(time_1hr, qoi_1hr)
 title("1 hour"); xlabel("time [s]"); ylabel("elevation [m]")
 scatter(t_peaks, qoi_peaks)
 yline(0)
 xlim([0 time_1hr(end)])
 
-figure; hold on;
+figure('Position', [100, 100, 1600, 600]);
+hold on;
 plot(time_1hr, qoi_1hr)
 title("Two minutes"); xlabel("time [s]"); ylabel("elevation [m]")
 scatter(t_peaks, qoi_peaks, 'filled')
@@ -226,6 +233,7 @@ peaks_pot_cdf = peaks_distribution_peaks_over_threshold(qoi_peaks, x, "cdf", "th
 % available.
 
 % plot cdf and pdf
+figure('Position', [100, 100, 1600, 600]);
 subplot(1,2,1); hold on;
 plot(x,peaks_w_pdf); xlabel('elevation [m]'); ylabel('PDF')
 plot(x,peaks_wtf_pdf); xlabel('elevation [m]'); ylabel('PDF')
