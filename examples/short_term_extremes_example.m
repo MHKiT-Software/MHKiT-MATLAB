@@ -1,4 +1,5 @@
 %% MHKiT Short-term Extreme Loads
+%
 % Short-term extreme loads are typically required as part of a long-term extreme
 % load estimate. A short-term extreme distribution is a probability distribution
 % for the extreme value of a short-term (e.g. 3-hours) time-series.
@@ -93,6 +94,8 @@ xlim([0 time(end)])
 figure;
 plot(time(1:two_min_index), qoi(1:two_min_index))
 title("First 2 minutes"); xlabel("time [s]"); ylabel("elevation [m]")
+
+%%
 % Block Maxima
 % The short-term extreme distribution can be estimated directly from N time-series
 % of short-term period. These time-series can be obtained, for instance, from
@@ -103,7 +106,7 @@ title("First 2 minutes"); xlabel("time [s]"); ylabel("elevation [m]")
 % small for most real applications.
 % 1. Find the maximum of each block
 % The first step is to get the maximum in each block, i.e. in each of the 10-minute
-% time series. We can use the |block_maxima| funtion to do this for us.
+% time series. We can use the |block_maxima| function to do this for us.
 
 % split time series into 10-minute (600s) segments
 block_max = block_maxima(time, qoi', 600);
@@ -141,15 +144,15 @@ fprintf('GEV:\n 95 percent interval: (%.3f m, %.3f m)',ste_block_maxima_gev(bloc
 fprintf('GUMBEL:\n 95 percent interval: (%.3f m, %.3f m)',ste_block_maxima_gumbel(block_max, 0.025, "ppf"),ste_block_maxima_gumbel(block_max, 0.975, "ppf"))
 % Peaks Distribution
 % The block maxima approach is the most direct way to approximate the short-term
-% extreme but it requires a lot of data (N timeseries of length equal to the short-term
+% extreme but it requires a lot of data (N time-series of length equal to the short-term
 % period). An alternative approach approximates the short-term extreme from a
-% timeseries of arbitrary length, even shorter than the short-term period, by
-% fitting a distribution to the peaks of the timeseries.
+% time-series of arbitrary length, even shorter than the short-term period, by
+% fitting a distribution to the peaks of the time-series.
 %
 % To demonstrate these methods we will approximate the 3-hour short-term extreme
-% distribution from a single 1-hour timeseries.
+% distribution from a single 1-hour time-series.
 %
-% We start by generating this 1-hour response timeseries.
+% We start by generating this 1-hour response time-series.
 
 t_end = 1.0 * 60.0 * 60.0;
 
@@ -162,12 +165,15 @@ figure;
 plot(time_1hr, qoi_1hr)
 title("1 hour"); xlabel("time [s]"); ylabel("elevation [m]")
 xlim([0 time_1hr(end)])
+
+%%
 % 1. Find the global peaks
-% The global peaks are the maximum between succesive zero-upcrossings. We use
+% The global peaks are the maximum between successive zero-upcrossings. We use
 % the |extreme.global_peaks| function to find these peaks.
 
 [t_peaks, qoi_peaks] = global_peaks(time_1hr, qoi_1hr);
 npeaks = length(qoi_peaks)
+
 %%
 % We will plot the entire time-series and the global peaks and then zoom in
 % on the first 2 minutes.
@@ -191,7 +197,7 @@ xlim([0,120])
 % # Fit a Weibull distribution to all the peaks.
 % # Weibull tail fit: seven different weibull distributions are fit to successively
 % smaller subsets of the highest peaks, and the peak distribution is taken as
-% the average of these sevenn
+% the average of these seven
 % # Peaks over threshold: a generalized Pareto distribution is fit to all peaks
 % above a certain threshold, typically taken as 1.4 standard deviations above
 % the mean.
@@ -211,6 +217,7 @@ peaks_wtf_cdf = peaks_distribution_weibull_tail_fit(qoi_peaks, x, "cdf");
 thresh = mean(qoi_peaks) + 1.4 * std(qoi_peaks);
 [peaks_pot_pdf, peaks_pot] = peaks_distribution_peaks_over_threshold(qoi_peaks, x, "pdf", "threshold", thresh);
 peaks_pot_cdf = peaks_distribution_peaks_over_threshold(qoi_peaks, x, "cdf", "threshold", thresh);
+
 %%
 % We will plot both the PDF and CDF of the peaks distribution, and obtain the
 % 95% interval for each distribution. Note however that for the peaks over threshold
@@ -231,6 +238,8 @@ plot(x,peaks_pot_cdf, 'green'); xlabel('elevation [m]'); ylabel('CDF')
 s1 = sprintf('Weibull:\n 95 percent interval: (%.3f m, %.3f m)\n',peaks_distribution_weibull(qoi_peaks,0.025,"ppf"),peaks_distribution_weibull(qoi_peaks,0.975,"ppf"));
 s2 = sprintf('Weibull tail fit:\n 95 percent interval: (%.3f m, %.3f m)',peaks_distribution_weibull_tail_fit(qoi_peaks,0.025,"ppf"),peaks_distribution_weibull_tail_fit(qoi_peaks,0.975,"ppf"));
 disp([s1, s2])
+
+%%
 % 3. Obtain the short-term extreme distribution from the peaks distribution
 % We do this using the peaks distribution and an approximation for the number
 % of peaks per short-term period. We use the |extreme.ste_peaks| function to obtain
@@ -238,7 +247,7 @@ disp([s1, s2])
 
 N_st = number_of_short_term_peaks(npeaks, t_end, t_st);
 fprintf("Approximate number of peaks in a (3-hours) short-term period: %d",N_st)
-%
+
 ste_w_pdf = ste_peaks(peaks_w, N_st, x, "pdf");
 ste_w_cdf = ste_peaks(peaks_w, N_st, x, "cdf");
 ste_wtf_pdf = ste_peaks(peaks_wtf, N_st, x, "pdf");
@@ -247,7 +256,7 @@ ste_pot_pdf = ste_peaks(peaks_pot, N_st, x, "pdf");
 ste_pot_cdf = ste_peaks(peaks_pot, N_st, x, "cdf");
 
 % plot cdf and pdf
-figure;
+figure('Position', [100, 100, 1600, 600]);
 subplot(1,2,1); hold on;
 plot(x,ste_w_pdf); xlabel('elevation [m]'); ylabel('PDF')
 plot(x,ste_wtf_pdf); xlabel('elevation [m]'); ylabel('PDF')
@@ -257,6 +266,8 @@ subplot(1,2,2); hold on;
 plot(x,ste_w_cdf); xlabel('elevation [m]'); ylabel('CDF')
 plot(x,ste_wtf_cdf); xlabel('elevation [m]'); ylabel('CDF')
 plot(x,ste_pot_cdf, 'green'); xlabel('elevation [m]'); ylabel('CDF')
+
+%%
 % The |short_term_extreme| function
 % This example showed step-by-step how to estimate the short-term extreme using
 % different methods. However for most use cases the results from the intermediate
