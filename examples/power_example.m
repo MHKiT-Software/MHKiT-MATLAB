@@ -27,7 +27,7 @@ voltage.voltage = T3.Var2;
 
 %% Power Characteristics
 %
-% The MHKiT |power characteristics| submodule can be used to compute basic quantities
+% The MHKiT |power/characteristics| submodule can be used to compute basic quantities
 % of interest from voltage and current time series. In this example we will calculate
 % active AC power and fundamental frequency, using the loaded voltage and current
 % time-series.
@@ -251,11 +251,13 @@ legend('u_m', 'u_0');
 % Secondly, we can also calculate u_fic step by step. The calculation of u_fic
 % can be achieved sequentially in 5 steps:
 
+%%
 % Step 1. Construct the fictitious grid: calculate resistance and inductance
 % using |calc_Rfic_Lfic()|.
 
 [Rfic, Lfic] = calc_Rfic_Lfic(Sr, SCR, Un, fg);
 
+%%
 % Step 2. Calculate the fundamental frequency and alpha_0:
 %   -opt1: method ZCD: method = 'ZCD'; methodopts={}
 %   -opt2: method STFT: method = 'stft'; methodopts = {'Window',rectwin(M),...
@@ -277,14 +279,20 @@ end
 
 [alpha0, freq] = calc_fundamental_freq(u_m, method, methodopts);
 
+%%
 % Step 3. Calculate the electrical angle (alpha_m) of the fundamental of u_m
 % using |calc_electrical_angle()|.
+
 alpha_m = calc_electrical_angle(freq, alpha0);
 
+%%
 % Step 4. Calculate u0 from alpha_m and nominal voltage (Un) using |calc_ideal_voltage()|.
+
 u0 = calc_ideal_voltage(Un, alpha_m);
 
+%%
 % Step 5. Calculate u_fic using |calc_simulated_voltage()|.
+
 u_fic = calc_simulated_voltage(u0, i_m, Rfic, Lfic);
 disp(size(u_fic));
 
@@ -300,10 +308,12 @@ figure('Position', [100, 100, 1600, 600]);
 plot(datetime(u_m.time, "ConvertFrom", "posixtime"), u0);
 legend('u_m', 'u_0');
 
-%% Calculate the flicker emission value (P_stfic) from u_fic
+%%
+% *Calculate the flicker emission value (P_stfic) from u_fic*
+%
 % Input u_fic into an appropriate digital flickermeter to get the P_stfic.
 %
-% According to the standard, the evaluation time is 10 min, therefore, to fullfill
+% According to the standard, the evaluation time is 10 min, therefore, to fulfill
 % this requirement, we need data length >= 10min. And note that we may need to
 % discard the first 20s depending on the performance of the flickermeter we choose.
 
