@@ -5,12 +5,12 @@
 % and harmonics from time series of voltage and current.
 
 %% Load Power Data
-% We will begin by reading in timeseries data of measured three phase (a,b,and,c)
+% We will begin by reading in time-series data of measured three phase (a,b,and,c)
 % voltage and current. The IEC TS 62600-30 requires that you perform power quality
-% assessments on a minimum of 10-min timeseries data, but for this example we
+% assessments on a minimum of 10-min time-series data, but for this example we
 % will only look at a fraction of that.
 
-% Read in timeseries data of voltage (V) and current (I)
+% Read in time-series data of voltage (V) and current (I)
 power_table = readtable('./examples/data/power/2020224_181521_PowRaw.csv');
 power_table
 
@@ -30,7 +30,7 @@ voltage.voltage = T3.Var2;
 % The MHKiT |power characteristics| submodule can be used to compute basic quantities
 % of interest from voltage and current time series. In this example we will calculate
 % active AC power and fundamental frequency, using the loaded voltage and current
-% timeseries.
+% time-series.
 %
 % To compute the active AC power, we will need the power factor. Power factor
 % describes the efficiency of the energy device.
@@ -51,7 +51,7 @@ xlabel('Time');
 % *Fundamental Frequency*
 %
 % Using the 3 phase voltage measurements we can compute the fundamental frequency
-% of the voltage timeseries. The time-varying fundamental frequency is a required
+% of the voltage time-series. The time-varying fundamental frequency is a required
 % metric for power quality assessments. The function |calc_fundamental_freq()|
 % provides two options of calculating the fundamental frequency:
 % 1. Short-Time Fourier Transform (STFT)
@@ -140,7 +140,7 @@ ylim([50, 70]);
 % IEC 61000-4-7. Harmonics and harmonic distortion are required as part of a power
 % quality assessment and characterize the stability of the power being produced.
 % Specifically, we focus on the flicker coefficient for continuous operation (MV
-% connected systems), which is a normalised measure of the flicker emission during
+% connected systems), which is a normalized measure of the flicker emission during
 % continuous operation of the MEC unit.
 
 % Set the sampling frequency of the dataset
@@ -224,13 +224,13 @@ out
 
 %%
 % Calculating u_fic can be tricky due to the part of calculating the ideal voltage
-% source (u0), as mentioned in the IECTS 62600-30, u0 should fullfill the following
+% source (u0), as mentioned in the IEC TS 62600-30, u0 should fulfill the following
 % two requirements:
 %
 % (1) be without any fluctuations
 % (2) have the same electrical angle as the fundamental of u_m
 %
-% Therefore, here we compare u0 and u_m to check if our output fullfills these
+% Therefore, here we compare u0 and u_m to check if our output fulfills these
 % requirements.
 
 % Check u0
@@ -282,7 +282,7 @@ u_fic = calc_simulated_voltage(u0, i_m, Rfic, Lfic);
 disp(size(u_fic));
 
 %%
-% Again, we check our derived u0 to see if it fullfills the requirements.
+% Again, we check our derived u0 to see if it fulfills the requirements.
 
 % Check u0
 hold off;
@@ -296,7 +296,7 @@ legend('u_m', 'u_0');
 %
 % According to the standard, the evaluation time is 10 min, therefore, to fullfill
 % this requirement, we need data length >= 10min. And note that we may need to
-% discard the first 20s depending on the performace of the flickermeter we choose.
+% discard the first 20s depending on the performance of the flickermeter we choose.
 
 % Prep input for the digital flickermeter
 time = u_m.time - u_m.time(1);
@@ -312,7 +312,7 @@ u_fic_in
 %
 % Note that the user needs to specify RMS value for voltage, sampling frequencies,
 % and other parameters to achieve a valid result. In addition, there may be some
-% unrealiable peaks in the instantaneous flicker levels derived from this particular
+% unreliable peaks in the instantaneous flicker levels derived from this particular
 % flickermeter, when performing statistical analysis, be sure to discard the S5
 % data at the very beginning of it.
 
@@ -343,13 +343,13 @@ coef_flicker
 % This part of the example illustrates how to test the performance of the user's
 % flicker assessment process, including methods to generate simulated voltage
 % of the fictitious grid and the performance of the (digital) flickermeter, following
-% the guidance provided in the IECTS 61400-21-1 Annex B.3: Verification test of
+% the guidance provided in the IEC TS 61400-21-1 Annex B.3: Verification test of
 % the measurement procedure for flicker.
 %
 % The verification is straightforward, we generate testing data with predetermined
 % flicker coefficients and verify the flicker assessment process by comparing
 % the derived flicker coefficient with the predetermined ones. The testing data
-% generated wiill be measured voltage and current time series (|u_m| and |i_m|),
+% generated will be measured voltage and current time series (|u_m| and |i_m|),
 % and the user can use |gen_test_data()| to generate test data for five different
 % scenarios: (1) pure sine wave (coef=0) and scenarios (2)-(5) as stated Annex
 % B.3.2 - B.3.5, and test them one by one. Here we illustrate the usage of gen_test_data
@@ -364,12 +364,12 @@ Un=12e3; In=144; fs=50e3; Sr = 3e6;
 % other parameters for generating distorted data
 fg=60;  SCR=20; fm=25;
 fv=0.5; % fv only needed for scenario B.3.4
-% According to IECTS 61400-21-1 Table B.2:
+% According to IEC TS 61400-21-1 Table B.2:
 DeltaI_I = [4.763 5.726 7.640 9.488];
 [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
 
 %%
-% The generated i_m(ntime, nphi_k) has 4 time serieses, corresponding to phi_k
+% The generated i_m(ntime, nphi_k) has 4 time-series, corresponding to phi_k
 % = 30, 50, 70, 85. While u_m is always the same, thus has only one time series.
 
 hold off; plot(i_m.time,i_m.data(:,1));xlim([0 1]);xlabel("time");ylabel("i_m")
