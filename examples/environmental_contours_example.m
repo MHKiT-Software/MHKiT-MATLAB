@@ -18,6 +18,7 @@
 % # Calculate Hm0 and Te using the requested data
 % # Find the data's 100-year contour
 % # Plot the data and the 100-year contour
+
 %% 1. Request Spectral Wave Density Data from NDBC
 % MHKiT can be used to request historical data from the National Data Buoy Center
 % (<https://www.ndbc.noaa.gov/ NDBC>). This process is split into the following
@@ -26,7 +27,9 @@
 % * Query available NDBC data
 % * Select years of interest
 % * Request Data from NDBC
+%
 % *Query available NDBC data*
+%
 % The NDBC_available_data function requires a parameter to be specified and
 % optionally the user may provide a station ID as a string. We are interested
 % in historical spectral wave density data |'swden'| (from which we may calculate
@@ -38,8 +41,10 @@ parameter = 'swden';
 buoy_number = '46022';
 available_data= NDBC_available_data(parameter,"buoy_number", buoy_number);
 available_data
+%%
 % *Select years of interest*
-% The NDBC_|available_data| function has returned a Table with columns 'Station_id',
+%
+% The |NDBC_available_data| function has returned a Table with columns 'Station_id',
 % 'year', and 'file'. In this case, the years returned from NDBC|_available_data|
 % span 1996 to the last complete year the buoy was operational (currently 2019
 % for 46022). For demonstration, we have decided we are interested in the data
@@ -50,7 +55,10 @@ available_data
 rows = (available_data.year < 2013) ;
 filenames_of_interest = available_data.file(rows);
 filenames_of_interest
+
+%%
 % *Request Data from NDBC*
+%
 % To get the NDBC data we can use the NDBC|_request_data| function to iterate
 % over each buoy id and year in passed filenames. This function will return the
 % parameter data as a structure of structures which may be accessed by buoy id
@@ -58,7 +66,9 @@ filenames_of_interest
 % additional data column called 'time' is created with time in datetime format.
 
 ndbc_requested_data = NDBC_request_data(parameter, filenames_of_interest);
+
 %% 2. Calculate Hm0 and Te using the NDBC Data
+%
 % A sea state may be characterized by significant wave height (Hm0) and energy
 % period (Te). Using the historical spectral wave density data from NDBC, we can
 % calculate these variables using MHKiT. Both Hm0 and Te return a single value
@@ -70,7 +80,9 @@ for field = fieldnames(ndbc_requested_data)'
     Hm0 = [Hm0 ; significant_wave_height(ndbc_requested_data.(field{1}))];
     Te = [Te ; energy_period(ndbc_requested_data.(field{1}))];
 end
+
 %% 3. Find the 100-year contour line
+%
 % With the sea state data calculated, we can now use the modified I-FORM method
 % to define reliability for a 100-year sea state based on the 17 years of spectral
 % wave density data obtained from NDBC for buoy 46022. Reliability is the likelihood
@@ -110,20 +122,26 @@ dt= seconds(dt);
 
 % Get the contour values
 contour = environmental_contours(Hm0, Te, dt, period, 'PCA');
+
 %% 4. Plot overlay of the data and contour
+%
 % Lastly we can use the MHKiT graphics module to create a contour plot which
 % shows the data and resultant contour line.
+
+figure('Position', [100, 100, 1600, 600]);
 
 plot_environmental_contours(Te,Hm0,contour.contour2,contour.contour1,"x_label",...
     'Energy Period (s)', "y_label",'Significant Wave Height (m)',"data_label",'NDBC 46022',...
     "contour_label",'100 Year Contour');
+
 %% Other Contour Methods
+%
 % MHKiT has parametric, nonparametric, and Kernel Density Estimation  methods
 % for calculating environmental contours housed within the |resource.environmental_contours|
 % function. We can compare other copulas to our PCA method simply by adding more
 % methods. A single string method can be applied if only one  copula is of interest
 % as was done above for the PCA method or multiple  methods can be sent in using
-% a list of strings. If mutiple methods of  the same type are desired is recommended
+% a list of strings. If multiple methods of the same type are desired is recommended
 % to run them at the same time if possible as it will reduce the computational
 % expense by utilizing the  common computational calls across the copulas. In
 % the example below we  will compare the parametric and nonparametric Gaussain
