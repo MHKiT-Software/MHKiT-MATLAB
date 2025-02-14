@@ -57,16 +57,28 @@ xlabel('Time')
 
 %STFT method:
 % set up method options:
-methodopts = {'Window',rectwin(5000),'OverlapLength',3750,...
-    'FFTLength',50e3,'FrequencyRange','onesided'};
-% prep input and output
-u_m = struct();u_m.time = voltage.time;
-fund_freq= struct();fund_freq.time = voltage.time;
-fund_freq.data=zeros(size(voltage.voltage));
-for i=1:3
-    u_m.data=voltage.voltage(:,i);
-    [~,freq] = calc_fundamental_freq(u_m,'stft',methodopts);
-    fund_freq.data(:,i) = freq.data;
+% Check for Signal Processing Toolbox
+if license('test', 'Signal_Toolbox')
+    methodopts = {'Window',int32(5000),'OverlapLength',3750,...
+        'FFTLength',50e3,'FrequencyRange','onesided'};
+    % prep input and output
+    u_m = struct();u_m.time = voltage.time;
+    fund_freq= struct();fund_freq.time = voltage.time;
+    fund_freq.data=zeros(size(voltage.voltage));
+    for i=1:3
+        u_m.data=voltage.voltage(:,i);
+        [~,freq] = calc_fundamental_freq(u_m,'stft',methodopts);
+        fund_freq.data(:,i) = freq.data;
+    end
+    fund_freq
+    %Display the result
+    hold off; plot(fund_freq.time,fund_freq.data);
+    title('Fundamental Frequency: STFT')
+    ylabel('Frequency [Hz]')
+    xlabel('Time')
+    ylim([50,70])
+else
+    warning('Signal Processing Toolbox is not installed. Skipping STFT analysis...');
 end
 fund_freq
 %Display the result
@@ -199,8 +211,14 @@ plot(u_m.time,u0);legend('u_m','u_0');
 %   -opt1: method ZCD: method = 'ZCD'; methodopts={};
 %   -opt2: method STFT: method = 'stft'; methodopts = {'Window',rectwin(M),...
 %           'OverlapLength',L,'FFTLength',128,'FrequencyRange','onesided'};
-method = 'stft'; methodopts = {'Window',rectwin(5000),'OverlapLength',3750,...
-    'FFTLength',50e3,'FrequencyRange','onesided'};
+% Check for Signal Processing Toolbox
+if license('test', 'Signal_Toolbox')
+    method = 'stft'; methodopts = {'Window',rectwin(5000),'OverlapLength',3750,...
+        'FFTLength',50e3,'FrequencyRange','onesided'};
+else
+    warning('Signal Processing Toolbox is not installed. Using ZCD method...');
+    method = 'ZCD'; methodopts = {};
+end
 [alpha0,freq] = calc_fundamental_freq(u_m,method,methodopts);
 %%
 % * Step 3. Calculate the electrical angle (alpha_m) of the fundamental of u_m
