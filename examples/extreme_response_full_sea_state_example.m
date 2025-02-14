@@ -1,9 +1,10 @@
 %% Extreme Conditions Modeling - Full Sea State Approach
+%
 % Extreme conditions modeling consists of identifying the expected extreme (e.g.
 % 100-year) response of some quantity of interest, such as WEC motions or mooring
 % loads. Three different methods of estimating extreme conditions were adapted
 % from <https://github.com/WEC-Sim/WDRT WDRT>: full sea state approach, contour
-% approach, and MLER design wave. This noteboook presents the full sea state approach.
+% approach, and MLER design wave. This notebook presents the full sea state approach.
 %
 % The full sea state approach consists of the following steps:
 %%
@@ -23,12 +24,13 @@
 % Converter.” Renewable Energy 116: 356–66._
 %
 % *NOTE:* Prior to running this example it is recommended to become familiar
-% with |environmental_contours_example.ipynb| and |short_term_extremes_example.ipynb|
+% with |environmental_contours_example.mlx| and |short_term_extremes_example.mlx|
 % since some code blocks are adapted from those examples and used here without
 % the additional description.
-%% Obtain and Process NDBC Buouy Data
+%
+%% Obtain and Process NDBC Buoy Data
 % The first step will be obtaining the environmental data and creating the contours.
-% See |environmental_contours_example.ipynb| for more details and explanations
+% See |environmental_contours_example.mlx| for more details and explanations
 % of how this is being done in the following code block.
 
 % Specify the parameter as spectral wave density and the buoy number to be 46022
@@ -63,8 +65,10 @@ Te = Te(row);
 % Delta time of sea-states in seconds
 dt = ndbc_requested_data.year_1996.time(2)- ndbc_requested_data.year_1996.time(1);
 dt = seconds(dt);
+
 %% 1. Sampling
-% The first step is sampling the sea state to get samples _*(H, T)*_ and associtated
+%
+% The first step is sampling the sea state to get samples _*(H, T)*_ and associated
 % weights. For this we will use the |waves.contours.samples_full_seastate| function.
 % We will sample 20 points between each return level, for 10 levels ranging from
 % 0.001—100 years return periods. For more details on the sampling approach see
@@ -90,7 +94,7 @@ npoints = 20;
     Hm0, Te, npoints, levels, dt, "PCA", 250);
 %%
 % We will now plot the samples alongside the contours. First we will create
-% the different contours using |contours.environmental_contours|. See |environmental_contours_example.ipynb|
+% the different contours using |contours.environmental_contours|. See |environmental_contours_example.mlx|
 % for more details on using this function. There are 20 samples, randomly distributed,
 % between each set of return levels.
 
@@ -107,7 +111,7 @@ plot_environmental_contours(sample_te,sample_hs,Te_contours,Hm0_contours,"x_labe
     "contour_label",string(levels'));
 %% 2. Short-Term Extreme Distributions
 % Many different methods for short-term extremes were adapted from WDRT, and
-% a summary and examples can be found in |short_term_extremes_example.ipynb|.
+% a summary and examples can be found in |short_term_extremes_example.mlx|.
 % The response quantity of interest is typically related to the WEC itself, e.g.
 % maximum heave displacement, PTO extension, or load on the mooring lines. This
 % requires running a simulation (e.g. WEC-Sim) for each of the 200 _*(H, T)*_
@@ -131,7 +135,7 @@ plot_environmental_contours(sample_te,sample_hs,Te_contours,Hm0_contours,"x_labe
 % the Weibull-tail-fitting method to estimate the 3-hour short-term extreme distributions
 % for each of the 200 samples.
 %
-% For more details on short-term extreme distributions see |short_term_extremes_example.ipynb|
+% For more details on short-term extreme distributions see |short_term_extremes_example.mlx|
 % and
 %
 % _[3] Michelén Ströfer, Carlos A., and Ryan Coe. 2015. “Comparison of Methods
@@ -166,7 +170,9 @@ for i=1:length(sample_hs)
     % 3-hour extreme distribution
     ste_all{i} = short_term_extreme(time, data.elevation, t_st, "peaks_weibull_tail_fit", 100, "cdf", "output_py",true);
 end
+
 %% 3. Long-Term Extreme Distribution
+%
 % Finally we integrate the weighted short-term extreme distributions over the
 % entire sea state space to obtain the extreme distribution, assuming a 3-hour
 % sea state coherence. For this we use the |full_seastate_long_term_extreme| function.
@@ -184,16 +190,16 @@ t_return_yr = 100.0;
 probability_of_exceedance = 1 / (t_return_yr * 365.25 * 24 / t_st_hr);
 x_t = full_seastate_long_term_extreme(ste_all, sample_weights, 1-probability_of_exceedance, "ppf");
 fprintf("100-year elevation: %.3f meters", x_t)
+
 % plot survival function
 x = linspace(0, 20, 1000);
 lte_sf = full_seastate_long_term_extreme(ste_all, sample_weights, x, "sf");
 figure;
 semilogy(x, lte_sf);
 xlabel('elevation [m]'); ylabel('survival function (1-cdf)'); ylim([1e-10, 1]); xlim([0, x(end)]);
+
 % add 100-year return level to plot
 hold on
 st_sf = full_seastate_long_term_extreme(ste_all, sample_weights, x_t, "sf");
 xline(x_t, '--')
 yline(st_sf, '--')
-%%
-%
