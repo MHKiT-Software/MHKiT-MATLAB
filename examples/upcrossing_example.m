@@ -1,4 +1,4 @@
-%% MHKit Upcrossing Analysis Example
+%% MHKiT Upcrossing Analysis Example
 %
 % The following example shows how to perform an upcrossing analysis on a surface
 % elevation trace and plot quantities of interest (such as wave heights, periods,
@@ -29,7 +29,7 @@ t = 0:1/fs:Tr-1/fs;     % Time vector
 eta = surface_elevation(spec, t, "seed", 123);
 
 % Plot Surface Elevation
-figure();
+figure('Position', [100, 100, 1600, 600]);
 plot(eta.time, eta.elevation);
 xlabel('Time (s)','interpreter','latex');
 ylabel('$\eta (m)$','interpreter','latex');
@@ -41,7 +41,7 @@ xlim([eta.time(1) eta.time(end)])
 waveHeights = uc_heights(t, eta.elevation);
 wavePeriods = uc_periods(t, eta.elevation);
 
-figure();
+figure('Position', [100, 100, 1600, 600]);
 plot(wavePeriods, waveHeights, 'o');
 xlabel('Zero Crossing Period (s)','interpreter','latex');
 ylabel('Wave Height (m)','interpreter','latex');
@@ -58,7 +58,7 @@ N = numel(crests_sorted);
 Q = (N:-1:1) / N;
 
 % Plot Exceedance Probability
-figure();
+figure('Position', [100, 100, 1600, 600]);
 semilogy(crests_sorted, Q, 'o');
 xlabel('Crest Height (m)','interpreter','latex');
 ylabel('P(Exceedance)','interpreter','latex');
