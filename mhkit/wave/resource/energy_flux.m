@@ -59,4 +59,4 @@ S_py = typecast_spectra_to_mhkit_python(S);
 J = py.mhkit.wave.resource.energy_flux(S_py,h,pyargs('rho',options.rho,'g',options.g,...
     'deep',options.deep, 'ratio',options.ratio));
 
-J = double(J);
+J = typecast_from_mhkit_python(J).data;
