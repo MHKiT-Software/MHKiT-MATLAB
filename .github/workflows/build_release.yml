@@ -13,6 +13,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Set environment variables
+      run: |
+        echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
     - name: Set up MATLAB
       uses: matlab-actions/setup-matlab@v2
       with:
@@ -65,7 +69,6 @@ jobs:
     - name: Rename files for develop branch
       if: github.ref != 'refs/heads/master'
       run: |
-        SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
         for f in mhkit_v*.mltbx; do
           mv "$f" "${f/.mltbx/-dev-${SHORT_SHA}.mltbx}"
         done
@@ -105,7 +108,7 @@ jobs:
           mhkit_v*.mltbx
           mhkit_examples_v*.zip
           mhkit_python_utils_v*.zip
-        name: ${{ github.ref == 'refs/heads/master' && format('MHKiT-MATLAB v{0} Release', env.MHKIT_MATLAB_VERSION) || format('MHKiT-MATLAB v{0} Development Build ({1})', env.MHKIT_MATLAB_VERSION, github.sha | slice(0, 7)) }}
+        name: ${{ github.ref == 'refs/heads/master' && format('MHKiT-MATLAB v{0} Release', env.MHKIT_MATLAB_VERSION) || format('MHKiT-MATLAB v{0} Development Build ({1})', env.MHKIT_MATLAB_VERSION, env.SHORT_SHA) }}
         tag_name: ${{ github.ref == 'refs/heads/master' && format('v{0}', env.MHKIT_MATLAB_VERSION) || '' }}
         draft: false
         prerelease: ${{ github.ref != 'refs/heads/master' }}
