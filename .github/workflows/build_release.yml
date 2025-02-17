@@ -19,22 +19,22 @@ jobs:
         PYPROJECT_VERSION=$(grep -Po '(?<=version = ")[^"]*' pyproject.toml)
 
         # Extract version from __init__.py
-        INIT_VERSION=$(grep -Po '(?<=__version__ = ")[^"]*' mhkit_python_utils/__init__.py)
+        INIT_PY_VERSION=$(grep -Po '(?<=__version__ = ")[^"]*' mhkit_python_utils/__init__.py)
 
         # Extract version from build_release.m
         MATLAB_VERSION=$(grep -Po "(?<=project_version = ')[^']*" scripts/build_release.m)
 
         echo "Versions found:"
         echo "pyproject.toml: $PYPROJECT_VERSION"
-        echo "__init__.py: $INIT_VERSION"
+        echo "__init__.py: $INIT_PY_VERSION"
         echo "build_release.m: $MATLAB_VERSION"
 
         # Verify all versions match
-        if [ "$PYPROJECT_VERSION" != "$INIT_VERSION" ] || [ "$PYPROJECT_VERSION" != "$MATLAB_VERSION" ]; then
+        if [ "$PYPROJECT_VERSION" != "$INIT_PY_VERSION" ] || [ "$PYPROJECT_VERSION" != "$MATLAB_VERSION" ]; then
           echo "Error: Version numbers do not match across files!"
           echo "Please ensure versions are consistent in:"
           echo "- pyproject.toml ($PYPROJECT_VERSION)"
-          echo "- mhkit_python_utils/__init__.py ($INIT_VERSION)"
+          echo "- mhkit_python_utils/__init__.py ($INIT_PY_VERSION)"
           echo "- scripts/build_release.m ($MATLAB_VERSION)"
           exit 1
         fi
