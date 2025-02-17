@@ -1,8 +1,8 @@
 function data=request_noaa_data(station, parameter, start_date, end_date, options)
 
-%     Loads NOAA current data directly from https://tidesandcurrents.noaa.gov/api/ using a
+%     Loads NOAA current data directly from https://api.tidesandcurrents.noaa.gov/api/prod/ using a
 %     GET request into a structure. NOAA sets max of 31 days between start and end date.
-%     See https://co-ops.nos.noaa.gov/api/ for options. All times are reported as GMT and metric
+%     See https://api.tidesandcurrents.noaa.gov/api/prod/ for options. All times are reported as GMT and metric
 %     units are returned for data.
 %
 %     Parameters
