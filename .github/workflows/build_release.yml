@@ -2,9 +2,6 @@ name: Build MATLAB Toolbox
 
 on:
   push:
-    branches:
-      - master
-      - develop
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
