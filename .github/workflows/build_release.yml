@@ -29,13 +29,13 @@ jobs:
       if: github.ref != 'refs/heads/master'
       run: |
         for f in mhkit_v*.mltbx; do
-          mv "$f" "${f/.mltbx/-dev$_{{ github.sha }}.mltbx}"
+          mv "$f" "${f/.mltbx/-dev-${{ github.sha }}.mltbx}"
         done
         for f in mhkit_examples_v*.zip; do
-          mv "$f" "${f/.zip/-dev_{{ github.sha }}.zip}"
+          mv "$f" "${f/.zip/-dev-${{ github.sha }}.zip}"
         done
         for f in mhkit_python_utils*.zip; do
-          mv "$f" "${f/.zip/-dev_{{ github.sha }}.zip}"
+          mv "$f" "${f/.zip/-dev-${{ github.sha }}.zip}"
         done
 
     - name: Upload MATLAB Toolbox
