@@ -66,14 +66,15 @@ jobs:
     - name: Rename files for develop branch
       if: github.ref != 'refs/heads/master'
       run: |
+        SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
         for f in mhkit_v*.mltbx; do
-          mv "$f" "${f/.mltbx/-dev-${{ github.sha }}.mltbx}"
+          mv "$f" "${f/.mltbx/-dev-${SHORT_SHA}.mltbx}"
         done
         for f in mhkit_examples_v*.zip; do
-          mv "$f" "${f/.zip/-dev-${{ github.sha }}.zip}"
+          mv "$f" "${f/.zip/-dev-${SHORT_SHA}.zip}"
         done
         for f in mhkit_python_utils*.zip; do
-          mv "$f" "${f/.zip/-dev-${{ github.sha }}.zip}"
+          mv "$f" "${f/.zip/-dev-${SHORT_SHA}.zip}"
         done
 
     - name: Upload MATLAB Toolbox
