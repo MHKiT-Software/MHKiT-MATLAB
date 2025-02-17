@@ -43,7 +43,7 @@ jobs:
         if-no-files-found: error
 
     - name: Upload Examples
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mhkit-examples
         path: mhkit_examples_v*.zip
