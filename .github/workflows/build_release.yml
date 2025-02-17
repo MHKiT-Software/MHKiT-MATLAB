@@ -1,0 +1,64 @@
+name: Build MATLAB Toolbox
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build-toolbox:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up MATLAB
+      uses: matlab-actions/setup-matlab@v2
+      with:
+        release: R2024a
+
+    - name: Build Toolbox
+      uses: matlab-actions/run-command@v2
+      with:
+        command: scripts/build_release
+
+    - name: Rename files for develop branch
+      if: github.ref == 'refs/heads/develop'
+      run: |
+        for f in mhkit_v*.mltbx; do
+          mv "$f" "${f/.mltbx/-dev.mltbx}"
+        done
+        for f in mhkit_examples_v*.zip; do
+          mv "$f" "${f/.zip/-dev.zip}"
+        done
+
+    - name: Upload MATLAB Toolbox
+      uses: actions/upload-artifact@v3
+      with:
+        name: mhkit-toolbox
+        path: mhkit_v*.mltbx
+        if-no-files-found: error
+
+    - name: Upload Examples
+      uses: actions/upload-artifact@v3
+      with:
+        name: mhkit-examples
+        path: mhkit_examples_v*.zip
+        if-no-files-found: error
+
+    - name: Create Release
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          mhkit_v*.mltbx
+          mhkit_examples_v*.zip
+        name: MHKiT Release ${{ github.ref_name }}
+        tag_name: v${{ github.ref_name }}-${{ github.sha }}
+        draft: false
+        prerelease: ${{ github.ref != 'refs/heads/master' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
