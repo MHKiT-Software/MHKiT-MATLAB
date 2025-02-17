@@ -36,7 +36,7 @@ jobs:
         done
 
     - name: Upload MATLAB Toolbox
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mhkit-toolbox
         path: mhkit_v*.mltbx
