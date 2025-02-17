@@ -17,6 +17,46 @@ jobs:
       uses: matlab-actions/setup-matlab@v2
       with:
         release: R2024a
+    - name: Verify Version Numbers
+      run: |
+        # Extract version from pyproject.toml
+        PYPROJECT_VERSION=$(grep -Po '(?<=version = ")[^"]*' pyproject.toml)
+
+        # Extract version from __init__.py
+        INIT_VERSION=$(grep -Po '(?<=__version__ = ")[^"]*' mhkit_python_utils/__init__.py)
+
+        # Extract version from build_release.m
+        MATLAB_VERSION=$(grep -Po "(?<=project_version = ')[^']*" scripts/build_release.m)
+
+        echo "Versions found:"
+        echo "pyproject.toml: $PYPROJECT_VERSION"
+        echo "__init__.py: $INIT_VERSION"
+        echo "build_release.m: $MATLAB_VERSION"
+
+        # Verify all versions match
+        if [ "$PYPROJECT_VERSION" != "$INIT_VERSION" ] || [ "$PYPROJECT_VERSION" != "$MATLAB_VERSION" ]; then
+          echo "Error: Version numbers do not match across files!"
+          echo "Please ensure versions are consistent in:"
+          echo "- pyproject.toml ($PYPROJECT_VERSION)"
+          echo "- mhkit_python_utils/__init__.py ($INIT_VERSION)"
+          echo "- scripts/build_release.m ($MATLAB_VERSION)"
+          exit 1
+        fi
+
+        # Set version as environment variable for later use
+        echo "MHKIT_MATLAB_VERSION=$MATLAB_VERSION" >> $GITHUB_ENV
+
+    - name: Check for existing version tag
+      if: github.ref == 'refs/heads/master'
+      run: |
+        if git ls-remote --exit-code --tags origin "refs/tags/v${MHKIT_MATLAB_VERSION}" >/dev/null 2>&1; then
+          echo "Error: Version v${MHKIT_MATLAB_VERSION} already exists as a tag!"
+          echo "Please update the version number in:"
+          echo "- pyproject.toml"
+          echo "- mhkit_python_utils/__init__.py"
+          echo "- scripts/build_release.m"
+          exit 1
+        fi
 
     - name: Build Toolbox
       uses: matlab-actions/run-command@v2
