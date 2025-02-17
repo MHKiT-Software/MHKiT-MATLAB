@@ -37,9 +37,6 @@ examples_path = fullfile(project_root, 'examples');
 % These are the folders and files included in the output MATLAB toolbox
 toolbox_files = {mhkit_path};
 
-
-fprintf('Adding %s to the MATLAB path recursively...\n', mhkitPath)
-
 fprintf('\nStarting MATLAB toolbox build of %s version %s\n', project_name, project_version);
 
 % Create a new toolbox project
