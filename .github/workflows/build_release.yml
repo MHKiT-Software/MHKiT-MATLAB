@@ -49,6 +49,13 @@ jobs:
         path: mhkit_examples_v*.zip
         if-no-files-found: error
 
+    - name: Upload mhkit_python_utils
+      uses: actions/upload-artifact@v4
+      with:
+        name: mhkit-python-utils
+        path: mhkit_python_utils_v*.zip
+        if-no-files-found: error
+
     - name: Create Release
       if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
       uses: softprops/action-gh-release@v1
@@ -56,6 +63,7 @@ jobs:
         files: |
           mhkit_v*.mltbx
           mhkit_examples_v*.zip
+          mhkit_python_utils_v*.zip
         name: MHKiT Release ${{ github.ref_name }}
         tag_name: v${{ github.ref_name }}-${{ github.sha }}
         draft: false
