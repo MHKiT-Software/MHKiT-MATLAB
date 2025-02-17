@@ -23,7 +23,7 @@ jobs:
     - name: Build Toolbox
       uses: matlab-actions/run-command@v2
       with:
-        command: addpath('scripts'); create_release_toolbox
+        command: addpath('scripts'); build_release
 
     - name: Rename files for develop branch
       if: github.ref == 'refs/heads/develop'
