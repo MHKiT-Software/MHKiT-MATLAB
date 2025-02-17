@@ -35,7 +35,7 @@ mhkit_path = fullfile(project_root, 'mhkit');
 examples_path = fullfile(project_root, 'examples');
 
 % These are the folders and files included in the output MATLAB toolbox
-toolbox_files = {mhkitPath};
+toolbox_files = {mhkit_path};
 
 
 fprintf('Adding %s to the MATLAB path recursively...\n', mhkitPath)
@@ -60,12 +60,12 @@ opts.AuthorCompany = author_company;
 
 % Set screenshot/logo
 fprintf('Checking for toolbox logo...\n');
-screenshotPath = fullfile(project_root, 'assets', [project_name '_logo.png']);
-if exist(screenshotPath, 'file')
-    opts.ToolboxImageFile = screenshotPath;
-    fprintf('Logo found and set: %s\n', screenshotPath);
+screenshot_path = fullfile(project_root, 'assets', [project_name '_logo.png']);
+if exist(screenshot_path, 'file')
+    opts.ToolboxImageFile = screenshot_path;
+    fprintf('Logo found and set: %s\n', screenshot_path);
 else
-    fprintf('Warning: Logo file not found at %s\n', screenshotPath);
+    fprintf('Warning: Logo file not found at %s\n', screenshot_path);
 end
 
 % Set MATLAB release compatibility
