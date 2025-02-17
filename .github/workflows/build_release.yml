@@ -4,7 +4,6 @@ on:
     branches:
       - master
       - develop
-      - hotfix-v0.6.0-release-action
 jobs:
   build-toolbox:
     runs-on: ubuntu-latest
@@ -19,22 +18,22 @@ jobs:
         PYPROJECT_VERSION=$(grep -Po '(?<=version = ")[^"]*' pyproject.toml)
 
         # Extract version from __init__.py
-        INIT_VERSION=$(grep -Po '(?<=__version__ = ")[^"]*' mhkit_python_utils/__init__.py)
+        INIT_PY_VERSION=$(grep -Po '(?<=__version__ = ")[^"]*' mhkit_python_utils/__init__.py)
 
         # Extract version from build_release.m
         MATLAB_VERSION=$(grep -Po "(?<=project_version = ')[^']*" scripts/build_release.m)
 
         echo "Versions found:"
         echo "pyproject.toml: $PYPROJECT_VERSION"
-        echo "__init__.py: $INIT_VERSION"
+        echo "__init__.py: $INIT_PY_VERSION"
         echo "build_release.m: $MATLAB_VERSION"
 
         # Verify all versions match
-        if [ "$PYPROJECT_VERSION" != "$INIT_VERSION" ] || [ "$PYPROJECT_VERSION" != "$MATLAB_VERSION" ]; then
+        if [ "$PYPROJECT_VERSION" != "$INIT_PY_VERSION" ] || [ "$PYPROJECT_VERSION" != "$MATLAB_VERSION" ]; then
           echo "Error: Version numbers do not match across files!"
           echo "Please ensure versions are consistent in:"
           echo "- pyproject.toml ($PYPROJECT_VERSION)"
-          echo "- mhkit_python_utils/__init__.py ($INIT_VERSION)"
+          echo "- mhkit_python_utils/__init__.py ($INIT_PY_VERSION)"
           echo "- scripts/build_release.m ($MATLAB_VERSION)"
           exit 1
         fi
@@ -103,7 +102,7 @@ jobs:
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
-      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hotfix-v0.6.0-release-action'
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
       with:
         files: |
           mhkit_v*.mltbx
@@ -111,7 +110,11 @@ jobs:
           mhkit_python_utils_v*.zip
         name: ${{ github.ref == 'refs/heads/master' && format('MHKiT-MATLAB v{0} Release', env.MHKIT_MATLAB_VERSION) || format('MHKiT-MATLAB v{0} Development Build ({1})', env.MHKIT_MATLAB_VERSION, env.SHORT_SHA) }}
         tag_name: ${{ github.ref == 'refs/heads/master' && format('v{0}', env.MHKIT_MATLAB_VERSION) || format('v{0}-dev-{1}', env.MHKIT_MATLAB_VERSION, env.SHORT_SHA) }}
-        draft: false
-        prerelease: ${{ github.ref != 'refs/heads/master' }}
+        # Release visibility settings:
+        # - For master branch: Creates a public production release (draft=false)
+        # - For other branches: Creates a draft release (draft=true) visible only to repository contributors
+        # This allows the development team to test new builds before making them public.
+        draft: ${{ github.ref != 'refs/heads/master' }}
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
