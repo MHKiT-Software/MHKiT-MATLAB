@@ -13,14 +13,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set environment variables
-      run: |
-        echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
-
-    - name: Set up MATLAB
-      uses: matlab-actions/setup-matlab@v2
-      with:
-        release: R2024a
     - name: Verify Version Numbers
       run: |
         # Extract version from pyproject.toml
@@ -60,6 +52,15 @@ jobs:
           echo "- scripts/build_release.m"
           exit 1
         fi
+
+    - name: Set environment variables
+      run: |
+        echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
+    - name: Set up MATLAB
+      uses: matlab-actions/setup-matlab@v2
+      with:
+        release: R2024a
 
     - name: Build Toolbox
       uses: matlab-actions/run-command@v2
