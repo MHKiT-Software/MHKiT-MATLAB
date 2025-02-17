@@ -96,7 +96,7 @@ jobs:
         name: mhkit-python-utils
         path: mhkit_python_utils_v*.zip
         if-no-files-found: error
-    - name: Upload mhkit_python_utils
+
     - name: Create Release
       uses: softprops/action-gh-release@v1
       if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hotfix-v0.6.0-release-action'
