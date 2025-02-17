@@ -1,8 +1,11 @@
-name: Build MATLAB Toolbox
+name: Build Release Toolbox and Examples
 
 on:
   push:
-  workflow_dispatch:  # Allows manual triggering
+    branches:
+      - master
+      - develop
+      - prep-v0.6.0-release  # Allows manual triggering
 
 jobs:
   build-toolbox:
