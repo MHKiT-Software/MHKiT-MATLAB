@@ -75,7 +75,7 @@ opts.ToolboxFiles = toolboxFiles;
 
 % Set output path for the .mltbx file
 outputFile = fullfile(project_root, sprintf('%s_v%s.mltbx', project_name, project_version));
-opts.OutputFile = outputFile
+opts.OutputFile = outputFile;
 fprintf('\nOutput file will be created at: %s\n', outputFile);
 
 
