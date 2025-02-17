@@ -68,18 +68,18 @@ end
 % Set MATLAB release compatibility
 opts.MinimumMatlabRelease = matlab_minimum_release_supported;
 
-opts.ToolboxFiles = toolboxFiles;
+opts.ToolboxFiles = toolbox_files;
 
 % Set output path for the .mltbx file
-outputFile = fullfile(project_root, sprintf('%s_v%s.mltbx', project_name, project_version));
-opts.OutputFile = outputFile;
-fprintf('\nOutput file will be created at: %s\n', outputFile);
+output_file = fullfile(project_root, sprintf('%s_v%s.mltbx', project_name, project_version));
+opts.OutputFile = output_file;
+fprintf('\nOutput file will be created at: %s\n', output_file);
 
 
 % Package the toolbox
 fprintf('\nPackaging toolbox...\n');
 matlab.addons.toolbox.packageToolbox(opts);
-fprintf('\n✓ Toolbox successfully created at: %s\n', outputFile);
+fprintf('\n✓ Toolbox successfully created at: %s\n', output_file);
 
 % Create zip file of examples folder
 fprintf('\nCreating zip file of examples folder...\n');
