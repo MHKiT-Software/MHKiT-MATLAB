@@ -1,5 +1,4 @@
-name: Build Release Toolbox and Examples
-
+name: Build Production and Development Release
 on:
   push:
     branches:
