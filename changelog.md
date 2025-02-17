@@ -137,5 +137,5 @@ Special thanks to all contributors who made this release possible:
 
 ## Fixes
 
-- Allow user to specific surface elevation generation method #126
+- Allow user to specify surface elevation generation method #126
 - Properly map the gamma parameter in the `jonswap` function #136
