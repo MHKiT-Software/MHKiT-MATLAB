@@ -47,7 +47,6 @@ jobs:
         echo "MHKIT_MATLAB_VERSION=$MATLAB_VERSION" >> $GITHUB_ENV
 
     - name: Check for existing version tag
-      if: github.ref == 'refs/heads/master'
       run: |
         if git ls-remote --exit-code --tags origin "refs/tags/v${MHKIT_MATLAB_VERSION}" >/dev/null 2>&1; then
           echo "Error: Version v${MHKIT_MATLAB_VERSION} already exists as a tag!"
@@ -97,17 +96,17 @@ jobs:
         name: mhkit-python-utils
         path: mhkit_python_utils_v*.zip
         if-no-files-found: error
-
+    - name: Upload mhkit_python_utils
     - name: Create Release
-      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
       uses: softprops/action-gh-release@v1
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
       with:
         files: |
           mhkit_v*.mltbx
           mhkit_examples_v*.zip
           mhkit_python_utils_v*.zip
-        name: MHKiT Release ${{ github.ref_name }}
-        tag_name: v${{ github.ref_name }}-${{ github.sha }}
+        name: ${{ github.ref == 'refs/heads/master' && format('MHKiT-MATLAB v{0} Release', env.MHKIT_MATLAB_VERSION) || format('MHKiT-MATLAB v{0} Development Build ({1})', env.MHKIT_MATLAB_VERSION, github.sha | slice(0, 7)) }}
+        tag_name: ${{ github.ref == 'refs/heads/master' && format('v{0}', env.MHKIT_MATLAB_VERSION) || '' }}
         draft: false
         prerelease: ${{ github.ref != 'refs/heads/master' }}
       env:
