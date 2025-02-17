@@ -26,13 +26,16 @@ jobs:
         command: addpath('scripts'); build_release
 
     - name: Rename files for develop branch
-      if: github.ref == 'refs/heads/develop'
+      if: github.ref != 'refs/heads/master'
       run: |
         for f in mhkit_v*.mltbx; do
-          mv "$f" "${f/.mltbx/-dev.mltbx}"
+          mv "$f" "${f/.mltbx/-dev$_{{ github.sha }}.mltbx}"
         done
         for f in mhkit_examples_v*.zip; do
-          mv "$f" "${f/.zip/-dev.zip}"
+          mv "$f" "${f/.zip/-dev_{{ github.sha }}.zip}"
+        done
+        for f in mhkit_python_utils*.zip; do
+          mv "$f" "${f/.zip/-dev_{{ github.sha }}.zip}"
         done
 
     - name: Upload MATLAB Toolbox
