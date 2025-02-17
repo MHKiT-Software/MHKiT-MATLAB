@@ -111,7 +111,11 @@ jobs:
           mhkit_python_utils_v*.zip
         name: ${{ github.ref == 'refs/heads/master' && format('MHKiT-MATLAB v{0} Release', env.MHKIT_MATLAB_VERSION) || format('MHKiT-MATLAB v{0} Development Build ({1})', env.MHKIT_MATLAB_VERSION, env.SHORT_SHA) }}
         tag_name: ${{ github.ref == 'refs/heads/master' && format('v{0}', env.MHKIT_MATLAB_VERSION) || format('v{0}-dev-{1}', env.MHKIT_MATLAB_VERSION, env.SHORT_SHA) }}
-        draft: false
-        prerelease: ${{ github.ref != 'refs/heads/master' }}
+        # Release visibility settings:
+        # - For master branch: Creates a public production release (draft=false)
+        # - For other branches: Creates a draft release (draft=true) visible only to repository contributors
+        # This allows the development team to test new builds before making them public.
+        draft: ${{ github.ref != 'refs/heads/master' }}
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
