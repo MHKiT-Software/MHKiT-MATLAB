@@ -1,12 +1,12 @@
 from mhkit_python_utils import pandas_dataframe, delft_3d_helper
-from mhkit_python_utils import scipy_stats
+from mhkit_python_utils import scipy_stats, type_conversion
 
 # Ignore future warnings
 import warnings as _warn
 
 _warn.simplefilter(action="ignore", category=FutureWarning)
 
-__version__ = "v0.2.0"
+__version__ = "0.6.0"
 
 __copyright__ = """
 Copyright 2019, Alliance for Sustainable Energy, LLC under the terms of 

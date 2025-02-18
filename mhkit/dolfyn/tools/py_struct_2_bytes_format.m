@@ -1,7 +1,25 @@
 function [format, bytes] = py_struct_2_bytes_format(py_format, size_only)
+    persistent format_cache
+    if isempty(format_cache)
+        format_cache = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    end
+
     if isstring(py_format)
         py_format = convertStringsToChars(py_format);
     end
+
+    % Create cache key combining format and size_only flag
+    cache_key = [py_format, '_', num2str(size_only)];
+
+    % Check cache first
+    if isKey(format_cache, cache_key)
+        cached_result = format_cache(cache_key);
+        format = cached_result{1};
+        bytes = cached_result{2};
+        return;
+    end
+
+    % Original logic
     if length(py_format) == 1
         [format, bytes] = assign_value(py_format);
     else
@@ -45,6 +63,9 @@ function [format, bytes] = py_struct_2_bytes_format(py_format, size_only)
             end
         end
     end
+
+    % Cache the result
+    format_cache(cache_key) = {format, bytes};
 
     function [fmt, size] = assign_value(input)
         switch input
@@ -97,4 +118,3 @@ function [format, bytes] = py_struct_2_bytes_format(py_format, size_only)
         end
     end
 end
-

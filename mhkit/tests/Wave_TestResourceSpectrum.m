@@ -13,23 +13,8 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             assertLessThan(testCase,error, 0.01);
         end
 
-         % This test and function no longer in corresponding Python code
-         % function test_bretschneider_spectrum(testCase)
-         %     Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
-         %     Obj.Tp = 8;
-         %     Obj.Hs = 2.5;
-
-         %     S = create_spectra('bretschneider_spectrum',Obj.f,Obj.Tp,Obj.Hs);
-         %     Tp0 = peak_period(S);
-         %     Hm0 = significant_wave_height(S);
-         %     errorHm0 = abs(Obj.Tp - Tp0)/Obj.Tp;
-         %     errorTp0 = abs(Obj.Hs - Hm0)/Obj.Hs;
-         %     assertLessThan(testCase,errorHm0, 0.01);
-         %     assertLessThan(testCase,errorTp0, 0.01);
-         % end
-
         function test_surface_elevation_seed(testCase)
-
+            assumeFail(testCase, "Per @simmsa: This test does not seem valid. A random seed and a defined seed should not have the same result")
             Obj.f = 0.0:0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
@@ -41,11 +26,11 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             seednum = 123;
             eta0 = surface_elevation(S, Obj.t);
             eta1 = surface_elevation(S, Obj.t,"seed",seednum);
-            assertEqual(testCase,eta0, eta1);
+            assertEqual(testCase,eta0.elevation, eta1.elevation);
         end
 
         function test_surface_elevation_phasing(testCase)
-
+            assumeFail(testCase, "Per @simmsa: This test does not account for randomness of the seed")
             Obj.f = 0.0:0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
@@ -59,7 +44,7 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             rng(seednum);
             phases = rand(size(S.spectrum))*2*pi;
             eta1 = surface_elevation(S, Obj.t,"phases",phases);
-            assertEqual(testCase,eta0, eta1);
+            assertEqual(testCase,eta0.elevation, eta1.elevation);
         end
 
         function test_surface_elevation_moments(testCase)
@@ -121,7 +106,7 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             Obj.f = 0.1/(2*pi):0.01/(2*pi):3.5/(2*pi);
             Obj.Tp = 8;
             Obj.Hs = 2.5;
-            Obj.gamma = 2.0
+            Obj.gamma = 2.0;
 
             S = jonswap_spectrum(Obj.f, Obj.Tp, Obj.Hs, Obj.gamma);
             Hm0 = significant_wave_height(S);
@@ -164,7 +149,6 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             eta_sum_of_sines = surface_elevation(S, t, "seed", 1, "method", "sum_of_sines");
 
             surface_elevation_diff = mean(eta_ifft.elevation - eta_sum_of_sines.elevation);
-            disp(surface_elevation_diff);
 
             assertLessThan(testCase, surface_elevation_diff, 0.01);
         end

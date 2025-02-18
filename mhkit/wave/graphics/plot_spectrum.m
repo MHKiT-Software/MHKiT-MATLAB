@@ -35,12 +35,12 @@ ylabel('Spectral Density (m^{2}s/_{rad})')
 si=size(wave_spectra.spectrum);
 if si(1)==1
     Hm0=significant_wave_height(wave_spectra);
+    Tp=peak_period(wave_spectra);
     format_Spec='Spectrum: %s, Tp= %f, Hm0= %f';
-    title(sprintf(format_Spec,wave_spectra.type,wave_spectra.Tp,Hm0));
+    title(sprintf(format_Spec,wave_spectra.type,Tp,Hm0));
 end
 
 len = strlength(options.savepath);
 if len > 1
     saveas(figure, options.savepath);
 end
-

@@ -1,10 +1,10 @@
 <deployment-project plugin="plugin.toolbox" plugin-version="1.0">
-  <configuration build-checksum="381625427" file="/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/prep-v0.5-release/MHKiT-MATLAB/mhkit.prj" location="/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/prep-v0.5-release/MHKiT-MATLAB" name="mhkit" target="target.toolbox" target-name="Package Toolbox">
-    <param.appname>mhkit</param.appname>
-    <param.authnamewatermark>Rebecca Fao</param.authnamewatermark>
+  <configuration build-checksum="1405035700" file="/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/prep-v0.6.0-release/mhkit_v0.6.0.prj" location="/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/prep-v0.6.0-release" name="mhkit_v0.6.0" target="target.toolbox" target-name="Package Toolbox">
+    <param.appname>Marine and Hydrokinetic Toolkit (MHKiT)</param.appname>
+    <param.authnamewatermark>NREL</param.authnamewatermark>
     <param.email>rebecca.fao@nrel.gov</param.email>
     <param.company>National Renewable Energy Laboratory</param.company>
-    <param.summary>Marine energy data processing and visualization toolbox</param.summary>
+    <param.summary>Marine energy data analysis and visualization toolbox</param.summary>
     <param.description>MHKiT-MATLAB is a MATLAB package designed for marine energy applications to assist in
 data processing and visualization.  The software package include functionality for:
 
@@ -14,14 +14,14 @@ data processing and visualization.  The software package include functionality f
 * Resource assessment
 * Device performance
 * Device loads</param.description>
-    <param.screenshot>/Users/asimms/Downloads/58954145.png</param.screenshot>
-    <param.version>0.5.0</param.version>
-    <param.output>${PROJECT_ROOT}/mhkit.mltbx</param.output>
+    <param.screenshot>${PROJECT_ROOT}/assets/mhkit_logo.png</param.screenshot>
+    <param.version>0.6.0</param.version>
+    <param.output>${PROJECT_ROOT}/Marine and Hydrokinetic Toolkit (MHKiT).mltbx</param.output>
     <param.products.name />
     <param.products.id />
     <param.products.version />
     <param.platforms />
-    <param.guid>1f426c5c-9e72-4f83-8e42-1e51b296aa29</param.guid>
+    <param.guid>40de46b2-d46c-4191-bbe2-5c1f9c9ad0ed</param.guid>
     <param.exclude.filters>% List files contained in your toolbox folder that you would like to exclude
 % from packaging.  Excludes should be listed relative to the toolbox folder.
 % Some examples of how to specify excludes are provided below:
@@ -41,35 +41,143 @@ data processing and visualization.  The software package include functionality f
 %
 % All files matching a pattern in all subfolders of the toolbox folder:
 % **/*.bak
-**/*.DS_Store</param.exclude.filters>
+**/*.DS_Store
+.git
+.github
+.mypy_cache
+assets
+mhkit_python_utils
+scripts
+.gitignore
+setup.py
+mhkit_webread_cache</param.exclude.filters>
     <param.exclude.pcodedmfiles>true</param.exclude.pcodedmfiles>
-    <param.examples />
+    <param.examples>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;examples&gt;
+   &lt;exampleCategory name="examples"&gt;
+      &lt;example name="SWAN_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/SWAN_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/SWAN_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="adcp_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/adcp_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/adcp_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="adv_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/adv_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/adv_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="cdip_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/cdip_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/cdip_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="delft3d_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/delft3d_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/delft3d_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="environmental_contours_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/environmental_contours_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/environmental_contours_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="extreme_response_MLER_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/extreme_response_MLER_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/extreme_response_MLER_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="extreme_response_contour_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/extreme_response_contour_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/extreme_response_contour_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="extreme_response_full_sea_state_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/extreme_response_full_sea_state_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/extreme_response_full_sea_state_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="loads_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/loads_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/loads_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="power_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/power_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/power_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="qc_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/qc_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/qc_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="river_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/river_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/river_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="short_term_extremes_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/short_term_extremes_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/short_term_extremes_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="strain_measurement_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/strain_measurement_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/strain_measurement_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="tidal_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/tidal_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/tidal_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="upcrossing_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/upcrossing_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/upcrossing_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="wave_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/wave_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/wave_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="wecsim_example" type="html"&gt;
+         &lt;file type="source"&gt;/examples/html/wecsim_example.html&lt;/file&gt;
+         &lt;file type="main"&gt;/examples/wecsim_example.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+   &lt;/exampleCategory&gt;
+&lt;/examples&gt;</param.examples>
     <param.demosxml />
     <param.apps />
     <param.registered.apps />
     <param.docs />
     <param.getting.started.guide />
     <param.matlabpath.excludes>
-      <item>/</item>
-      <item>/tests</item>
-      <item>/tests/coverage_report</item>
-      <item>/tests/coverage_report/release</item>
-      <item>/tests/coverage_report/release/coverageData</item>
-      <item>/tests/coverage_report/release/derived</item>
-      <item>/tests/coverage_report/release/derived/3p</item>
-      <item>/tests/coverage_report/release/derived/3p/ui</item>
-      <item>/tests/coverage_report/release/derived/3p/ui/dojo</item>
-      <item>/tests/coverage_report/release/images</item>
-      <item>/tests/coverage_report/release/matlab_codecov_js-ui</item>
-      <item>/tests/coverage_report/release/rights</item>
-      <item>/tests/example_ncfiles</item>
+      <item>/assets</item>
+      <item>/mhkit/tests/coverage_report</item>
+      <item>/mhkit/tests/coverage_report/release</item>
+      <item>/mhkit/tests/coverage_report/release/coverageData</item>
+      <item>/mhkit/tests/coverage_report/release/derived</item>
+      <item>/mhkit/tests/coverage_report/release/derived/3p</item>
+      <item>/mhkit/tests/coverage_report/release/derived/3p/ui</item>
+      <item>/mhkit/tests/coverage_report/release/derived/3p/ui/dojo</item>
+      <item>/mhkit/tests/coverage_report/release/images</item>
+      <item>/mhkit/tests/coverage_report/release/matlab_codecov_js-ui</item>
+      <item>/mhkit/tests/coverage_report/release/rights</item>
+      <item>/mhkit_python_utils</item>
+      <item>/scripts</item>
     </param.matlabpath.excludes>
     <param.javaclasspath.excludes />
-    <param.exported.on.package>false</param.exported.on.package>
+    <param.exported.on.package>true</param.exported.on.package>
     <param.required.addons />
     <param.matlab.project.id />
     <param.matlab.project.name />
-    <param.release.start>R2021b</param.release.start>
+    <param.release.start>R2022b</param.release.start>
     <param.release.end>latest</param.release.end>
     <param.release.current.only>false</param.release.current.only>
     <param.compatiblity.windows>true</param.compatiblity.windows>
@@ -89,14 +197,12 @@ data processing and visualization.  The software package include functionality f
       <param.products.version />
       <param.platforms />
       <param.exclude.pcodedmfiles />
-      <param.examples />
       <param.demosxml />
       <param.apps />
       <param.registered.apps />
       <param.docs />
       <param.getting.started.guide />
       <param.javaclasspath.excludes />
-      <param.exported.on.package />
       <param.required.addons />
       <param.matlab.project.id />
       <param.matlab.project.name />
@@ -112,29 +218,30 @@ data processing and visualization.  The software package include functionality f
       <param.additional.sw.linux.url />
     </unset>
     <fileset.rootdir>
-      <file>${PROJECT_ROOT}/mhkit</file>
+      <file>${PROJECT_ROOT}</file>
     </fileset.rootdir>
     <fileset.rootfiles>
-      <file>${PROJECT_ROOT}/mhkit/dolfyn</file>
-      <file>${PROJECT_ROOT}/mhkit/loads</file>
-      <file>${PROJECT_ROOT}/mhkit/power</file>
-      <file>${PROJECT_ROOT}/mhkit/qc</file>
-      <file>${PROJECT_ROOT}/mhkit/river</file>
-      <file>${PROJECT_ROOT}/mhkit/setup.py</file>
-      <file>${PROJECT_ROOT}/mhkit/tests</file>
-      <file>${PROJECT_ROOT}/mhkit/tidal</file>
-      <file>${PROJECT_ROOT}/mhkit/utils</file>
-      <file>${PROJECT_ROOT}/mhkit/wave</file>
+      <file>${PROJECT_ROOT}/LICENSE</file>
+      <file>${PROJECT_ROOT}/README.md</file>
+      <file>${PROJECT_ROOT}/changelog.md</file>
+      <file>${PROJECT_ROOT}/demos.xml</file>
+      <file>${PROJECT_ROOT}/examples</file>
+      <file>${PROJECT_ROOT}/mhkit</file>
+      <file>${PROJECT_ROOT}/mhkit_examples_v0.6.0.zip</file>
+      <file>${PROJECT_ROOT}/mhkit_python_utils.egg-info</file>
+      <file>${PROJECT_ROOT}/mhkit_python_utils_v0.6.0</file>
+      <file>${PROJECT_ROOT}/mhkit_python_utils_v0.6.0.zip</file>
+      <file>${PROJECT_ROOT}/pyproject.toml</file>
     </fileset.rootfiles>
     <fileset.depfun.included />
     <fileset.depfun.excluded />
     <fileset.package />
     <build-deliverables>
-      <file location="${PROJECT_ROOT}" name="mhkit.mltbx" optional="false">/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/prep-v0.5-release/MHKiT-MATLAB/mhkit.mltbx</file>
+      <file location="${PROJECT_ROOT}" name="Marine and Hydrokinetic Toolkit (MHKiT).mltbx" optional="false">/Users/asimms/Desktop/Programming/mhkit_matlab_simms_dev/prep-v0.6.0-release/Marine and Hydrokinetic Toolkit (MHKiT).mltbx</file>
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>/Applications/MATLAB_R2023b.app</root>
+      <root>/Applications/MATLAB_R2024a.app</root>
       <toolboxes />
     </matlab>
     <platform>
@@ -146,7 +253,7 @@ data processing and visualization.  The software package include functionality f
       <vista>false</vista>
       <linux>false</linux>
       <solaris>false</solaris>
-      <osver>13.6.7</osver>
+      <osver>13.7.3</osver>
       <os32>true</os32>
       <os64>false</os64>
       <arch>maci64</arch>

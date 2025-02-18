@@ -145,6 +145,37 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             assertEqual(testCase,expected_meta.distance_to_shore(2),hindcast_data(2).metadata.distance_to_shore,'RelTol',0.000001);
         end
 
+        function test_WPTO_omnidirectional(testCase)
+
+            % assumeFail(testCase, "API key usage saturated - temporarily disabling")
+
+            api_key = '3K3JQbjZmWctY0xmIfSYvYgtIcM3CN0cb1Y2w9bf';
+            hindcast_data = request_wpto('1-hour',...
+                ["omni-directional_wave_power"],[44.624076,-124.280097;43.489171,-125.152137],...
+                2010,api_key);
+
+            % Verify hindcast data is not empty
+            testCase.verifyNotEmpty(hindcast_data, 'Hindcast data should not be empty.');
+
+            expected_point_1_file = "../../examples/data/wave/hindcast/hindcast_test_omni_point_1.csv";
+            expected_point_1 = readtable(expected_point_1_file,'delimiter',',');
+
+            expected_point_2_file = "../../examples/data/wave/hindcast/hindcast_test_omni_point_2.csv";
+            expected_point_2 = readtable(expected_point_2_file,'delimiter',',');
+
+            % Convert missing csv timezone to UTC
+            expected_point_1.time = datetime(expected_point_1.time, 'TimeZone', 'UTC');
+            expected_point_2.time = datetime(expected_point_2.time, 'TimeZone', 'UTC');
+
+            % Verify downloaded omni-directional_wave_power matches the expected values
+            assertEqual(testCase, expected_point_1.omni_directional_wave_power,hindcast_data(1).omni_directional_wave_power, 'RelTol',0.000001);
+            assertEqual(testCase, expected_point_2.omni_directional_wave_power,hindcast_data(2).omni_directional_wave_power, 'RelTol',0.000001);
+
+            % Verify time matches the expected values
+            assertEqual(testCase, expected_point_1.time,hindcast_data(1).time);
+            assertEqual(testCase, expected_point_2.time,hindcast_data(2).time);
+        end
+
         function test_WPTO_point_multiparm(testCase)
 
             % assumeFail(testCase, "API key usage saturated - temporarily disabling")
