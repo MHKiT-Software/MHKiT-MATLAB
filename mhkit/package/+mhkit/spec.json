@@ -1,0 +1,64 @@
+{
+  "package": {
+    "name": "MHKiT",
+    "version": "0.6.0",
+    "repository": "https://github.com/MHKiT-Software/MHKiT-MATLAB",
+    "documentation": "https://github.com/MHKiT-Software/MHKiT-MATLAB",
+    "issues": "https://github.com/MHKiT-Software/MHKiT-MATLAB/issues",
+    "toolbox": "https://github.com/MHKiT-Software/MHKiT-MATLAB/releases/download/v<version>/mhkit_v<version>.mltbx",
+    "examples": "https://github.com/MHKiT-Software/MHKiT-MATLAB/releases/download/v<version>/mhkit_examples_v<version>.zip",
+    "python_package": "https://github.com/MHKiT-Software/MHKiT-MATLAB/releases/download/v<version>/mhkit_python_utils_v<version>.zip"
+  },
+  "matlab": {
+    "minimum_version": "R2022b",
+    "maximum_tested_version": "R2024b"
+  },
+  "python": {
+    "minimum_version": "3.10",
+    "install_version": "3.11",
+    "maximum_version": "3.12"
+  },
+  "mhkit_python": {
+    "install": "conda install -c conda-forge mhkit==<mhkit_python_version>",
+    "version": "0.9",
+    "verify_version": {
+      "command": "python -c \"import mhkit; print(mhkit.__version__)\"",
+      "expect": "v0.9"
+    },
+    "verify_operation": {
+      "command": "python -c \"import mhkit; print(mhkit.river.performance.circular(30))\"",
+      "expect": "(30, 706.85"
+    }
+  },
+  "conda": {
+    "environment_name": "mhkit-matlab-env",
+    "create": "conda create -n <conda_env> python=<python_version>",
+    "install": {
+      "windows": [
+        "curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe -o .miniconda.exe",
+        "start /wait \"\" .miniconda.exe /S'",
+        "del .miniconda.exe"
+      ],
+      "mac": {
+        "arm": [
+          "mkdir -p ~/miniconda3",
+          "curl https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh -o ~/miniconda3/miniconda.sh",
+          "bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3",
+          "rm ~/miniconda3/miniconda.sh"
+        ],
+        "intel": [
+          "mkdir -p ~/miniconda3",
+          "curl https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -o ~/miniconda3/miniconda.sh",
+          "bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3",
+          "rm ~/miniconda3/miniconda.sh"
+        ]
+      },
+      "linux": [
+        "mkdir -p ~/miniconda3",
+        "wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh",
+        "bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3",
+        "rm ~/miniconda3/miniconda.sh"
+      ]
+    }
+  }
+}
