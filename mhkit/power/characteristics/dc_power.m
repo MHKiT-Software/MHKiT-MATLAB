@@ -1,110 +1,82 @@
-function P=dc_power(voltage,current)
+function power_dc = dc_power(voltage, current)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Calculates the real power from DC voltage and current.
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     Calculates DC power from voltage and current measurements across
+%     multiple channels. Supports both single and multi-channel
+%     configurations.
 %
 % Parameters
 % ------------
-%     voltage: Time series of  measured voltages [V]
-%        Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time,voltage)
-%
-%        OR
-%
-%        structure of form:
-%               voltage.voltage : matrix or vector
-%
-%               voltage.time : time vector
-%
-%     current: Time series of current [A]
-%        Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time,current)
-%
-%        OR
-%
-%        structure of form:
-%               current.current : matrix or vector
-%
-%               current.time : time vector
+%   voltage: structure
+%       voltage.voltage : Matrix of voltage measurements [V]
+%                         Each row is a time point, each column is a channel
+%       voltage.time : Time vector
+%   current: structure
+%       current.current : Matrix of current measurements [A]
+%                         Each row is a time point, each column is a channel
+%       current.time : Time vector
 %
 % Returns
 % ---------
-%     P: Structure
+%   power_dc: structure
+%       power_dc.power : Matrix of calculated power for each channel [W]
+%                        Same dimensions as input voltage/current
+%       power_dc.gross : Vector of gross power (sum of all channels) [W]
+%       power_dc.time : Time vector
 %
+% Key Equations
+% -------------
+% 1. Channel Power:
+%    P_channel = V_channel × I_channel
 %
-%       P.power [W]
+% 2. Gross Power:
+%    P_gross = sum(P_channel) across all channels
 %
-%       P.gross: gross power from all lines [W]
-%
-%       P.time
-%
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
-
-py.importlib.import_module('mhkit_python_utils');
-
-if (isa(voltage,'py.pandas.core.frame.DataFrame')~=1)
-    if (isstruct(voltage)==1)
-        x=size(voltage.voltage);
-        li=py.list();
-        if x(2)> 1
-            for i = 1:x(2)
-                app=py.list(double(voltage.voltage(:,i)));
-                li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-            end
-            voltage=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(voltage.time(:,1)),li,int32(x(2)));
-        elseif x(2)==1
-            voltage=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(voltage.time(:,1)),voltage.voltage,int32(x(2)));
-        end
-
-    else
-        ME = MException('MATLAB:dc_power','voltage needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one or create a structure');
-        throw(ME);
+    % Input validation
+    if ~isstruct(voltage) || ~isstruct(current)
+        error('voltage and current must be structures with voltage/current and time fields');
     end
-end
 
-if (isa(current,'py.pandas.core.frame.DataFrame')~=1)
-    if (isstruct(current)==1)
-        x=size(current.current);
-        li=py.list();
-        if x(2)==3
-            for i = 1:x(2)
-                app=py.list(double(current.current(:,i)));
-                li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
+    % Validate required fields exist
+    required_fields_v = {'voltage', 'time'};
+    required_fields_c = {'current', 'time'};
 
-            end
-            current=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(current.time(:,1)),li,int32(x(2)));
-        elseif x(2)==1
-            current=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(current.time(:,1)),current.current,int32(x(2)));
-        end
-
-    else
-        ME = MException('MATLAB:dc_power','voltage needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one or create a structure');
-        throw(ME);
+    if ~all(isfield(voltage, required_fields_v))
+        error('voltage structure must contain fields: voltage and time');
     end
+
+    if ~all(isfield(current, required_fields_c))
+        error('current structure must contain fields: current and time');
+    end
+
+    % Extract data
+    v_data = voltage.voltage;
+    i_data = current.current;
+    v_time = voltage.time;
+    c_time = current.time;
+
+    % Verify time vectors match
+    if ~isequal(v_time, c_time)
+        error('Time vectors in voltage and current structures must match');
+    end
+
+    % Verify dimensions match
+    if ~isequal(size(v_data), size(i_data))
+        error('voltage and current must have the same dimensions');
+    end
+
+    % Calculate power for each channel
+    power = v_data .* i_data;
+
+    % Calculate gross power (sum across channels - dimension 2)
+    gross_power = sum(power, 2);
+
+    % Assign outputs
+    power_dc = struct();
+    power_dc.power = power;
+    power_dc.gross = gross_power;
+    power_dc.time = v_time;
 end
-
-p_pd=py.mhkit.power.characteristics.dc_power(voltage,current);
-vals=double(py.array.array('d',py.numpy.nditer(p_pd.values)));
-sha=cell(p_pd.values.shape);
-x=int64(sha{1,1});
-y=int64(sha{1,2});
-vals=reshape(vals,[x,y]);
-si=size(vals);
-% for i=1:si(2)
-%     if i == si(2)
-%         P.gross=vals(:,i);
-%     else
-%         P.power{i}=vals(:,i);
-%         %P.power{i}=[P.power{i}];
-%     end
-%  end
-P.power=vals(:,1:end-1);
-P.gross=vals(:,end);
-P.time=double(py.array.array('d',py.numpy.nditer(p_pd.index))).';
-
