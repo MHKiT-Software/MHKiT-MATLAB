@@ -1,49 +1,74 @@
-function Te=energy_period(S,varargin)
-
+function Te = energy_period(S, varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+% Calculates wave energy period Te from wave spectra
 %
 % Parameters
 % ------------
-%   S: Spectral Density (m^2/Hz)
-%       Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,spectra)
+%   S: structure or numeric array
+%       If structure:
+%           S.spectrum   - Spectral Density (m^2/Hz)
+%           S.frequency  - Frequency (Hz)
+%       If numeric:
+%           S is spectral density array (vector or matrix)
+%           varargin{1} must contain frequency vector
 %
-%       OR
-%
-%       structure of form:
-%           S.spectrum: Spectral Density (m^2/Hz)
-%
-%           S.type: String of the spectra type, i.e. Bretschneider,
-%           time series, date stamp etc.
-%
-%           S.frequency: frequency (Hz)
-%
-%     frequency_bins: vector (optional)
-%       Bin widths for frequency of S. Required for unevenly sized bins
-%
+%   frequency_bins: vector (optional)
+%       Frequency bin widths [Hz]. Required for unevenly spaced bins.
 %
 % Returns
 % ---------
-%    Te: float
-%        Wave energy Period (s)
-%
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Te: double
+%       Wave energy period [s]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% assign feq_bin
-if nargin == 2
-    freq_bins = py.numpy.array(varargin{1});
-elseif nargin == 1
-    freq_bins = py.None;
-else
-    ME = MException('MATLAB:energy_period','Incorrect number of input arguments');
-        throw(ME);
+    % Extract spectrum and frequency
+    if isstruct(S)
+        spectrum = S.spectrum;
+        frequency = S.frequency;
+    elseif isnumeric(S)
+        if nargin < 2
+            error('When S is numeric, frequency vector must be provided as second argument');
+        end
+        spectrum = S;
+        frequency = varargin{1};
+        varargin(1) = [];
+    else
+        error('Input S must be a struct or numeric array');
+    end
+
+    % Determine frequency bin widths
+    if ~isempty(varargin)
+        freq_bins = varargin{1};
+    else
+        df = diff(frequency);
+        freq_bins = mean(df);
+    end
+
+    % Ensure proper shapes
+    frequency = frequency(:);
+    if isvector(spectrum)
+        spectrum = spectrum(:);
+    end
+
+    % Check size consistency
+    if length(frequency) ~= size(spectrum,1)
+        error('Length of frequency vector must match number of rows in spectrum');
+    end
+
+    % Calculate moments: m0 and m-1
+    if isscalar(freq_bins)
+        m0 = sum(spectrum .* freq_bins, 1);
+        m_neg1 = sum((spectrum ./ frequency) .* freq_bins, 1);
+    else
+        freq_bins = freq_bins(:);
+        if length(freq_bins) ~= length(frequency)
+            error('Length of freq_bins must match frequency vector');
+        end
+        m0 = sum(spectrum .* freq_bins, 1);
+        m_neg1 = sum((spectrum ./ frequency) .* freq_bins, 1);
+    end
+
+    % Calculate energy period
+    Te = m_neg1 ./ m0;
+
 end
-
-S_py = typecast_spectra_to_mhkit_python(S);
-
-Te = py.mhkit.wave.resource.energy_period(S_py, pyargs('frequency_bins',freq_bins));
-
-Te = typecast_from_mhkit_python(Te).data;
