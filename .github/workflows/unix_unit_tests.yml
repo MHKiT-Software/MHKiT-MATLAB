@@ -131,7 +131,7 @@ jobs:
         os: [macos-13, "ubuntu-22.04"]
         python-version: ["3.10", 3.11, 3.12]
         # Note: It is preferred to use an actual release name as opposed to 'latest'
-        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
+        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b, R2025a]
         mhkit-python-version: ["0.9.0"]
         exclude:
           - python-version: "3.10" # cache_population job
