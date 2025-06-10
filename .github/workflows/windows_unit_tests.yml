@@ -236,6 +236,14 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
+      - name: Set PYBIND11 GIL workaround
+        # if: ${{ matrix.matlab-version == 'R2025a' }}
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          export PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1
+          echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
+
       - name: Add Python Dir to Path
         shell: bash -l {0}
         run: |
