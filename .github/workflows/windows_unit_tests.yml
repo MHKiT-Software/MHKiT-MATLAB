@@ -209,9 +209,8 @@ jobs:
 
       # Some tests fail with:
       # Python Error: ImportError: DLL load failed while importing pyexpat: The operating system cannot run %1.
-      # One potential fix is to reinstall python and expat from conda-forge
-      # Reinstall python and expat from conda-forge
-      - name: Reinstall Python packages for Windows compatibility
+      # One potential fix is to install expat and lxml
+      - name: Install Windows XML dependencies
         if: ${{ matrix.os == 'windows-latest' }}
         shell: bash -l {0}
         run: |
