@@ -137,7 +137,7 @@ jobs:
         os: [windows-latest]
         python-version: ["3.10", 3.11, 3.12]
         # matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
-        matlab-version: [R2023a, R2023b, R2024a, R2024b, R2025a]
+        matlab-version: [R2023a, R2023b, R2024a, R2024b]
         mhkit-python-version: ["0.9.0"]
         exclude:
           # Cache population job
