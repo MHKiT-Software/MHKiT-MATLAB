@@ -102,10 +102,10 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             current.current = current_data;
             current.time = [0;1;2;3];
 
-            P1 = ac_power_three_phase(voltage, current, 1, false);
-            P1b = ac_power_three_phase(voltage, current, 0.5, false);
-            P2 = ac_power_three_phase(voltage, current,1, true);
-            P2b = ac_power_three_phase(voltage, current, 0.5, true);
+            P1 = ac_power_three_phase(voltage, current, 1, "LineToLine", false);
+            P1b = ac_power_three_phase(voltage, current, 0.5, "LineToLine", false);
+            P2 = ac_power_three_phase(voltage, current,1, "LineToLine", true);
+            P2b = ac_power_three_phase(voltage, current, 0.5, "LineToLine", true);
 
             assertEqual(testCase,sum(P1.power), 584)
             assertEqual(testCase,sum(P1b.power), 584/2)
