@@ -37,6 +37,12 @@ jobs:
           conda activate mhkit_conda_env
           conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
 
+      - name: Fix libstdc++ compatibility
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          # Force MATLAB to use system libstdc++
+          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6:/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
@@ -179,9 +185,15 @@ jobs:
           conda activate mhkit_conda_env
           conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
 
-      - name: Setup MATLAB Path on Ubuntu
-        if: ${{ matrix.os == '"ubuntu-22.04"' }}
-        run: echo "LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+      - name: Fix libstdc++ compatibility
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          # Force MATLAB to use system libstdc++
+          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6:/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+
+      # - name: Setup MATLAB Path on Ubuntu
+      #   if: ${{ matrix.os == '"ubuntu-22.04"' }}
+      #   run: echo "LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
 
       - name: Print Python executable
         shell: bash -l {0}
