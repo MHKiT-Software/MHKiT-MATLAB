@@ -1,124 +1,149 @@
-function frequency = instantaneous_frequency(measured_voltage, time_dimension)
+function frequency = instantaneous_frequency(voltage)
+
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Calculates instantaneous frequency of measured voltage signals
-%     using Hilbert transform to extract phase information. Works with
-%     both single and multi-channel voltage measurements.
-%
+% Calculates instantaneous frequency of measured voltage
+%     
 % Parameters
 % ------------
-%   measured_voltage: structure
-%       measured_voltage.voltage : Matrix of voltage measurements [V]
-%                                 Each row is a time point, each column is a channel
-%       measured_voltage.time : Time vector [s]
-%   time_dimension: string (optional)
-%       Currently not used in MATLAB implementation
-%       Reserved for future compatibility
+%   voltage: structure
+%       voltage.voltage : Measured voltage data (V) with each timeseries in its own column
+%       voltage.time : Time vector corresponding to voltage measurements
 %
 % Returns
 % ---------
 %   frequency: structure
-%       frequency.frequency : Matrix of calculated instantaneous frequencies [Hz]
-%                            Has one fewer row than the input voltage
-%       frequency.time : Time vector corresponding to frequency values
+%       frequency.frequency : Instantaneous frequency of the measured voltage (Hz)
+%       frequency.time : Time vector (one element shorter than input due to differentiation)
 %
 % Key Equations
 % -------------
-% 1. Analytic Signal via Hilbert Transform:
-%    z(t) = x(t) + j·H[x(t)]
-%    where H[x(t)] is the Hilbert transform of x(t)
+% 1. Analytic signal using Hilbert transform:
+%    z(t) = voltage(t) + i * H[voltage(t)]
 %
-% 2. Instantaneous Phase:
+% 2. Instantaneous phase:
 %    φ(t) = unwrap(angle(z(t)))
 %
-% 3. Instantaneous Frequency:
-%    f(t) = (1/2π) · dφ(t)/dt
-%
-% Notes
-% ------
-% The function implements a custom Hilbert transform without requiring
-% the Signal Processing Toolbox.
+% 3. Instantaneous frequency:
+%    f(t) = (1/(2π)) * dφ/dt
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    % Input validation
-    if ~isstruct(measured_voltage)
-        error('measured_voltage must be a structure with voltage and time fields');
+    % Create input parser
+    p = inputParser;
+    
+    % Define validation functions
+    validStruct = @(x) isstruct(x);
+    
+    % Add required parameters
+    addRequired(p, 'voltage', validStruct);
+    
+    % Parse inputs
+    parse(p, voltage);
+    
+    % Extract validated inputs
+    voltage = p.Results.voltage;
+    
+    % Validate input structure has required fields
+    if ~isfield(voltage, 'voltage')
+        error('MHKiT:instantaneous_frequency: voltage structure must contain voltage field');
     end
-
-    % Validate required fields exist
-    required_fields = {'voltage', 'time'};
-    if ~all(isfield(measured_voltage, required_fields))
-        error('measured_voltage structure must contain fields: voltage and time');
+    if ~isfield(voltage, 'time')
+        error('MHKiT:instantaneous_frequency: voltage structure must contain time field');
     end
-
-    % Extract voltage and time data
-    voltage_data = measured_voltage.voltage;
-    time = measured_voltage.time;
-
-    % Validate data types
-    if ~isnumeric(voltage_data) || ~isnumeric(time)
-        error('Voltage and time data must be numeric');
+    
+    % Extract data from structure
+    voltage_data = voltage.voltage;
+    time_vector = voltage.time;
+    
+    % Validate dimensions
+    if size(voltage_data, 1) ~= length(time_vector)
+        error('MHKiT:instantaneous_frequency: voltage data rows must match time vector length');
     end
-
-    % Check for empty data
-    if isempty(voltage_data) || isempty(time)
-        error('Voltage and time data cannot be empty');
+    
+    % Get data dimensions
+    [num_samples, num_columns] = size(voltage_data);
+    
+    % Validate minimum data length for meaningful frequency calculation
+    if num_samples < 4
+        error('MHKiT:instantaneous_frequency: voltage data must have at least 4 samples for frequency calculation');
     end
-
-    % Verify time vector is suitable for frequency calculation
-    if length(time) <= 1
-        error('Time vector must contain at least two points for frequency calculation');
+    
+    % Calculate time differences for frequency calculation
+    time_diff = diff(time_vector(:));  % Ensure column vector
+    
+    % Check for uniform time spacing (within tolerance)
+    dt_mean = mean(time_diff);
+    dt_tolerance = 0.01 * dt_mean;  % 1% tolerance
+    if any(abs(time_diff - dt_mean) > dt_tolerance)
+        warning('MHKiT:instantaneous_frequency: Non-uniform time spacing detected, using local time differences');
     end
-
-    % Calculate time step
-    dt = diff(time);
-    if std(dt)/mean(dt) > 0.01  % Check if sampling is approximately uniform
-        warning('Time steps vary by more than 1%. Frequency calculation assumes uniform sampling.');
-    end
-    dt = dt(1); % Assuming uniform sampling
-
-    % Initialize output structure
-    frequency = struct();
-
-    % Get size of voltage data
-    [num_samples, num_channels] = size(voltage_data);
-    freq_data = zeros(num_samples-1, num_channels);
-
-    % Calculate frequency for each channel
-    for i = 1:num_channels
-        % Calculate analytic signal using custom Hilbert transform
-        analytic_signal = custom_hilbert(voltage_data(:,i));
-
+    
+    % Initialize output frequency matrix
+    frequency_data = zeros(num_samples - 1, num_columns);
+    
+    % Process each column of voltage data
+    for col_idx = 1:num_columns
+        current_voltage = voltage_data(:, col_idx);
+        
+        % Check if Signal Processing Toolbox is available for hilbert function
+        if ~exist('hilbert', 'file')
+            warning('MHKiT:instantaneous_frequency: hilbert function not available, using custom implementation');
+            analytic_signal = custom_hilbert_transform(current_voltage);
+        else
+            % Apply Hilbert transform to get analytic signal
+            analytic_signal = hilbert(current_voltage);
+        end
+        
         % Calculate instantaneous phase
-        instantaneous_phase = unwrap(angle(analytic_signal));
-
+        instantaneous_phase = angle(analytic_signal);
+        
+        % Unwrap phase to remove 2π discontinuities
+        unwrapped_phase = unwrap(instantaneous_phase);
+        
         % Calculate instantaneous frequency
-        freq_data(:,i) = diff(instantaneous_phase) / (2.0 * pi) / dt;
+        phase_diff = diff(unwrapped_phase);
+        % Ensure proper element-wise division with matching dimensions
+        if size(phase_diff, 1) == 1
+            phase_diff = phase_diff(:);  % Convert to column vector if row
+        end
+        instantaneous_frequency = phase_diff ./ (2.0 * pi * time_diff);
+        
+        % Store result
+        frequency_data(:, col_idx) = instantaneous_frequency;
     end
+    
+    % Create output structure
+    frequency = struct();
+    frequency.frequency = frequency_data;
+    frequency.time = time_vector(2:end);  % Time vector is one element shorter due to differentiation
 
-    % Assign outputs
-    frequency.frequency = freq_data;
-    frequency.time = time(1:end-1);
 end
 
-function analytic = custom_hilbert(x)
-    % Compute Hilbert transform without using Signal Processing Toolbox
-    N = length(x);
-    X = fft(x);
-
-    % Create vector for Hilbert transform in frequency domain
-    h = ones(N, 1);
-    if mod(N,2) == 0
-        % even length
-        h(2:N/2) = 2;
-        h(N/2+1:end) = 0;
+function analytic_signal = custom_hilbert_transform(signal)
+    % Custom implementation of Hilbert transform using FFT
+    % This is used when Signal Processing Toolbox is not available
+    
+    n = length(signal);
+    
+    % Take FFT of the signal
+    signal_fft = fft(signal);
+    
+    % Create Hilbert transform multiplier
+    h = zeros(n, 1);
+    if mod(n, 2) == 0
+        % Even length
+        h([1, n/2+1]) = 1;
+        h(2:n/2) = 2;
     else
-        % odd length
-        h(2:(N+1)/2) = 2;
-        h((N+1)/2+1:end) = 0;
+        % Odd length  
+        h(1) = 1;
+        h(2:(n+1)/2) = 2;
     end
-
-    % Calculate analytic signal
-    analytic = ifft(X .* h);
+    
+    % Apply Hilbert transform in frequency domain
+    analytic_fft = signal_fft .* h;
+    
+    % Convert back to time domain
+    analytic_signal = ifft(analytic_fft);
 end
