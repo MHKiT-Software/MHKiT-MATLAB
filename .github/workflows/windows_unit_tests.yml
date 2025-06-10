@@ -206,6 +206,19 @@ jobs:
       #     pip uninstall -y scipy
       #     pip install scipy==1.10.1
       #
+
+      # Some tests fail with:
+      # Python Error: ImportError: DLL load failed while importing pyexpat: The operating system cannot run %1.
+      # One potential fix is to reinstall python and expat from conda-forge
+      # Reinstall python and expat from conda-forge
+      - name: Reinstall Python packages for Windows compatibility
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          conda install -c conda-forge python=${{ matrix.python-version }} expat libxml2 libxslt --force-reinstall
+
+
       - name: List installed pip modules
         shell: bash -l {0}
         run: |
