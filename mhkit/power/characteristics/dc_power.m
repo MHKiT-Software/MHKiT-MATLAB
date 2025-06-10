@@ -2,9 +2,7 @@ function power_dc = dc_power(voltage, current)
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Calculates DC power from voltage and current measurements across
-%     multiple channels. Supports both single and multi-channel
-%     configurations.
+% Calculates DC power from voltage and current measurements
 %
 % Parameters
 % ------------
@@ -35,48 +33,64 @@ function power_dc = dc_power(voltage, current)
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    % Input validation
-    if ~isstruct(voltage) || ~isstruct(current)
-        error('voltage and current must be structures with voltage/current and time fields');
+    % Create input parser
+    input_parser = inputParser;
+    
+    % Define validation functions
+    valid_struct = @(x) isstruct(x);
+    
+    % Add required parameters
+    addRequired(input_parser, 'voltage', valid_struct);
+    addRequired(input_parser, 'current', valid_struct);
+    
+    % Parse inputs
+    parse(input_parser, voltage, current);
+    
+    % Extract validated inputs
+    voltage = input_parser.Results.voltage;
+    current = input_parser.Results.current;
+    
+    % Validate input structures have required fields
+    if ~isfield(voltage, 'voltage')
+        error('MHKiT:dc_power: voltage structure must contain voltage field');
     end
-
-    % Validate required fields exist
-    required_fields_v = {'voltage', 'time'};
-    required_fields_c = {'current', 'time'};
-
-    if ~all(isfield(voltage, required_fields_v))
-        error('voltage structure must contain fields: voltage and time');
+    if ~isfield(voltage, 'time')
+        error('MHKiT:dc_power: voltage structure must contain time field');
     end
-
-    if ~all(isfield(current, required_fields_c))
-        error('current structure must contain fields: current and time');
+    if ~isfield(current, 'current')
+        error('MHKiT:dc_power: current structure must contain current field');
     end
-
-    % Extract data
-    v_data = voltage.voltage;
-    i_data = current.current;
-    v_time = voltage.time;
-    c_time = current.time;
-
-    % Verify time vectors match
-    if ~isequal(v_time, c_time)
-        error('Time vectors in voltage and current structures must match');
+    if ~isfield(current, 'time')
+        error('MHKiT:dc_power: current structure must contain time field');
     end
-
-    % Verify dimensions match
-    if ~isequal(size(v_data), size(i_data))
-        error('voltage and current must have the same dimensions');
+    
+    % Extract data matrices
+    voltage_data = voltage.voltage;
+    current_data = current.current;
+    voltage_time = voltage.time;
+    current_time = current.time;
+    
+    % Validate dimensions match
+    if ~isequal(size(voltage_data), size(current_data))
+        error('MHKiT:dc_power: voltage and current must have the same dimensions');
     end
-
-    % Calculate power for each channel
-    power = v_data .* i_data;
-
+    
+    % Validate time vectors match
+    if ~isequal(voltage_time, current_time)
+        error('MHKiT:dc_power: Time vectors must match between voltage and current structures');
+    end
+    
+    % Calculate power for each channel (element-wise multiplication)
+    power_matrix = voltage_data .* current_data;
+    
     % Calculate gross power (sum across channels - dimension 2)
-    gross_power = sum(power, 2);
-
-    % Assign outputs
+    % Handle NaN values by skipping them in the sum
+    gross_power_vector = sum(power_matrix, 2, 'omitnan');
+    
+    % Create output structure
     power_dc = struct();
-    power_dc.power = power;
-    power_dc.gross = gross_power;
-    power_dc.time = v_time;
+    power_dc.power = power_matrix;
+    power_dc.gross = gross_power_vector;
+    power_dc.time = voltage_time;
+
 end
