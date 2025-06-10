@@ -1,139 +1,159 @@
-function power_ac = ac_power_three_phase(voltage, current, power_factor, varargin)
+function P = ac_power_three_phase(voltage, current, power_factor, varargin)
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Calculates three-phase active (real) power [W] from instantaneous
-%     voltage and current measurements. Valid for both balanced and
-%     unbalanced three-phase systems.
+% Calculates magnitude of active AC power from line to neutral voltage and current
+%     
+% Computes three-phase AC power by taking absolute values of voltage and current,
+% applying line-to-line correction if specified, summing across phases, and 
+% applying power factor.
 %
 % Parameters
 % ------------
-%   voltage: structure
-%       voltage.voltage : Matrix of voltage measurements [V] (3 phases)
-%       voltage.time : Time vector
-%   current: structure
-%       current.current : Matrix of current measurements [A] (3 phases)
-%       current.time : Time vector
-%   power_factor: double
-%       Power factor for the efficiency of the system (0 to 1)
-%   Name-Value Parameters:
-%       'LineToLine': logical (default: false)
-%           Set to true if the given voltage measurements are line-to-line
-%       'VoltageImbalanceThreshold': double (default: 2.0)
-%           Maximum allowable voltage unbalance factor in percent
-%           Default per IEC TS 62600-30:2018, Section 7.1.3
-%           Can be overridden based on local system operator's codes
+%   voltage: structure or matrix
+%       voltage.voltage : Three-phase voltage measurements [V] (n_time x 3 matrix)
+%                        Each row represents one time step, columns are phases A, B, C
+%       voltage.time : Time vector (n_time x 1) (if time series data)
+%   current: structure or matrix
+%       current.current : Three-phase current measurements [A] (n_time x 3 matrix)
+%                        Each row represents one time step, columns are phases A, B, C
+%       current.time : Time vector (n_time x 1) (if time series data)
+%   power_factor: numeric scalar
+%       Power factor for the efficiency of the system [dimensionless]
+%   'LineToLine': name-value pair (optional)
+%       Set to true if voltage measurements are line-to-line (default: false)
 %
 % Returns
 % ---------
-%   power_ac: structure
-%       power_ac.power : Vector of calculated active power [W]
-%       power_ac.time : Time vector
-%
-% Standards Reference
-% ------------------
-% IEC TS 62600-30:2018 Section 7.1.3 Test conditions states:
-% "The voltage unbalance factor shall be less than a value, defined by the
-% local system operator's codes and standards, measured as 10 min data at
-% the MEC unit terminals, or PCC as appropriate. Where no such codes or
-% standards exist, a value of 2 % shall be used. The voltage unbalance
-% factor may be determined as described in IEC 61800-3:2017, Clause B.5."
+%   P: structure
+%       P.power : Magnitude of active AC power [W]
+%       P.time : Time vector
 %
 % Key Equations
 % -------------
-% 1. Line-to-Line to Phase Voltage Conversion:
-%    V_phase = V_line-to-line / √3
+% 1. Line-to-neutral power:
+%    P_phase = |V| * |I|
 %
-% 2. Three-Phase Active Power:
-%    P = (V1×I1 + V2×I2 + V3×I3) × power_factor
-%    where V1,V2,V3 are instantaneous phase voltages
-%    and I1,I2,I3 are instantaneous phase currents
+% 2. Line-to-line power:
+%    P_phase = |V| * sqrt(3) * |I|
 %
-% 3. Voltage Unbalance Factor:
-%    Unbalance = (max_value - min_value) / mean_value × 100%
+% 3. Total power:
+%    P_total = sum(P_phase) * power_factor
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    % Parse input parameters
+    % Create input parser
     p = inputParser;
-    addParameter(p, 'LineToLine', false, @islogical);
-    addParameter(p, 'VoltageImbalanceThreshold', 2.0, @(x) isnumeric(x) && x > 0);
-    parse(p, varargin{:});
-
-    % Extract parameters
+    
+    % Define validation functions
+    validStructOrNumeric = @(x) isstruct(x) || isnumeric(x);
+    validNumeric = @(x) isnumeric(x) && isscalar(x);
+    validLogical = @(x) islogical(x) && isscalar(x);
+    
+    % Add required parameters
+    addRequired(p, 'voltage', validStructOrNumeric);
+    addRequired(p, 'current', validStructOrNumeric);
+    addRequired(p, 'power_factor', validNumeric);
+    
+    % Add optional name-value pairs
+    addParameter(p, 'LineToLine', false, validLogical);
+    
+    % Parse inputs
+    parse(p, voltage, current, power_factor, varargin{:});
+    
+    % Extract validated inputs
+    voltage = p.Results.voltage;
+    current = p.Results.current;
+    power_factor = p.Results.power_factor;
     line_to_line = p.Results.LineToLine;
-    v_threshold = p.Results.VoltageImbalanceThreshold;
 
-    % Input validation
-    if ~isstruct(voltage) || ~isstruct(current)
-        error('voltage and current must be structures with voltage/current and time fields');
-    end
-
-    % Extract data
-    v_data = voltage.voltage;
-    i_data = current.current;
-    time = voltage.time;
-
-    % Validate data types
-    if ~isnumeric(v_data) || ~isnumeric(i_data)
-        error('Voltage and current data must be numeric');
-    end
-    if ~isnumeric(power_factor)
-        error('Power factor must be numeric');
-    end
-
-    % Validate power factor range
+    % Validate power factor is between 0 and 1
     if power_factor < 0 || power_factor > 1
-        error('Power factor must be between 0 and 1');
+        error('MHKiT:ac_power_three_phase: power_factor must be between 0 and 1 (inclusive). Received: %.3f', power_factor);
     end
 
-    % Check for empty data
-    if isempty(v_data) || isempty(i_data)
-        error('Voltage and current data cannot be empty');
+    % Extract data and time vectors
+    if isstruct(voltage)
+        % Validate input structures have required fields
+        if ~isfield(voltage, 'voltage')
+            error('MHKiT:ac_power_three_phase: voltage structure must contain voltage field');
+        end
+        if ~isfield(voltage, 'time')
+            error('MHKiT:ac_power_three_phase: voltage structure must contain time field');
+        end
+        voltage_data = voltage.voltage;
+        voltage_time = voltage.time;
+    else
+        voltage_data = voltage;
+        voltage_time = (1:size(voltage, 1))';  % Default time vector
+    end
+    
+    if isstruct(current)
+        % Validate input structures have required fields
+        if ~isfield(current, 'current')
+            error('MHKiT:ac_power_three_phase: current structure must contain current field');
+        end
+        if ~isfield(current, 'time')
+            error('MHKiT:ac_power_three_phase: current structure must contain time field');
+        end
+        current_data = current.current;
+        current_time = current.time;
+    else
+        current_data = current;
+        current_time = (1:size(current, 1))';  % Default time vector
     end
 
-    % Verify three phases
-    if size(v_data, 2) ~= 3 || size(i_data, 2) ~= 3
-        error('voltage and current must have exactly three phases (columns)');
+    % Validate voltage has three columns
+    if size(voltage_data, 2) ~= 3
+        error('MHKiT:ac_power_three_phase: voltage must have three columns for three-phase measurements');
+    end
+    
+    % Validate current has three columns
+    if size(current_data, 2) ~= 3
+        error('MHKiT:ac_power_three_phase: current must have three columns for three-phase measurements');
+    end
+    
+    % Validate dimensions match
+    if ~isequal(size(voltage_data), size(current_data))
+        error('MHKiT:ac_power_three_phase: voltage and current must have the same dimensions');
+    end
+    
+    % Validate time vectors match (if both are structures)
+    if isstruct(voltage) && isstruct(current)
+        if ~isequal(voltage_time, current_time)
+            error('MHKiT:ac_power_three_phase: Time vectors must match between voltage and current structures');
+        end
+        time_vector = voltage_time;
+    elseif isstruct(voltage)
+        time_vector = voltage_time;
+    elseif isstruct(current)
+        time_vector = current_time;
+    else
+        time_vector = voltage_time;  % Use default time vector
     end
 
-    % Verify matching dimensions
-    if size(v_data, 1) ~= size(i_data, 1)
-        error('Voltage and current measurements must have the same number of samples');
-    end
-
-    % Verify time vectors match
-    if ~isequal(voltage.time, current.time)
-        error('Time vectors in voltage and current structures must match');
-    end
-
-    % Check for voltage unbalance factor
-    v_mean = mean(v_data, 2);
-    v_max = max(v_data, [], 2);
-    v_min = min(v_data, [], 2);
-    v_unbalance = (v_max - v_min) ./ v_mean * 100;
-
-    if any(v_unbalance > v_threshold)
-        warning(['Voltage unbalance factor exceeds %.1f%% (max: %.1f%%)\n' ...
-                'IEC TS 62600-30:2018 requires voltage unbalance factor ' ...
-                'to be below local system operator defined threshold, ' ...
-                'or 2%% where no such threshold exists.'], ...
-                v_threshold, max(v_unbalance));
-    end
-
-    % Convert line-to-line voltage to phase voltage if necessary
+    % Calculate absolute values of voltage and current
+    abs_voltage = abs(voltage_data);
+    abs_current = abs(current_data);
+    
+    % Calculate power for each phase
     if line_to_line
-        v_data = v_data / sqrt(3);
+        % For line-to-line measurements, apply sqrt(3) correction
+        power_per_phase = abs_current .* (abs_voltage * sqrt(3));
+    else
+        % For line-to-neutral measurements
+        power_per_phase = abs_current .* abs_voltage;
     end
-
-    % Calculate instantaneous power for each phase
-    power = sum(v_data .* i_data, 2);
-
+    
+    % Sum power across all three phases (sum along columns)
+    total_power = sum(power_per_phase, 2);
+    
     % Apply power factor
-    power = abs(power) * power_factor;
+    active_power = total_power * power_factor;
+    
+    % Create output structure
+    P = struct();
+    P.power = active_power;
+    P.time = time_vector;
 
-    % Assign outputs
-    power_ac = struct();
-    power_ac.power = power;
-    power_ac.time = time;
 end
