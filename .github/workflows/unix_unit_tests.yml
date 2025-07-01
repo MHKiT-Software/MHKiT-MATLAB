@@ -12,9 +12,9 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.10"]
-        matlab-version: [R2022b]
+        os: ["ubuntu-22.04"]
+        python-version: ["3.11"]
+        matlab-version: [R2023b]
 
     runs-on: ${{ matrix.os }}
 
@@ -36,6 +36,12 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
+
+      - name: Fix libstdc++ compatibility
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          # Force MATLAB to use system libstdc++
+          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6:/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -122,7 +128,7 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [macos-13, ubuntu-latest]
+        os: [macos-13, "ubuntu-22.04"]
         python-version: ["3.10", 3.11, 3.12]
         # Note: It is preferred to use an actual release name as opposed to 'latest'
         matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
@@ -130,7 +136,7 @@ jobs:
         exclude:
           - python-version: "3.10" # cache_population job
             matlab-version: R2022b
-            os: ubuntu-latest
+            os: "ubuntu-22.04"
           # Python 3.12 + MATLAB incompatability
           - matlab-version: R2024a
             python-version: 3.12
@@ -153,6 +159,10 @@ jobs:
           - matlab-version: R2024b
             python-version: 3.12
             os: macos-13
+          # Unable to resolve the name 'py.mhkit.wave.resource.jonswap_spectrum'
+          - matlab-version: R2023a
+            python-version: 3.10
+            os: "ubuntu-22.04"
 
     runs-on: ${{ matrix.os }}
 
@@ -179,9 +189,15 @@ jobs:
           conda activate mhkit_conda_env
           conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
 
-      - name: Setup MATLAB Path on Ubuntu
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: echo "LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+      - name: Fix libstdc++ compatibility
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          # Force MATLAB to use system libstdc++
+          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6:/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+
+      # - name: Setup MATLAB Path on Ubuntu
+      #   if: ${{ matrix.os == '"ubuntu-22.04"' }}
+      #   run: echo "LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
 
       - name: Print Python executable
         shell: bash -l {0}
