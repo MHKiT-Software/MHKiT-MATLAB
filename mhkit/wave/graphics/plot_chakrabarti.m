@@ -68,7 +68,6 @@ for i=1:max(szD)
     Diffraction(i) = pi.*D(i) ./ lambda_w(i);
     txt = ('H='+string(H(i))+', {\lambda_w}='+string(lambda_w(i))+', D='+string(D(i)));
     figure = loglog(Diffraction(i), KC(i),'o', 'DisplayName', txt);
-    legend('Location', 'southoutside', 'NumColumns', 2);
     xlabel('Diffraction parameter, $\frac{\pi*D}{\lambda_w}$','Interpreter','latex')
     ylabel('KC parameter, $\frac{H}{D}$','Interpreter','latex')
     set(figure, 'markerfacecolor', get(figure, 'color'))
@@ -91,8 +90,7 @@ yWaveBreaking1 = 2;
 yWaveBreaking2 = 1.25;
 x1 = xlim;
 graphScale_x = x1(1);
-legend show
-legend('AutoUpdate','off')
+legend('Location', 'southoutside', 'NumColumns', 2, 'AutoUpdate', 'off');
 
 
  if x1(1) >= 0.01
