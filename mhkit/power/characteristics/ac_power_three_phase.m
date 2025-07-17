@@ -118,6 +118,14 @@ function P = ac_power_three_phase(voltage, current, power_factor, varargin)
         error('MHKiT:ac_power_three_phase: voltage and current must have the same dimensions');
     end
 
+    % Validate time vectors match
+    if ~isequal(voltage_time, current_time)
+        error('MHKiT:ac_power_three_phase: Time vectors must match between voltage and current structures');
+    end
+
+    % After validation, use the time vector from voltage
+    time_vector = voltage_time;
+
     % Calculate absolute values of voltage and current
     abs_voltage = abs(voltage_data);
     abs_current = abs(current_data);
