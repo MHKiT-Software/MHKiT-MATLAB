@@ -1,4 +1,4 @@
-function Fr=Froude_number(v,h,varargin)
+function Fr=Froude_number(v,h,g)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Calculate the Froude Number of the river, channel or duct flow,
@@ -25,7 +25,6 @@ function Fr=Froude_number(v,h,varargin)
 py.importlib.import_module('mhkit');
 
 if nargin == 3
-     g=varagin{1};
      Fr=py.mhkit.river.resource.Froude_number(v,h,pyargs('g',g));
 else
      Fr=py.mhkit.river.resource.Froude_number(v,h);
