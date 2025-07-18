@@ -77,8 +77,8 @@ is_first_query = true;
 start_period_datetime = start_datetime;
 while start_period_datetime <= end_datetime
     end_period_datetime = min(end_datetime, start_period_datetime + days(MAX_DAYS_PER_QUERY - 1));
-    end_period = datestr(end_period_datetime, 'yyyymmdd');
-    start_period = datestr(start_period_datetime, 'yyyymmdd');
+    end_period = string(end_period_datetime, 'yyyymmdd');
+    start_period = string(start_period_datetime, 'yyyymmdd');
 
     % Query data in period
     [data_in_period, timeseries_fields] = request_noaa_data_restricted_duration( ...
