@@ -42,8 +42,6 @@ classdef QC_Test < matlab.unittest.TestCase
             dataA.time = simple.Var1;
             dataC.time = simple.Var1;
             format long
-            datenumA = datenum(dataA.time);
-            datenumC = datenum(dataC.time);
             bound = [-1.0, 1.0];
             window = 2*3600; % seconds
             resultsA = check_delta(dataA,bound,window);
@@ -68,8 +66,6 @@ classdef QC_Test < matlab.unittest.TestCase
             dataC.time = simple.Var1;
 
             format long
-            datenumA = datenum(dataA.time);
-            datenumC = datenum(dataC.time);
 
             bound = [0.0001, 0.6];
 
@@ -159,11 +155,11 @@ classdef QC_Test < matlab.unittest.TestCase
             expected.values = simple_expected.A;
             expected.time = (simple_expected.Var1);
             results = check_timestamp(data,freq);
-            datenum_time = datenum(expected.time) - datenum(results.time.');
-            expected_datenum_time = zeros(length(datenum_time),1);
+            time_diff = seconds(expected.time - results.time.');
+            expected_time_diff = zeros(length(time_diff),1);
             ABSTOL = 0.00000001;
             assertEqual(testCase, results.values, expected.values, 'AbsTol', ABSTOL);
-            assertEqual(testCase, datenum_time, expected_datenum_time, 'AbsTol', ABSTOL);
+            assertEqual(testCase, time_diff, expected_time_diff, 'AbsTol', ABSTOL);
         end
 
     end
