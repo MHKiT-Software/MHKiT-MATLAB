@@ -37,7 +37,7 @@ arguments
 end
 
 figure=pcolor(M.Te_bins,M.Hm0_bins,M.values);
-colormap(flipud(hot))
+colormap(flipud(hot(256)))
 ylabel('Hm0 [m]','FontSize',20)
 xlabel('Te [s]','FontSize',20)
 x=strcat(Mtype,': ',M.stat);

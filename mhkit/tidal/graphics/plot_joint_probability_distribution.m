@@ -166,7 +166,7 @@ Hplt = H;
 Hplt(H<pcolorThreshold) = nan;
 pfig = pcolor(x_pos,y_pos,Hplt);
 set(pfig, 'EdgeColor', 'none');
-colormap(CMaPType)
+colormap(CMaPType, 256)
 shading interp;
 cbh = colorbar;
 ylabel(cbh,'Joint Probability [%]','fontsize',20);

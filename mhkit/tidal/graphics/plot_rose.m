@@ -101,7 +101,7 @@ VelEdges = 0:width_vel:max(data.s);
 theta = data.d/180*pi;
 
 % setting the colors
-cmap = colormap(CMaPType);
+cmap = colormap(CMaPType, 256);
 colors = interp1(linspace(0,max(data.s),length(cmap)),cmap,VelEdges);
 
 %tx = Q.s'<Yedges(end)
