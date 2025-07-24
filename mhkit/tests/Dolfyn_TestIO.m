@@ -265,6 +265,30 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                 ds_read, ds_cntrl);
             testCase.assertLessThan(Obj.diff, 1e-6);
         end
+
+        % NetCDF Readers
+        function test_io_netcdf_read_basic(testCase)
+            this_ds = read_netcdf('../../examples/data/dolfyn/control/burst_mode01.nc');
+
+            n_fieldnames = length(fieldnames(this_ds));
+            expected_n_fieldnames = 19;
+
+            testCase.assertEqual(n_fieldnames, expected_n_fieldnames);
+        end
+
+        function test_io_netcdf_read_data_attrs(testCase)
+            this_ds = read_netcdf('../../examples/data/dolfyn/control/burst_mode01.nc');
+
+            expected_pressure_unit = 'dbar';
+            % TODO: Find a file with long names
+            expected_pressure_long_name = 'Pressure';
+            expected_temperature_unit = 'deg C';
+            % TODO: Find a file with long names
+            expected_temperature_long_name = 'Degrees Celsius';
+
+            testCase.assertEqual(this_ds.pressure.units, expected_pressure_unit);
+            testCase.assertEqual(this_ds.temp.units, expected_temperature_unit);
+        end
     end
 
     methods (Static)
@@ -419,4 +443,3 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
     end
 
 end
-

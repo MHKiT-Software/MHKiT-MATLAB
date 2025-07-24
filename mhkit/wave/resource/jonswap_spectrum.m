@@ -36,10 +36,6 @@ function S=jonswap_spectrum(frequency,Tp,Hs,varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-py.importlib.import_module('mhkit');
-% py.importlib.import_module('numpy');
-
 if (isa(frequency,'py.numpy.ndarray') ~= 1)
     frequency = py.numpy.array(frequency);
 end
@@ -50,7 +46,10 @@ elseif nargin == 4
         S_py=py.mhkit.wave.resource.jonswap_spectrum(frequency, Tp, Hs, pyargs('gamma', varargin{1}));
 end
 
-S.spectrum=double(py.array.array('d',py.numpy.nditer(S_py.values))).';
-char_arr=char(S_py.index.values);
-S.frequency=double(py.array.array('d',py.numpy.nditer(S_py.index))).';
-S.Tp=Tp;
+S_py = typecast_from_mhkit_python(S_py);
+
+S = struct();
+
+S.frequency = S_py.index.data;
+S.spectrum = S_py.data;
+S.type = S_py.columns{1};

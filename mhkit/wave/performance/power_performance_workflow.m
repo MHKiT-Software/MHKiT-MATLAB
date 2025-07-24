@@ -71,14 +71,30 @@ if any([~isnumeric(h), ~isnumeric(P)])
     throw(ME);
 end
 
-% Compute the enegy periods from spectra data
-Te = energy_period(S);
+% Check dimensions of the spectrum data
+[num_frequencies, num_spectra] = size(S.spectrum);
 
-% Compute the significant wave height from spectra data
-Hm0 = significant_wave_height(S) ;
+% Initialize arrays to store results
+Te = zeros(num_spectra, 1);
+Hm0 = zeros(num_spectra, 1);
+J = zeros(num_spectra, 1);
 
-% Compute the energy flux from spectra data and water depth
-J = energy_flux(S,h);
+% Process each spectrum separately
+for i = 1:num_spectra
+    % Create a temporary structure for the current spectrum
+    S_temp = struct();
+    S_temp.spectrum = S.spectrum(:,i);
+    S_temp.frequency = S.frequency;
+
+    % Compute the energy periods from spectra data
+    Te(i) = energy_period(S_temp);
+
+    % Compute the significant wave height from spectra data
+    Hm0(i) = significant_wave_height(S_temp);
+
+    % Compute the energy flux from spectra data and water depth
+    J(i) = energy_flux(S_temp, h);
+end; clear S_temp
 
 % calculating capture length with power and wave flux in vectors
 L = capture_length(P,J);
@@ -91,19 +107,20 @@ Te_bins = Te_bins+0.5;
 
 % Calculate the necessary capture length matrices for each statistic based
 % on IEC/TS 62600-100
-clmat.mean = capture_length_matrix(Hm0,Te,L,"mean",Hm0_bins,Te_bins);
-clmat.std = capture_length_matrix(Hm0,Te,L,"std",Hm0_bins,Te_bins);
-clmat.median = capture_length_matrix(Hm0,Te,L,"median",Hm0_bins,Te_bins);
-clmat.count = capture_length_matrix(Hm0,Te,L,"count",Hm0_bins,Te_bins);
-clmat.sum = capture_length_matrix(Hm0,Te,L,"sum",Hm0_bins,Te_bins);
-clmat.min = capture_length_matrix(Hm0,Te,L,"min",Hm0_bins,Te_bins);
-clmat.max = capture_length_matrix(Hm0,Te,L,"max",Hm0_bins,Te_bins);
-clmat.freq = capture_length_matrix(Hm0,Te,L,"frequency",Hm0_bins,Te_bins);
+clmat.mean   = capture_length_matrix(Hm0, Te, L, "mean", Hm0_bins, Te_bins);
+clmat.std    = capture_length_matrix(Hm0, Te, L, "std", Hm0_bins, Te_bins);
+clmat.median = capture_length_matrix(Hm0 ,Te, L, "median", Hm0_bins, Te_bins);
+clmat.count  = capture_length_matrix(Hm0 ,Te, L, "count", Hm0_bins, Te_bins);
+clmat.sum    = capture_length_matrix(Hm0 ,Te, L, "sum", Hm0_bins, Te_bins);
+clmat.min    = capture_length_matrix(Hm0 ,Te, L, "min", Hm0_bins, Te_bins);
+clmat.max    = capture_length_matrix(Hm0 ,Te, L, "max", Hm0_bins, Te_bins);
+clmat.freq   = capture_length_matrix(Hm0 ,Te, L, "frequency", Hm0_bins, Te_bins);
 
 % Create wave energy flux matrix using statistic
-jmat = wave_energy_flux_matrix(Hm0,Te,J,"mean",Hm0_bins,Te_bins);
+jmat = wave_energy_flux_matrix(Hm0, Te, J, "mean", Hm0_bins, Te_bins);
+
 % Calcaulte MAEP from matrix
-maep_matrix = mean_annual_energy_production_matrix(clmat.mean,jmat,clmat.freq);
+maep_matrix = mean_annual_energy_production_matrix(clmat.mean, jmat, clmat.freq);
 stats_cell = {'mean', 'std', 'median','count', 'sum', 'min', 'max','frequency'};
 
 % Capture Length Matrix using statistic
@@ -127,4 +144,3 @@ for i = 1:length(statistic)
 end
 
 end
-

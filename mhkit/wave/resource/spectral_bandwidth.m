@@ -31,10 +31,6 @@ function e=spectral_bandwidth(S,varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-py.importlib.import_module('mhkit');
-py.importlib.import_module('mhkit_python_utils');
-
 if nargin == 2
     freq_bins = py.numpy.array(varargin{1});
 elseif nargin == 1
@@ -44,28 +40,8 @@ else
         throw(ME);
 end
 
-if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
-    if (isstruct(S)==1)
-        x=size(S.spectrum);
-        li=py.list();
-        if x(2)>1
-            for i = 1:x(2)
-                app=py.list(S.spectrum(:,i));
-                li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
+S_py = typecast_spectra_to_mhkit_python(S);
 
-            end
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency(:,1),li,x(2));
-        elseif x(2)==1
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(S.frequency,py.numpy.array(S.spectrum),x(2));
-        end
+e0 = py.mhkit.wave.resource.spectral_bandwidth(S_py,pyargs('frequency_bins',freq_bins));
 
-    else
-        ME = MException('MATLAB:spectral_bandwidth','S needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
-        throw(ME);
-    end
-end
-
-
-e0=py.mhkit.wave.resource.spectral_bandwidth(S,pyargs('frequency_bins',freq_bins));
-e=double(e0.values);
-
+e = typecast_from_mhkit_python(e0).data;

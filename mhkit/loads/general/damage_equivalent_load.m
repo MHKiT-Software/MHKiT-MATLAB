@@ -44,11 +44,9 @@ arguments
     options.data_length {mustBeNumeric} = 600;
 end
 
-py.importlib.import_module('mhkit');
-% py.importlib.import_module('numpy');
-py.importlib.import_module('mhkit_python_utils');
+data_signal_py = py.numpy.array(data_signal);
+m_py = double(m);
 
+DEL_py = py.mhkit.loads.general.damage_equivalent_load(data_signal_py, m_py, pyargs('bin_num',int32(options.bin_num),'data_length',int32(options.data_length)));
 
-DEL = py.mhkit.loads.general.damage_equivalent_load(data_signal,m,pyargs('bin_num',int32(options.bin_num),'data_length',int32(options.data_length)));
-
-
+DEL = typecast_from_mhkit_python(DEL_py).data;

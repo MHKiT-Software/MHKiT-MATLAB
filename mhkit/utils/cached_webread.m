@@ -18,81 +18,83 @@ function data = cached_webread(url, options)
 %             The data retrieved from the specified URL.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Define the number of retries if the URL request fails
+
+    % Configuration
     maxRetries = 5;
-    % Define the seconds to pause between webread retries
     retryPause = 5;
 
-    % Define the fixed cache directory at the project root
-    cacheDir = fullfile(fileparts(mfilename('fullpath')), '..', '..' , 'mhkit_webread_cache');
-
-    % Create the cache directory if it does not exist
+    % Setup cache directory
+    cacheDir = fullfile(fileparts(mfilename('fullpath')), '..', '..', 'mhkit_webread_cache');
     if ~exist(cacheDir, 'dir')
         mkdir(cacheDir);
     end
 
-    % Create a hash of the URL to use as a cache filename
+    % Create URL hash for cache
     cacheFilename = fullfile(cacheDir, [md5hash(url) '.mat']);
 
-    % Check if the file is in the cache
+    % Check cache
     if exist(cacheFilename, 'file')
-        % Check the age of the cache
         cachedFileinfo = dir(cacheFilename);
-        cachedFileAge = datetime('now', 'Format', 'yyyy-MM-dd HH:mm:ss') - datetime(cachedFileinfo.datenum, 'ConvertFrom', 'datenum');
+        cachedFileAge = datetime('now') - datetime(cachedFileinfo.datenum, 'ConvertFrom', 'datenum');
 
         if days(cachedFileAge) <= 1
-            disp(['Data found in cache. Using cached version of ', url]);
+            fprintf('Reading from cache: %s\n', truncateUrl(url));
             load(cacheFilename, 'data');
             return;
-        else
-            disp(['Cache is older than 1 day. Redownloading...']);
         end
-    else
-        % disp(['Cache not found or forceAddDate is true. Redownloading...']);
     end
 
-    % Perform webread
-    disp("Cache of url not found! Performing webread for url:");
-    disp(url)
+    % Check file size before downloading
+    try
+        headOptions = weboptions('RequestMethod', 'head');
+        response = webwrite(url, '', headOptions);
 
-     for attempt = 1:maxRetries
+        % Get content length from headers if available
+        if isfield(response, 'Content-Length')
+            content_length = str2double(response.('Content-Length'));
+            if ~isnan(content_length)
+                fprintf('Downloading %.1f MB: %s\n', content_length/1024/1024, truncateUrl(url));
+            else
+                fprintf('Downloading: %s\n', truncateUrl(url));
+            end
+        else
+            fprintf('Downloading: %s\n', truncateUrl(url));
+        end
+    catch
+        % If HEAD request fails, continue without size information
+        fprintf('Downloading: %s\n', truncateUrl(url));
+    end
+
+    % Perform webread with progress tracking
+    for attempt = 1:maxRetries
         try
             data = webread(url, options);
-            break; % Break out of the loop if webread is successful
+            fprintf('Successfully downloaded data\n');
+            break;
         catch exception
-            disp(['Error during webread attempt ', num2str(attempt), ':']);
-            disp(exception.message);
             if attempt < maxRetries
-                disp(['Retrying in ', num2str(retryPause), ' seconds...']);
+                fprintf('Download failed, attempt %d of %d. Retrying...\n', attempt, maxRetries);
                 pause(retryPause);
             else
-                error('Webread failed after maximum number of retries.');
+                error('Failed to download after %d attempts', maxRetries);
             end
         end
     end
 
-    % Save raw data to cache
+    % Cache the successful response
     save(cacheFilename, 'data');
 end
 
+function shortened_url = truncateUrl(url)
+    max_length = 80;
+    if length(url) > max_length
+        shortened_url = [url(1:max_length/2-3) '...' url(end-max_length/2+4:end)];
+    else
+        shortened_url = url;
+    end
+end
+
 function hash = md5hash(str)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%     Compute MD5 hash for a given string.
-%
-%     Parameters
-%     ----------
-%         str : char
-%             The input string for which the MD5 hash will be computed.
-%
-%      Returns
-%      -------
-%         hash : char
-%             The MD5 hash value represented as a hexadecimal string.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
     md = java.security.MessageDigest.getInstance('MD5');
     md.update(uint8(str));
     hashBytes = typecast(md.digest, 'uint8');
