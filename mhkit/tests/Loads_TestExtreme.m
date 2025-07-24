@@ -70,7 +70,19 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             mler_ts = mler_export_time_series(RAO, mler, sim, k.values);
 
             assertEqual(testCase, mler_ts.linear_response, validation.LinearResponse, 'AbsTol', 0.00005)
-         end
+        end
+
+        function test_automatic_hs_threshold(testCase)
+            relative_file_name = '../../examples/data/loads/data_loads_hs.csv';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = readtable(full_file_name);
+            peaks = table2array(data);
+            years = 2.97;
+            [pct, threshold] = automatic_hs_threshold(peaks, years);
+
+            assertEqual(testCase, pct, 0.9913)
+            assertEqual(testCase, threshold, 1.032092)
+        end
 
     end
 
