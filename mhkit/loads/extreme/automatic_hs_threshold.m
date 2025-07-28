@@ -50,7 +50,7 @@ peaks = py.numpy.array(peaks);
 initial_threshold_range = py.tuple(initial_threshold_range);
 
 result = py.mhkit.loads.extreme.peaks.automatic_hs_threshold(...
-    peaks, sampling_rate, initial_threshold_range, max_refinement);
+    peaks, sampling_rate, initial_threshold_range, py.int(max_refinement));
 
 best_threshold = double(result{1});
 best_threshold_unit = double(result{2});
