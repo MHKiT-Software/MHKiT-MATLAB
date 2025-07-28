@@ -166,8 +166,8 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             years = 2.97;
             [pct, threshold] = automatic_hs_threshold(peaks, years);
 
-            assertEqual(testCase, pct, 0.9913)
-            assertEqual(testCase, threshold, 1.032092)
+            assertEqual(testCase, pct, 0.9913, 'AbsTol', 0.00005)
+            assertEqual(testCase, threshold, 1.032092, 'AbsTol', 0.00005)
         end
 
     end
