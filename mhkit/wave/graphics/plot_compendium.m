@@ -33,8 +33,8 @@ arguments
 end
 
 title_text = sprintf("%s to %s", ...
-    string(time(1), 'yyyy-mm-dd'), ...
-    string(time(end), 'yyyy-mm-dd'));
+    string(time(1), 'yyyy-MM-dd'), ...
+    string(time(end), 'yyyy-MM-dd'));
 
 % Create figure window
 f = figure('Name', 'Compendium');
