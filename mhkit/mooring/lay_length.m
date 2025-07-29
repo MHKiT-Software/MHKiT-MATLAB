@@ -16,7 +16,7 @@ function line_lay_length = lay_length(data, depth, tolerance)
 %        Array containing the laylength at each time step
 
 arguments
-    data {mustBeNumeric}
+    data table
     depth {mustBeNumeric}
     tolerance {mustBeNumeric} = 0.25
 end
@@ -36,7 +36,7 @@ idz = cell2mat(cellfun(@(x)any(~isempty(x)),idz,'UniformOutput',false));
 nodes_z = {chans{idz}};
 
 % check if data contains the necessary nodes
-if isempty(nodes_x) || isempty(nodes_y) || isempty(nodes_zz)
+if isempty(nodes_x) || isempty(nodes_y) || isempty(nodes_z)
     error("The data must contain x, y, and z node data!")
 end
 if length(nodes_z) < 3
