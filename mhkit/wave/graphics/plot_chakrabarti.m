@@ -90,7 +90,9 @@ yWaveBreaking1 = 2;
 yWaveBreaking2 = 1.25;
 x1 = xlim;
 graphScale_x = x1(1);
-legend('Location', 'southoutside', 'NumColumns', 2, 'AutoUpdate', 'off');
+% Use empty cell array {} to specify legend properties without labels
+% This prevents MATLAB from interpreting property names as legend labels
+legend({}, 'Location', 'southoutside', 'NumColumns', 2, 'AutoUpdate', 'off');
 
 
  if x1(1) >= 0.01
