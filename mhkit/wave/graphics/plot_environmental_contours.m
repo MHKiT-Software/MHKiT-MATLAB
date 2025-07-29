@@ -3,7 +3,7 @@ function figure=plot_environmental_contours(x1, x2, x1_contour, x2_contour, opti
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Plots an overlay of the x1 and x2 variables to the calculated
 %     environmental contours.
-%
+%     
 % Parameters
 % ------------
 %     x1: vector
@@ -27,12 +27,12 @@ function figure=plot_environmental_contours(x1, x2, x1_contour, x2_contour, opti
 %         to call: plot_environmental_contours(x1,x2,x1_contour,x2_contour,"y_label",y_label)
 %
 %     data_label: string (optional)
-%         Legend label for x1, x2 data (e.g. 'Buoy 46022').
+%         Legend label for x1, x2 data (e.g. 'Buoy 46022'). 
 %         Default None.
 %         to call: plot_environmental_contours(x1,x2,x1_contour,x2_contour,"data_label",data_label)
 %
 %     contour_label: string or array of strings (optional)
-%         Legend label for x1_contour, x2_contour countor data
+%         Legend label for x1_contour, x2_contour countor data 
 %         (e.g. '100-year contour'). Default None.
 %         to call: plot_environmental_contours(x1,x2,x1_contour,x2_contour,"contour_label",contour_label)
 %
@@ -43,12 +43,12 @@ function figure=plot_environmental_contours(x1, x2, x1_contour, x2_contour, opti
 %     savepath: string (optional)
 %         path and filename to save figure.
 %         to call: plot_environmental_contours(x1,x2,x1_contour,x2_contour,"savepath",savepath)
-%
+%         
 % Returns
 % ---------
 %     figure: figure
 %         Envoronmental contour plot
-%
+%   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
@@ -71,18 +71,18 @@ for x = 1:min(size(x1_contour))
 end
 grid on
 xlabel(options.x_label)
-ylabel(options.y_label)
+ylabel(options.y_label) 
 
 title(options.title)
 len = strlength(options.data_label);
 len2 = strlength(options.contour_label);
 if len > 1 || len2 > 1
-    label = [ {options.data_label} , options.contour_label];
-    legend(label);
+    label = [ {options.data_label} , options.contour_label]; 
+    legend(label,'Location','bestoutside');
 end
 len = strlength(options.savepath);
 if len > 1
     saveas(figure, options.savepath);
-end
+end 
 
 hold off

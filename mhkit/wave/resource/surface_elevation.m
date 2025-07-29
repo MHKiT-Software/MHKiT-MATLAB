@@ -45,7 +45,6 @@ function wave_elevation=surface_elevation(S,time_index,options)
 % ---------
 %    wave_elevation: structure
 %
-%
 %         wave_elevation.elevation: Wave surface elevation (m)
 %
 %         wave_elevation.type: 'Time Series from Spectra'
@@ -63,36 +62,14 @@ arguments
     options.method = "ifft";
 end
 
-py.importlib.import_module('mhkit');
-% py.importlib.import_module('numpy');
-py.importlib.import_module('mhkit_python_utils');
+S_py = typecast_spectra_to_mhkit_python(S);
 
-frequency= S.frequency ;
+frequency = S.frequency ;
 
 if (isa(time_index,'py.numpy.ndarray') ~= 1)
 
     time_index = py.numpy.array(time_index);
 
-end
-
-if (isa(S,'py.pandas.core.frame.DataFrame')~=1)
-    if (isstruct(S)==1)
-        x=size(S.spectrum);
-        li=py.list();
-        if x(2)>1
-            for i = 1:x(2)
-                app=py.list(S.spectrum(:,i));
-                li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-            end
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency(:,1),li,int32(x(2)));
-        elseif x(2)==1
-            S=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(py.list(frequency),py.numpy.array(S.spectrum),int32(x(2)));
-        end
-    else
-        ME = MException('MATLAB:significant_wave_height','S needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
-        throw(ME);
-    end
 end
 
 if (isa(options.frequency_bins,'py.NoneType')~=1)
@@ -107,19 +84,7 @@ end
 
 if (isa(options.phases,'py.NoneType')~=1)
     if isnumeric(options.phases)
-     x=size(options.phases);
-     li=py.list();
-     if x(2)>1
-         for i = 1:x(2)
-             app=py.list(options.phases(:,i));
-             li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-         end
-         options.phases=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency(:,1),li,int32(x(2)));
-      elseif x(2)==1
-         options.phases=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(py.list(frequency),py.numpy.array(options.phases),int32(x(2)));
-     end
-
+        options.phases = py.numpy.array(options.phases);
     else
         ME = MException('MATLAB:significant_wave_height','phases need to be of numeric type');
         throw(ME);
@@ -132,23 +97,10 @@ if ~(strcmp(options.method, "ifft") || strcmp(options.method, "sum_of_sines"))
     throw(ME);
 end
 
-eta=py.mhkit.wave.resource.surface_elevation(S,time_index,pyargs('seed',...
-    py.int(options.seed),'frequency_bins',options.frequency_bins,'phases',options.phases, 'method', options.method));
+eta_py=py.mhkit.wave.resource.surface_elevation(S_py, time_index);
 
-
-vals=double(py.array.array('d',py.numpy.nditer(eta.values)));
- sha=cell(eta.values.shape);
- x=int64(sha{1,1});
- y=int64(sha{1,2});
- vals=reshape(vals,[x,y]);
-
-si=size(vals);
-
-wave_elevation.elevation=vals;
-% for i=1:si(2)
-%    wave_elevation.spectrum{i}=vals(:,i);
-% end
+eta = typecast_from_mhkit_python(eta_py);
 
 wave_elevation.type='Time Series from Spectra';
-
-wave_elevation.time=double(py.array.array('d',py.numpy.nditer(eta.index)));
+wave_elevation.time=eta.index.data;
+wave_elevation.elevation = eta.data;

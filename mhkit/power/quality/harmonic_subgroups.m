@@ -19,10 +19,6 @@ function harmonic_subgroups=harmonic_subgroups(harmonics,grid_freq)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
-% py.importlib.import_module('numpy');
-py.importlib.import_module('mhkit_python_utils');
-
 data = harmonics.amplitude;
 
 dsize=size(data);
@@ -49,4 +45,3 @@ vals=reshape(vals,[y,x]).';
 
 harmonic_subgroups.amplitude=vals;
 harmonic_subgroups.harmonic = double(py.array.array('d',py.numpy.nditer(sg_pd.index)));
-

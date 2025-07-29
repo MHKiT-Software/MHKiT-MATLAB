@@ -61,4 +61,3 @@ mler_ts.linear_response = wave_amp_time(:,2);
 mler_ts.time = sim.T;
 
 end
-

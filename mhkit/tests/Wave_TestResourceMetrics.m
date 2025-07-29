@@ -18,6 +18,8 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
             f1 = valdata1.Data1.w/(2*pi);
             f2 = valdata1.Data11.w/(2*pi);
+            f1 = f1';
+            f2 = f2';
             h1 = Data1_valdata1.h;
             h2 = Data11_valdata1.h;
             rho1 = Data1_valdata1.rho;
@@ -286,7 +288,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
         function test_environmental_contour(testCase)
 
-            assumeFail(testCase, "Not compatible with latest MHKIT-Python")
+            % assumeFail(testCase, "Not compatible with latest MHKIT-Python")
 
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
@@ -319,24 +321,24 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             dt = (time2-time1)/1000.;
             time_R = 100;
 
-            contour = environmental_contour(Hm0, Te, dt, time_R);
+            contour = environmental_contours(Hm0, Te, dt, time_R, 'PCA');
 
             relative_file_name= '../../examples/data/wave/Hm0_Te_contours_46022.csv';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             expected_contours = readmatrix(full_file_name);
 
-            Hm0_expected = expected_contours(:,2);
-            Te_expected = expected_contours(:,1);
+            Hm0_expected = expected_contours(:,1);
+            Te_expected = expected_contours(:,2);
 
-            assertEqual(testCase,table2array(contour.contour2),Hm0_expected,'RelTol',0.01);
-            assertEqual(testCase,table2array(contour.contour1),Te_expected,'RelTol',0.01);
+            assertEqual(testCase,contour.contour1,Hm0_expected','RelTol',0.01);
+            assertEqual(testCase,contour.contour2,Te_expected','RelTol',0.01);
 
 
         end
 
         function test_plot_environmental_contour(testCase)
 
-            assumeFail(testCase, "Not compatible with latest MHKIT-Python")
+            %assumeFail(testCase, "Not compatible with latest MHKIT-Python")
 
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
@@ -369,7 +371,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             dt = (time2-time1)/1000.;
             time_R = 100;
 
-            contour = environmental_contour(Hm0, Te, dt, time_R);
+            contour = environmental_contours(Hm0, Te, dt, time_R, 'PCA');
 
             filename = 'wave_plot_env_contour.png';
             if isfile(filename)
@@ -388,7 +390,8 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
         function test_plot_environmental_contour_multiyear(testCase)
 
             assumeFail(testCase, "Not compatible with latest MHKIT-Python")
-
+            % not sure about why this test exists...return period has to be float or
+            % int and cannot be a list...
             relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
 
@@ -420,7 +423,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             dt = (time2-time1)/1000.;
             time_R = [100, 120, 130];
 
-            contour = environmental_contour(Hm0, Te, dt, time_R);
+            contour = environmental_contours(Hm0, Te, dt, time_R, 'PCA');
 
             filename = 'wave_plot_env_contour_multiyear.png';
             if isfile(filename)
@@ -450,66 +453,64 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
         end
 
         function test_wave_length(testCase)
-         k=[1,2,10,3];
-         l_expected = (2.*3.14)./k;
+            k=[1,2,10,3];
+            l_expected = (2.*3.14)./k;
 
 
-         l_calculated = wave_length(k);
-         assertEqual(testCase,l_expected,l_calculated,'RelTol',0.01);
-
-         end
+            l_calculated = wave_length(k);
+            assertEqual(testCase,l_expected,l_calculated,'RelTol',0.01);
+        end
 
 
          function test_depth_regime(testCase)
-         expected = [1,1,0,1];
-         l_vector=[1,2,10,3];
+             expected = [1,1,0,1];
+             l_vector=[1,2,10,3];
 
-         h = 10;
+             h = 10;
 
-         calculated = depth_regime(l_vector,h);
-         assertEqual(testCase,expected,calculated);
-
+             calculated = depth_regime(l_vector,h);
+             assertEqual(testCase,expected,calculated);
          end
 
-         function test_wave_celerity(testCase)
-         % small change in f will give similar value cg
-         f=linspace(20.0001,20.0005,5);
+        function test_wave_celerity(testCase)
+            % small change in f will give similar value cg
+            f=linspace(20.0001,20.0005,5);
 
-         % Choose index to spike at. cg spike is inversly proportional to k
-         k_tmp=[1, 1, 0.5, 1, 1];
-         k.values = k_tmp;
-         k.frequency=f;
+            % Choose index to spike at. cg spike is inversly proportional to k
+            k_tmp=[1, 1, 0.5, 1, 1];
+            k.values = k_tmp;
+            k.frequency=f;
 
-         % all shallow
-         cg_shallow1 = wave_celerity(k,0.0001,"depth_check",py.True);
-         cg_shallow2 = wave_celerity(k, 0.0001,"depth_check",py.False);
-         assertEqual(testCase,cg_shallow1, cg_shallow2);
+            % all shallow
+            cg_shallow1 = wave_celerity(k,0.0001,"depth_check",py.True);
+            cg_shallow2 = wave_celerity(k, 0.0001,"depth_check",py.False);
+            assertEqual(testCase,cg_shallow1, cg_shallow2);
 
-         x = (3.14.*f)./k.values;
-         % all deep
-         cg = wave_celerity(k, 1000,"depth_check",py.True);
-         assertEqual(testCase,x,cg.values,'RelTol',0.01);
-         end
+            x = (3.14.*f)./k.values;
+            % all deep
+            cg = wave_celerity(k, 1000,"depth_check",py.True);
+            assertEqual(testCase,x,cg.values,'RelTol',0.01);
+        end
 
-         function test_energy_flux_deep(testCase)
+        function test_energy_flux_deep(testCase)
+            omega = [0.1:0.01:3.5];
+            f = omega./(2*pi);
+            Hs = 2.5;
+            Tp = 8 ;
+            % Dependent on mhkit.resource.BS spectrum
+            S = jonswap_spectrum(f,Tp,Hs);
+            Te = energy_period(S);
+            Hm0 = significant_wave_height(S);
+            rho=1025;
+            g=9.80665;
 
-         omega = [0.1:0.01:3.5];
-         f = omega./(2*pi);
-         Hs = 2.5;
-         Tp = 8 ;
-         % Dependent on mhkit.resource.BS spectrum
-         S = jonswap_spectrum(f,Tp,Hs);
-         Te = energy_period(S);
-         Hm0 = significant_wave_height(S);
-         rho=1025;
-         g=9.80665;
-         coeff = rho*(g^2)/(64*pi);
-         J = coeff*(Hm0^2)*Te;
+            coeff = rho*(g^2)/(64*pi);
+            J = coeff*(Hm0^2)*Te;
 
-         h=-1; % not used when deep=True
-         J_calc = energy_flux(S, h, "deep",py.True);
+            h=-1; % not used when deep=True
+            J_calc = energy_flux(S, h, "deep",py.True);
 
-         assertEqual(testCase,J_calc,J,'RelTol',0.01);
-         end
+            assertEqual(testCase,J_calc,J,'RelTol',0.01);
+        end
     end
 end

@@ -1,4 +1,4 @@
-function L=capture_length(Power,J)
+function L = capture_length(Power, J)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     Calculates the capture length (often called capture width).
@@ -19,12 +19,10 @@ function L=capture_length(Power,J)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-py.importlib.import_module('mhkit');
-% py.importlib.import_module('numpy');
 
-Power=py.numpy.array(Power);
-J=py.numpy.array(J);
+Power = py.numpy.array(Power);
+J = py.numpy.array(J);
 
+L = py.mhkit.wave.performance.capture_length(Power, J);
 
-L=double(py.mhkit.wave.performance.capture_length(Power,J)).';
-
+L = typecast_from_mhkit_python(L).data;

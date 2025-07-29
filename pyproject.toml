@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=64.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mhkit_python_utils"
+version = "0.6.0"
+description = "A utility package that enables data exchange and interoperability between MHKiT-MATLAB and MHKiT-Python. Part of the MHKiT (Marine and Hydrokinetic Toolkit) project."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Rebecca Fao", email = "rebecca.fao@nrel.gov" },
+    { name = "Chris Ivanov", email = "chris.ivanov@nrel.gov" },
+    { name = "Andrew Simms", email = "andrew.simms@nrel.gov" },
+]
+maintainers = [
+    { name = "Andrew Simms", email = "andrew.simms@nrel.gov" },
+    { name = "Rebecca Fao", email = "rebecca.fao@nrel.gov" },
+]
+license = { text = "BSD 3-Clause License" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: BSD License"
+]
+dependencies = [
+    "mhkit>=0.9.0"
+]
+
+[tool.setuptools]
+packages = ["mhkit_python_utils"]
+zip-safe = false
+include-package-data = true
+
+[project.urls]
+Homepage = "https://github.com/MHKiT-Software/MHKiT-MATLAB"
+Documentation = "https://mhkit-software.github.io/MHKiT/"
+Repository = "https://github.com/MHKiT-Software/MHKiT-MATLAB"

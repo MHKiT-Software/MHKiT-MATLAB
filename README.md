@@ -16,27 +16,7 @@ See the [documentation](https://mhkit-software.github.io/MHKiT/) for more inform
 
 ## Installation
 
-**NOTE:** MHKiT-MATLAB now requires the user to install a specific version of MHKiT-Python,
-currently version `0.7.0`. You can achieve this by executing the following commands in the Anaconda
-environment where MHKiT-Python is installed:
-
-1. Uninstall the current version of MHKiT-Python:
-
-```bash
-pip uninstall mhkit
-```
-
-2. Install MHKiT-Python version `0.7.0`:
-
-```bash
-pip install mhkit==0.7.0
-```
-
-3. Verify the MHKiT-Python version:
-
-```bash
-python -c "import mhkit; print(mhkit.__version__)"
-```
+See the [MHKiT MATLAB Installation Instructions](https://mhkit-software.github.io/MHKiT/matlab_installation.html).
 
 ### Software Requirements
 
@@ -45,13 +25,12 @@ compatible versions of Python and MHKiT-Python installed.
 
 MHKiT-MATLAB supports the following combinations of MATLAB and Python versions.[^1]
 
-|      | R2021b | R2022a | R2022b | R2023a | R2023b | R2024a |
-| ---- | ------ | ------ | ------ | ------ | ------ | ------ |
-| 3.12 | -      | -      | -      | -      | -      | -      |
-| 3.11 | -      | -      | -      | -      | ✓      | ✓      |
-| 3.10 | -      | -      | ✓      | ✓      | ✓      | ✓      |
-| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
-| 3.8  | ✓      | ✓      | ✓      | ✓      | -      | -      |
+|      | R2022b | R2023a | R2023b | R2024a | R2024b |
+| ---- | ------ | ------ | ------ | ------ | ------ |
+| 3.13 | -      | -      | -      | -      | -      |
+| 3.12 | -      | -      | -      | -      | ✓      |
+| 3.11 | -      | -      | ✓      | ✓      | ✓      |
+| 3.10 | ✓      | ✓      | ✓      | ✓      | ✓      |
 
 - ✓: MATLAB/Python versions compatible
 - `-`: MATLAB/Python versions not compatible
@@ -72,33 +51,27 @@ The test matrices below detail the current state of unit testing. An "X" indicat
 
 #### Linux (`ubuntu-latest`)
 
-|      | R2021b | R2022a | R2022b | R2023a | R2023b | R2024a |
-| ---- | ------ | ------ | ------ | ------ | ------ | ------ |
-| 3.12 | -      | -      | -      | -      | -      | -      |
-| 3.11 | -      | -      | -      | -      | ✓      | ✓      |
-| 3.10 | -      | -      | ✓      | ✓      | ✓      | ✓      |
-| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
-| 3.8  | ✓      | ✓      | ✓      | ✓      | -      | -      |
+|      | R2022b | R2023a | R2023b | R2024a | R2024b |
+| ---- | ------ | ------ | ------ | ------ | ------ |
+| 3.12 | -      | -      | -      | -      | ✓      |
+| 3.11 | -      | -      | ✓      | ✓      | ✓      |
+| 3.10 | ✓      | ✓      | ✓      | ✓      | ✓      |
 
 #### macOS (`macos-latest`)
 
-|      | R2021b | R2022a | R2022b | R2023a | R2023b | R2024a |
-| ---- | ------ | ------ | ------ | ------ | ------ | ------ |
-| 3.12 | -      | -      | -      | -      | -      | -      |
-| 3.11 | -      | -      | -      | -      | ✓      | ✓      |
-| 3.10 | -      | -      | ✓      | ✓      | ✓      | ✓      |
-| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
-| 3.8  | ✓      | ✓      | ✓      | ✓      | -      | -      |
+|      | R2022b | R2023a | R2023b | R2024a | R2024b |
+| ---- | ------ | ------ | ------ | ------ | ------ |
+| 3.12 | -      | -      | -      | -      | ✓      |
+| 3.11 | -      | -      | ✓      | ✓      | ✓      |
+| 3.10 | ✓      | ✓      | ✓      | ✓      | ✓      |
 
 #### Windows (`windows-latest`)
 
-|      | R2021b | R2022a | R2022b | R2023a | R2023b | R2024a |
-| ---- | ------ | ------ | ------ | ------ | ------ | ------ |
-| 3.12 | -      | -      | -      | -      | -      | -      |
-| 3.11 | -      | -      | -      | -      | ✓      | ✓      |
-| 3.10 | -      | -      | ✓      | ✓      | ✓      | ✓      |
-| 3.9  | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
-| 3.8  | ✓      | ✓      | ✓      | ✓      | -      | -      |
+|      | R2022b | R2023a | R2023b | R2024a | R2024b |
+| ---- | ------ | ------ | ------ | ------ | ------ |
+| 3.12 | -      | -      | -      | -      | ✓      |
+| 3.11 | -      | -      | ✓      | ✓      | ✓      |
+| 3.10 | ✓      | ✓      | ✓      | ✓      | ✓      |
 
 ### Legend
 

@@ -1,4 +1,6 @@
-function out = nan_beyond_surface(ds, options)
+function out = remove_surface_interference(ds, options)
+
+%%%%%%%%%%%%%%%%%%%%
 % Mask the values of 3D data (vel, amp, corr, echo) that are beyond
 % the surface.
 %
@@ -7,7 +9,7 @@ function out = nan_beyond_surface(ds, options)
 % ds : Dataset
 %   The adcp dataset to clean
 % val : nan or numeric
-%   Specifies the value to set the bad values to (default np.nan).
+%   Specifies the value to set the bad values to (default nan).
 %
 % Returns
 % -------
@@ -19,6 +21,7 @@ function out = nan_beyond_surface(ds, options)
 % -----
 % Surface interference expected to happen at
 % distance > range * cos(beam angle) - cell size
+%%%%%%%%%%%%%%%%%%%%
 
     arguments
         ds
@@ -56,11 +59,15 @@ function out = nan_beyond_surface(ds, options)
         range_limit = ((ds.depth.data-ds.attrs.h_deploy).*cos(beam_angle) ...
                         - ds.attrs.cell_size) + ds.attrs.h_deploy;
     else
-        range_limit = ds.depth.data .* np.cos(beam_angle) - ...
+        range_limit = ds.depth.data .* cos(beam_angle) - ...
             ds.attrs.cell_size;
     end
 
-    bds = ds.coords.range > range_limit; bds_shape = size(bds);
+    % Create a 2d matrix of to compare each range against the range limit
+    ds_coords_range_rep = repmat(ds.coords.range', numel(range_limit), 1);
+
+    bds = ds.coords.range > range_limit;
+    bds_shape = size(bds);
     bds = reshape(bds,[bds_shape(1),1,bds_shape(2)]);
 
     % Echosounder data gets trimmed at water surface
@@ -98,4 +105,3 @@ function out = nan_beyond_surface(ds, options)
     out = ds;
 
 end
-
