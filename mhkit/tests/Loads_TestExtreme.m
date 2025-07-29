@@ -170,6 +170,20 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             assertEqual(testCase, threshold, 1.032092, 'AbsTol', 0.00005)
         end
 
+        function test_return_year_value(testCase)
+            py.importlib.import_module('scipy');
+            dist = py.scipy.stats.norm;
+            stp = 1;
+            ry = 50;
+
+            val = return_year_value(dist, ry, stp);
+            want = 4.5839339;
+
+            assertEqual(testCase, val, want, 'AbsTol', 0.00005)
+
+        end
+       
+
     end
 end
 
