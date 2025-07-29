@@ -95,7 +95,7 @@ end;
 max_rings = 8; % maximum number of anular lines
 Vel_label_ang = 80/180*pi; %direction of the velocity lables
 pcolorThreshold = 0.05; %threshold for the smallest number to include in pcolor
-CMaPType = 'jet';
+CMaPType = jet(256);
 
 % converting degrees to radians
 theta = Q.d/180*pi;
@@ -166,7 +166,7 @@ Hplt = H;
 Hplt(H<pcolorThreshold) = nan;
 pfig = pcolor(x_pos,y_pos,Hplt);
 set(pfig, 'EdgeColor', 'none');
-colormap(CMaPType, 256)
+colormap(CMaPType)
 shading interp;
 cbh = colorbar;
 ylabel(cbh,'Joint Probability [%]','fontsize',20);
