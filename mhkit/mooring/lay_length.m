@@ -44,8 +44,9 @@ if length(nodes_z) < 3
 end
 
 % find name of first z point where tolerance is exceeded
-laypoint = data(:,nodes_z) > depth + abs(tolerance);
-laypoint = nodes_z(any(table2array(laypoint)));
+zdata = table2array(data(:,nodes_z)); % Convert table to array
+laypoint_mask = zdata > (depth + abs(tolerance));
+laypoint = nodes_z(any(laypoint_mask));
 
 % get previous z-point
 lay_indx = find(cellfun(@(x) strcmp(x, laypoint), nodes_z)) - 1;
