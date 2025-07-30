@@ -151,15 +151,16 @@ classdef QC_Test < matlab.unittest.TestCase
             simple_expected = readtable('../../examples/data/qc/simple_expected.xlsx');
             data.values = simple.A;
             data.time = simple.Var1;
-            freq = 900; % seconds
+            freq = 900; % seconds or 15 minutes
             expected.values = simple_expected.A;
             expected.time = (simple_expected.Var1);
             results = check_timestamp(data,freq);
-            time_diff = seconds(expected.time - results.time.');
-            expected_time_diff = zeros(length(time_diff),1);
-            ABSTOL = 0.00000001;
-            assertEqual(testCase, results.values, expected.values, 'AbsTol', ABSTOL);
-            assertEqual(testCase, time_diff, expected_time_diff, 'AbsTol', ABSTOL);
+            time_diff = expected.time - results.time.';
+            expected_time_diff = duration(zeros(length(time_diff),1), 0, 0);
+            values_tolerance = 0.00000001;  % Tolerance for values comparison
+            time_tolerance = milliseconds(1);  % 1ms tolerance for duration comparison
+            assertEqual(testCase, results.values, expected.values, 'AbsTol', values_tolerance);
+            assertEqual(testCase, time_diff, expected_time_diff, 'AbsTol', time_tolerance);
         end
 
     end
