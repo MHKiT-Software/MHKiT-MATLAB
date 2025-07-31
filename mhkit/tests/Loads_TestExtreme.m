@@ -171,7 +171,6 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
         end
 
         function test_return_year_value(testCase)
-            py.importlib.import_module('scipy');
             dist = py.scipy.stats.norm;
             stp = 1;
             ry = 50;

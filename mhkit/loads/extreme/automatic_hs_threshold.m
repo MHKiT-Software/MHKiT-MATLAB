@@ -1,4 +1,4 @@
-function [best_threshold,best_threshold_unit] = automatic_hs_threshold(peaks, sampling_rate, initial_threshold_range, max_refinement)
+function [best_threshold,best_threshold_unit] = automatic_hs_threshold(peaks, sampling_rate_hr, initial_threshold_range, max_refinement)
 %%%%%%%%%%%%%%%%%%%%%
 %{
     Find the best significant wave height threshold for the
@@ -23,7 +23,7 @@ function [best_threshold,best_threshold_unit] = automatic_hs_threshold(peaks, sa
     ----------
     peaks: array
         Peak values of the response time-series.
-    sampling_rate: double
+    sampling_rate_hr: double
         Sampling rate in hours.
     initial_threshold_range: array(double, double, double)
         Initial range of thresholds to search. Described as
@@ -39,18 +39,16 @@ function [best_threshold,best_threshold_unit] = automatic_hs_threshold(peaks, sa
 
 arguments
     peaks {mustBeNumeric}
-    sampling_rate {mustBeNumeric}
+    sampling_rate_hr {mustBeNumeric}
     initial_threshold_range {mustBeNumeric} = [0.99, 0.995, 0.001]
     max_refinement {mustBeInteger} = 5
 end
-
-py.importlib.import_module('mhkit')
 
 peaks = py.numpy.array(peaks);
 initial_threshold_range = py.tuple(initial_threshold_range);
 
 result = py.mhkit.loads.extreme.peaks.automatic_hs_threshold(...
-    peaks, sampling_rate, initial_threshold_range, py.int(max_refinement));
+    peaks, sampling_rate_hr, initial_threshold_range, py.int(max_refinement));
 
 best_threshold = double(result{1});
 best_threshold_unit = double(result{2});
