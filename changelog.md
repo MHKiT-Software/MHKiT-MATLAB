@@ -1,3 +1,9 @@
+# Current development
+
+## PR 170 - WDRT leftovers
+- Expanded WDRT functionality by adding `automatic_hs_threshold` and `return_year_value` functions
+
+
 # MHKiT-MATLAB v0.6.0
 
 ## Release Highlights
