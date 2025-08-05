@@ -22,8 +22,6 @@ function Fr=Froude_number(v,h,g)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
-
 if nargin == 3
      Fr=py.mhkit.river.resource.Froude_number(v,h,pyargs('g',g));
 else
