@@ -1510,8 +1510,11 @@ function ds=read_signature(filename,options)
             vec(vec == exclude(1)) = [];
             out = vec(1);
         else
-            [uniq, idx] = unique(vec);
-            counts = histc(vec, uniq);
+            % Replace deprecated histc with more efficient approach
+            % Get unique values and their first occurrence indices  
+            [uniq, idx, idx_map] = unique(vec);
+            % Count occurrences of each unique value using accumarray
+            counts = accumarray(idx_map, 1);
             if all(counts == counts(1))
                 out = max(uniq); % pings saved out of order, but equal # of pings
             else

@@ -5,7 +5,7 @@ project_name = 'mhkit';
 % This is unique to this project and first setup in the .prj file. DO NOT CHANGE THIS!
 toolbox_guid = '1f426c5c-9e72-4f83-8e42-1e51b296aa29';
 display_name = 'Marine and Hydrokinetic Toolkit (MHKiT)';
-project_version = '0.6.0';
+project_version = '0.7.0-dev.1';
 matlab_minimum_release_supported = 'R2022b';
 summary = 'Marine energy data analysis and visualization toolbox';
 description = sprintf([ ...

@@ -311,8 +311,6 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
             %     diff: float
             %         difference between the data in the two structures
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            oldFmt = get(0,'Format');
-            format long
             diff = 0.0;
             exclude = {'coords', 'attrs', 'time', 'complex_vars', ...
                 'filehead_config'};
@@ -436,8 +434,6 @@ classdef Dolfyn_TestIO < matlab.unittest.TestCase
                     end
                 end
             end
-            %fprintf('Final Diff = %f\n',diff)
-            format(oldFmt);
         end
 
     end
