@@ -74,9 +74,17 @@ function frequency = instantaneous_frequency(voltage)
     
     % Check for uniform time spacing (within tolerance)
     dt_mean = mean(time_diff);
+    % Warn the user if the sample rate is not consistent
+    sample_rate_hz_tolerance_percent = 0.01;  % 1% tolerance
     dt_tolerance = 0.01 * dt_mean;  % 1% tolerance
     if any(abs(time_diff - dt_mean) > dt_tolerance)
-        warning('MHKiT:instantaneous_frequency: Non-uniform time spacing detected, using local time differences');
+        warning('MHKiT:instantaneous_frequency: The sample rate of this signal has differences greater than ,' ...
+                num2str(sample_rate_hz_tolerance_percent * 100), '%% from the mean sample rate. ', ...
+                'This has a high likelihood of causing inaccurate instantaneous frequency calculation results');
+        warning('MHKiT:instantaneous_frequency: Mean sample rate hz: ', num2str(1/dt_mean));
+        warning('MHKiT:instantaneous_frequency: Max sample rate hz: ', num2str(1/min(time_diff)));
+        warning('MHKiT:instantaneous_frequency: Min sample rate hz: ', num2str(1/max(time_diff)));
+        warning('MHKiT:instantaneous_frequency: Standard Deviation sample rate hz: ', num2str(std(1./time_diff)));
     end
     
     % Initialize output frequency matrix
