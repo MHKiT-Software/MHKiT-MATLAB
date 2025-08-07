@@ -96,8 +96,8 @@ function frequency = instantaneous_frequency(voltage)
         
         % Check if Signal Processing Toolbox is available for hilbert function
         if ~exist('hilbert', 'file')
-            warning('MHKiT:instantaneous_frequency: hilbert function not available, using custom implementation');
-            analytic_signal = custom_hilbert_transform(current_voltage);
+            warning('MHKiT:instantaneous_frequency: MATLAB hilbert function not available, using scipy hilbert function');
+            analytic_signal = mhkit_scipy_hilbert(current_voltage);
         else
             % Apply Hilbert transform to get analytic signal
             analytic_signal = hilbert(current_voltage);
@@ -126,32 +126,4 @@ function frequency = instantaneous_frequency(voltage)
     frequency.frequency = frequency_data;
     frequency.time = time_vector(2:end);  % Time vector is one element shorter due to differentiation
 
-end
-
-function analytic_signal = custom_hilbert_transform(signal)
-    % Custom implementation of Hilbert transform using FFT
-    % This is used when Signal Processing Toolbox is not available
-    
-    n = length(signal);
-    
-    % Take FFT of the signal
-    signal_fft = fft(signal);
-    
-    % Create Hilbert transform multiplier
-    h = zeros(n, 1);
-    if mod(n, 2) == 0
-        % Even length
-        h([1, n/2+1]) = 1;
-        h(2:n/2) = 2;
-    else
-        % Odd length  
-        h(1) = 1;
-        h(2:(n+1)/2) = 2;
-    end
-    
-    % Apply Hilbert transform in frequency domain
-    analytic_fft = signal_fft .* h;
-    
-    % Convert back to time domain
-    analytic_signal = ifft(analytic_fft);
 end
