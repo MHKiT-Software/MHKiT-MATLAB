@@ -1,19 +1,32 @@
 function line_lay_length = lay_length(data, depth, tolerance)
-%Calculate the laylength of a mooring line over time.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calculate the lay length of a mooring line over time.
+%
+% Lay length is the measure of how much of the mooring line is in contact 
+% with the seabed. This function requires MoorDyn line output data containing
+% individual node positions NodeNpx, NodeNpy, NodeNpz.
+%
 %   Parameters
 %    ----------
-%    data: Array
-%        Array containing x,y,z nodes (ie Node1px, Node1py, Node1pz)
+%    data: table
+%        MoorDyn line output data table containing Time column and node 
+%        position data (NodeNpx, NodeNpy, NodeNpz) where N is the node number.
+%        Data should be obtained using mhkit.mooring.read_moordyn() with a 
+%        MoorDyn line output file (*.Line*.out).
 %    depth: double
-%        Depth of seabed (m)
+%        Depth of seabed (m). Should be negative for depths below sea level.
 %    tolerance: double, optional
 %        Tolerance to detect first lift point from seabed, by default 0.25
-%        meters
+%        meters. Nodes with z-position > depth + abs(tolerance) are 
+%        considered lifted from seabed.
 %
 %    Returns
 %    -------
-%    line_lay_length: xr.Dataset
-%        Array containing the laylength at each time step
+%    line_lay_length: double array
+%        Array containing the lay length at each time step (m)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 arguments
     data table
