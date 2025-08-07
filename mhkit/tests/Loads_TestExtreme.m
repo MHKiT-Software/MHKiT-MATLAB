@@ -158,5 +158,31 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             assertEqual(testCase, lte_cdf, w(1)*ste1 + w(2)*ste2, 'AbsTol', 0.00005)
         end
 
+        function test_automatic_hs_threshold(testCase)
+            relative_file_name = '../../examples/data/loads/data_loads_hs.csv';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = readtable(full_file_name);
+            peaks = table2array(data);
+            years = 2.97;
+            [pct, threshold] = automatic_hs_threshold(peaks, years);
+
+            assertEqual(testCase, pct, 0.9913, 'AbsTol', 0.00005)
+            assertEqual(testCase, threshold, 1.032092, 'AbsTol', 0.00005)
+        end
+
+        function test_return_year_value(testCase)
+            dist = py.scipy.stats.norm;
+            stp = 1;
+            ry = 50;
+
+            val = return_year_value(dist, ry, stp);
+            want = 4.5839339;
+
+            assertEqual(testCase, val, want, 'AbsTol', 0.00005)
+
+        end
+       
+
     end
 end
+
