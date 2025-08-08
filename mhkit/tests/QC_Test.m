@@ -42,8 +42,6 @@ classdef QC_Test < matlab.unittest.TestCase
             dataA.time = simple.Var1;
             dataC.time = simple.Var1;
             format long
-            datenumA = datenum(dataA.time);
-            datenumC = datenum(dataC.time);
             bound = [-1.0, 1.0];
             window = 2*3600; % seconds
             resultsA = check_delta(dataA,bound,window);
@@ -68,8 +66,6 @@ classdef QC_Test < matlab.unittest.TestCase
             dataC.time = simple.Var1;
 
             format long
-            datenumA = datenum(dataA.time);
-            datenumC = datenum(dataC.time);
 
             bound = [0.0001, 0.6];
 
@@ -155,15 +151,16 @@ classdef QC_Test < matlab.unittest.TestCase
             simple_expected = readtable('../../examples/data/qc/simple_expected.xlsx');
             data.values = simple.A;
             data.time = simple.Var1;
-            freq = 900; % seconds
+            freq = 900; % seconds or 15 minutes
             expected.values = simple_expected.A;
             expected.time = (simple_expected.Var1);
             results = check_timestamp(data,freq);
-            datenum_time = datenum(expected.time) - datenum(results.time.');
-            expected_datenum_time = zeros(length(datenum_time),1);
-            ABSTOL = 0.00000001;
-            assertEqual(testCase, results.values, expected.values, 'AbsTol', ABSTOL);
-            assertEqual(testCase, datenum_time, expected_datenum_time, 'AbsTol', ABSTOL);
+            time_diff = expected.time - results.time.';
+            expected_time_diff = duration(zeros(length(time_diff),1), 0, 0);
+            values_tolerance = 0.00000001;  % Tolerance for values comparison
+            time_tolerance = milliseconds(1);  % 1ms tolerance for duration comparison
+            assertEqual(testCase, results.values, expected.values, 'AbsTol', values_tolerance);
+            assertEqual(testCase, time_diff, expected_time_diff, 'AbsTol', time_tolerance);
         end
 
     end

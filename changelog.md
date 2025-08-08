@@ -1,3 +1,15 @@
+# Current development
+
+## PR 170 - WDRT leftovers
+
+- Author: @hivanov-nrel
+- Expanded WDRT functionality by adding `automatic_hs_threshold` and `return_year_value` functions
+
+## PR 169 - Code Compatibility Improvements
+
+- Author: @simmsa
+- Fix code compatibility issues detailed in issues #115, #116, #117, #118, #119, #120, #121, and #122
+
 # MHKiT-MATLAB v0.6.0
 
 ## Release Highlights
