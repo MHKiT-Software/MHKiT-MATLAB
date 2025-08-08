@@ -1,5 +1,14 @@
 # Current development
 
+## PR 153 - Mooring Module
+
+- Author: @hivanov-nrel
+- Addition of the mooring module, which includes
+  - Read in MoorDyn files into MATLAB
+  - Function to calculate mooring line lay length
+  - Functions to visualize mooring line dynamics in 2D or 3D.
+  - Example LiveScript demonstrating the functionality of the mooring module
+
 ## PR 170 - WDRT leftovers
 
 - Author: @hivanov-nrel

@@ -4,7 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mhkit_python_utils"
-version = "0.7.0-dev.1"
+# Release version format:
+#   - Major.Minor.Patch, i.e., 0.6.0
+# Non Release version format:
+#   - <Next Major (opt)>.<Next Minor>.Patch-<label>.Build, i.e., 0.7.0-dev.1
+#   - Labels can be 'dev', 'alpha', 'beta', 'rc' (release candidate)
+version = "0.7.0-dev.2"
 description = "A utility package that enables data exchange and interoperability between MHKiT-MATLAB and MHKiT-Python. Part of the MHKiT (Marine and Hydrokinetic Toolkit) project."
 readme = "README.md"
 requires-python = ">=3.10"

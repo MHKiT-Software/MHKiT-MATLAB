@@ -6,7 +6,7 @@ import warnings as _warn
 
 _warn.simplefilter(action="ignore", category=FutureWarning)
 
-__version__ = "0.7.0-dev.1"
+__version__ = "0.7.0-dev.2"
 
 __copyright__ = """
 Copyright 2019, Alliance for Sustainable Energy, LLC under the terms of 
