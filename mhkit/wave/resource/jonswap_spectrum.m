@@ -1,55 +1,91 @@
-function S=jonswap_spectrum(frequency,Tp,Hs,varargin)
-
+function S = jonswap_spectrum(frequency, Tp, Hs, gamma)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Calculates JONSWAP spectrum from Hasselmann et al (1973)
+% Calculates JONSWAP spectrum based on IEC TS 62600-2 ED2 Annex C.2 (2019)
 %
 % Parameters
 % ------------
-%
-%     Frequency: float
+%     frequency: vector
 %         Wave frequency (Hz)
 %
 %     Tp: float
 %         Peak Period (s)
 %
 %     Hs: float
-%         Significant Wave Height (s)
+%         Significant Wave Height (m)
 %
 %     gamma: float (optional)
-%         Gamma
+%         Peak enhancement factor
 %
 % Returns
 % ---------
-%     S: structure
-%
-%
-%         S.spectrum=Spectral Density (m^2/Hz)
-%
-%         S.type=String of the spectra type, i.e. Bretschneider,
-%         time series, date stamp etc.
-%
-%         S.frequency= frequency (Hz)
-%
-%         S.Te
-%
-%         S.Hm0
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     S: structure with fields
+%         .spectrum  = Spectral Density (m^2/Hz)
+%         .frequency = Frequency (Hz)
+%         .type      = 'JONSWAP (Hs,Tp)'
+%         .Hm0       = Significant wave height (m)
+%         .Te        = Energy period (s)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if (isa(frequency,'py.numpy.ndarray') ~= 1)
-    frequency = py.numpy.array(frequency);
+% Ensure column vector
+frequency = frequency(:);
+f = frequency;
+df = diff(f);
+uniform_spacing = all(abs(df - df(1)) < 1e-6);
+if uniform_spacing
+    df_val = df(1);
+else
+    df_val = [diff(f); diff(f(end-1:end))]; % Extend last bin
 end
 
-if nargin == 3
-        S_py=py.mhkit.wave.resource.jonswap_spectrum(frequency,Tp,Hs);
-elseif nargin == 4
-        S_py=py.mhkit.wave.resource.jonswap_spectrum(frequency, Tp, Hs, pyargs('gamma', varargin{1}));
+% Constants
+fp = 1 / Tp;
+B_PM = (5 / 4) * (1 / Tp)^4;
+A_PM = B_PM * (Hs / 2)^2;
+
+% Initialize spectral density
+S_f = zeros(size(f));
+nonzero = f > 0;
+S_f(nonzero) = A_PM .* f(nonzero).^(-5) .* exp(-B_PM .* f(nonzero).^(-4));
+
+% Gamma computation
+if nargin < 4 || isempty(gamma)
+    TpsqrtHs = Tp / sqrt(Hs);
+    if TpsqrtHs <= 3.6
+        gamma = 5;
+    elseif TpsqrtHs > 5
+        gamma = 1;
+    else
+        gamma = exp(5.75 - 1.15 * TpsqrtHs);
+    end
 end
 
-S_py = typecast_from_mhkit_python(S_py);
+% Spreading function G(f)
+siga = 0.07;
+sigb = 0.09;
+Gf = zeros(size(f));
+lind = f <= fp;
+hind = f > fp;
+Gf(lind) = gamma .^ exp(-((f(lind) - fp).^2) ./ (2 * siga^2 * fp^2));
+Gf(hind) = gamma .^ exp(-((f(hind) - fp).^2) ./ (2 * sigb^2 * fp^2));
 
-S = struct();
+C = 1 - 0.287 * log(gamma);
+Sf = C * S_f .* Gf;
 
-S.frequency = S_py.index.data;
-S.spectrum = S_py.data;
-S.type = S_py.columns{1};
+% Outputs
+S.frequency = f;
+S.spectrum = Sf;
+S.type = sprintf('JONSWAP (%.2fm, %.2fs)', Hs, Tp);
+
+% Compute Hm0 and Te
+if uniform_spacing
+    m0 = sum(Sf) * df_val;
+    m1 = sum(Sf ./ f) * df_val;
+else
+    m0 = sum(Sf .* df_val);
+    m1 = sum((Sf ./ f) .* df_val);
+end
+
+S.Hm0 = 4 * sqrt(m0);
+S.Te = m1 / m0;
+
+end
