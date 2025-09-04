@@ -1,6 +1,7 @@
 function S = jonswap_spectrum(frequency, Tp, Hs, gamma)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Calculates JONSWAP spectrum based on IEC TS 62600-2 ED2 Annex C.2 (2019)
+%
+% Calculates JONSWAP spectrum from IEC TS 62600-2 ED2 Annex C.2 (2019)
 %
 % Parameters
 % ------------
@@ -22,32 +23,30 @@ function S = jonswap_spectrum(frequency, Tp, Hs, gamma)
 %         .spectrum  = Spectral Density (m^2/Hz)
 %         .frequency = Frequency (Hz)
 %         .type      = 'JONSWAP (Hs,Tp)'
-%         .Hm0       = Significant wave height (m)
-%         .Te        = Energy period (s)
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Ensure column vector
+% Ensure column vector and sort (match MHKiT-Python behavior)
 frequency = frequency(:);
-f = frequency;
-df = diff(f);
-uniform_spacing = all(abs(df - df(1)) < 1e-6);
-if uniform_spacing
-    df_val = df(1);
-else
-    df_val = [diff(f); diff(f(end-1:end))]; % Extend last bin
-end
+f = sort(frequency);
 
-% Constants
-fp = 1 / Tp;
+% Constants (same as MHKiT-Python)
 B_PM = (5 / 4) * (1 / Tp)^4;
 A_PM = B_PM * (Hs / 2)^2;
 
-% Initialize spectral density
+% Avoid divide by zero if the 0 frequency is provided
+% The zero frequency should always have 0 amplitude, otherwise
+% we end up with a mean offset when computing the surface elevation.
 S_f = zeros(size(f));
-nonzero = f > 0;
-S_f(nonzero) = A_PM .* f(nonzero).^(-5) .* exp(-B_PM .* f(nonzero).^(-4));
+if f(1) == 0.0
+    inds = 2:length(f);  % Skip first element like MHKiT-Python
+else
+    inds = 1:length(f);  % Use all elements
+end
 
-% Gamma computation
+S_f(inds) = A_PM * f(inds).^(-5) .* exp(-B_PM * f(inds).^(-4));
+
+% Gamma computation (match MHKiT-Python logic)
 if nargin < 4 || isempty(gamma)
     TpsqrtHs = Tp / sqrt(Hs);
     if TpsqrtHs <= 3.6
@@ -59,33 +58,25 @@ if nargin < 4 || isempty(gamma)
     end
 end
 
-% Spreading function G(f)
+% Cutoff frequencies for gamma function (match MHKiT-Python)
 siga = 0.07;
 sigb = 0.09;
-Gf = zeros(size(f));
+
+% Peak frequency
+fp = 1 / Tp;
 lind = f <= fp;
 hind = f > fp;
+Gf = zeros(size(f));
 Gf(lind) = gamma .^ exp(-((f(lind) - fp).^2) ./ (2 * siga^2 * fp^2));
 Gf(hind) = gamma .^ exp(-((f(hind) - fp).^2) ./ (2 * sigb^2 * fp^2));
 
 C = 1 - 0.287 * log(gamma);
 Sf = C * S_f .* Gf;
 
-% Outputs
+% Output structure (match MHKiT-Python naming style)
+name = sprintf('JONSWAP (%.1fm,%.1fs)', Hs, Tp);
 S.frequency = f;
 S.spectrum = Sf;
-S.type = sprintf('JONSWAP (%.2fm, %.2fs)', Hs, Tp);
-
-% Compute Hm0 and Te
-if uniform_spacing
-    m0 = sum(Sf) * df_val;
-    m1 = sum(Sf ./ f) * df_val;
-else
-    m0 = sum(Sf .* df_val);
-    m1 = sum((Sf ./ f) .* df_val);
-end
-
-S.Hm0 = 4 * sqrt(m0);
-S.Te = m1 / m0;
+S.type = name;
 
 end
