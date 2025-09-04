@@ -48,10 +48,14 @@ Nt = numel(time_index);
 
 % Handle frequency bins
 if isempty(options.frequency_bins)
+    % Calculate individual frequency bin widths to match MHKiT-Python implementation
+    % MHKiT-Python uses: delta_f = f.diff() then prepends first difference
+    % This creates a vector where each frequency has its own bin width,
+    % which is critical for accurate numerical integration when frequencies
+    % are not perfectly uniform (using mean(df) introduces systematic error)
     df = diff(f);
+    delta_f = [df(1); df(:)];  % Prepend first difference, ensure column vector
     df_uniform = all(abs(df - df(1)) < 1e-8);
-    df_val = mean(df);
-    delta_f = df_val * ones(size(f));
 else
     delta_f = options.frequency_bins(:);
     if length(delta_f) ~= length(f)
