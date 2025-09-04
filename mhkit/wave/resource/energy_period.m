@@ -1,5 +1,7 @@
 function Te = energy_period(S, varargin)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 % Calculates wave energy period Te from wave spectra
 %
 % Parameters
@@ -20,6 +22,14 @@ function Te = energy_period(S, varargin)
 %   Te: double
 %       Wave energy period [s]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments
+    S
+end
+
+arguments (Repeating)
+    varargin
+end
 
     % Extract spectrum and frequency
     if isstruct(S)

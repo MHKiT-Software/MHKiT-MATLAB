@@ -27,6 +27,15 @@ function m = frequency_moment(S, N, varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+arguments
+    S
+    N {mustBeNumeric, mustBeFinite, mustBeInteger}
+end
+
+arguments (Repeating)
+    varargin
+end
+
     % Extract spectrum and frequency
     if isstruct(S)
         spectrum = S.spectrum;

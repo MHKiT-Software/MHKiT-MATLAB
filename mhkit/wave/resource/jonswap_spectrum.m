@@ -1,4 +1,5 @@
 function S = jonswap_spectrum(frequency, Tp, Hs, gamma)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Calculates JONSWAP spectrum from IEC TS 62600-2 ED2 Annex C.2 (2019)
@@ -26,6 +27,13 @@ function S = jonswap_spectrum(frequency, Tp, Hs, gamma)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+arguments
+    frequency {mustBeNumeric, mustBeFinite}
+    Tp {mustBeNumeric, mustBeFinite, mustBePositive}
+    Hs {mustBeNumeric, mustBeFinite, mustBePositive}
+    gamma {mustBeNumeric, mustBeFinite, mustBePositive} = []
+end
+
 % Ensure column vector and sort (match MHKiT-Python behavior)
 frequency = frequency(:);
 f = sort(frequency);
@@ -47,7 +55,7 @@ end
 S_f(inds) = A_PM * f(inds).^(-5) .* exp(-B_PM * f(inds).^(-4));
 
 % Gamma computation (match MHKiT-Python logic)
-if nargin < 4 || isempty(gamma)
+if isempty(gamma)
     TpsqrtHs = Tp / sqrt(Hs);
     if TpsqrtHs <= 3.6
         gamma = 5;

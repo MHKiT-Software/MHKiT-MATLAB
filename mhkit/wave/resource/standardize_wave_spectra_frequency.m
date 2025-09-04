@@ -1,5 +1,7 @@
 function [frequency, spectrum, freq_bins] = standardize_wave_spectra_frequency(frequency, spectrum, varargin)
-%STANDARDIZE_WAVE_SPECTRA_FREQUENCY Standardize frequency and spectrum data for wave calculations
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Standardize frequency and spectrum data for wave calculations
 %
 % This utility function standardizes frequency vectors, spectra, and frequency bins
 % following MHKiT-Python conventions for consistent numerical integration.
@@ -22,6 +24,16 @@ function [frequency, spectrum, freq_bins] = standardize_wave_spectra_frequency(f
 %   freq_bins: vector
 %       Frequency bin widths, column format
 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments
+    frequency {mustBeNumeric, mustBeFinite}
+    spectrum {mustBeNumeric, mustBeFinite}
+end
+
+arguments (Repeating)
+    varargin
+end
 
     % Handle optional frequency bins input
     if ~isempty(varargin)

@@ -1,6 +1,7 @@
 function Hm0 = significant_wave_height(S, varargin)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Calculates significant wave height Hm0 from spectra
+% Calculate significant wave height Hm0 from spectra
 %
 % Parameters
 % ------------
@@ -20,6 +21,14 @@ function Hm0 = significant_wave_height(S, varargin)
 %     Hm0: double
 %         Significant Wave Height (m)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments
+    S
+end
+
+arguments (Repeating)
+    varargin
+end
 
     % Extract spectrum and frequency
     if isstruct(S)
