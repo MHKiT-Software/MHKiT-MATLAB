@@ -86,12 +86,12 @@ switch options.method
             warning('Switching to sum_of_sines because ifft requires f(1)==0 and uniform spacing.');
             options.method = 'sum_of_sines';
         else
-            % Create complex spectrum
-            A_complex = A .* exp(1i * phase);
-            % Use irfft approximation: 0 to fN mapped to 0 to Nyquist
-            % Double spectrum (except DC and Nyquist if exists)
-            spectrum_full = [A_complex(1); A_complex(2:end-1)/2; conj(flip(A_complex(2:end-1)/2))];
-            eta = real(ifft(spectrum_full, Nt)) * Nt;
+            % Match MHKiT-Python implementation: A_cmplx = A * (cos(phase) + 1j * sin(phase))
+            A_complex = A .* (cos(phase) + 1i * sin(phase));
+            % Match MHKiT-Python scaling: 0.5 * A_cmplx * time_index.size
+            A_scaled = 0.5 * A_complex * length(time_index);
+            % Use MATLAB's equivalent of irfft
+            eta = real(ifft(A_scaled, length(time_index), 'symmetric'));
             wave_elevation.elevation = eta;
     end
 
