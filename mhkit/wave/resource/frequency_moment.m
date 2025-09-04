@@ -1,48 +1,59 @@
-function m=frequency_moment(S,N,varargin)
+function m = frequency_moment(S, N, varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 %   Calculates the Nth frequency moment of the spectrum
 %
 % Parameters
 % ------------
-%    S: Spectral Density (m^2/Hz)
-%       Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,spectra)
+%   S: structure or numeric array
+%       If structure:
+%           S.spectrum   - Spectral Density (m^2/Hz)
+%           S.frequency  - Frequency (Hz)
+%       If numeric:
+%           S is spectral density array (vector or matrix)
+%           varargin{1} must contain frequency vector
 %
-%       OR
+%   N: int
+%       Moment (0 for 0th, 1 for 1st, -1 for -1st, etc.)
 %
-%       structure of form:
-%           S.spectrum: Spectral Density (m^2/Hz)
-%
-%           S.type: String of the spectra type, i.e. Bretschneider,
-%           time series, date stamp etc.
-%
-%           S.frequency: frequency (Hz)
-%
-%    N: int
-%       Moment (0 for 0th, 1 for 1st ....)
-%
-%    frequency_bins: vector (optional)
+%   frequency_bins: vector (optional)
 %       Bin widths for frequency of S. Required for unevenly sized bins
 %
 % Returns
 % ---------
-%    m: double
+%   m: double
+%       Nth frequency moment
 %
-%
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-S_py = typecast_spectra_to_mhkit_python(S);
+    % Extract spectrum and frequency
+    if isstruct(S)
+        spectrum = S.spectrum;
+        frequency = S.frequency;
+    elseif isnumeric(S)
+        if nargin < 3
+            error('When S is numeric, frequency vector must be provided as third argument');
+        end
+        spectrum = S;
+        frequency = varargin{1};
+        varargin(1) = [];
+    else
+        error('Input S must be a struct or numeric array');
+    end
 
-if nargin == 3
-    m = py.mhkit.wave.resource.frequency_moment(S_py, int32(N),pyargs('frequency_bins',py.numpy.array(varargin{1})));
-elseif nargin == 2
-    m = py.mhkit.wave.resource.frequency_moment(S_py, int32(N));
-else
-    ME = MException('MATLAB:frequency_moment','Incorrect number of arguments');
-        throw(ME);
+    % Standardize frequency, spectrum, and frequency bins
+    if ~isempty(varargin)
+        [frequency, spectrum, freq_bins] = standardize_wave_spectra_frequency(frequency, spectrum, varargin{1});
+    else
+        [frequency, spectrum, freq_bins] = standardize_wave_spectra_frequency(frequency, spectrum);
+    end
+
+    if isscalar(freq_bins)
+        freq_bins = freq_bins(:);
+    end
+
+    % Calculate Nth moment: m_N = sum(f^N * S * df)
+    m = sum((frequency.^N) .* spectrum .* freq_bins, 1);
+
 end
-
-m = typecast_from_mhkit_python(m).data;
