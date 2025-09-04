@@ -1,22 +1,35 @@
 function wave_elevation = surface_elevation(S, time_index, options)
-%SURFACE_ELEVATION Generate wave surface elevation from spectrum
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Inputs:
-%   S - struct with fields:
-%       .spectrum: (n_freq x 1) spectral density values (m^2/Hz)
-%       .frequency: (n_freq x 1) frequency vector (Hz)
-%   time_index - (n_time x 1) time vector (s)
-%   options - struct with optional fields:
-%       .seed: random seed (default = 123)
-%       .frequency_bins: bin widths for each frequency
-%       .phases: explicit phases (radians)
-%       .method: 'ifft' (default) or 'sum_of_sines'
+%   Generate wave surface elevation from spectrum
 %
-% Output:
-%   wave_elevation - struct with fields:
-%       .elevation: (n_time x 1) wave elevation (m)
-%       .time: time vector (s)
-%       .type: description string
+% Parameters
+% ------------
+%     S: structure
+%         Spectral data with fields:
+%             S.spectrum: (n_freq x 1) spectral density values (m^2/Hz)
+%             S.frequency: (n_freq x 1) frequency vector (Hz)
+%     
+%     time_index: vector
+%         (n_time x 1) time vector (s)
+%
+%     options: structure (optional)
+%         Optional fields:
+%             seed: random seed (default = 123)
+%             frequency_bins: bin widths for each frequency
+%             phases: explicit phases (radians)
+%             method: 'ifft' (default) or 'sum_of_sines'
+%
+% Returns
+% ---------
+%     wave_elevation: structure
+%         Generated wave elevation with fields:
+%             elevation: (n_time x 1) wave elevation (m)
+%             time: time vector (s)
+%             type: description string
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     S struct
