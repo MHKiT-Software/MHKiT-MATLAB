@@ -30,30 +30,19 @@ arguments (Repeating)
     varargin
 end
 
-    % Extract spectrum and frequency
+    % Calculate zeroth moment m0 using frequency_moment function
     if isstruct(S)
-        spectrum = S.spectrum;
-        frequency = S.frequency;
+        % Pass struct directly
+        m0 = frequency_moment(S, 0, varargin{:});
     elseif isnumeric(S)
+        % Pass numeric spectrum with frequency vector
         if nargin < 2
             error('When S is numeric, frequency vector must be provided as second argument');
         end
-        spectrum = S;
-        frequency = varargin{1};
-        varargin(1) = [];
+        m0 = frequency_moment(S, 0, varargin{:});
     else
         error('Input S must be either a struct with fields .spectrum and .frequency, or a numeric array');
     end
-
-    % Standardize frequency, spectrum, and frequency bins
-    if ~isempty(varargin)
-        [frequency, spectrum, freq_bins] = standardize_wave_spectra_frequency(frequency, spectrum, varargin{1});
-    else
-        [frequency, spectrum, freq_bins] = standardize_wave_spectra_frequency(frequency, spectrum);
-    end
-
-    % Calculate zeroth moment m0
-    m0 = sum(spectrum .* freq_bins, 1);
 
     % Calculate significant wave height Hm0
     Hm0 = 4 * sqrt(m0);
