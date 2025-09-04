@@ -40,8 +40,13 @@ function Hm0 = significant_wave_height(S, varargin)
     if ~isempty(varargin)
         freq_bins = varargin{1};
     else
+        % Calculate individual frequency bin widths to match MHKiT-Python implementation
+        % MHKiT-Python uses: delta_f = f.diff() then prepends first difference
+        % This creates a vector where each frequency has its own bin width,
+        % which is critical for accurate numerical integration when frequencies
+        % are not perfectly uniform (using mean(df) introduces systematic error)
         df = diff(frequency);
-        freq_bins = mean(df);  % assume uniform bin width
+        freq_bins = [df(1); df(:)];  % Prepend first difference, ensure column vector
     end
 
     % Ensure column vector format
@@ -55,14 +60,26 @@ function Hm0 = significant_wave_height(S, varargin)
         error('Length of frequency vector must match number of rows in spectrum');
     end
 
+    % Filter out zero and near-zero frequencies to match MHKiT-Python implementation
+    % Following MHKiT-Python implementation: omit frequencies <= 1e-12
+    valid_idx = frequency > 1e-12;
+    frequency = frequency(valid_idx);
+    spectrum = spectrum(valid_idx, :);
+    
+    % Handle frequency bins - filter if vector, keep scalar as-is
+    if ~isscalar(freq_bins)
+        freq_bins = freq_bins(:);
+        if length(freq_bins) ~= length(valid_idx)
+            error('Length of freq_bins must match original frequency vector');
+        end
+        freq_bins = freq_bins(valid_idx);
+    end
+
     % Calculate zeroth moment m0
     if isscalar(freq_bins)
         m0 = sum(spectrum .* freq_bins, 1);
     else
         freq_bins = freq_bins(:);
-        if length(freq_bins) ~= length(frequency)
-            error('Length of freq_bins must match frequency vector');
-        end
         m0 = sum(spectrum .* freq_bins, 1);
     end
 
