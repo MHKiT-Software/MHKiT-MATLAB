@@ -27,7 +27,7 @@
     },
     "verify_operation": {
       "command": "python -c \"import mhkit; print(mhkit.river.performance.circular(30))\"",
-      "expect": "(30, 706.85"
+      "expect": "(30, 706.85)"
     }
   },
   "conda": {
