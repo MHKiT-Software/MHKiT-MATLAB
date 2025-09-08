@@ -63,9 +63,20 @@ function install()
         if ~conda_env_exists
             logger.info('Creating environment "%s"...', conda_env_name);
             command = spec.conda.create;
+            logger.info('Original command template: %s', command);
             command = replace(command, '<conda_env>', conda_env_name);
             command = replace(command, '<python_version>', spec.python.install_version);
-            mhkit.sys(command);
+            logger.info('Final conda create command: %s', command);
+            logger.info('Using Python version: %s', spec.python.install_version);
+            [status, output] = mhkit.sys(command);
+            logger.info('Conda create exit status: %d', status);
+            if ~isempty(output)
+                logger.info('Conda create output: %s', output);
+            end
+            if status ~= 0
+                logger.error('Conda create command failed!');
+                return;
+            end
             logger.info('✓ Environment created');
         else
             logger.info('✓ Environment "%s" ready', conda_env_name);
@@ -83,9 +94,20 @@ function install()
             logger.info('Recreating %s Conda environment', conda_env_name);
             mhkit.sys(sprintf('conda remove -n  %s --all -y', conda_env_name));
             command = spec.conda.create;
+            logger.info('Recreation - Original command template: %s', command);
             command = replace(command, '<conda_env>', conda_env_name);
             command = replace(command, '<python_version>', spec.python.install_version);
-            mhkit.sys(command);
+            logger.info('Recreation - Final conda create command: %s', command);
+            logger.info('Recreation - Using Python version: %s', spec.python.install_version);
+            [status, output] = mhkit.sys(command);
+            logger.info('Recreation - Conda create exit status: %d', status);
+            if ~isempty(output)
+                logger.info('Recreation - Conda create output: %s', output);
+            end
+            if status ~= 0
+                logger.error('Recreation - Conda create command failed!');
+                return;
+            end
         end
 
         % Check if `mhkit` is in `conda list`
