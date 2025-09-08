@@ -40,6 +40,9 @@ function result = parse_info(env_name, logger)
         'platform'
     };
 
+    disp('Parsing conda info output...');
+    disp(cmd_out);
+
     % Split the input into lines
     lines = regexp(cmd_out, '\n', 'split');
 
@@ -76,14 +79,14 @@ function result = parse_info(env_name, logger)
         end
     end
 
-    % % Verify all fields were found
-    % fprintf('\nFound fields:\n');
-    % for j = 1:length(fields_to_find)
-    %     field_name = regexprep(lower(fields_to_find{j}), '\s+', '_');
-    %     if isfield(result, field_name)
-    %         fprintf('  %s: %s\n', field_name, result.(field_name));
-    %     else
-    %         fprintf('  WARNING: Field "%s" not found!\n', fields_to_find{j});
-    %     end
-    % end
+    % Verify all fields were found
+    fprintf('\nFound fields:\n');
+    for j = 1:length(fields_to_find)
+        field_name = regexprep(lower(fields_to_find{j}), '\s+', '_');
+        if isfield(result, field_name)
+            fprintf('  %s: %s\n', field_name, result.(field_name));
+        else
+            fprintf('  WARNING: Field "%s" not found!\n', fields_to_find{j});
+        end
+    end
 end
