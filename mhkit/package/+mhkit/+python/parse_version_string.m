@@ -1,18 +1,26 @@
 function version = parse_python_version(version_str)
-    % PARSE_PYTHON_VERSION Parse Python version string into a structured format
-    %   version = PARSE_PYTHON_VERSION(version_str) takes a Python version string
-    %   and returns a struct with major, minor, patch, and additional version info
-    %
-    %   Input:
-    %       version_str - string, Python version (e.g., "3.11.8.final.0")
-    %
-    %   Output:
-    %       version - struct containing:
-    %           - major (integer)
-    %           - minor (integer)
-    %           - patch (integer)
-    %           - qualifier (string, e.g., 'final')
-    %           - build (integer)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Parse Python version string into a structured format
+%   Takes a Python version string and returns a struct with major, minor, 
+%   patch, and additional version info
+%
+% Parameters
+% ------------
+%     version_str: string
+%         Python version string (e.g., '3.11.8.final.0')
+%
+% Returns
+% ---------
+%     version: struct
+%         Structure containing:
+%         - major: double (integer)
+%         - minor: double (integer)  
+%         - patch: double (integer)
+%         - qualifier: string (e.g., 'final')
+%         - build: double (integer)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %           - original (string, the original version string)
     %
     %   Example:
@@ -26,8 +34,6 @@ function version = parse_python_version(version_str)
     %       %   ver.original = "3.11.8.final.0"
 
     % Initialize the output struct
-    disp("Parsing python version from:");
-    disp(version_str);
     version = struct();
     version.original = version_str;
 
@@ -41,7 +47,7 @@ function version = parse_python_version(version_str)
     if length(parts) > 2
         version.patch = str2double(parts{3});
     else
-        version.patch = 0
+        version.patch = 0;
     end
 
     % Extract qualifier and build if they exist

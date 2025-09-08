@@ -1,16 +1,30 @@
 function result = version_within(actual_version, min_version, max_version, logger)
-    % VERSION_WITHIN Check if Python version is within specified bounds
-    %   Checks if actual_version falls within min_version and max_version
-    %   Only verifies major and minor version bounds
-    %
-    %   Input:
-    %       actual_version - string, current Python version
-    %       min_version - string, minimum required version
-    %       max_version - string, maximum allowed version
-    %       logger - logger object for error reporting
-    %
-    %   Output:
-    %       result - boolean, true if version is within bounds
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Check if Python version is within specified bounds
+%   Checks if actual_version falls within min_version and max_version
+%   Only verifies major and minor version bounds
+%
+% Parameters
+% ------------
+%     actual_version: string
+%         Current Python version (e.g., '3.11.2')
+%
+%     min_version: string
+%         Minimum required version (e.g., '3.10')
+%
+%     max_version: string
+%         Maximum allowed version (e.g., '3.12')
+%
+%     logger: struct
+%         Logger object for error reporting
+%
+% Returns
+% ---------
+%     result: logical
+%         true if version is within bounds, false otherwise
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % Parse all version strings
     actual_parsed = mhkit.python.parse_version_string(actual_version);
