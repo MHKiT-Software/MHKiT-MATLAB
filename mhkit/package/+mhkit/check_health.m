@@ -34,12 +34,20 @@ function result = check_health()
         logger.info('=== Python Environment Validation ===');
         try
             pe = pyenv();
-            logger.info('Python Version: %s', pe.Version);
-            logger.info('Python Executable: %s', pe.Executable);
-            logger.info('Python Library: %s', pe.Library);
-            logger.info('Python Home: %s', pe.Home);
-            logger.info('Execution Mode: %s', pe.ExecutionMode);
-            logger.info('Status: %s', pe.Status);
+            logger.info('Python Version: "%s"', pe.Version);
+            logger.info('Python Executable: "%s"', pe.Executable);
+            logger.info('Python Library: "%s"', pe.Library);
+            logger.info('Python Home: "%s"', pe.Home);
+            logger.info('Execution Mode: "%s"', pe.ExecutionMode);
+            logger.info('Status: "%s"', pe.Status);
+            
+            % Additional debugging for empty fields
+            if isempty(pe.Version)
+                logger.warning('⚠ Python Version is empty - pyenv not configured');
+            end
+            if isempty(pe.Executable)
+                logger.warning('⚠ Python Executable is empty - no Python path set');
+            end
             
             % Validate Python is properly configured
             if strcmp(pe.Status, 'NotLoaded')

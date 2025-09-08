@@ -187,15 +187,28 @@ function initialize_python_integration(env_name, logger)
     % Initialize Python integration
     try
         % Get the Python executable path from the conda environment
-        [status, python_path] = mhkit.sys(sprintf('conda run -n %s python -c "import sys; print(sys.executable)"', env_name));
+        conda_command = sprintf('conda run -n %s python -c "import sys; print(sys.executable)"', env_name);
+        logger.info('Executing command: %s', conda_command);
+        [status, python_path] = mhkit.sys(conda_command);
+        
+        logger.info('Command status: %d', status);
+        logger.info('Raw Python path output: "%s"', python_path);
         
         if status ~= 0
             logger.error('Failed to get Python executable path from conda environment');
+            logger.error('Command output: %s', python_path);
             return
         end
         
         python_path = strip(python_path);
-        logger.info('Found Python executable: %s', python_path);
+        logger.info('Cleaned Python executable: %s', python_path);
+        
+        % Verify the Python executable exists
+        if ~exist(python_path, 'file')
+            logger.error('Python executable does not exist at path: %s', python_path);
+            return
+        end
+        logger.info('✓ Verified Python executable exists');
         
         % Add Python directory to system PATH (like the working Unix tests)
         python_dir = fileparts(python_path);
