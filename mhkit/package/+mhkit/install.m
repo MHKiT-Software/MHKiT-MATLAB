@@ -1,14 +1,23 @@
 function install()
-    % INSTALL Install MHKiT and its dependencies
-    %   mhkit.install() installs MHKiT with default settings
-    %   mhkit.install('Name', Value) installs with custom settings
-    %
-    % Optional Parameters:
-    %   'Python' - Python version to use (default: '3.11')
-    %   'Environment' - Conda environment name (default: 'mhkit-matlab-env')
-    %
-    % Example:
-    %   mhkit.install('Version', '0.9.0', 'Python', '3.11')
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Install MHKiT Python dependencies and configure MATLAB integration
+%
+% Parameters
+% ------------
+%     No parameters required
+%
+% Returns
+% ---------
+%     No return values
+%         Installs Conda, creates Python environment, installs MHKiT-Python
+%         package and utilities, and configures MATLAB-Python integration
+%
+% Example
+% -------
+%     mhkit.install()
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % Initialize logger
     logger = mhkit.utils.get_logger();
