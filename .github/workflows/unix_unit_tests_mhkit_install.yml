@@ -13,7 +13,7 @@ jobs:
 
       matrix:
         os: [ubuntu-latest]
-        matlab-version: [R2022b]
+        matlab-version: [R2023b]
 
     runs-on: ${{ matrix.os }}
 
