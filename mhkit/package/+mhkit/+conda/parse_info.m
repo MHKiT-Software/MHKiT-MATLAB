@@ -24,7 +24,7 @@ function result = parse_info(env_name, logger)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    [status, cmd_out] = mhkit.sys(sprintf('conda activate %s && conda info', env_name));
+    [status, cmd_out] = mhkit.sys(sprintf('conda run -n %s conda info', env_name));
     if status ~= 0
         logger.error('Failed to execute conda info');
     end
