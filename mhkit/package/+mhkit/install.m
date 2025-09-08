@@ -197,8 +197,20 @@ function initialize_python_integration(env_name, logger)
         python_path = strip(python_path);
         logger.info('Found Python executable: %s', python_path);
         
-        % Set MATLAB's Python environment to use this executable
-        pyenv('Version', python_path);
+        % Add Python directory to system PATH (like the working Unix tests)
+        python_dir = fileparts(python_path);
+        current_path = getenv('PATH');
+        if isunix
+            new_path = [python_dir ':' current_path];
+        else
+            new_path = [python_dir ';' current_path];
+        end
+        setenv('PATH', new_path);
+        logger.info('Added Python directory to PATH: %s', python_dir);
+        
+        % Set MATLAB's Python environment with OutOfProcess execution mode (like working Unix tests)
+        pyenv('Version', python_path, 'ExecutionMode', 'OutOfProcess');
+        logger.info('Configured pyenv with OutOfProcess execution mode');
         
         % Test Python import
         logger.info('Testing Python module imports...');
