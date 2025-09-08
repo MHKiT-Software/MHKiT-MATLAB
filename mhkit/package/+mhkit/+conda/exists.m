@@ -23,6 +23,28 @@ function result = exists()
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    % On Windows, try to add conda to PATH first
+    if ispc
+        userprofile = getenv('USERPROFILE');
+        conda_script_paths = {
+            fullfile(userprofile, 'miniconda3', 'Scripts')
+            fullfile(userprofile, 'miniconda3', 'condabin')
+            fullfile(userprofile, 'Miniconda3', 'Scripts') 
+            fullfile(userprofile, 'Miniconda3', 'condabin')
+            fullfile(userprofile, 'anaconda3', 'Scripts')
+            fullfile(userprofile, 'anaconda3', 'condabin')
+        };
+        
+        current_path = getenv('PATH');
+        for i = 1:length(conda_script_paths)
+            if exist(conda_script_paths{i}, 'dir')
+                new_path = [conda_script_paths{i} ';' current_path];
+                setenv('PATH', new_path);
+                break; % Only add the first found path
+            end
+        end
+    end
+
     % First, try to check using system path
     try
         % Attempt to run conda info with system command
