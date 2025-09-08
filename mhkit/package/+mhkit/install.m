@@ -58,7 +58,7 @@ function install()
         % Step 3: Create or verify Conda environment
         conda_env_name = spec.conda.environment_name;
         logger.info('\nSetting up Python environment...');
-        conda_env_exists = mhkit.conda.env_exists(conda_env_name);
+        conda_env_exists = mhkit.conda.env_exists(conda_env_name, logger);
 
         if ~conda_env_exists
             logger.info('Creating environment "%s"...', conda_env_name);
@@ -77,7 +77,7 @@ function install()
 
         conda_env_python = conda_info.python_version;
 
-        is_conda_python_within_bounds = mhkit.python.version_within(conda_env_python, spec.python.minimum_version, spec.python.maximum_version);
+        is_conda_python_within_bounds = mhkit.python.version_within(conda_env_python, spec.python.minimum_version, spec.python.maximum_version, logger);
 
         if ~is_conda_python_within_bounds
             logger.info('Recreating %s Conda environment', conda_env_name);
