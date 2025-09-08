@@ -19,7 +19,7 @@
     "maximum_version": "3.12"
   },
   "mhkit_python": {
-    "install": "conda install -c conda-forge mhkit==<mhkit_python_version>",
+    "install": "conda install -c conda-forge mhkit==<mhkit_python_version> -y",
     "version": "0.9",
     "verify_version": {
       "command": "python -c \"import mhkit; print(mhkit.__version__)\"",
@@ -32,7 +32,7 @@
   },
   "conda": {
     "environment_name": "mhkit-matlab-env",
-    "create": "conda create -n <conda_env> python=<python_version>",
+    "create": "conda create -n <conda_env> python=<python_version> -y",
     "install": {
       "windows": [
         "curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe -o .miniconda.exe",
