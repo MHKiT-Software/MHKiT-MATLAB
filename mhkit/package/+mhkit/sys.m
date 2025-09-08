@@ -1,13 +1,23 @@
 function [status, cmdout] = sys(command)
-    % SYS_SHELL Cross-platform initialized shell execution
-    % Executes commands in a shell with the user's environment properly initialized
-    %
-    % Inputs:
-    %   command: String containing the command to execute
-    %
-    % Outputs:
-    %   status: Exit status (0 for success)
-    %   cmdout: Command output as string
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Cross-platform initialized shell execution
+%   Executes commands in a shell with the user's environment properly initialized
+%
+% Parameters
+% ------------
+%     command: string
+%         Command to execute in the shell
+%
+% Returns
+% ---------
+%     status: double
+%         Exit status (0 for success, non-zero for error)
+%
+%     cmdout: string  
+%         Command output as string
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % Clean command by escaping quotes appropriately for the target shell
     if ispc
@@ -21,9 +31,6 @@ function [status, cmdout] = sys(command)
         % Mac/Linux: Use login shell to get full environment
         full_cmd = sprintf('bash -l -c "%s"', cleaned_command);
     end
-
-    disp("Executing...");
-    disp(full_cmd);
 
     [status, cmdout] = system(full_cmd);
 end

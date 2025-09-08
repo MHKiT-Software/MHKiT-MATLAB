@@ -1,4 +1,23 @@
 function dirs = get_mhkit_directories()
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Get MHKiT application directories for different platforms
+%   Returns standardized directory paths for config, data, and cache storage
+%
+% Parameters
+% ------------
+%     None
+%
+% Returns
+% ---------
+%     dirs: struct
+%         Structure containing directory paths:
+%         - config: string (configuration files directory)
+%         - data: string (user data directory) 
+%         - cache: string (temporary cache directory)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     % Initialize directories structure
     dirs = struct();
 
