@@ -1,18 +1,20 @@
 function packages = list(env_name)
-% GET_CONDA_PACKAGES Gets a list of packages from conda environment or file
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Gets a list of packages from conda environment
 %
-% env_name:
-%   env_name   - a conda environment name or a file path
-%   is_file - Boolean, true if env_name is a file path, false if environment name
-%             Default is false if not specified
+% Parameters
+% ------------
+%     env_name: string
+%         Conda environment name
 %
-% Output:
-%   packages - Struct where each field is a package name containing a struct
-%              with 'version', 'build', and 'channel' fields
+% Returns
+% ---------
+%     packages: struct
+%         Structure where each field is a package name containing a struct
+%         with 'version', 'build', and 'channel' fields
 %
-% Examples:
-%   % Get packages from an environment
-%   packages = get_conda_packages('myenv');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   disp(packages.numpy.version);
 %
 %   % Parse packages from a file
@@ -31,15 +33,8 @@ packages = struct();
 % Run conda command
 % Construct command to activate environment and list packages
 cmd = sprintf('conda run -n %s conda list', env_name);
-% cmd = sprintf('conda activate %s && conda list', env_name);
-disp("Running");
-disp(cmd);
 
 [status, cmdout] = mhkit.sys(cmd);
-disp(status);
-
-disp("Finished...");
-disp(cmdout);
 
 % Check if command was successful
 if status ~= 0

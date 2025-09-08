@@ -1,7 +1,28 @@
 function result = parse_info(env_name, logger)
-    % PARSECONDAINFO Parse specific fields from 'conda info' command output
-    %   info = PARSECONDAINFO(cmdOutput) extracts active environment, location,
-    %   Python version, and platform from conda info output
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Parse specific fields from 'conda info' command output
+%   Extracts active environment, location, Python version, and platform 
+%   from conda info output
+%
+% Parameters
+% ------------
+%     env_name: string
+%         Name of conda environment to get info from
+%
+%     logger: struct
+%         Logger object for error reporting
+%
+% Returns
+% ---------
+%     result: struct
+%         Structure containing conda environment information:
+%         - active_environment: string
+%         - active_env_location: string  
+%         - python_version: string
+%         - platform: string
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     [status, cmd_out] = mhkit.sys(sprintf('conda activate %s && conda info', env_name));
     if status ~= 0
@@ -25,7 +46,6 @@ function result = parse_info(env_name, logger)
     % Process each line
     for i = 1:length(lines)
         line = strtrim(lines{i});
-        disp(line);  % Debug output
 
         % Skip empty lines
         if isempty(line)
@@ -49,21 +69,21 @@ function result = parse_info(env_name, logger)
 
                     % Store in struct
                     result.(field_name) = value;
-                    fprintf('Matched field "%s" with value "%s"\n', field, value);
+                    % fprintf('Matched field "%s" with value "%s"\n', field, value);
                     break;
                 end
             end
         end
     end
 
-    % Verify all fields were found
-    fprintf('\nFound fields:\n');
-    for j = 1:length(fields_to_find)
-        field_name = regexprep(lower(fields_to_find{j}), '\s+', '_');
-        if isfield(result, field_name)
-            fprintf('  %s: %s\n', field_name, result.(field_name));
-        else
-            fprintf('  WARNING: Field "%s" not found!\n', fields_to_find{j});
-        end
-    end
+    % % Verify all fields were found
+    % fprintf('\nFound fields:\n');
+    % for j = 1:length(fields_to_find)
+    %     field_name = regexprep(lower(fields_to_find{j}), '\s+', '_');
+    %     if isfield(result, field_name)
+    %         fprintf('  %s: %s\n', field_name, result.(field_name));
+    %     else
+    %         fprintf('  WARNING: Field "%s" not found!\n', fields_to_find{j});
+    %     end
+    % end
 end

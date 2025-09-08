@@ -28,8 +28,6 @@ function result = exists()
         % Attempt to run conda info with system command
         [status, out] = mhkit.sys('conda info --base');
 
-        disp(out);
-
         % If the command succeeds (status = 0), Conda is installed
         if status == 0
             result = true;

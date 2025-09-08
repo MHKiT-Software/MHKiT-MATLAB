@@ -1,5 +1,26 @@
 function result = install(commands, logger)
-    % INSTALL Detects OS and installs miniconda using appropriate commands
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Detects OS and installs miniconda using appropriate commands
+%
+% Parameters
+% ------------
+%     commands: struct
+%         Structure containing installation commands for different OS:
+%         - windows: cell array of commands for Windows
+%         - mac.arm: cell array of commands for macOS ARM64
+%         - mac.intel: cell array of commands for macOS Intel
+%         - linux: cell array of commands for Linux
+%
+%     logger: struct
+%         Logger object for outputting status messages
+%
+% Returns
+% ---------
+%     result: logical
+%         true if installation succeeds, false if it fails
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % Get command list based on OS
     if ispc
