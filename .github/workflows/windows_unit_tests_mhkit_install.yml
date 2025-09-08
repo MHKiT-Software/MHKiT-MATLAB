@@ -1,0 +1,153 @@
+name: MHKiT-MATLAB Windows Unit Tests (mhkit.install)
+
+on:
+  push:
+    branches: [ master, develop, feat_add_mhkit_python_install_script ]
+  pull_request:
+    branches: [ master, develop, feat_add_mhkit_python_install_script ]
+
+jobs:
+  cache_population:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        matlab-version: [R2023b]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v4
+
+      # Create the cache and add a dummy file
+      # The dummy file ensures that the artifact download
+      - name: Setup mhkit_webread_cache
+        shell: bash
+        run: |
+          mkdir mhkit_webread_cache
+          touch mhkit_webread_cache/test.txt
+          echo "Hello World" > mhkit_webread_cache/test.txt
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: ${{ matrix.matlab-version }}
+
+      - name: Run mhkit.install()
+        uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            addpath(genpath('mhkit'));
+            mhkit.install();
+          startup-options: -noFigureWindows
+
+      - name: Add MATLAB test commands
+        shell: bash
+        run: echo "version,
+          addpath(genpath('mhkit')),
+          import matlab.unittest.TestSuite,
+          import matlab.unittest.TestRunner,
+          testFolder = ['mhkit' filesep 'tests'],
+          suite = TestSuite.fromFolder(testFolder),
+          runner = TestRunner.withTextOutput,
+          results = runner.run(suite),
+          assertSuccess(results)" >> run.m
+
+      - name: Output Run.m
+        shell: bash
+        run: cat run.m
+
+      - name: Run MHKiT-MATLAB Unit Tests
+        uses: matlab-actions/run-command@v2
+        with:
+          command: run
+          startup-options: -noFigureWindows
+
+      - name: Save mhkit_webread_cache directory as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # GitHub Action "Name" of artifact
+          name: mhkit_webread_cache
+          # Filesystem path of directory
+          path: mhkit_webread_cache
+
+  main:
+    needs: cache_population
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        python-version: ["3.10", 3.11, 3.12]
+        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
+        mhkit-python-version: ["0.9.0"]
+        exclude:
+          # Cache population job
+          - matlab-version: R2023b
+            python-version: "3.10"
+          # Python 3.12 + MATLAB incompatability
+          - matlab-version: R2024a
+            python-version: 3.12
+          - matlab-version: R2023b
+            python-version: 3.12
+          - matlab-version: R2023a
+            python-version: 3.12
+          - matlab-version: R2022b
+            python-version: 3.12
+          # Python 3.11 + MATLAB incompatability
+          - matlab-version: R2023a
+            python-version: 3.11
+          - matlab-version: R2022b
+            python-version: 3.11
+    runs-on: ${{ matrix.os }}
+
+    env:
+      MHKIT_PYTHON_VERSION: ${{  matrix.mhkit-python-version }}
+    steps:
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v4
+
+      - name: Download mhkit_webread_cache artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mhkit_webread_cache
+          path: mhkit_webread_cache
+
+      - name: Display structure mhkit_webread_cache
+        run: ls -R
+        working-directory: .
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: ${{ matrix.matlab-version }}
+
+      - name: Run mhkit.install()
+        uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            addpath(genpath('mhkit'));
+            mhkit.install();
+          startup-options: -noFigureWindows
+
+      - name: Add MATLAB test commands
+        shell: bash
+        run: echo "version,
+          pyenv,
+          addpath(genpath('mhkit')),
+          import matlab.unittest.TestSuite,
+          import matlab.unittest.TestRunner,
+          testFolder = ['mhkit' filesep 'tests'],
+          suite = TestSuite.fromFolder(testFolder),
+          runner = TestRunner.withTextOutput,
+          results = runner.run(suite),
+          assertSuccess(results)" >> run.m
+
+      - name: Output Run.m
+        shell: bash
+        run: cat run.m
+
+      - name: Run MHKiT-MATLAB Unit Tests
+        uses: matlab-actions/run-command@v2
+        with:
+          command: run
+          startup-options: -noFigureWindows
