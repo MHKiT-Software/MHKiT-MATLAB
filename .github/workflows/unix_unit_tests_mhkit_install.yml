@@ -43,6 +43,17 @@ jobs:
             mhkit.install();
           startup-options: -noFigureWindows
 
+      - name: Validate Installation Health
+        uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            addpath(genpath('mhkit'));
+            success = mhkit.check_health();
+            if ~success
+              error('MHKiT health check failed - installation has issues');
+            end
+          startup-options: -noFigureWindows
+
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version,
@@ -140,6 +151,17 @@ jobs:
           command: |
             addpath(genpath('mhkit'));
             mhkit.install();
+          startup-options: -noFigureWindows
+
+      - name: Validate Installation Health
+        uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            addpath(genpath('mhkit'));
+            success = mhkit.check_health();
+            if ~success
+              error('MHKiT health check failed - installation has issues');
+            end
           startup-options: -noFigureWindows
 
       - name: Add MATLAB test commands
