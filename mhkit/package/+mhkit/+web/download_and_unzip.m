@@ -1,19 +1,30 @@
 function [status, extracted_path] = download_and_unzip(url, target_dir, unzip_folder_name)
-    % DOWNLOAD_AND_UNZIP Downloads a zip file from a URL and extracts its contents
-    %
-    % Inputs:
-    %   url: String containing the URL of the zip file to download
-    %   target_dir: String containing the directory where the zip file should be
-    %              downloaded to. Will be created if it doesn't exist.
-    %   unzip_folder_name: String containing name of folder to extract to.
-    %                     This folder will be deleted if it exists before extraction.
-    %
-    % Outputs:
-    %   status: Boolean indicating success (true) or failure (false)
-    %   extracted_path: String containing the full path to the extracted directory
-    %
-    % Example:
-    %   [status, extracted_path] = download_and_unzip('https://example.com/data.zip', 'C:/data', 'dataset');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Downloads a zip file from a URL and extracts its contents
+%
+% Parameters
+% ------------
+%     url: string
+%         URL of the zip file to download
+%
+%     target_dir: string
+%         Directory where the zip file should be downloaded to
+%         Will be created if it doesn't exist
+%
+%     unzip_folder_name: string
+%         Name of folder to extract to
+%         This folder will be deleted if it exists before extraction
+%
+% Returns
+% ---------
+%     status: logical
+%         true for success, false for failure
+%
+%     extracted_path: string
+%         Full path to the extracted directory
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % Check that all required parameters are provided
     if nargin < 3
