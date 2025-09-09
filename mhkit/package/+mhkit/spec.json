@@ -19,7 +19,11 @@
     "maximum_version": "3.12"
   },
   "mhkit_python": {
-    "install": "conda install -c conda-forge mhkit==<mhkit_python_version> -y",
+    "install": {
+      "windows": "conda install -c conda-forge mhkit==<mhkit_python_version> -y",
+      "linux": "conda install -c conda-forge mhkit==<mhkit_python_version> -y",
+      "mac": "conda install -c conda-forge mhkit==<mhkit_python_version> -y"
+    },
     "version": "0.9",
     "verify_version": {
       "command": "python -c \"import mhkit; print(mhkit.__version__)\"",
@@ -59,6 +63,61 @@
         "bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3",
         "rm ~/miniconda3/miniconda.sh"
       ]
+    }
+  },
+  "hooks": {
+    "pre_install": {
+      "commands": {
+        "linux": [
+          "conda run -n <conda_env> conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 -y"
+        ],
+        "mac": [
+          "conda run -n <conda_env> conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 -y",
+          "conda run -n <conda_env> conda install openssl==3.0.* -y"
+        ],
+        "windows": []
+      },
+      "environment_variables": {
+        "linux": {},
+        "mac": {},
+        "windows": {}
+      }
+    },
+    "post_install": {
+      "commands": {
+        "linux": [
+          "conda run -n <conda_env> pip install --upgrade netcdf4",
+          "conda run -n <conda_env> pip uninstall -y scipy",
+          "conda run -n <conda_env> pip install scipy==1.12.0"
+        ],
+        "mac": [
+          "conda run -n <conda_env> pip install --upgrade netcdf4",
+          "conda run -n <conda_env> pip uninstall -y scipy",
+          "conda run -n <conda_env> pip install scipy==1.12.0"
+        ],
+        "windows": []
+      },
+      "environment_variables": {
+        "linux": {},
+        "mac": {},
+        "windows": {}
+      }
+    },
+    "environment_setup": {
+      "commands": {
+        "linux": [],
+        "mac": [],
+        "windows": []
+      },
+      "environment_variables": {
+        "linux": {
+          "LD_PRELOAD": "/lib/x86_64-linux-gnu/libstdc++.so.6"
+        },
+        "mac": {
+          "DYLD_LIBRARY_PATH": "<conda_lib_path>:$DYLD_LIBRARY_PATH"
+        },
+        "windows": {}
+      }
     }
   }
 }

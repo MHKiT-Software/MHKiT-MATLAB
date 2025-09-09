@@ -110,6 +110,15 @@ function install()
             end
         end
 
+        % Execute pre-install hooks
+        logger.info('\nExecuting pre-install hooks...');
+        hook_success = mhkit.hooks.execute('pre_install', spec, logger);
+        if ~hook_success
+            logger.error('Pre-install hooks failed');
+            return;
+        end
+        logger.info('✓ Pre-install hooks completed');
+
         % Check if `mhkit` is in `conda list`
         has_correct_mhkit_python = false;
         conda_packages = mhkit.conda.list(conda_env_name);
@@ -124,7 +133,10 @@ function install()
         if ~has_correct_mhkit_python
             % Step 4: Install MHKiT-Python
             logger.info('\nInstalling MHKiT-Python v%s...', spec.mhkit_python.version);
-            command = spec.mhkit_python.install;
+            
+            % Get platform-specific install command
+            platform = mhkit.sys.get_platform();
+            command = spec.mhkit_python.install.(platform);
             command = replace(command, '<mhkit_python_version>', spec.mhkit_python.version);
             mhkit.sys(sprintf("conda run -n %s %s", conda_env_name, command));
 
@@ -145,6 +157,15 @@ function install()
         else
             logger.info('✓ MHKiT-Python v%s ready', spec.mhkit_python.version);
         end
+
+        % Execute post-install hooks
+        logger.info('\nExecuting post-install hooks...');
+        hook_success = mhkit.hooks.execute('post_install', spec, logger);
+        if ~hook_success
+            logger.error('Post-install hooks failed');
+            return;
+        end
+        logger.info('✓ Post-install hooks completed');
 
         logger.info('Testing functionality...');
         command = spec.mhkit_python.verify_operation.command;
@@ -180,6 +201,16 @@ function install()
 
         % Configure MATLAB integration
         logger.info('\nConfiguring MATLAB integration...');
+        
+        % Execute environment setup hooks
+        logger.info('Executing environment setup hooks...');
+        hook_success = mhkit.hooks.execute('environment_setup', spec, logger);
+        if ~hook_success
+            logger.warning('Environment setup hooks failed, continuing with Python integration');
+        else
+            logger.info('✓ Environment setup hooks completed');
+        end
+        
         initialize_python_integration(conda_env_name, logger);
 
         % Final verification
