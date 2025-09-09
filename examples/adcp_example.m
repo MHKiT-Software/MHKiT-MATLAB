@@ -265,10 +265,10 @@ ds = water_depth_from_pressure(ds, 'salinity', water_salinity_psu);
 % Visualizing Depth
 
 dolfyn_plot(ds, 'depth', 'width', 800, 'height', 400);
-title('Distance from Water Surface to Seafloor [m]');
+title('Distance from ADCP Pressure Sensor (Including Offset) to Water Surface [m]');
 
 %%
-% After determining the "depth", the |remove_surface_interference| function can be used to
+% After determining the depth/altitude, the |remove_surface_interference| function can be used to
 % discard data in depth bins near or above the actual water surface. This function
 % calculates a range limit based on the beam angle and cell size, where surface
 % interference is expected to occur at distances greater than |range * cos(beam angle)
