@@ -53,7 +53,7 @@ time = datetime(data.time, 'convertfrom', 'posixtime', 'Format', 'MM/dd/yy HH:mm
 % Call on standard xy plotting
 figure = plot(time, velocities);
 hold on
-datetick('x',2,'keeplimits');
+xtickformat('yyyy-MM-dd HH:mm:ss');
 
 grid on;
 %axis 'tight';

@@ -1,3 +1,24 @@
+# Current development
+
+## PR 153 - Mooring Module
+
+- Author: @hivanov-nrel
+- Addition of the mooring module, which includes
+  - Read in MoorDyn files into MATLAB
+  - Function to calculate mooring line lay length
+  - Functions to visualize mooring line dynamics in 2D or 3D.
+  - Example LiveScript demonstrating the functionality of the mooring module
+
+## PR 170 - WDRT leftovers
+
+- Author: @hivanov-nrel
+- Expanded WDRT functionality by adding `automatic_hs_threshold` and `return_year_value` functions
+
+## PR 169 - Code Compatibility Improvements
+
+- Author: @simmsa
+- Fix code compatibility issues detailed in issues #115, #116, #117, #118, #119, #120, #121, and #122
+
 # MHKiT-MATLAB v0.6.0
 
 ## Release Highlights

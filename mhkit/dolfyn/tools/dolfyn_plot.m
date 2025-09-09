@@ -297,7 +297,7 @@ function dolfyn_plot(ds, field, varargin)
 
         % Set colorbar limits if provided
         if ~isempty(options.cbar_min) && ~isempty(options.cbar_max)
-            caxis([options.cbar_min options.cbar_max]);
+            clim([options.cbar_min options.cbar_max]);
         end
 
         cb = colorbar;
@@ -309,7 +309,7 @@ function dolfyn_plot(ds, field, varargin)
 
         % Set colorbar limits if provided
         if ~isempty(options.cbar_min) && ~isempty(options.cbar_max)
-            caxis([options.cbar_min options.cbar_max]);
+            clim([options.cbar_min options.cbar_max]);
         end
 
         try
