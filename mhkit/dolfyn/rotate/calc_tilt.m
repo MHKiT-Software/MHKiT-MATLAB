@@ -89,16 +89,13 @@ function tilt = calc_tilt(pitch, roll, options)
     
     % Calculate tilt using trigonometric relationship
     % Source: mhkit_python:dolfyn.rotate.base.calc_tilt, author @jmcvey3
-    tilt_rad = tilt_rad = atan(sqrt(tan(roll_rad).^2 + tan(pitch_rad).^2));
+    tilt_rad = atan(sqrt(tan(roll_rad).^2 + tan(pitch_rad).^2));
 
     % Quality assessment and warnings
-    if input_is_degrees
-        max_tilt_deg = max(rad2deg(tilt_rad(:)));
-        mean_tilt_deg = mean(rad2deg(tilt_rad(:)));
-    else
-        max_tilt_deg = max(rad2deg(tilt_rad(:)));
-        mean_tilt_deg = mean(rad2deg(tilt_rad(:)));
-    end
+    % Convert tilt to degrees for quality assessment regardless of output units
+    tilt_deg = rad2deg(tilt_rad);
+    max_tilt_deg = max(tilt_deg(:));
+    mean_tilt_deg = mean(tilt_deg(:));
     
     % Issue warnings for large tilts
     if max_tilt_deg > 5
@@ -106,7 +103,7 @@ function tilt = calc_tilt(pitch, roll, options)
         fprintf('Tilt Analysis Summary:\n');
         fprintf('  Mean tilt: %.2f°\n', mean_tilt_deg);
         fprintf('  Max tilt:  %.2f°\n', max_tilt_deg);
-        fprintf('  Std tilt:  %.2f°\n', std(rad2deg(tilt_rad(:))));
+        fprintf('  Std tilt:  %.2f°\n', std(tilt_deg(:)));
     end
     
     % Convert to desired output units
