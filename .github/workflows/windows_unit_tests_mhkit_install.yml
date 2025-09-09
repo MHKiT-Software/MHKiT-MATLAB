@@ -41,15 +41,30 @@ jobs:
             mhkit.install();
           startup-options: -noFigureWindows
 
+      - name: Configure MATLAB Python Environment for Health Check
+        shell: bash -l {0}
+        run: |
+          # Get Python executable from mhkit-matlab-env
+          PYTHON_PATH=$(conda run -n mhkit-matlab-env python -c "import sys; print(sys.executable)")
+          echo "Python path: $PYTHON_PATH"
+          
+          # Create health check script with Python configuration
+          cat > health_check.m << EOF
+          addpath(genpath('mhkit'));
+          pyenv(Version='$PYTHON_PATH', ExecutionMode='OutOfProcess');
+          success = mhkit.check_health();
+          if ~success
+            error('MHKiT health check failed - installation has issues');
+          end
+          EOF
+          
+          echo "Health check script content:"
+          cat health_check.m
+
       - name: Validate Installation Health
         uses: matlab-actions/run-command@v2
         with:
-          command: |
-            addpath(genpath('mhkit'));
-            success = mhkit.check_health();
-            if ~success
-              error('MHKiT health check failed - installation has issues');
-            end
+          command: health_check
           startup-options: -noFigureWindows
 
       - name: Add MATLAB test commands
@@ -140,15 +155,30 @@ jobs:
             mhkit.install();
           startup-options: -noFigureWindows
 
+      - name: Configure MATLAB Python Environment for Health Check
+        shell: bash -l {0}
+        run: |
+          # Get Python executable from mhkit-matlab-env
+          PYTHON_PATH=$(conda run -n mhkit-matlab-env python -c "import sys; print(sys.executable)")
+          echo "Python path: $PYTHON_PATH"
+          
+          # Create health check script with Python configuration
+          cat > health_check.m << EOF
+          addpath(genpath('mhkit'));
+          pyenv(Version='$PYTHON_PATH', ExecutionMode='OutOfProcess');
+          success = mhkit.check_health();
+          if ~success
+            error('MHKiT health check failed - installation has issues');
+          end
+          EOF
+          
+          echo "Health check script content:"
+          cat health_check.m
+
       - name: Validate Installation Health
         uses: matlab-actions/run-command@v2
         with:
-          command: |
-            addpath(genpath('mhkit'));
-            success = mhkit.check_health();
-            if ~success
-              error('MHKiT health check failed - installation has issues');
-            end
+          command: health_check
           startup-options: -noFigureWindows
 
       - name: Add MATLAB test commands
