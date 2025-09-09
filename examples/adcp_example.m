@@ -565,4 +565,787 @@ hold off;
 
 %% 7. Turbulence Statistics
 %
-% In the next release of MHKiT-MATLAB turbulence statistics calculations and visualizations will be added.
+% The next section of this example will run through the turbulence analysis 
+% of the data presented here. There was no intention of measuring turbulence 
+% in the deployment that collected this data, so results depicted here are 
+% not the highest quality. The quality of turbulence measurements from an 
+% ADCP depend heavily on the quality of the deployment setup and data 
+% collection, particularly instrument frequency, sampling frequency and 
+% depth bin size.
+%
+% Read more on proper ADCP setup for turbulence measurements in: Thomson, 
+% Jim, et al. "Measurements of turbulence at two tidal energy sites in 
+% Puget Sound, WA." IEEE Journal of Oceanic Engineering 37.3 (2012): 363-374.
+%
+% Most functions related to turbulence statistics in MHKiT-DOLfYN have the 
+% papers they originate from referenced in their docstrings.
+
+%% 7.1 Turbulence Intensity
+% For most users, turbulence intensity (TI), the ratio of the ensemble 
+% standard deviation to ensemble flow speed given as a percent, is all most 
+% will need. In MHKiT, this can be simply calculated from ensemble-averaged 
+% data, but be aware that this will be a conservative estimate. Another 
+% function, |calculate_turbulence_intensity|, is capable of subtracting 
+% instrument noise from this parameter and is discussed below. The 
+% noise-subtracted TI is more accurate and typically 1-2% lower than the 
+% non-noise-subtracted estimation.
+
+% Basic turbulence intensity calculation
+ds_avg = calculate_turbulence_intensity(ds_avg, 'field_name', 'TI');
+
+% Create visualization
+fig = figure;
+fig.Position = [100 100 800 400];
+
+ti_data = ds_avg.TI.data';  % Transpose for proper orientation
+time = datetime(ds_avg.coords.time, 'ConvertFrom', 'posixtime');
+range = ds_avg.coords.range;
+depth = ds_avg.depth.data;
+
+[T, R] = meshgrid(time, range);
+pcolor(T, R, ti_data);
+shading flat;
+colormap('hot');  % Red colormap similar to Python
+
+hold on;
+plot(time, depth, 'b-', 'LineWidth', 2);  % Water surface line
+
+xlabel('Time');
+ylabel('Altitude [m]');
+ylim([0, max(depth) + 1]);
+
+ax = gca;
+ax.XAxis.TickLabelFormat = 'HH:mm';
+
+c = colorbar;
+c.Label.String = 'Turbulence Intensity';
+title('Basic Turbulence Intensity and Surface Elevation');
+
+hold off;
+
+%% 7.2 Power Spectral Densities (Auto-Spectra)
+%
+% Other turbulence parameters include the TKE power- and cross-spectral 
+% densities (i.e the power spectra), turbulent kinetic energy (TKE, i.e. 
+% the variances of velocity vector components), Reynolds stress vector 
+% (i.e. the co-variances of velocity vector components), TKE dissipation 
+% rate, and TKE production rate. These quantities are primarily used to 
+% inform and verify hydrodynamic and coastal models, which take some or 
+% all of these quantities as input.
+%
+% The TKE production rate is the rate at which kinetic energy (KE) 
+% transitions from a useful state (able to do "work" in the physics sense) 
+% to turbulent; TKE is the actual amount of turbulent KE in the water; and 
+% TKE dissipation rate is the rate at which turbulent KE is lost to 
+% non-motion forms of energy (heat, sound, etc) due to viscosity. The power 
+% spectra are used to depict and quantify this energy in the frequency 
+% domain, and creating them are the first step in turbulence analysis.
+%
+% We'll start by looking at the power spectra, specifically the auto-spectra 
+% from the vertical beam. This can be done using the 
+% |calculate_power_spectral_density| function. We'll create spectra at the 
+% middle water column, at a depth of 5 m, and use a number of FFT's equal 
+% to 1/3 the bin size.
+
+rng = 5;  % m - depth for analysis
+
+% Calculate PSD using vertical beam data at specified range
+fprintf('Using 5th beam (vertical) for PSD calculation at %.1f m depth\n', rng);
+
+[vel_up, vel_coords] = dolfyn_select(ds.vel_b5, 'range_b5', rng, 'method', 'nearest');
+fprintf('Selected vel_b5 range bin: %.1f m\n', vel_coords.range_b5);
+
+[U_data, u_coords] = dolfyn_select(ds_avg.U_mag, 'range', rng, 'method', 'nearest');
+fprintf('Selected U_mag range bin: %.1f m\n', u_coords.range);
+
+ds_avg = power_spectral_density(ds_avg, vel_up, ...
+    'freq_units', 'Hz', ...
+    'n_fft', floor(ds_avg.attrs.n_bin / 2), ...
+    'field_name', 'auto_spectra_5m');
+
+U = U_data;
+
+% Create figure for PSD plot with velocity-colored spectra
+fig = figure;
+fig.Position = [100 100 500 500];  
+
+% Set default font properties to match Python
+set(0, 'DefaultAxesFontSize', 18);
+set(0, 'DefaultAxesFontName', 'Times New Roman');
+
+% Get PSD and frequency data
+psd_data = ds_avg.auto_spectra_5m.data;  % [time_bins x freq_bins]
+freq_data = ds_avg.auto_spectra_5m.coords.freq;
+
+% Get velocity data for coloring (U was extracted earlier)
+U_values = U_data(:);  % Make sure it's a column vector
+U_max = max(U_values);
+
+% Average spectra into 0.1 m/s velocity bins (match Python exactly)
+% Python: np.arange(0.5, U_max, 0.1)
+speed_bins = 0.5:0.1:U_max;
+if speed_bins(end) ~= U_max
+    speed_bins = [speed_bins, U_max];  % Ensure U_max is included
+end
+n_bins = length(speed_bins) - 1;
+
+% Initialize storage for binned spectra
+S_binned = zeros(n_bins, length(freq_data));
+count_binned = zeros(n_bins, 1);
+
+% Bin the spectra by velocity (match Python's groupby_bins behavior)
+for i = 1:n_bins
+    if i < n_bins
+        % For all bins except last: [bin_start, bin_end)
+        bin_mask = (U_values >= speed_bins(i)) & (U_values < speed_bins(i+1));
+    else
+        % For last bin: [bin_start, bin_end]
+        bin_mask = (U_values >= speed_bins(i)) & (U_values <= speed_bins(i+1));
+    end
+    
+    if sum(bin_mask) > 0
+        S_binned(i, :) = mean(psd_data(bin_mask, :), 1, 'omitnan');
+        count_binned(i) = sum(bin_mask);
+    else
+        S_binned(i, :) = NaN;
+    end
+end
+
+% Create colormap (match Python's turbo)
+if exist('turbo', 'file') == 2
+    cmap = turbo(256);
+else
+    % Fallback if turbo not available
+    cmap = jet(256);
+end
+
+% Create colors for each speed bin (match Python's BoundaryNorm)
+cbar_max = 2.0;  % Match Python's cbar_max=2.0 exactly
+bounds = 0.5:0.1:cbar_max;  % Match Python's np.arange(0.5, cbar_max, 0.1)
+
+% Map speed_bins to colors using BoundaryNorm approach
+speed_bin_centers = speed_bins(1:end-1) + diff(speed_bins)/2;
+colors = zeros(n_bins, 3);
+for i = 1:n_bins
+    % Find which boundary interval this speed falls into
+    bound_idx = find(bounds <= speed_bin_centers(i), 1, 'last');
+    if isempty(bound_idx)
+        bound_idx = 1;
+    elseif bound_idx >= length(bounds)
+        bound_idx = length(bounds) - 1;
+    end
+    
+    % Map to colormap index
+    cmap_idx = round((bound_idx - 1) / (length(bounds) - 1) * (size(cmap, 1) - 1)) + 1;
+    cmap_idx = max(1, min(size(cmap, 1), cmap_idx));
+    colors(i, :) = cmap(cmap_idx, :);
+end
+
+% Create main plot axes (match Python's subplots_adjust layout)
+ax = axes('Position', [0.2 0.1 0.55 0.85]);  % left=0.2, right=0.75, bottom=0.1, top=0.95
+hold on;
+
+% Plot each velocity bin with its color
+for i = 1:n_bins
+    if count_binned(i) > 0 && ~all(isnan(S_binned(i, :)))
+        loglog(freq_data, S_binned(i, :), 'Color', colors(i, :), 'LineWidth', 1.0);
+    end
+end
+
+% Add -5/3 slope reference line (match Python exactly)
+m = -5/3;
+x = logspace(-1, 0.5, 50);  % Match Python's np.logspace(-1, 0.5)
+y = 10^(-3) * x.^m;         % Match Python's 10**(-3) * x**m
+loglog(x, y, '--', 'Color', 'black', 'LineWidth', 2);
+
+% Add grid (match Python)
+grid on;
+
+% Specify logarithmic scaling
+set(ax, 'XScale', 'log');
+set(ax, 'YScale', 'log');
+
+% Set axis properties (match Python exactly)
+set(ax, 'FontSize', 18, 'FontName', 'Times New Roman');
+xlabel('Frequency [Hz]', 'FontSize', 18);
+ylabel('PSD [m^2 s^{-2} Hz^{-1}]', 'FontSize', 18);  % Match Python's format
+xlim([0.01, 1]);
+ylim([0.0005, 0.1]);
+
+% Add legend (match Python's formatting)
+legend('f^{-5/3}', 'Location', 'northeast');
+
+% Create colorbar (match Python's ColorbarBase implementation)
+cax = axes('Position', [0.8 0.07 0.03 0.88]);  % Match Python's [0.8, 0.07, 0.03, 0.88]
+
+% Create colorbar data
+cbar_data = linspace(0.5, cbar_max, 256)';
+imagesc(cax, [1], cbar_data, repmat(cbar_data, 1, 1));
+colormap(cax, cmap);
+
+% Format colorbar (match Python's formatting)
+set(cax, 'YDir', 'normal', 'XTick', []);
+set(cax, 'FontSize', 18, 'FontName', 'Times New Roman');
+set(cax, 'YLim', [0.5, cbar_max]);
+
+% Set colorbar ticks to match Python's bounds
+yticks(cax, bounds);
+yticklabels(cax, arrayfun(@(x) sprintf('%.1f', x), bounds, 'UniformOutput', false));
+ylabel(cax, 'Velocity [m/s]', 'FontSize', 18);
+
+hold off;
+
+%% 7.3 Instrument Noise
+%
+% The next thing we want to do is calculate the instrument's Doppler noise 
+% floor from the spectrum we calculated above. (We are making the 
+% assumption that the noise floor of the vertical beam is the same as the 
+% noise floor of the other 4 beams). This gives us a timeseries of the 
+% noise floor, which varies by instrument and with flow speed, at that 
+% depth bin.
+%
+% We can do this using the |calculate_doppler_noise_level| function. The 
+% two inputs for this function are the power spectra and "pct_fN", the 
+% percent of the Nyquist frequency that the noise floor exists. Because in 
+% this particularly dataset we can't see the noise floor, we'll just use 
+% 90% or pct_fN=0.9 as an example. If the noise floor began at 0.4 Hz and 
+% ran til our maximum frequency of 0.5 Hz, we'd use pct_fN = 0.4 Hz / 0.5 Hz = 0.8.
+
+ds_avg = calculate_doppler_noise_level(ds_avg, ...
+    'psd_field', 'auto_spectra_5m', ...
+    'pct_fN', 0.9, ...
+    'field_name', 'noise_5m');
+
+% Display noise statistics
+noise_data = ds_avg.noise_5m.data;
+fprintf('Noise level statistics:\n');
+fprintf('  Mean: %.4f m/s\n', mean(noise_data(:), 'omitnan'));
+fprintf('  Std:  %.4f m/s\n', std(noise_data(:), 'omitnan'));
+fprintf('  Range: [%.4f, %.4f] m/s\n', min(noise_data(:)), max(noise_data(:)));
+
+%% 7.4 TKE Dissipation Rate
+%
+% Because we can see the isotropic turbulence cascade (0.2 - 0.5 Hz) at this 
+% depth bin (5 m altitude), we can calculate the TKE dissipation rate at this 
+% location from the spectra itself. This can be done using 
+% |calculate_dissipation_rate_LT83|, whose inputs are the power spectra, the 
+% ensemble speed, the frequency range of the isotropic cascade, and the 
+% instrument's noise.
+
+% Frequency range of isotropic turbulence cascade
+f_rng = [0.2, 0.5];  % Hz
+
+% Create temporary 1D U_mag field for dissipation calculation  
+% (since our PSD is 2D [time, freq], we need 1D U_mag [time])
+ds_avg.U_mag_5m = struct();
+ds_avg.U_mag_5m.data = U_data;  % Use the selected 1D data
+ds_avg.U_mag_5m.dims = {'time'};  % 1D time dimension
+ds_avg.U_mag_5m.coords = struct();  % Empty coords structure
+
+% Calculate dissipation rate
+ds_avg = calculate_dissipation_rate_LT83(ds_avg, ...
+    'psd_field', 'auto_spectra_5m', ...
+    'U_mag_field', 'U_mag_5m', ...
+    'freq_range', f_rng, ...
+    'noise', ds_avg.noise_5m, ...
+    'field_name', 'dissipation_rate_5m');
+
+% Display dissipation statistics
+eps_data = ds_avg.dissipation_rate_5m.data;
+fprintf('Dissipation rate statistics:\n');
+fprintf('  Mean: %.2e m²/s³\n', mean(eps_data(:), 'omitnan'));
+fprintf('  Valid points: %d/%d\n', sum(~isnan(eps_data(:))), numel(eps_data));
+
+%% Calculate full profile of spectra and dissipation rates
+%
+% We have just found the spectra and dissipation rate from a single depth 
+% bin at an altitude of 5 m from the seafloor, but typically we want the 
+% spectra and dissipation rates from the entire measurement profile.
+
+n_range = length(ds.coords.range);
+
+% Initialize cell arrays for storing results
+spec_profile = cell(n_range, 1);
+dissipation_profile = cell(n_range, 1);
+noise_profile = cell(n_range, 1);
+
+% Process each depth bin (match Python: for r in range(len(ds["range"])))
+for r = 1:n_range
+    try
+        % Extract velocity data for this specific range bin (match Python: ds["vel_b5"].isel(range_b5=r))
+        [vel_b5_r, ~] = dolfyn_select(ds.vel_b5, 'range_b5', ds.coords.range_b5(r), 'method', 'nearest');
+        
+        % Calculate PSD for this range bin (match Python: avg_tool.power_spectral_density(..., freq_units="Hz"))
+        ds_temp = power_spectral_density(ds_avg, vel_b5_r, ...
+            'freq_units', 'Hz', ...
+            'n_fft', floor(ds_avg.attrs.n_bin / 2), ...
+            'field_name', sprintf('auto_spectra_r%d', r));
+        
+        % Calculate noise level (match Python: avg_tool.doppler_noise_level(spec[r], pct_fN=0.9))
+        ds_temp = calculate_doppler_noise_level(ds_temp, ...
+            'psd_field', sprintf('auto_spectra_r%d', r), ...
+            'pct_fN', 0.9, ...
+            'field_name', sprintf('noise_r%d', r));
+        
+        % Extract velocity magnitude for this range bin (match Python: ds_avg.velds.U_mag.isel(range=r))
+        if isfield(ds_avg, 'U_mag')
+            [U_mag_r, ~] = dolfyn_select(ds_avg.U_mag, 'range', ds.coords.range(r), 'method', 'nearest');
+            
+            % Create temporary 1D U_mag field for this range bin
+            u_field_name = sprintf('U_mag_r%d', r);
+            ds_temp.(u_field_name) = struct();
+            ds_temp.(u_field_name).data = U_mag_r;  % 1D extracted data
+            ds_temp.(u_field_name).dims = {'time'};  % 1D time dimension
+            ds_temp.(u_field_name).coords = struct();  % Empty coords structure
+            
+            % Calculate dissipation rate (match Python: avg_tool.dissipation_rate_LT83(spec[r], U_mag.isel(range=r), ...))
+            ds_temp = calculate_dissipation_rate_LT83(ds_temp, ...
+                'psd_field', sprintf('auto_spectra_r%d', r), ...
+                'U_mag_field', u_field_name, ...
+                'freq_range', f_rng, ...
+                'noise', ds_temp.(sprintf('noise_r%d', r)).data, ...
+                'field_name', sprintf('dissipation_r%d', r));
+            
+            % Store results
+            if isfield(ds_temp, sprintf('auto_spectra_r%d', r))
+                spec_profile{r} = ds_temp.(sprintf('auto_spectra_r%d', r));
+            end
+            if isfield(ds_temp, sprintf('noise_r%d', r))
+                noise_profile{r} = ds_temp.(sprintf('noise_r%d', r));
+            end
+            if isfield(ds_temp, sprintf('dissipation_r%d', r))
+                dissipation_profile{r} = ds_temp.(sprintf('dissipation_r%d', r));
+            end
+        end
+        
+        % Progress indicator
+        if mod(r, 5) == 0
+            fprintf('  Processed range bin %d/%d\n', r, n_range);
+        end
+        
+    catch ME
+        fprintf('Warning: Failed to process range bin %d: %s\n', r, ME.message);
+        continue;
+    end
+end
+
+
+%% Quality control for dissipation rate
+%
+% Now that we have a profile timeseries of dissipation rate, we need apply 
+% some quality control (QC). Since we can't look at each individual 
+% spectrum to ensure we can see the isotropic turbulence cascade, we want 
+% to QC the output from |calculate_dissipation_rate_LT83| to make sure what 
+% was calculated actually falls on a f^(-5/3) slope. We can do this using 
+% the function |check_turbulence_cascade_slope|, which uses linear 
+% regression on the log-transformed LT83 equation (ref. to Lumley and 
+% Terray, 1983, see docstring) to calculate the spectral slope for the 
+% given frequency range.
+%
+% In our case, we're calculating the slope of each spectrum between 0.2 and 
+% 0.5 Hz. We'll use a cutoff of 20% for the error, but this can be lowered 
+% if there still appear to be erroneous estimations from visual inspection 
+% of the spectra.
+
+fprintf('Applying quality control to dissipation rate estimates\n');
+
+% Reconstruct full profile spectra from spec_profile cell array (like Python ds_avg["auto_spectra"])
+n_time = length(ds_avg.coords.time);
+n_freq = length(ds_avg.auto_spectra_5m.coords.freq);  % Get freq dimension from 5m example
+n_range = length(spec_profile);
+
+% Initialize full profile spectra structure
+ds_avg.auto_spectra = struct();
+ds_avg.auto_spectra.data = NaN(n_range, n_time, n_freq);  % [range x time x freq]
+ds_avg.auto_spectra.coords = ds_avg.auto_spectra_5m.coords;  % Same frequency coords
+ds_avg.auto_spectra.dims = {'range', 'time', 'freq'};
+
+% Fill in the data from spec_profile
+for r = 1:n_range
+    if ~isempty(spec_profile{r})
+        ds_avg.auto_spectra.data(r, :, :) = spec_profile{r}.data;  % [time x freq] -> [1 x time x freq]
+    end
+end
+
+% Quality control using cascade slope (match Python exactly)
+[slope, ~] = check_turbulence_cascade_slope(ds_avg.auto_spectra, 'freq_range', f_rng);
+
+% Check that percent difference from -5/3 is not greater than 20% (match Python)
+% Note: Python has typo (-5.3 should be -5/3), we'll use correct value
+target_slope = -5/3;
+mask = abs((slope - target_slope) / target_slope) <= 0.20;
+
+% Apply mask to dissipation rate data (reconstruct full profile first)
+ds_avg.dissipation_rate = struct();
+ds_avg.dissipation_rate.data = NaN(n_range, n_time);
+for r = 1:n_range
+    if ~isempty(dissipation_profile{r})
+        ds_avg.dissipation_rate.data(r, :) = dissipation_profile{r}.data;  % Extract .data field
+    end
+end
+
+% Apply quality control mask (match Python: ds_avg["dissipation_rate"].where(mask))
+ds_avg.dissipation_rate.data(~mask) = NaN;
+
+% Statistics
+valid_estimates = sum(~isnan(ds_avg.dissipation_rate.data(:)));
+total_estimates = numel(ds_avg.dissipation_rate.data);
+qc_passed = sum(mask(:));
+
+fprintf('QC Results:\n');
+fprintf('  Slope test passed: %d/%d points (%.1f%%)\n', qc_passed, total_estimates, 100*qc_passed/total_estimates);
+fprintf('  Final valid estimates: %d/%d (%.1f%%)\n', valid_estimates, total_estimates, 100*valid_estimates/total_estimates);
+
+%% Physical interpretation and ADCP limitations
+%
+% If we plot the dissipation rate below in a colormap, we can see that the 
+% profile map has a lot of missing data. One of the reasons is that the 1 Hz 
+% sampling rate doesn't provide enough information needed to make dissipation 
+% rate estimations, and the other part is that turbulence measurements push 
+% the boundaries of what ADCPs are capable of.
+%
+% Also, 1x10^-4 to 3x10^-4 m²/s³ is reasonable for a dissipation rate 
+% estimate for the 1 - 1.5 m/s current speeds measured here. They can be a 
+% magnitude greater for faster flow speeds, typically increase closer to the 
+% seafloor, and depend heavily on bathymetry and regional hydrodynamics.
+
+% Create dissipation rate visualization
+fig = figure;
+fig.Position = [100 100 800 400];
+
+% Reconstruct full profile data for plotting
+n_time = length(ds_avg.coords.time);
+n_range = length(ds.coords.range);
+dissipation_full = NaN(n_range, n_time);
+
+for r = 1:length(dissipation_profile)
+    if ~isempty(dissipation_profile{r})
+        dissipation_full(r, :) = dissipation_profile{r}.data;
+    end
+end
+
+time = datetime(ds_avg.coords.time, 'ConvertFrom', 'posixtime');
+range = ds.coords.range;
+depth = ds_avg.depth.data;
+
+[T, R] = meshgrid(time, range);
+pcolor(T, R, dissipation_full);
+shading flat;
+colormap('turbo');
+
+hold on;
+plot(time, depth, 'b-', 'LineWidth', 2);
+
+xlabel('Time');
+ylabel('Altitude [m]');
+ylim([0, max(depth) + 1]);
+
+ax = gca;
+ax.XAxis.TickLabelFormat = 'HH:mm';
+
+c = colorbar;
+c.Label.String = 'Dissipation Rate [m² s⁻³]';
+title('TKE Dissipation Rate and Surface Elevation');
+
+hold off;
+
+%% 7.5 Noise-Corrected Turbulence Intensity
+%
+% Now that we've calculated the noise floor for each ping, we can recalculate TI and 
+% include subtracting instrument noise using the |calculate_turbulence_intensity| 
+% function. If we subtract this from the non-noise corrected function, we 
+% can see there's a large difference at slower flow speeds, but the average 
+% difference is about 0.008 (0.8%). Notice this will also remove measurements 
+% where noise is high.
+
+fprintf('Calculating noise-corrected turbulence intensity\n');
+
+ds_avg = calculate_turbulence_intensity(ds_avg, ...
+    'noise', ds_avg.noise_5m, ...
+    'field_name', 'turbulence_intensity');
+
+% Calculate and plot the difference
+ti_diff = ds_avg.TI.data - ds_avg.turbulence_intensity.data;
+
+% Create visualization of TI difference
+fig = figure;
+fig.Position = [100 100 800 400];
+
+time = datetime(ds_avg.coords.time, 'ConvertFrom', 'posixtime');
+range = ds_avg.coords.range;
+depth = ds_avg.depth.data;
+
+[T, R] = meshgrid(time, range);
+pcolor(T, R, ti_diff');
+shading flat;
+colormap('summer');  % Green colormap similar to Python
+
+hold on;
+plot(time, depth, 'b-', 'LineWidth', 2);
+
+xlabel('Time');
+ylabel('Altitude [m]');
+ylim([0, max(depth) + 1]);
+
+ax = gca;
+ax.XAxis.TickLabelFormat = 'HH:mm';
+
+c = colorbar;
+c.Label.String = 'TI Difference';
+title('Turbulence Intensity Difference (Basic - Noise Corrected)');
+
+hold off;
+
+fprintf('TI difference statistics:\n');
+fprintf('  Mean difference: %.4f (%.1f%%)\n', mean(ti_diff(:), 'omitnan'), ...
+    100*mean(ti_diff(:), 'omitnan'));
+
+%% 7.6 Reynolds Stress Components
+%
+% The next parameters we'll find here are the Reynolds normal and shear 
+% stresses (-$\overline{u_iu_j}$). Since we're using the vertical beam on 
+% the ADCP, we can directly measure the vertical TKE component from the 
+% along-beam velocity using the |calculate_turbulent_kinetic_energy| 
+% function. This function is capable of calculating TKE for any along-beam 
+% velocity.
+%
+% We can also use the so-called "beam-variance" equations to estimate the 
+% Reynolds stress tensor components (i.e. $\overline{u'^2}$, $\overline{v'^2}$, 
+% $\overline{w'^2}$, $\overline{u'v'}$, $\overline{u'w'^2}$, $\overline{v'w'^2}$), 
+% which define the normal and shear stresses acting on an element of water. 
+% These equations are built into the functions |calculate_reynolds_stress_5beam| 
+% and |calculate_reynolds_stress_4beam|.
+%
+% Both of these functions will give comparable results, but 
+% |calculate_reynolds_stress_5beam| takes into account instrument tilt, and 
+% |calculate_reynolds_stress_4beam| does not. Both will throw a tilt warning 
+% if tilt is greater than 5 degrees.
+%
+% *Quick 5-beam ADCP lesson before we dive in:*
+%
+% There are a couple caveats to calculating Reynolds stress tensor components:
+%
+% # Because this instrument only has 5 beams, we can only find 5 of the 6 components (6 unknowns, 5 knowns)
+% # Because the ADCP's instrument (XYZ) axes weren't aligned with the flow during deployment, we don't know what direction these components are aligned to (i.e. the 'u' direction is not necessarily the streamwise direction)
+% # It is possible to rotate the tensor, but we'd need to know all 6 components to do so properly ("coupled ADCPs")
+% # Measurements close to the seafloor can be suspect due to increased vertical flow. ADCPs operate under the "assumption of homogeneity", which means that they can only accurately measure consistent horizontal currents with relatively little vertical motion.
+%
+% As an example, we'll calculate the Reynolds stresses from the 
+% |calculate_reynolds_stress_5beam| function, which calculates the individual 
+% Reynolds stress tensor components and takes the same inputs: the raw dataset 
+% in "beam" coordinates, the instrument Doppler noise, the ADCP's orientation 
+% and its beam angle. It outputs both the normal stress ("tke_vec") and the 
+% shear stress ("stress_vec") vector. Note, this function will drop at least 
+% one warning every time it's run, primarily the coordinate system warning. 
+% This function also requires the input raw data to be in beam coordinates, 
+% so we'll create a copy of the raw data and rotate it to 'beam'. If you do 
+% not, this function will do so automatically.
+
+fprintf('Rotating dataset to beam coordinates for Reynolds stress calculation\n');
+ds_beam = rotate2(ds, 'beam');
+
+fprintf('Calculating Reynolds stress components using 5-beam method\n');
+% Extract mean noise value for 5-beam calculation
+noise_mean = mean(ds_avg.noise_5m.data(:), 'omitnan');
+ds_avg = calculate_reynolds_stress_5beam(ds_beam, ...
+    'noise', noise_mean, ...
+    'orientation', 'up', ...
+    'beam_angle', 25, ...
+    'align_with_shear', true);
+
+% Display Reynolds stress statistics
+tke_data = ds_avg.tke_vec.data;
+stress_data = ds_avg.stress_vec.data;
+fprintf('TKE components statistics:\n');
+fprintf('  Mean TKE: %.2e m²/s²\n', mean(tke_data(:), 'omitnan'));
+fprintf('  Valid points: %d/%d\n', sum(~isnan(tke_data(:))), numel(tke_data));
+fprintf('Reynolds stress statistics:\n');
+fprintf('  Mean stress magnitude: %.2e m²/s²\n', mean(abs(stress_data(:)), 'omitnan'));
+fprintf('  Valid points: %d/%d\n', sum(~isnan(stress_data(:))), numel(stress_data));
+
+%
+% There is one other important thing to note on Reynolds stress measurements 
+% by ADCPs: the minimum turbulence length scale that the ADCP is capable of 
+% measuring increases with range from the instrument. This means the 
+% instrument is only capable of measuring the stress transported by larger 
+% and larger turbulent structures as the beams travel farther and farther 
+% from the instrument head. One of the benefits of calculating w'w' from the 
+% vertical beam is that it isn't limited by this beam spread issue, though 
+% on its own it may not be particularly useful.
+
+%% 7.7 TKE Production
+%
+% Though it can't be found from this deployment, we'll go over how to estimate 
+% the TKE shear production rate. Note that we're assuming here that the buoyancy 
+% production is negligible and we're in a well-mixed tidal channel. There isn't 
+% a specific function in MHKiT-DOLfYN for production, but all the necessary 
+% variables are.
+%
+% It is possible to estimate production rates from either an ADV or an ADCP 
+% aligned with the flow direction (so "X" would align with the principal flow 
+% direction). The following estimation for shear production rates takes into 
+% account both along- and cross-stream shear:
+%
+% $$P = -\overline{u'w'}\frac{du}{dz} - \overline{v'w'}\frac{dv}{dz}$$
+%
+% Note that the signs can get tricky but are important here. We found the 
+% Reynolds shear stresses $-\overline{u'w'}$ and $-\overline{v'w'}$ above using 
+% the Reynolds stress equations. If ADV data is available, those estimations 
+% are preferred because the ADV's point measurement does not have the assumptions 
+% that ADCP measurements have.
+%
+% The velocity shear components can be found from the aptly named functions 
+% |dudz| and |dvdz| in ADPBinner. These functions, which are useful alone in 
+% their own right, approximate the shear in the velocity vector between respective 
+% depth bins. There is always correlation between velocity measurements in adjacent 
+% depth bins, based on ADCP operation principles, which is why "approximate" is 
+% also used here for velocity shear.
+%
+% The velocity shear functions operate on the raw velocity vector in the principal 
+% reference frame and need to be ensemble-averaged here. This can be done by 
+% nesting the |d*dz| function within the ADPBinner's |mean| function. With the 
+% ensemble shear known, we can put all the components together to get a production 
+% estimation. If using ADV data, take the mean again of the "range" dimension.
+
+fprintf('Calculating TKE production rate from Reynolds stress and velocity shear\n');
+
+% Calculate velocity shear components
+ds_avg = calculate_velocity_shear(ds_avg, ...
+    'vel_field', 'vel', ...
+    'diff_style', 'centered');
+
+% Extract Reynolds shear stress components 
+% The updated calculate_reynolds_stress_5beam function now handles dimension alignment
+% internally, so stress components should match velocity shear dimensions
+fprintf('stress_vec.data size: %s\n', mat2str(size(ds_avg.stress_vec.data)));
+fprintf('stress_vec.dims: %s\n', strjoin(ds_avg.stress_vec.dims, ' x '));
+fprintf('Available stress components: %s\n', strjoin(ds_avg.stress_vec.coords.tau, ', '));
+
+% Access stress components - data is [range x time x tau]
+if size(ds_avg.stress_vec.data, 3) >= 3
+    upwp = squeeze(ds_avg.stress_vec.data(:, :, 2));  % u'w' component (2nd tau component)
+    vpwp = squeeze(ds_avg.stress_vec.data(:, :, 3));  % v'w' component (3rd tau component)
+else
+    error('Expected 3 stress components, got %d', size(ds_avg.stress_vec.data, 3));
+end
+
+% Extract velocity shear
+dudz = ds_avg.dudz.data;
+dvdz = ds_avg.dvdz.data;
+dwdz = ds_avg.dwdz.data;
+
+% Extract wpwp from TKE vector (wpwp is the 3rd component: upup, vpvp, wpwp)
+if isfield(ds_avg, 'tke_vec') && size(ds_avg.tke_vec.data, 3) >= 3
+    wpwp = squeeze(ds_avg.tke_vec.data(:, :, 3));  % w'w' component (3rd tke component)
+    fprintf('wpwp component extracted from tke_vec\n');
+else
+    error('wpwp component not found in tke_vec data');
+end
+
+% Calculate TKE production: P = -u'w'*du/dz - v'w'*dv/dz - w'w'*dw/dz
+% This is the complete three-term formula matching Python implementation
+% Reynolds stress function automatically aligns dimensions with velocity shear
+P = -upwp .* dudz - vpwp .* dvdz - wpwp .* dwdz;
+
+%% 7.8 TKE Balance
+%
+% We can plot the production rates and the ratio of production rates to 
+% dissipation rates to get an understanding of the TKE balance. We always 
+% expect production to be greater than 0, though negative values can give 
+% us an indication of uncertainty. In a well mixed coastal environment, we 
+% expect production and dissipation to be approximately equal. Our 
+% production estimates are possibly high because our stress components 
+% aren't aligned with the flow (4x10^-3 m²/s³ is quite large), but if this 
+% weren't the case, we would conclude that TKE is produced (kinetic energy 
+% is lost to turbulence) but not dissipated (turbulent energy is lost to 
+% entropy) here.
+
+% Remove estimations below 0
+P(P <= 0) = NaN;
+
+% Plot production rate
+fig = figure;
+fig.Position = [100 100 800 400];
+
+time = datetime(ds_avg.coords.time, 'ConvertFrom', 'posixtime');
+% Use the shear-aligned range coordinate (26 bins) instead of original range (28 bins)
+if isfield(ds_avg, 'dudz') && isfield(ds_avg.dudz, 'coords') && isfield(ds_avg.dudz.coords, 'range')
+    range = ds_avg.dudz.coords.range;  % 26 range bins from velocity shear
+else
+    % Fallback: create aligned range by trimming original range to match P dimensions
+    original_range = ds_avg.coords.range;  % 28 bins
+    n_range_p = size(P, 1);  % 26 bins
+    range_start = 2;  % Skip first bin (centered difference)
+    range_end = range_start + n_range_p - 1;  % Skip last bin
+    range = original_range(range_start:range_end);
+end
+depth = ds_avg.depth.data;
+
+% Debug dimensions for plotting
+fprintf('Plotting dimensions:\n');
+fprintf('  time length: %d\n', length(time));
+fprintf('  range length: %d\n', length(range));
+fprintf('  P size: %s\n', mat2str(size(P)));
+
+% Create meshgrid
+[T, R] = meshgrid(time, range);
+fprintf('  Meshgrid T size: %s\n', mat2str(size(T)));
+fprintf('  Meshgrid R size: %s\n', mat2str(size(R)));
+
+% Ensure P has the right orientation for pcolor
+% pcolor expects Z to match meshgrid dimensions: [length(range) x length(time)]
+if size(P, 1) == length(range) && size(P, 2) == length(time)
+    % P is already [range x time]
+    pcolor(T, R, P);
+elseif size(P, 1) == length(time) && size(P, 2) == length(range)
+    % P is [time x range], transpose it
+    pcolor(T, R, P');
+else
+    error('P dimensions [%d x %d] do not match time (%d) and range (%d)', size(P, 1), size(P, 2), length(time), length(range));
+end
+shading flat;
+colormap('turbo');
+
+hold on;
+plot(time, depth, 'b-', 'LineWidth', 2);
+
+xlabel('Time');
+ylabel('Altitude [m]');
+ylim([0, max(depth) + 1]);
+
+ax = gca;
+ax.XAxis.TickLabelFormat = 'HH:mm';
+
+c = colorbar;
+c.Label.String = 'TKE Production [m² s⁻³]';
+title('TKE Production');
+
+hold off;
+
+% Plot difference between production and dissipation rate
+figure;
+fig.Position = [100 100 800 400];
+
+% Create balance by expanding dissipation to match production dimensions
+eps_expanded = repmat(ds_avg.dissipation_rate_5m.data, size(P, 1), 1);
+balance = P - eps_expanded;
+
+pcolor(T, R, balance');
+shading flat;
+colormap('turbo');
+
+hold on;
+plot(time, depth, 'b-', 'LineWidth', 2);
+
+xlabel('Time');
+ylabel('Altitude [m]');
+ylim([0, max(depth) + 1]);
+
+ax = gca;
+ax.XAxis.TickLabelFormat = 'HH:mm';
+
+c = colorbar;
+c.Label.String = 'TKE Balance [m² s⁻³]';
+title('TKE Balance');
+
+hold off;
