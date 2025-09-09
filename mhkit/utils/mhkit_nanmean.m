@@ -35,7 +35,7 @@ function m = mhkit_nanmean(x, dim)
 
 arguments
     x {mustBeNumeric}
-    dim (1,1) {mustBePositive, mustBeInteger} = []
+    dim {mustBeNumeric, mustBeInteger} = []
 end
 
 % Validate input array is not empty
@@ -50,6 +50,12 @@ if isempty(dim)
     dim = find(size(x) ~= 1, 1);
     if isempty(dim)
         dim = 1;
+    end
+else
+    % Validate provided dimension is positive
+    if dim < 1
+        error('MHKiT:mhkit_nanmean:InvalidDimension', ...
+            'Dimension must be a positive integer, got %d', dim);
     end
 end
 
