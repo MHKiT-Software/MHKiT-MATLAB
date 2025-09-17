@@ -20,12 +20,17 @@ function spsd_cal = apply_calibration(spsd,sensitivity_curve, fill_value)
 
 arguments (Input)
     spsd struct
-    sensitivity_curve {mustBeMatrix}
+    sensitivity_curve
     fill_value {mustBeNumeric}
 end
 
 arguments (Output)
     spsd_cal struct
+end
+
+% check if sensitivity_curve is a matrix
+if ~ismatrix(sensitivity_curve) || size(sensitivity_curve,2) ~= 2
+    error('sensitivity_curve must be a matrix with two columns!')
 end
 
 % check if 'freq' exists in spsd
