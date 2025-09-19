@@ -710,13 +710,9 @@ for i = 1:n_bins
     end
 end
 
-% Create colormap (match Python's turbo)
-if exist('turbo', 'file') == 2
-    cmap = turbo(256);
-else
-    % Fallback if turbo not available
-    cmap = jet(256);
-end
+% Create colormap (jet is similar Python's turbo)
+cmap = jet(256);
+
 
 % Create colors for each speed bin (match Python's BoundaryNorm)
 cbar_max = 2.0;  % Match Python's cbar_max=2.0 exactly
