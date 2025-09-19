@@ -653,14 +653,9 @@ hold off;
 
 rng = 5;  % m - depth for analysis
 
-% Calculate PSD using vertical beam data at specified range
-fprintf('Using 5th beam (vertical) for PSD calculation at %.1f m depth\n', rng);
-
 [vel_up, vel_coords] = dolfyn_select(ds.vel_b5, 'range_b5', rng, 'method', 'nearest');
-fprintf('Selected vel_b5 range bin: %.1f m\n', vel_coords.range_b5);
 
 [U_data, u_coords] = dolfyn_select(ds_avg.U_mag, 'range', rng, 'method', 'nearest');
-fprintf('Selected U_mag range bin: %.1f m\n', u_coords.range);
 
 ds_avg = power_spectral_density(ds_avg, vel_up, ...
     'freq_units', 'Hz', ...
