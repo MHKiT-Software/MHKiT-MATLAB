@@ -747,7 +747,7 @@ for i = 1:n_bins
     end
 end
 
-% Add -5/3 slope reference line (match Python exactly)
+% Add -5/3 slope reference line
 m = -5/3;
 x = logspace(-1, 0.5, 50);  % Match Python's np.logspace(-1, 0.5)
 y = 10^(-3) * x.^m;         % Match Python's 10**(-3) * x**m
@@ -772,20 +772,20 @@ legend('f^{-5/3}', 'Location', 'northeast');
 
 % Create colorbar (match Python's ColorbarBase implementation)
 cax = axes('Position', [0.8 0.07 0.03 0.88]);  % Match Python's [0.8, 0.07, 0.03, 0.88]
-
 % Create colorbar data
 cbar_data = linspace(0.5, cbar_max, 256)';
 imagesc(cax, [1], cbar_data, repmat(cbar_data, 1, 1));
 colormap(cax, cmap);
-
 % Format colorbar (match Python's formatting)
 set(cax, 'YDir', 'normal', 'XTick', []);
 set(cax, 'FontSize', 18, 'FontName', 'Times New Roman');
 set(cax, 'YLim', [0.5, cbar_max]);
-
 % Set colorbar ticks to match Python's bounds
 yticks(cax, bounds);
 yticklabels(cax, arrayfun(@(x) sprintf('%.1f', x), bounds, 'UniformOutput', false));
+
+% Move y-axis (ticks and label) to the right side
+set(cax, 'YAxisLocation', 'right');
 ylabel(cax, 'Velocity [m/s]', 'FontSize', 18);
 
 hold off;
