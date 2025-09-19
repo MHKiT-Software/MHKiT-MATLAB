@@ -528,7 +528,7 @@ direction = direction';
 
 pcolor(T, R, direction);
 shading flat;
-colormap(twilight);
+colormap(cmocean('phase', 256));
 
 set(gca, 'Layer', 'top', 'Box', 'on')
 set(gca, 'XGrid', 'off', 'YGrid', 'off')
@@ -538,7 +538,8 @@ set(gca, 'LineWidth', 1)
 hold on;
 
 % Plot water surface depth
-plot(time, depth, 'Color', darkest_blue, 'LineWidth', 2);
+surface_elevation = plot(time, depth, 'Color', darkest_blue, 'LineWidth', 2);
+legend(surface_elevation, 'Surface Elevation [m]', 'Location', 'southeast');
 
 xlabel('Time');
 ylabel('Altitude [m]');
@@ -547,9 +548,9 @@ ylim([y_min y_max]);
 ax.XAxis.TickLabelFormat = 'HH:mm';
 
 c = colorbar;
-c.Label.String = sprintf('%s [deg CW from true N]', ds_avg.U_dir.long_name);
+c.Label.String = "Horizontal Vel Dir [deg CW from true N]";
 
-title('Horizontal Velocity "To" Direction [deg] and Surface Elevation [m]');
+title('Horizontal Velocity "To" Direction [deg]');
 
 hold off;
 
