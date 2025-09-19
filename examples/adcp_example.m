@@ -461,7 +461,7 @@ ds_avg.U_dir
 % * Same axes as the speed plot for easy comparison
 %
 % Both plots use the time-averaged data (ds_avg) we created earlier,
-% with each point representing a 5-minute average.
+% where each cell is a 5-minute average.
 
 % Create color map for both visualizations
 blues = blues_colormap(256);
