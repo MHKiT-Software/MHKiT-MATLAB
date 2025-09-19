@@ -556,8 +556,8 @@ hold off;
 
 %% 6. Save Data
 %
-% Datasets can be saved and loaded using the write_netcdf and read_netcdf functions,
-% respectively.
+% Datasets can be saved using the dolfyn |write_netcdf| function and be read
+% using the dolfyn |read_netcdf| function.
 
 % Uncomment these lines to save and load to your current working directory
 % write_netcdf(ds, 'your_data.nc');
@@ -573,12 +573,13 @@ hold off;
 % collection, particularly instrument frequency, sampling frequency and 
 % depth bin size.
 %
-% Read more on proper ADCP setup for turbulence measurements in: Thomson, 
-% Jim, et al. "Measurements of turbulence at two tidal energy sites in 
-% Puget Sound, WA." IEEE Journal of Oceanic Engineering 37.3 (2012): 363-374.
+% Read more on proper ADCP setup for turbulence measurements in: Thomson, Jim,
+% et al. "Measurements of turbulence at two tidal energy sites in Puget
+% Sound, WA." IEEE Journal of Oceanic Engineering 37.3 (2012): 363-374.
+% <https://doi.org/10.1109/JOE.2012.2191656>
 %
-% Most functions related to turbulence statistics in MHKiT-DOLfYN have the 
-% papers they originate from referenced in their docstrings.
+% Most functions related to turbulence statistics in MHKiT-MATLAB dolfyn module
+% have the papers they originate from referenced in their docstrings.
 
 %% 7.1 Turbulence Intensity
 % For most users, turbulence intensity (TI), the ratio of the ensemble 
