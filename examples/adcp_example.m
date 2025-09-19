@@ -464,15 +464,11 @@ ds_avg.U_dir
 % where each cell is a 5-minute average.
 
 % Create color map for both visualizations
-blues = blues_colormap(256);
+blues = cmocean('ice-', 256);
 darkest_blue = blues(end,:);
 
 %%
 % Current Speed Visualization
-
-% Create color map for both visualizations
-blues = blues_colormap(256);
-darkest_blue = blues(end,:);
 
 fig = figure;
 viz_width = 800;
@@ -486,6 +482,7 @@ speed = squeeze(ds_avg.U_mag.data);
 speed = speed';
 depth = ds_avg.depth.data;
 y_min = 0;
+% Calculate y_max so all plots have the same y-axis limits
 y_max = int32(max(ds.depth.data) + 1);
 
 [T, R] = meshgrid(time, range);
@@ -503,7 +500,8 @@ set(gca, 'LineWidth', 1)
 hold on;
 
 % Add a line denoting water surface depth using the darkest blue from the colormap
-plot(time, depth, 'Color', darkest_blue, 'LineWidth', 2);
+surface_elevation = plot(time, depth, 'Color', darkest_blue, 'LineWidth', 2);
+legend(surface_elevation, 'Surface Elevation [m]', 'Location', 'southeast');
 
 xlabel('Time');
 ylabel('Altitude [m]');
@@ -513,7 +511,7 @@ ax.XAxis.TickLabelFormat = 'HH:mm';
 
 c = colorbar;
 c.Label.String = sprintf('%s [%s]', ds_avg.U_mag.long_name, ds_avg.U_mag.units);
-title('Current Speed [m] and Surface Elevation [m]');
+title('Water Speed [m/s]');
 
 hold off;
 
