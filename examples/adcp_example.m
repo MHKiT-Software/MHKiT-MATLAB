@@ -1,10 +1,11 @@
 %% Analyzing ADCP Data with DOLfYN
 %
-% The following example illustrates a straightforward workflow for analyzing
-% Acoustic Doppler Current Profiler (ADCP) data utilizing MHKiT. MHKiT has
-% integrated the Doppler Oceanographic Library for pYthoN (DOLfYN) codebase
-% as a module to facilitate ADCP and Acoustic Doppler Velocimetry (ADV)
-% data processing.
+% The following example walks through a straightforward workflow for analyzing
+% Acoustic Doppler Current Profiler (ADCP) data utilizing MHKiT-MATLAB.
+%
+% MHKiT-MATLAB has developed native MATLAB code based on the Doppler
+% Oceanographic Library for pYthoN (DOLfYN) in MHKiT-Python as a module to
+% facilitate ADCP and Acoustic Doppler Velocimetry (ADV) data processing.
 %
 % Here is a standard workflow for ADCP data analysis:
 %
