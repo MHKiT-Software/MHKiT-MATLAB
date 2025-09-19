@@ -29,7 +29,7 @@
 %
 % *6. Saving and Loading DOLfYN datasets*
 %
-% *7. Turbulence Statistics:* (Upcoming in MHKiT-MATLAB)
+% *7. Turbulence Statistics:*
 %
 % * Turbulence Intensity (TI)
 % * Power Spectral Densities
