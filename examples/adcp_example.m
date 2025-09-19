@@ -606,21 +606,24 @@ depth = ds_avg.depth.data;
 [T, R] = meshgrid(time, range);
 pcolor(T, R, ti_data);
 shading flat;
-colormap('hot');  % Red colormap similar to Python
+colormap(cmocean('amp', 256));  % Red colormap similar to Python
 
 hold on;
-plot(time, depth, 'b-', 'LineWidth', 2);  % Water surface line
+
+% Plot water surface depth
+surface_elevation = plot(time, depth, 'Color', darkest_blue, 'LineWidth', 2);
+legend(surface_elevation, 'Surface Elevation [m]', 'Location', 'southeast');
 
 xlabel('Time');
-ylabel('Altitude [m]');
+ylabel('range');
 ylim([0, max(depth) + 1]);
 
 ax = gca;
 ax.XAxis.TickLabelFormat = 'HH:mm';
 
 c = colorbar;
-c.Label.String = 'Turbulence Intensity';
-title('Basic Turbulence Intensity and Surface Elevation');
+c.Label.String = 'Turbulence Intensity [% [0, 1]]';
+title('Turbulence Intensity');
 
 hold off;
 
