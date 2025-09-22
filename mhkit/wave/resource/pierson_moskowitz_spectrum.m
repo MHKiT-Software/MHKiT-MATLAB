@@ -1,43 +1,39 @@
 function S = pierson_moskowitz_spectrum(frequency, Tp, Hs)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Calculates Pierson-Moskowitz Spectrum from Tucker and Pitt (2001)
+% Calculates Pierson-Moskowitz Spectrum from IEC TS 62600-2 ED2 Annex C.2 (2019)
 %
 % Parameters
 % ------------
-%
-%     Frequency: float
-%         Wave frequency (Hz)
+%     frequency: vector
+%         Wave frequency [Hz]
 %
 %     Tp: float
-%         Peak Period (s)
+%         Peak period [s]
 %
 %     Hs: float
-%         Significant wave height (m)
-%
+%         Significant wave height [m]
 %
 % Returns
 % ---------
-%     S: structure
-%
-%         S.spectrum=Spectral Density (m^2/Hz)
-%
-%         S.type=String of the spectra type, i.e. (Pierson-Moskowitz 8.0s)
-%
-%         S.frequency= frequency (Hz)
+%     S: structure with fields
+%         .spectrum  = Spectral density [m^2/Hz]
+%         .frequency = Frequency [Hz]
+%         .type      = 'Pierson-Moskowitz (Hs,Tp)'
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if (isa(frequency,'py.numpy.ndarray') ~= 1)
-    frequency = py.numpy.array(frequency);
+arguments
+    frequency {mustBeNumeric, mustBeFinite}
+    Tp {mustBeNumeric, mustBeFinite, mustBePositive}
+    Hs {mustBeNumeric, mustBeFinite, mustBePositive}
 end
 
-S_py = py.mhkit.wave.resource.pierson_moskowitz_spectrum(frequency, Tp, Hs);
+% Use JONSWAP spectrum with gamma = 1 (equivalent to Pierson-Moskowitz)
+S_jonswap = jonswap_spectrum(frequency, Tp, Hs, 1);
 
-S_py = typecast_from_mhkit_python(S_py);
-
+% Create output structure with Pierson-Moskowitz naming for backward compatibility
 S = struct();
-
-S.frequency = S_py.index.data;
-S.spectrum = S_py.data;
-S.type = S_py.columns{1};
+S.frequency = S_jonswap.frequency;
+S.spectrum = S_jonswap.spectrum;
+S.type = sprintf('Pierson-Moskowitz (%.1fm,%.1fs)', Hs, Tp);
