@@ -55,12 +55,6 @@ function ds_out = calculate_dissipation_rate_profile(ds_avg, ds_raw, options)
 %           ds_out.qc_slope : Quality control slope values [range x time]
 %           ds_out.qc_mask : Quality control mask [range x time]
 %
-% Notes
-% -----
-% This function replaces the manual loop approach for processing ADCP profiles.
-% It automatically handles range bin extraction, PSD calculation, noise estimation,
-% and dissipation rate calculation for the full water column.
-%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     arguments

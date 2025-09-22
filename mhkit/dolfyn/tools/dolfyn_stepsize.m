@@ -26,17 +26,6 @@ function [step, n_segments, n_fft_used] = dolfyn_stepsize(l, n_fft, n_segments, 
 %   n_fft_used : double
 %       Actual FFT size used (may be reduced if l < n_fft) [samples]
 %
-% Key Equations
-% -------------
-% 1. Auto-calculated segments:
-%    n_segments = floor(2.0 * l / n_fft)
-%
-% 2. Step size calculation:
-%    step = floor((l - n_fft) / (n_segments - 1))
-%
-% 3. Segments from step:
-%    n_segments = floor((l - n_fft) / step + 1)
-%
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments

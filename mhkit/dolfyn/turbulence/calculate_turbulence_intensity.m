@@ -32,14 +32,6 @@ function ds_out = calculate_turbulence_intensity(ds, options)
 %           ds_out.turbulence_intensity.units : "1"
 %           ds_out.turbulence_intensity.long_name : "Turbulence Intensity"
 %
-% Example
-% -------
-% % First, ensemble average the raw data
-% ds_avg = average_by_dimension(ds_raw, 300, 'time');  % 300-sample ensembles
-% % Then calculate turbulence intensity  
-% ds_avg = calculate_turbulence_intensity(ds_avg, 'noise', 0.01);
-% ds.turbulence_intensity.data  % Access TI data
-%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     arguments
