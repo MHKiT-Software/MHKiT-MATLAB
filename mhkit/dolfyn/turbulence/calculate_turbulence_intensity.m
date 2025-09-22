@@ -170,10 +170,7 @@ function ds_out = calculate_turbulence_intensity(ds, options)
             end
             vel_std_corrected = sqrt(max(0, vel_std_data.^2 - noise_expanded.^2));
         end
-        
-        fprintf('  Noise correction applied successfully\\n');
     else
-        fprintf('  No noise correction applied (noise = 0)\\n');
         vel_std_corrected = vel_std_data;
     end
     
