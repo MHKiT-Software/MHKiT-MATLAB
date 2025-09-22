@@ -853,76 +853,11 @@ fprintf('  Valid points: %d/%d\n', sum(~isnan(eps_data(:))), numel(eps_data));
 
 %% Calculate full profile of spectra and dissipation rates
 %
-% We have just found the spectra and dissipation rate from a single depth 
-% bin at an altitude of 5 m from the seafloor, but typically we want the 
+% We have just found the spectra and dissipation rate from a single depth
+% bin at an altitude of 5 m from the seafloor, but typically we want the
 % spectra and dissipation rates from the entire measurement profile.
 
-n_range = length(ds.coords.range);
-
-% Initialize cell arrays for storing results
-spec_profile = cell(n_range, 1);
-dissipation_profile = cell(n_range, 1);
-noise_profile = cell(n_range, 1);
-
-% Process each depth bin (match Python: for r in range(len(ds["range"])))
-for r = 1:n_range
-    try
-        % Extract velocity data for this specific range bin (match Python: ds["vel_b5"].isel(range_b5=r))
-        [vel_b5_r, ~] = dolfyn_select(ds.vel_b5, 'range_b5', ds.coords.range_b5(r), 'method', 'nearest');
-        
-        % Calculate PSD for this range bin (match Python: avg_tool.power_spectral_density(..., freq_units="Hz"))
-        ds_temp = power_spectral_density(ds_avg, vel_b5_r, ...
-            'freq_units', 'Hz', ...
-            'n_fft', floor(ds_avg.attrs.n_bin / 2), ...
-            'field_name', sprintf('auto_spectra_r%d', r));
-        
-        % Calculate noise level (match Python: avg_tool.doppler_noise_level(spec[r], pct_fN=0.9))
-        ds_temp = calculate_doppler_noise_level(ds_temp, ...
-            'psd_field', sprintf('auto_spectra_r%d', r), ...
-            'pct_fN', 0.9, ...
-            'field_name', sprintf('noise_r%d', r));
-        
-        % Extract velocity magnitude for this range bin (match Python: ds_avg.velds.U_mag.isel(range=r))
-        if isfield(ds_avg, 'U_mag')
-            [U_mag_r, ~] = dolfyn_select(ds_avg.U_mag, 'range', ds.coords.range(r), 'method', 'nearest');
-            
-            % Create temporary 1D U_mag field for this range bin
-            u_field_name = sprintf('U_mag_r%d', r);
-            ds_temp.(u_field_name) = struct();
-            ds_temp.(u_field_name).data = U_mag_r;  % 1D extracted data
-            ds_temp.(u_field_name).dims = {'time'};  % 1D time dimension
-            ds_temp.(u_field_name).coords = struct();  % Empty coords structure
-            
-            % Calculate dissipation rate (match Python: avg_tool.dissipation_rate_LT83(spec[r], U_mag.isel(range=r), ...))
-            ds_temp = calculate_dissipation_rate_LT83(ds_temp, ...
-                'psd_field', sprintf('auto_spectra_r%d', r), ...
-                'U_mag_field', u_field_name, ...
-                'freq_range', f_rng, ...
-                'noise', ds_temp.(sprintf('noise_r%d', r)).data, ...
-                'field_name', sprintf('dissipation_r%d', r));
-            
-            % Store results
-            if isfield(ds_temp, sprintf('auto_spectra_r%d', r))
-                spec_profile{r} = ds_temp.(sprintf('auto_spectra_r%d', r));
-            end
-            if isfield(ds_temp, sprintf('noise_r%d', r))
-                noise_profile{r} = ds_temp.(sprintf('noise_r%d', r));
-            end
-            if isfield(ds_temp, sprintf('dissipation_r%d', r))
-                dissipation_profile{r} = ds_temp.(sprintf('dissipation_r%d', r));
-            end
-        end
-        
-        % Progress indicator
-        if mod(r, 5) == 0
-            fprintf('  Processed range bin %d/%d\n', r, n_range);
-        end
-        
-    catch ME
-        fprintf('Warning: Failed to process range bin %d: %s\n', r, ME.message);
-        continue;
-    end
-end
+ds_avg = calculate_dissipation_rate_profile(ds_avg, ds, 'freq_range', f_rng);
 
 
 %% Quality control for dissipation rate

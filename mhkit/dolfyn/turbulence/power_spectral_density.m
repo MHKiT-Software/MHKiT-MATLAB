@@ -73,7 +73,6 @@ n_samples = length(vel_data);
 if isfield(ds, 'attrs') && isfield(ds.attrs, 'n_bin')
     bin_size = double(ds.attrs.n_bin);
     n_time_bins = floor(n_samples / bin_size);
-    fprintf('Using n_bin=%d to create %d time bins from %d samples\n', bin_size, n_time_bins, n_samples);
 else
     error('MHKiT:dolfyn:power_spectral_density:NoNBin', 'ds.attrs.n_bin not found. Run average_by_dimension first.');
 end
@@ -101,9 +100,6 @@ vel_binned = reshape(vel_data(1:usable_samples), bin_size, n_time_bins);
 
 % Calculate step size parameters
 [step, n_segments, n_fft_used] = dolfyn_stepsize(bin_size, n_fft, [], []);
-
-fprintf('Python step calculation: l=%d, nfft=%d -> step=%d, n_segments=%d\n', ...
-    bin_size, n_fft, step, n_segments);
 
 % Create frequency vector (will be computed by dolfyn_psd_1D, but we need it for output)
 n_freq_end = floor(n_fft / 2.0 + 1); % Python: int(nfft / 2.0 + 1)
