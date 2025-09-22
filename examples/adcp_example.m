@@ -1032,7 +1032,7 @@ hold off;
 %% 7.6 Reynolds Stress Components
 %
 % The next parameters to calculate are the Reynolds normal and shear 
-% stresses (-$\overline{u_iu_j}$). Using the vertical beam on
+% stresses $-\overline{u_iu_j}$. Using the vertical beam on
 % the ADCP allows calculation of the vertical TKE component from the
 % along-beam velocity using the |calculate_turbulent_kinetic_energy|
 % function. This function calculates TKE for any along-beam
