@@ -2,28 +2,28 @@ function m = frequency_moment(S, N, varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%   Calculates the Nth frequency moment of the spectrum
+% Calculates the Nth frequency moment of the spectrum
 %
 % Parameters
-% ------------
-%   S: structure or numeric array
-%       If structure:
-%           S.spectrum   - Spectral Density (m^2/Hz)
-%           S.frequency  - Frequency (Hz)
-%       If numeric:
-%           S is spectral density array (vector or matrix)
-%           varargin{1} must contain frequency vector
+% -----------
+%     S: structure or numeric array
+%         If structure:
+%             S.spectrum   - Spectral density [m^2/Hz]
+%             S.frequency  - Frequency [Hz]
+%         If numeric:
+%             S is spectral density array (vector or matrix)
+%             varargin{1} must contain frequency vector
 %
-%   N: int
-%       Moment (0 for 0th, 1 for 1st, -1 for -1st, etc.)
+%     N: int
+%         Moment (0 for 0th, 1 for 1st ....)
 %
-%   frequency_bins: vector (optional)
-%       Bin widths for frequency of S. Required for unevenly sized bins
+%     frequency_bins: vector (optional)
+%         Bin widths for frequency of S. Required for unevenly sized bins
 %
 % Returns
-% ---------
-%   m: double
-%       Nth frequency moment
+% -------
+%     m: double
+%         Nth Frequency Moment indexed by S.columns
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

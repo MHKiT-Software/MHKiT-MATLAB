@@ -1,35 +1,40 @@
 function wave_elevation = surface_elevation(S, time_index, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%   Generate wave surface elevation from spectrum
+% Calculates wave elevation time-series from spectrum
 %
 % Parameters
 % ------------
 %     S: structure
 %         Spectral data with fields:
-%             S.spectrum: (n_freq x 1) spectral density values (m^2/Hz)
-%             S.frequency: (n_freq x 1) frequency vector (Hz)
+%             S.spectrum: (n_freq x 1) spectral density [m^2/Hz]
+%             S.frequency: (n_freq x 1) frequency vector [Hz]
 %     
 %     time_index: vector
-%         (n_time x 1) time vector (s)
+%         Time used to create the wave elevation time-series [s],
+%         for example, time = 0:0.01:100
 %
 %     options: structure (optional)
 %         Optional fields:
-%             seed: random seed (default = 123)
-%             frequency_bins: bin widths for each frequency
-%             phases: explicit phases (radians)
-%             method: 'ifft' (default) or 'sum_of_sines'
+%             seed: Random seed (default = 123)
+%             frequency_bins: Bin widths for frequency of S. Required for unevenly sized bins
+%             phases: Explicit phases for frequency components (overrides seed)
+%                     for example, phases = rand(length(S.frequency),1) * 2 * pi
+%             method: Method used to calculate the surface elevation. 'ifft'
+%                     (Inverse Fast Fourier Transform) used by default if the
+%                     given frequency_bins==[] or is evenly spaced.
+%                     'sum_of_sines' explicitly sums each frequency component
+%                     and used by default if uneven frequency_bins are provided.
+%                     The 'ifft' method is significantly faster.
 %
 % Returns
 % ---------
 %     wave_elevation: structure
 %         Generated wave elevation with fields:
-%             elevation: (n_time x 1) wave elevation (m)
-%             time: time vector (s)
+%             elevation: Wave surface elevation [m]
+%             time: time vector [s]
 %             type: description string
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     S struct

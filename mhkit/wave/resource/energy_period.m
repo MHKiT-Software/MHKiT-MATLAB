@@ -1,25 +1,27 @@
 function Te = energy_period(S, varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Calculate wave energy period Te from wave spectra
+%
+% Calculate wave energy period (Te) seconds from power spectral density (PSD)
 %
 % Parameters
 % ------------
-%   S: structure or numeric array
-%       If structure:
-%           S.spectrum   - Spectral Density (m^2/Hz)
-%           S.frequency  - Frequency (Hz)
-%       If numeric:
-%           S is spectral density array (vector or matrix)
-%           varargin{1} must contain frequency vector
+%     S: structure or numeric array
+%         If structure:
+%             S.spectrum   - Spectral density [m^2/Hz]
+%             S.frequency  - Frequency [Hz]
+%         If numeric:
+%             S is spectral density array (vector or matrix)
+%             varargin{1} must contain frequency vector
 %
-%   frequency_bins: vector (optional)
-%       Frequency bin widths [Hz]. Required for unevenly spaced bins.
+%     frequency_bins: vector (optional)
+%         Bin widths for frequency of S. Required for unevenly sized bins
 %
 % Returns
 % ---------
-%   Te: double
-%       Wave energy period [s]
+%     Te: double
+%         Wave energy period [seconds] indexed by S.columns
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments

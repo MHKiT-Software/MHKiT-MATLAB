@@ -2,18 +2,18 @@ function S = jonswap_spectrum(frequency, Tp, Hs, gamma)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Calculates JONSWAP spectrum from IEC TS 62600-2 ED2 Annex C.2 (2019)
+% Calculates JONSWAP Spectrum from IEC TS 62600-2 ED2 Annex C.2 (2019)
 %
 % Parameters
 % ------------
 %     frequency: vector
-%         Wave frequency (Hz)
+%         Frequency [Hz]
 %
 %     Tp: float
-%         Peak Period (s)
+%         Peak period [s]
 %
 %     Hs: float
-%         Significant Wave Height (m)
+%         Significant wave height [m]
 %
 %     gamma: float (optional)
 %         Peak enhancement factor
@@ -21,8 +21,8 @@ function S = jonswap_spectrum(frequency, Tp, Hs, gamma)
 % Returns
 % ---------
 %     S: structure with fields
-%         .spectrum  = Spectral Density (m^2/Hz)
-%         .frequency = Frequency (Hz)
+%         .spectrum  = Spectral density [m^2/Hz]
+%         .frequency = Frequency [Hz]
 %         .type      = 'JONSWAP (Hs,Tp)'
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

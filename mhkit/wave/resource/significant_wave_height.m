@@ -1,14 +1,15 @@
 function Hm0 = significant_wave_height(S, varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Calculate significant wave height Hm0 from spectra
+%
+% Calculates significant wave height Hm0 from spectra
 %
 % Parameters
 % ------------
 %     S: structure or numeric array
 %         If structure:
-%             S.spectrum: Spectral Density (m^2/Hz)
-%             S.frequency: frequency (Hz)
+%             S.spectrum: Spectral density [m^2/Hz]
+%             S.frequency: frequency [Hz]
 %         If numeric:
 %             S is assumed to be spectral density vector/matrix
 %             varargin{1} must contain frequency vector
@@ -19,8 +20,9 @@ function Hm0 = significant_wave_height(S, varargin)
 % Returns
 % ---------
 %     Hm0: double
-%         Significant Wave Height (m)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%         Significant wave height [m] index by S.columns
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     S
