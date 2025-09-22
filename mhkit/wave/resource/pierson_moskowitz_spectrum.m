@@ -1,6 +1,7 @@
 function S = pierson_moskowitz_spectrum(frequency, Tp, Hs)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 % Calculates Pierson-Moskowitz Spectrum from IEC TS 62600-2 ED2 Annex C.2 (2019)
 %
 % Parameters

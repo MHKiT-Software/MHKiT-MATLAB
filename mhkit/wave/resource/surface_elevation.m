@@ -1,6 +1,7 @@
 function wave_elevation = surface_elevation(S, time_index, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 % Calculates wave elevation time-series from spectrum
 %
 % Parameters
@@ -34,6 +35,7 @@ function wave_elevation = surface_elevation(S, time_index, options)
 %             elevation: Wave surface elevation [m]
 %             time: time vector [s]
 %             type: description string
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
