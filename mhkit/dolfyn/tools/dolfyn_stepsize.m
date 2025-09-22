@@ -4,7 +4,7 @@ function [step, n_segments, n_fft_used] = dolfyn_stepsize(l, n_fft, n_segments, 
 %
 %     Calculate step size for overlapping FFT segments
 %
-%     From MHKiT-Python _stepsize function
+%     Use same algorithm as MHKiT-Python _stepsize function
 %
 % Parameters
 % ------------
@@ -42,19 +42,14 @@ function [step, n_segments, n_fft_used] = dolfyn_stepsize(l, n_fft, n_segments, 
 arguments
     l (1,1) {mustBeNumeric, mustBePositive}
     n_fft (1,1) {mustBeNumeric, mustBePositive}
-    n_segments (1,1) {mustBeNumeric, mustBeNonnegative} = []
-    step (1,1) {mustBeNumeric, mustBeNonnegative} = []
+    n_segments {mustBeNumeric, mustBeNonnegative} = []
+    step {mustBeNumeric, mustBeNonnegative} = []
 end
 
-% Additional input validation
+% Additional input validation for non-empty values
 if ~isempty(n_segments) && n_segments < 1
     error('MHKiT:dolfyn_stepsize:InvalidSegments', ...
           'Number of segments must be positive');
-end
-
-if ~isempty(step) && step < 0
-    error('MHKiT:dolfyn_stepsize:InvalidStep', ...
-          'Step size must be non-negative');
 end
 
 % Validate that FFT size is not larger than data length
@@ -62,14 +57,6 @@ if n_fft > l
     warning('MHKiT:dolfyn_stepsize:FFTSizeReduced', ...
             'FFT size (%d) larger than data length (%d), reducing to data length', ...
             n_fft, l);
-end
-
-% Input validation and defaults
-if nargin < 3 || isempty(n_segments)
-    n_segments = [];
-end
-if nargin < 4 || isempty(step)
-    step = [];
 end
 
 % Ensure inputs are integers
