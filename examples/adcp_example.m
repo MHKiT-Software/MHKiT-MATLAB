@@ -44,24 +44,24 @@
 %
 % One of DOLfYN's key features is its ability to directly import raw data from
 % an Acoustic Doppler Current Profiler (ADCP) right after it has been
-% transferred. In this instance, we are using a Nortek Signature1000 ADCP, with
+% transferred. This example uses a Nortek Signature1000 ADCP, with
 % the data stored in files with an '.ad2cp' extension. This specific dataset
 % represents several hours of velocity data, captured at 1 Hz by an ADCP
 % mounted on a bottom lander within a tidal inlet. The list of instruments
 % compatible with DOLfYN can be found in the
 % <https://mhkit-software.github.io/MHKiT/mhkit-python/api.dolfyn.html MHKiT DOLfYN documentation>.
 %
-% We'll start by importing the raw data file downloaded from the instrument.
+% To start, this section uses the |dolfyn_read| function to import the raw ADCP data into a MATLAB struct.
 % The |dolfyn_read| function processes the input raw file and converts the data
-% into a MATLAB struct, typically called a Dataset, or |ds| for short. This
-% Dataset includes several groups of variables:
+% into a MATLAB struct, typically called a dataset, or |ds| for short. This
+% dataset includes several groups of variables:
 %
 % # *Velocity*: Recorded in the coordinate system saved by the instrument (beam, XYZ, ENU)
 % # *Beam Data*: Includes amplitude and correlation data
 % # *Instrumental & Environmental Measurements*: Captures the instrument's bearing and environmental conditions
 % # *Orientation Matrices*: Used by DOLfYN for rotating through different coordinate frames.
 %
-% Note: Before reading ADCP data with dolfyn_read, ensure your files are split
+% Note: Before reading ADCP data with |dolfyn_read|, ensure your files are split
 % into manageable chunks. DOLfYN performs best with files under 1GB. The file
 % size depends primarily on your sampling frequency and deployment duration.
 % Most ADCP manufacturers provide software tools or deployment settings to
@@ -73,63 +73,96 @@
 ds = dolfyn_read('./examples/data/dolfyn/Sig1000_tidal.ad2cp');
 
 %%
-% Display the contents and structure of the dataset by examining the |ds|
-% variable below.
-
-ds
+%
+% The |dolfyn_read| function automatically detects the instrument type and reads
+% the specified ensemble data (by default all data) into a MATLAB struct.
+% ADCP datasets contain multiple measurement types, coordinate systems, and data dimensions
+% organized in a hierarchical structure. When working with raw ADCP data, it is recommended to
+% examine the dataset organization before proceeding with analysis. Understanding how the ADCP data is stored
+% will add value to both the analysis and interpretation of the data.
+%
+% The |ds| struct contains many fields. The following key fields define important aspects of the dataset:
 
 %%
-% The function |dolfyn_plot| provides a simple api to visualize the data read
-% by DOLFyN. Pass in the dataset, the dimension name and index.
+% |attrs| contains global attributes that provide metadata about the dataset,
+% including instrument specifications, deployment configuration, and processing history.
+
+ds.attrs
+
+%%
+% |coords| contains the coordinate arrays that define the dimensional structure of the dataset. These coordinates specify how multidimensional data arrays are indexed and organized.
+
+ds.coords
+
+%%
+% |vel| contains velocity measurements organized by dimensions and coordinates,
+% with the actual measurement data stored in the |data| field.
+
+ds.vel
+
+%%
+% |ds.vel.dims| shows the dimension labels of the velocity data that correspond
+% to the actual shape of the underlying data array.
+
+ds.vel.dims
+size(ds.vel.data)
+
+%%
+% The output shows that the velocity data contains 55,000 time samples,
+% 28 range bins, and 4 directional components (typically the 4 beam velocities).
+% All MHKiT |dolfyn_| functions are designed to work with these dimensions and
+% perform necessary data reshaping internally.
+
+%% Using |dolfyn_plot| to visualize ADCP Data:
+%
+% The |dolfyn_plot| function is designed to visualize multidimensional ADCP data directly from DOLfYN datasets.
+% Pass in the dataset, the dimension name and index.
 % |dolfyn_plot| uses data found within the dataset attributes to determine
 % the plot type and labels.
 %
-% Before creating our visualizations, we'll define standard figure dimensions
-% that will be used throughout this example. Setting consistent figure sizes
-% ensures all plots are properly scaled and makes it easier to compare
-% different aspects of the data. The viz_width and viz_height variables
-% defined below will be passed to dolfyn_plot for each visualization.
+% The following visualization parameters define standard figure dimensions
+% for consistent plot scaling. These viz_width and viz_height variables
+% are passed to |dolfyn_plot| to maintain uniform visualization sizing.
 
 viz_width = 1800;
 viz_height = 300;
 
 %%
-% |dolfyn_plot| is a versatile visualization function for DOLfYN datasets. Here we use it
+% |dolfyn_plot| is a versatile visualization function for DOLfYN datasets. This example uses it
 % to create histograms of velocity measurements across all depth bins. The function
 % accepts the following key arguments:
 %
-% * ds: our dataset structure
-% * 'vel': specifies the variable in |ds| that we want to plot
-% * 'dim', specifies the dimension we want to plot, 1:3: plots all three velocity components (typically east, north, up)
+% * ds: the dataset structure
+% * 'vel': specifies the variable in |ds| to plot
+% * 'dim', specifies the dimension to plot, 1:3: plots all three velocity components (typically east, north, up)
 % * 'width'/'height': control figure dimensions
-% * 'kind', 'hist': specifies we want histogram plots instead of the default time series
+% * 'kind', 'hist': specifies histogram plots instead of the default time series
 %
-% The resulting histograms help us identify potential outliers and assess the overall
+% The resulting histograms help identify potential outliers and assess the overall
 % distribution of velocity measurements.
 
 dolfyn_plot(ds, 'vel', 'dim', 1:3, 'width', viz_width, 'height', viz_height, 'kind', 'hist');
 
 %%
-% Now we will plot the data with a logarithmic y scale, We are looking for outliers, particularly in the extremes of the dataset.
+% Plot the data with a logarithmic y scale to identify outliers, particularly in the extremes of the dataset.
 
 dolfyn_plot(ds, 'vel', 'dim', 1:3, 'width', viz_width, 'height', viz_height, 'kind', 'hist', 'scale', 'logy');
 
 %%
 % For this dataset |./examples/data/dolfyn/Signature1000_tidal.ad2cp| the
-% histogram plots show that our velocity measurements are symmetrically
+% histogram plots show that the velocity measurements are symmetrically
 % distributed and centered around 0 m/s, with no significant spikes or
-% discontinuities at the extremes. This indicates the data quality is reasonable
-% and we can proceed with our analysis without removing outliers. If we had seen
-% unusual peaks at extreme values or a highly asymmetric distribution, we would
-% need to investigate those measurements more carefully.
+% discontinuities at the extremes. This indicates reasonable data quality
+% and the analysis can proceed without removing outliers. Unusual peaks at extreme
+% values or highly asymmetric distributions would require further investigation.
 %
-% Note: While this visual inspection is a good first step, a comprehensive
+% Note: While visual inspection provides an initial assessment, a complete
 % quality control process would typically include additional statistical
-% tests and instrument-specific checks. For this example, we'll proceed
-% with our initial assessment.
+% tests and instrument-specific checks. This example proceeds
+% with the original data.
 
 %%
-% We are also going to calculate and define the colorbar to keep comparisons velocity plots consistent
+% To ensure consistent scaling across velocity plots, this code calculates and defines the colorbar limits
 % The velocity colorbar limits are determined using percentile-based thresholds
 % to reduce the impact of outliers while maintaining symmetry around zero.
 % First, the 1st and 99th percentiles of the velocity data are calculated,
@@ -158,7 +191,7 @@ vel_cbar_min = -ceil(max_abs);
 vel_cbar_max = ceil(max_abs);
 
 %%
-% Now we'll create our first comprehensive visualization of the ADCP velocity data.
+% The following creates a visualization of the ADCP velocity data.
 % dolfyn_plot will generate three panels showing:
 %
 % # East velocity component (dim=1): positive values indicate eastward flow
@@ -173,9 +206,8 @@ vel_cbar_max = ceil(max_abs);
 % * Blues/Negatives: flow in negative direction
 % * Reds/Positives: flow in positive direction
 %
-% We use our previously calculated |vel_cbar_min| and |vel_cbar_max| to ensure
-% the color scales are consistent and centered around zero across all plots.
-% This makes it easier to compare velocity magnitude across directions.
+% The previously calculated |vel_cbar_min| and |vel_cbar_max| ensure
+% color scales are consistent and centered around zero across all plots.
 
 dolfyn_plot(ds, 'vel', 'dim', 1:3, ...
     'width', viz_width, 'height', viz_height, ...
@@ -213,7 +245,7 @@ ds.coords.dir
 % when working with a down-facing instrument as it helps account for
 % the depth below the water surface.
 %
-% For those using a Teledyne RDI ADCP, the TRDI deployment software will prompt
+% For Teledyne RDI ADCPs, the TRDI deployment software will prompt
 % the user to specify the deployment height/depth during setup. If there's a need
 % for calibration post-deployment, the |set_range_offset| function can be
 % utilized in the same way as described above.
@@ -241,8 +273,8 @@ range_stats
 %%
 % *2.2. Discard Data Above Surface Level*
 %
-% To reduce computational load, we can exclude all data at or above the water
-% surface level. Since the instrument was oriented upwards, we can utilize the
+% To reduce computational load, this section excludes all data at or above the water
+% surface level. Since the instrument was oriented upwards, this approach utilizes the
 % pressure sensor data along with the function |water_depth_from_pressure|. However,
 % this approach necessitates that the pressure sensor was calibrated or
 % 'zeroed' prior to deployment. If the instrument is facing downwards or
@@ -256,7 +288,7 @@ range_stats
 % |set_range_offset|, "depth" represents the distance from the water
 % surface to the seafloor. Otherwise, it indicates the distance to the
 % ADCP pressure sensor. The |water_depth_from_pressure| function allows
-% the user to specified salinity value in Practical Salinity
+% the user to specify a salinity value in Practical Salinity
 % Units (PSU).
 
 water_salinity_psu = 31;
@@ -288,10 +320,10 @@ dolfyn_plot(ds, 'vel', 'dim', 1:3, ...
 %%
 % *Correlation*
 %
-% It's beneficial to also review data from the other beams. A significant
+% Reviewing data from the other beams is recommended. A significant
 % portion of this data is of high quality. To avoid discarding valuable data
-% with lower correlations, which could be due to natural variations, we can use
-% the |correlation_filter|. This function assigns a value of NaN (not a number)
+% with lower correlations, which could be due to natural variations, this section uses
+% the |correlation_filter| function to assign a value of NaN (not a number)
 % to velocity values corresponding to correlations below 50%.
 %
 % However, it's important to note that the correlation threshold is dependent
@@ -334,10 +366,11 @@ ds = set_declination(ds, 15.8);
 ds = rotate2(ds, 'earth');
 
 %%
-% To rotate into the principal frame of reference (streamwise, cross-stream,
-% vertical), if desired, we must first calculate the depth-averaged principal
-% flow heading and add it to the dataset attributes. Then the dataset can
-% be rotated using the same |rotate2| function.
+% For analysis that requires changing the frame of reference, DOLfYN provides
+% the |rotate2| function to transform data between coordinate systems
+% (beam, inst, earth, principal). To rotate into the principal frame
+% (streamwise, cross-stream, vertical), first calculate the depth-averaged
+% principal flow heading and add it to the dataset attributes.
 
 ds.attrs.principal_heading = calc_principal_heading(squeeze(ds.vel.data), true);
 disp(ds.attrs.principal_heading);
@@ -347,12 +380,12 @@ ds_streamwise = rotate2(ds, 'principal');
 % Visualize Streamwise Velocity
 
 %%
-% First we will verify the transformation by visually inspecting the histogram and checking for outliers
+% First verify the transformation by visually inspecting the histogram and checking for outliers
 
 dolfyn_plot(ds_streamwise, 'vel', 'dim', 1:3, 'width', viz_width, 'height', viz_height, 'kind', 'hist');
 
 %%
-% Next we will plot streamwise and cross-stream velocity
+% Next plot streamwise and cross-stream velocity
 
 dolfyn_plot(ds_streamwise, 'vel', 'dim', 1:2, ...
     'width', viz_width, 'height', viz_height, ...
@@ -371,7 +404,7 @@ dolfyn_plot(ds_streamwise, 'vel', 'dim', 1:2, ...
 % The function |average_by_dimension| is used to average the data by dimension.
 % To average the data into time bins (also known as ensembles), the sampling rate and averaging period must be defined.
 % DOLfYN stores the sampling frequency [Hz] in |.attrs.fs|. The averaging period should be specified in seconds.
-% We can then use these values to calculate the number of samples to average.
+% These values specify the number of samples to average.
 
 sampling_frequency_hz = ds.attrs.fs;
 averaging_period_seconds = 300; % 5 minutes
@@ -379,8 +412,8 @@ averaging_period_seconds = 300; % 5 minutes
 averaging_samples = int32(round(averaging_period_seconds * sampling_frequency_hz));
 
 %%
-% Once the averaging samples count has been calculated we can average the
-% dataset by time by passing the original dataset, the number of samples to
+% Once the averaging samples count has been calculated, the
+% dataset can be averaged by time by passing the original dataset, the number of samples to
 % average, and the dimension ('time').
 %
 % Important note about sample size:
@@ -401,7 +434,7 @@ averaging_samples = int32(round(averaging_period_seconds * sampling_frequency_hz
 % # Accept the loss of the partial bin at the end if it's not critical
 %
 % In this example, losing 100 samples (100/55000 = 0.18% of data) is acceptable
-% for our analysis.
+% for this analysis.
 
 ds_avg = average_by_dimension(ds, averaging_samples, 'time');
 
@@ -416,8 +449,8 @@ dolfyn_plot(ds_avg, 'vel', 'dim', 1:3, ...
 
 %% 4. Calculate Current Speed and Direction
 %
-% The |calculate_horizontal_speed_and_direction| function processes our east and
-% north velocity components to compute two key measurements: current speed (U_mag)
+% The |calculate_horizontal_speed_and_direction| function processes the east and
+% north velocity components to compute two value added fields: current speed (U_mag)
 % and direction (U_dir). The speed is calculated as the magnitude of the horizontal
 % velocity components and stored in ds_avg.U_mag, using the same units as the
 % input velocities (typically m/s).
@@ -443,7 +476,7 @@ ds_avg.U_dir
 
 %% 5. Visualize Current Speed and Direction
 %
-% Now we'll create two key visualizations to help understand the flow patterns:
+% The following creates two visualizations to illustrate the flow patterns:
 %
 % *1. Current Speed Plot:*
 %
@@ -458,14 +491,13 @@ ds_avg.U_dir
 % * Shows where the water is flowing TO at each depth and time
 % * Uses a circular colormap to represent the full 360° of possible directions
 % * Includes the same water surface elevation line
-% * Same axes as the speed plot for easy comparison
+% * Same axes as the speed plot for direct comparison
 %
-% Both plots use the time-averaged data (ds_avg) we created earlier,
-% where each cell is a 5-minute average.
+% Both plots use the time-averaged data (ds_avg), where each cell represents a 5-minute average.
 
 % Create color map for both visualizations
 blues = cmocean('ice-', 256);
-darkest_blue = blues(end,:);
+surface_elevation_blue = blues(128,:);
 
 %%
 % Current Speed Visualization
@@ -500,7 +532,7 @@ set(gca, 'LineWidth', 1)
 hold on;
 
 % Add a line denoting water surface depth using the darkest blue from the colormap
-surface_elevation = plot(time, depth, 'Color', darkest_blue, 'LineWidth', 2);
+surface_elevation = plot(time, depth, 'Color', surface_elevation_blue, 'LineWidth', 2);
 legend(surface_elevation, 'Surface Elevation [m]', 'Location', 'southeast');
 
 xlabel('Time');
@@ -538,7 +570,7 @@ set(gca, 'LineWidth', 1)
 hold on;
 
 % Plot water surface depth
-surface_elevation = plot(time, depth, 'Color', darkest_blue, 'LineWidth', 2);
+surface_elevation = plot(time, depth, 'Color', surface_elevation_blue, 'LineWidth', 2);
 legend(surface_elevation, 'Surface Elevation [m]', 'Location', 'southeast');
 
 xlabel('Time');
@@ -582,9 +614,9 @@ hold off;
 % have the papers they originate from referenced in their docstrings.
 
 %% 7.1 Turbulence Intensity
-% For most users, turbulence intensity (TI), the ratio of the ensemble 
-% standard deviation to ensemble flow speed given as a percent, is all most 
-% will need. In MHKiT, this can be simply calculated from ensemble-averaged 
+% For most users, turbulence intensity (TI), the ratio of the ensemble
+% standard deviation to ensemble flow speed given as a percent, is the primary
+% metric needed. In MHKiT, this can be simply calculated from ensemble-averaged 
 % data, but be aware that this will be a conservative estimate. Another 
 % function, |calculate_turbulence_intensity|, is capable of subtracting 
 % instrument noise from this parameter and is discussed below. The 
@@ -611,7 +643,7 @@ colormap(cmocean('amp', 256));  % Red colormap similar to Python
 hold on;
 
 % Plot water surface depth
-surface_elevation = plot(time, depth, 'Color', darkest_blue, 'LineWidth', 2);
+surface_elevation = plot(time, depth, 'Color', surface_elevation_blue, 'LineWidth', 2);
 legend(surface_elevation, 'Surface Elevation [m]', 'Location', 'southeast');
 
 xlabel('Time');
@@ -645,10 +677,10 @@ hold off;
 % spectra are used to depict and quantify this energy in the frequency 
 % domain, and creating them are the first step in turbulence analysis.
 %
-% We'll start by looking at the power spectra, specifically the auto-spectra 
-% from the vertical beam. This can be done using the 
-% |calculate_power_spectral_density| function. We'll create spectra at the 
-% middle water column, at a depth of 5 m, and use a number of FFT's equal 
+% This section examines the power spectra, specifically the auto-spectra
+% from the vertical beam. This can be done using the
+% |calculate_power_spectral_density| function. The following code creates spectra at the
+% middle water column, at a depth of 5 m, and uses a number of FFT's equal
 % to 1/3 the bin size.
 
 rng = 5;  % m - depth for analysis
@@ -792,19 +824,18 @@ hold off;
 
 %% 7.3 Instrument Noise
 %
-% The next thing we want to do is calculate the instrument's Doppler noise 
-% floor from the spectrum we calculated above. (We are making the 
-% assumption that the noise floor of the vertical beam is the same as the 
-% noise floor of the other 4 beams). This gives us a timeseries of the 
-% noise floor, which varies by instrument and with flow speed, at that 
+% The next step calculates the instrument's Doppler noise
+% floor from the spectrum calculated above. (This analysis assumes that the noise floor of the vertical beam is the same as the
+% noise floor of the other 4 beams). This provides a timeseries of the
+% noise floor, which varies by instrument and with flow speed, at that
 % depth bin.
 %
-% We can do this using the |calculate_doppler_noise_level| function. The 
-% two inputs for this function are the power spectra and "pct_fN", the 
-% percent of the Nyquist frequency that the noise floor exists. Because in 
-% this particularly dataset we can't see the noise floor, we'll just use 
-% 90% or pct_fN=0.9 as an example. If the noise floor began at 0.4 Hz and 
-% ran til our maximum frequency of 0.5 Hz, we'd use pct_fN = 0.4 Hz / 0.5 Hz = 0.8.
+% This section uses the |calculate_doppler_noise_level| function. The
+% two inputs for this function are the power spectra and "pct_fN", the
+% percent of the Nyquist frequency that the noise floor exists. Because in
+% this particular dataset the noise floor is not visible, this section uses
+% 90% or pct_fN=0.9 as an example. If the noise floor began at 0.4 Hz and
+% ran to the maximum frequency of 0.5 Hz, the calculation would use pct_fN = 0.4 Hz / 0.5 Hz = 0.8.
 
 ds_avg = calculate_doppler_noise_level(ds_avg, ...
     'psd_field', 'auto_spectra_5m', ...
@@ -813,15 +844,19 @@ ds_avg = calculate_doppler_noise_level(ds_avg, ...
 
 % Display noise statistics
 noise_data = ds_avg.noise_5m.data;
-fprintf('Noise level statistics:\n');
-fprintf('  Mean: %.4f m/s\n', mean(noise_data(:), 'omitnan'));
-fprintf('  Std:  %.4f m/s\n', std(noise_data(:), 'omitnan'));
-fprintf('  Range: [%.4f, %.4f] m/s\n', min(noise_data(:)), max(noise_data(:)));
+doppler_noise_stats = table(...
+    mean(noise_data(:), 'omitnan'), ...
+    std(noise_data(:), 'omitnan'), ...
+    min(noise_data(:)), ...
+    max(noise_data(:)), ...
+    'VariableNames', {'Mean_m_s', 'StdDev_m_s', 'Min_m_s', 'Max_m_s'});
+doppler_noise_stats.Properties.Description = 'Doppler Noise Level Statistics';
+disp(doppler_noise_stats);
 
 %% 7.4 TKE Dissipation Rate
 %
-% Because we can see the isotropic turbulence cascade (0.2 - 0.5 Hz) at this 
-% depth bin (5 m altitude), we can calculate the TKE dissipation rate at this 
+% Because the isotropic turbulence cascade (0.2 - 0.5 Hz) is visible at this
+% depth bin (5 m altitude), the TKE dissipation rate can be calculated at this 
 % location from the spectra itself. This can be done using 
 % |calculate_dissipation_rate_LT83|, whose inputs are the power spectra, the 
 % ensemble speed, the frequency range of the isotropic cascade, and the 
@@ -831,7 +866,7 @@ fprintf('  Range: [%.4f, %.4f] m/s\n', min(noise_data(:)), max(noise_data(:)));
 f_rng = [0.2, 0.5];  % Hz
 
 % Create temporary 1D U_mag field for dissipation calculation  
-% (since our PSD is 2D [time, freq], we need 1D U_mag [time])
+% (since the PSD is 2D [time, freq], a 1D U_mag [time] is required)
 ds_avg.U_mag_5m = struct();
 ds_avg.U_mag_5m.data = U_data;  % Use the selected 1D data
 ds_avg.U_mag_5m.dims = {'time'};  % 1D time dimension
@@ -847,14 +882,19 @@ ds_avg = calculate_dissipation_rate_LT83(ds_avg, ...
 
 % Display dissipation statistics
 eps_data = ds_avg.dissipation_rate_5m.data;
-fprintf('Dissipation rate statistics:\n');
-fprintf('  Mean: %.2e m²/s³\n', mean(eps_data(:), 'omitnan'));
-fprintf('  Valid points: %d/%d\n', sum(~isnan(eps_data(:))), numel(eps_data));
+dissipation_stats = table(...
+    mean(eps_data(:), 'omitnan'), ...
+    sum(~isnan(eps_data(:))), ...
+    numel(eps_data), ...
+    100 * sum(~isnan(eps_data(:))) / numel(eps_data), ...
+    'VariableNames', {'Mean_m2_s3', 'Valid_Points', 'Total_Points', 'Valid_Percent'});
+dissipation_stats.Properties.Description = 'TKE Dissipation Rate Statistics (5m depth)';
+disp(dissipation_stats);
 
 %% Calculate full profile of spectra and dissipation rates
 %
-% We have just found the spectra and dissipation rate from a single depth
-% bin at an altitude of 5 m from the seafloor, but typically we want the
+% The previous section found the spectra and dissipation rate from a single depth
+% bin at an altitude of 5 m from the seafloor, but typically analysis requires the
 % spectra and dissipation rates from the entire measurement profile.
 
 ds_avg = calculate_dissipation_rate_profile(ds_avg, ds, 'freq_range', f_rng);
@@ -862,79 +902,47 @@ ds_avg = calculate_dissipation_rate_profile(ds_avg, ds, 'freq_range', f_rng);
 
 %% Quality control for dissipation rate
 %
-% Now that we have a profile timeseries of dissipation rate, we need apply 
-% some quality control (QC). Since we can't look at each individual 
-% spectrum to ensure we can see the isotropic turbulence cascade, we want 
-% to QC the output from |calculate_dissipation_rate_LT83| to make sure what 
-% was calculated actually falls on a f^(-5/3) slope. We can do this using 
-% the function |check_turbulence_cascade_slope|, which uses linear 
-% regression on the log-transformed LT83 equation (ref. to Lumley and 
-% Terray, 1983, see docstring) to calculate the spectral slope for the 
+% With a profile timeseries of dissipation rate calculated, the next step applies
+% quality control (QC). Since individual spectra cannot be manually inspected
+% to verify the isotropic turbulence cascade, QC becomes necessary for the output
+% from |calculate_dissipation_rate_LT83| to verify that calculated values
+% actually fall on a $f^{(-5/3)}$ slope. The function |check_turbulence_cascade_slope|
+% provides this capability, using linear regression on the log-transformed LT83 equation
+% (ref. to Lumley and Terray, 1983, see docstring) to calculate the spectral slope for the
 % given frequency range.
 %
-% In our case, we're calculating the slope of each spectrum between 0.2 and 
-% 0.5 Hz. We'll use a cutoff of 20% for the error, but this can be lowered 
-% if there still appear to be erroneous estimations from visual inspection 
+% This analysis calculates the slope of each spectrum between 0.2 and
+% 0.5 Hz. The following uses a cutoff of 20% for the error, but this can be lowered
+% if erroneous estimations appear during visual inspection
 % of the spectra.
 
-fprintf('Applying quality control to dissipation rate estimates\n');
+% Display QC results from the profile function
+valid_estimates = sum(ds_avg.qc_mask.data(:));
+total_estimates = numel(ds_avg.qc_mask.data);
+qc_results = table(...
+    valid_estimates, ...
+    total_estimates, ...
+    100*valid_estimates/total_estimates, ...
+    'VariableNames', {'Valid_Estimates', 'Total_Estimates', 'Pass_Rate_Percent'});
+qc_results.Properties.Description = 'Quality Control Results for Dissipation Rate';
+disp(qc_results);
 
-% Reconstruct full profile spectra from spec_profile cell array (like Python ds_avg["auto_spectra"])
-n_time = length(ds_avg.coords.time);
-n_freq = length(ds_avg.auto_spectra_5m.coords.freq);  % Get freq dimension from 5m example
-n_range = length(spec_profile);
+% Apply quality control mask
+threshold_for_difference_from_expected_slope = 0.20;  % 20%
+slope_data = ds_avg.qc_slope.data;
+mask = abs((slope_data - (-5/3)) / (-5/3)) <= threshold_for_difference_from_expected_slope;
 
-% Initialize full profile spectra structure
-ds_avg.auto_spectra = struct();
-ds_avg.auto_spectra.data = NaN(n_range, n_time, n_freq);  % [range x time x freq]
-ds_avg.auto_spectra.coords = ds_avg.auto_spectra_5m.coords;  % Same frequency coords
-ds_avg.auto_spectra.dims = {'range', 'time', 'freq'};
-
-% Fill in the data from spec_profile
-for r = 1:n_range
-    if ~isempty(spec_profile{r})
-        ds_avg.auto_spectra.data(r, :, :) = spec_profile{r}.data;  % [time x freq] -> [1 x time x freq]
-    end
-end
-
-% Quality control using cascade slope (match Python exactly)
-[slope, ~] = check_turbulence_cascade_slope(ds_avg.auto_spectra, 'freq_range', f_rng);
-
-% Check that percent difference from -5/3 is not greater than 20% (match Python)
-% Note: Python has typo (-5.3 should be -5/3), we'll use correct value
-target_slope = -5/3;
-mask = abs((slope - target_slope) / target_slope) <= 0.20;
-
-% Apply mask to dissipation rate data (reconstruct full profile first)
-ds_avg.dissipation_rate = struct();
-ds_avg.dissipation_rate.data = NaN(n_range, n_time);
-for r = 1:n_range
-    if ~isempty(dissipation_profile{r})
-        ds_avg.dissipation_rate.data(r, :) = dissipation_profile{r}.data;  % Extract .data field
-    end
-end
-
-% Apply quality control mask (match Python: ds_avg["dissipation_rate"].where(mask))
+% Apply mask to dissipation rate (match Python exactly)
 ds_avg.dissipation_rate.data(~mask) = NaN;
-
-% Statistics
-valid_estimates = sum(~isnan(ds_avg.dissipation_rate.data(:)));
-total_estimates = numel(ds_avg.dissipation_rate.data);
-qc_passed = sum(mask(:));
-
-fprintf('QC Results:\n');
-fprintf('  Slope test passed: %d/%d points (%.1f%%)\n', qc_passed, total_estimates, 100*qc_passed/total_estimates);
-fprintf('  Final valid estimates: %d/%d (%.1f%%)\n', valid_estimates, total_estimates, 100*valid_estimates/total_estimates);
 
 %% Physical interpretation and ADCP limitations
 %
-% If we plot the dissipation rate below in a colormap, we can see that the 
-% profile map has a lot of missing data. One of the reasons is that the 1 Hz 
-% sampling rate doesn't provide enough information needed to make dissipation 
-% rate estimations, and the other part is that turbulence measurements push 
-% the boundaries of what ADCPs are capable of.
+% For this example dataset collected at 1 Hz, plotting the dissipation rate in a colormap shows
+% significant missing data in the profile map. This 1 Hz sampling rate doesn't provide
+% sufficient information for reliable dissipation rate estimations, and turbulence measurements
+% approach the limits of ADCP measurement capabilities.
 %
-% Also, 1x10^-4 to 3x10^-4 m²/s³ is reasonable for a dissipation rate 
+% Also, 1x10^-4 to 3x10^-4 $m^2/s^3$ is reasonable for a dissipation rate 
 % estimate for the 1 - 1.5 m/s current speeds measured here. They can be a 
 % magnitude greater for faster flow speeds, typically increase closer to the 
 % seafloor, and depend heavily on bathymetry and regional hydrodynamics.
@@ -943,16 +951,8 @@ fprintf('  Final valid estimates: %d/%d (%.1f%%)\n', valid_estimates, total_esti
 fig = figure;
 fig.Position = [100 100 800 400];
 
-% Reconstruct full profile data for plotting
-n_time = length(ds_avg.coords.time);
-n_range = length(ds.coords.range);
-dissipation_full = NaN(n_range, n_time);
-
-for r = 1:length(dissipation_profile)
-    if ~isempty(dissipation_profile{r})
-        dissipation_full(r, :) = dissipation_profile{r}.data;
-    end
-end
+% Use dissipation rate profile from the function
+dissipation_full = ds_avg.dissipation_rate.data;
 
 time = datetime(ds_avg.coords.time, 'ConvertFrom', 'posixtime');
 range = ds.coords.range;
@@ -961,34 +961,34 @@ depth = ds_avg.depth.data;
 [T, R] = meshgrid(time, range);
 pcolor(T, R, dissipation_full);
 shading flat;
-colormap('turbo');
+% colormap('turbo');
+colormap(cmocean('thermal', 256));
 
 hold on;
-plot(time, depth, 'b-', 'LineWidth', 2);
+surface_elevation = plot(squeeze(time), squeeze(depth), 'Color', surface_elevation_blue, 'LineWidth', 2);
+legend(surface_elevation, 'Surface Elevation [m]', 'Location', 'northeast');
 
-xlabel('Time');
-ylabel('Altitude [m]');
+xlabel('time b5');
+ylabel('range');
 ylim([0, max(depth) + 1]);
 
 ax = gca;
 ax.XAxis.TickLabelFormat = 'HH:mm';
 
 c = colorbar;
-c.Label.String = 'Dissipation Rate [m² s⁻³]';
-title('TKE Dissipation Rate and Surface Elevation');
+c.Label.String = 'TKE Dissipation Rate [m2 s-3]';
+title('TKE Dissipation Rate');
 
 hold off;
 
 %% 7.5 Noise-Corrected Turbulence Intensity
 %
-% Now that we've calculated the noise floor for each ping, we can recalculate TI and 
-% include subtracting instrument noise using the |calculate_turbulence_intensity| 
-% function. If we subtract this from the non-noise corrected function, we 
-% can see there's a large difference at slower flow speeds, but the average 
-% difference is about 0.008 (0.8%). Notice this will also remove measurements 
+% With the noise floor calculated for each ping, TI can be recalculated with instrument noise removed by using the |calculate_turbulence_intensity|
+% function. Subtracting this from the non-noise corrected function
+% shows a large difference at slower flow speeds, with an average
+% difference of about 0.008 (0.8%). This approach also removes measurements
 % where noise is high.
 
-fprintf('Calculating noise-corrected turbulence intensity\n');
 
 ds_avg = calculate_turbulence_intensity(ds_avg, ...
     'noise', ds_avg.noise_5m, ...
@@ -1008,13 +1008,16 @@ depth = ds_avg.depth.data;
 [T, R] = meshgrid(time, range);
 pcolor(T, R, ti_diff');
 shading flat;
-colormap('summer');  % Green colormap similar to Python
+colormap(cmocean('algae', 256));  % Green colormap similar to Python
 
 hold on;
-plot(time, depth, 'b-', 'LineWidth', 2);
+
+% Plot water surface depth
+surface_elevation = plot(time, depth, 'Color', surface_elevation_blue, 'LineWidth', 2);
+legend(surface_elevation, 'Surface Elevation [m]', 'Location', 'southeast');
 
 xlabel('Time');
-ylabel('Altitude [m]');
+ylabel('range');
 ylim([0, max(depth) + 1]);
 
 ax = gca;
@@ -1022,26 +1025,22 @@ ax.XAxis.TickLabelFormat = 'HH:mm';
 
 c = colorbar;
 c.Label.String = 'TI Difference';
-title('Turbulence Intensity Difference (Basic - Noise Corrected)');
+title('TI Difference');
 
 hold off;
 
-fprintf('TI difference statistics:\n');
-fprintf('  Mean difference: %.4f (%.1f%%)\n', mean(ti_diff(:), 'omitnan'), ...
-    100*mean(ti_diff(:), 'omitnan'));
-
 %% 7.6 Reynolds Stress Components
 %
-% The next parameters we'll find here are the Reynolds normal and shear 
-% stresses (-$\overline{u_iu_j}$). Since we're using the vertical beam on 
-% the ADCP, we can directly measure the vertical TKE component from the 
-% along-beam velocity using the |calculate_turbulent_kinetic_energy| 
-% function. This function is capable of calculating TKE for any along-beam 
+% The next parameters to calculate are the Reynolds normal and shear 
+% stresses (-$\overline{u_iu_j}$). Using the vertical beam on
+% the ADCP allows calculation of the vertical TKE component from the
+% along-beam velocity using the |calculate_turbulent_kinetic_energy|
+% function. This function calculates TKE for any along-beam
 % velocity.
 %
-% We can also use the so-called "beam-variance" equations to estimate the 
-% Reynolds stress tensor components (i.e. $\overline{u'^2}$, $\overline{v'^2}$, 
-% $\overline{w'^2}$, $\overline{u'v'}$, $\overline{u'w'^2}$, $\overline{v'w'^2}$), 
+% The so-called "beam-variance" equations can also estimate the 
+% Reynolds stress tensor components (i.e. $\overline{u'}^2$, $\overline{v'}^2$, 
+% $\overline{w'}^2$, $\overline{u'v'}$, $\overline{u'w'}^2$, $\overline{v'w'}^2$), 
 % which define the normal and shear stresses acting on an element of water. 
 % These equations are built into the functions |calculate_reynolds_stress_5beam| 
 % and |calculate_reynolds_stress_4beam|.
@@ -1051,16 +1050,16 @@ fprintf('  Mean difference: %.4f (%.1f%%)\n', mean(ti_diff(:), 'omitnan'), ...
 % |calculate_reynolds_stress_4beam| does not. Both will throw a tilt warning 
 % if tilt is greater than 5 degrees.
 %
-% *Quick 5-beam ADCP lesson before we dive in:*
+% *5-beam ADCP considerations:*
 %
 % There are a couple caveats to calculating Reynolds stress tensor components:
 %
-% # Because this instrument only has 5 beams, we can only find 5 of the 6 components (6 unknowns, 5 knowns)
-% # Because the ADCP's instrument (XYZ) axes weren't aligned with the flow during deployment, we don't know what direction these components are aligned to (i.e. the 'u' direction is not necessarily the streamwise direction)
-% # It is possible to rotate the tensor, but we'd need to know all 6 components to do so properly ("coupled ADCPs")
+% # Because this instrument only has 5 beams, only 5 of the 6 components can be found (6 unknowns, 5 knowns)
+% # Because the ADCP's instrument (XYZ) axes weren't aligned with the flow during deployment, the direction these components are aligned to is unknown (i.e. the 'u' direction is not necessarily the streamwise direction)
+% # It is possible to rotate the tensor, but all 6 components would be required to do so properly ("coupled ADCPs")
 % # Measurements close to the seafloor can be suspect due to increased vertical flow. ADCPs operate under the "assumption of homogeneity", which means that they can only accurately measure consistent horizontal currents with relatively little vertical motion.
 %
-% As an example, we'll calculate the Reynolds stresses from the 
+% The following section calculates the Reynolds stresses using the 
 % |calculate_reynolds_stress_5beam| function, which calculates the individual 
 % Reynolds stress tensor components and takes the same inputs: the raw dataset 
 % in "beam" coordinates, the instrument Doppler noise, the ADCP's orientation 
@@ -1068,31 +1067,38 @@ fprintf('  Mean difference: %.4f (%.1f%%)\n', mean(ti_diff(:), 'omitnan'), ...
 % shear stress ("stress_vec") vector. Note, this function will drop at least 
 % one warning every time it's run, primarily the coordinate system warning. 
 % This function also requires the input raw data to be in beam coordinates, 
-% so we'll create a copy of the raw data and rotate it to 'beam'. If you do 
-% not, this function will do so automatically.
+% so this section creates a copy of the raw data and rotates it to 'beam'. If not provided,
+% this function will perform the rotation automatically.
 
-fprintf('Rotating dataset to beam coordinates for Reynolds stress calculation\n');
 ds_beam = rotate2(ds, 'beam');
-
-fprintf('Calculating Reynolds stress components using 5-beam method\n');
 % Extract mean noise value for 5-beam calculation
 noise_mean = mean(ds_avg.noise_5m.data(:), 'omitnan');
-ds_avg = calculate_reynolds_stress_5beam(ds_beam, ...
+ds_reynolds = calculate_reynolds_stress_5beam(ds_beam, ...
     'noise', noise_mean, ...
     'orientation', 'up', ...
     'beam_angle', 25, ...
     'align_with_shear', true);
 
+% Merge Reynolds stress results into ds_avg (preserve existing fields like dissipation_rate)
+ds_avg.tke_vec = ds_reynolds.tke_vec;
+ds_avg.stress_vec = ds_reynolds.stress_vec;
+
 % Display Reynolds stress statistics
 tke_data = ds_avg.tke_vec.data;
 stress_data = ds_avg.stress_vec.data;
-fprintf('TKE components statistics:\n');
-fprintf('  Mean TKE: %.2e m²/s²\n', mean(tke_data(:), 'omitnan'));
-fprintf('  Valid points: %d/%d\n', sum(~isnan(tke_data(:))), numel(tke_data));
-fprintf('Reynolds stress statistics:\n');
-fprintf('  Mean stress magnitude: %.2e m²/s²\n', mean(abs(stress_data(:)), 'omitnan'));
-fprintf('  Valid points: %d/%d\n', sum(~isnan(stress_data(:))), numel(stress_data));
+reynolds_stats = table(...
+    mean(tke_data(:), 'omitnan'), ...
+    sum(~isnan(tke_data(:))), ...
+    numel(tke_data), ...
+    mean(abs(stress_data(:)), 'omitnan'), ...
+    sum(~isnan(stress_data(:))), ...
+    numel(stress_data), ...
+    'VariableNames', {'TKE_Mean_m2_s2', 'TKE_Valid_Points', 'TKE_Total_Points', ...
+                      'Stress_Mean_m2_s2', 'Stress_Valid_Points', 'Stress_Total_Points'});
+reynolds_stats.Properties.Description = 'TKE and Reynolds Stress Statistics';
+disp(reynolds_stats);
 
+%%
 %
 % There is one other important thing to note on Reynolds stress measurements 
 % by ADCPs: the minimum turbulence length scale that the ADCP is capable of 
@@ -1105,11 +1111,11 @@ fprintf('  Valid points: %d/%d\n', sum(~isnan(stress_data(:))), numel(stress_dat
 
 %% 7.7 TKE Production
 %
-% Though it can't be found from this deployment, we'll go over how to estimate 
-% the TKE shear production rate. Note that we're assuming here that the buoyancy 
-% production is negligible and we're in a well-mixed tidal channel. There isn't 
-% a specific function in MHKiT-DOLfYN for production, but all the necessary 
-% variables are.
+% Though it can't be found from this deployment, the following explains how to estimate
+% the TKE shear production rate. This calculation assumes that buoyancy
+% production is negligible and the environment is a well-mixed tidal channel. MHKiT-DOLfYN does not include
+% a specific function for production, but provides all necessary
+% variables.
 %
 % It is possible to estimate production rates from either an ADV or an ADCP 
 % aligned with the flow direction (so "X" would align with the principal flow 
@@ -1118,10 +1124,10 @@ fprintf('  Valid points: %d/%d\n', sum(~isnan(stress_data(:))), numel(stress_dat
 %
 % $$P = -\overline{u'w'}\frac{du}{dz} - \overline{v'w'}\frac{dv}{dz}$$
 %
-% Note that the signs can get tricky but are important here. We found the 
-% Reynolds shear stresses $-\overline{u'w'}$ and $-\overline{v'w'}$ above using 
-% the Reynolds stress equations. If ADV data is available, those estimations 
-% are preferred because the ADV's point measurement does not have the assumptions 
+% Note that the signs can be complex but are important here. The previous calculations found the
+% Reynolds shear stresses $-\overline{u'w'}$ and $-\overline{v'w'}$ using
+% the Reynolds stress equations. If ADV data is available, those estimations
+% are preferred because the ADV's point measurement does not have the assumptions
 % that ADCP measurements have.
 %
 % The velocity shear components can be found from the aptly named functions 
@@ -1134,10 +1140,9 @@ fprintf('  Valid points: %d/%d\n', sum(~isnan(stress_data(:))), numel(stress_dat
 % The velocity shear functions operate on the raw velocity vector in the principal 
 % reference frame and need to be ensemble-averaged here. This can be done by 
 % nesting the |d*dz| function within the ADPBinner's |mean| function. With the 
-% ensemble shear known, we can put all the components together to get a production 
+% ensemble shear known, all components can be combined to calculate a production
 % estimation. If using ADV data, take the mean again of the "range" dimension.
 
-fprintf('Calculating TKE production rate from Reynolds stress and velocity shear\n');
 
 % Calculate velocity shear components
 ds_avg = calculate_velocity_shear(ds_avg, ...
@@ -1147,17 +1152,10 @@ ds_avg = calculate_velocity_shear(ds_avg, ...
 % Extract Reynolds shear stress components 
 % The updated calculate_reynolds_stress_5beam function now handles dimension alignment
 % internally, so stress components should match velocity shear dimensions
-fprintf('stress_vec.data size: %s\n', mat2str(size(ds_avg.stress_vec.data)));
-fprintf('stress_vec.dims: %s\n', strjoin(ds_avg.stress_vec.dims, ' x '));
-fprintf('Available stress components: %s\n', strjoin(ds_avg.stress_vec.coords.tau, ', '));
 
 % Access stress components - data is [range x time x tau]
-if size(ds_avg.stress_vec.data, 3) >= 3
-    upwp = squeeze(ds_avg.stress_vec.data(:, :, 2));  % u'w' component (2nd tau component)
-    vpwp = squeeze(ds_avg.stress_vec.data(:, :, 3));  % v'w' component (3rd tau component)
-else
-    error('Expected 3 stress components, got %d', size(ds_avg.stress_vec.data, 3));
-end
+upwp = squeeze(ds_avg.stress_vec.data(:, :, 2));  % u'w' component (2nd tau component)
+vpwp = squeeze(ds_avg.stress_vec.data(:, :, 3));  % v'w' component (3rd tau component)
 
 % Extract velocity shear
 dudz = ds_avg.dudz.data;
@@ -1167,35 +1165,37 @@ dwdz = ds_avg.dwdz.data;
 % Extract wpwp from TKE vector (wpwp is the 3rd component: upup, vpvp, wpwp)
 if isfield(ds_avg, 'tke_vec') && size(ds_avg.tke_vec.data, 3) >= 3
     wpwp = squeeze(ds_avg.tke_vec.data(:, :, 3));  % w'w' component (3rd tke component)
-    fprintf('wpwp component extracted from tke_vec\n');
 else
     error('wpwp component not found in tke_vec data');
 end
 
-% Calculate TKE production: P = -u'w'*du/dz - v'w'*dv/dz - w'w'*dw/dz
-% This is the complete three-term formula matching Python implementation
-% Reynolds stress function automatically aligns dimensions with velocity shear
-P = -upwp .* dudz - vpwp .* dvdz - wpwp .* dwdz;
+
+% Calculate TKE production using main horizontal terms (standard oceanographic approach)
+% P = -u'w'*du/dz - v'w'*dv/dz
+% Note: w'w'*dw/dz term often excluded due to measurement limitations and smaller contribution
+
+P = -upwp .* dudz - vpwp .* dvdz;
+
 
 %% 7.8 TKE Balance
 %
-% We can plot the production rates and the ratio of production rates to 
-% dissipation rates to get an understanding of the TKE balance. We always 
-% expect production to be greater than 0, though negative values can give 
-% us an indication of uncertainty. In a well mixed coastal environment, we 
-% expect production and dissipation to be approximately equal. Our 
-% production estimates are possibly high because our stress components 
-% aren't aligned with the flow (4x10^-3 m²/s³ is quite large), but if this 
-% weren't the case, we would conclude that TKE is produced (kinetic energy 
-% is lost to turbulence) but not dissipated (turbulent energy is lost to 
-% entropy) here.
+% Plotting the production rates and the ratio of production rates to
+% dissipation rates provides understanding of the TKE balance. Production
+% should typically be greater than 0, though negative values can indicate
+% uncertainty. In a well mixed coastal environment,
+% production and dissipation are expected to be approximately equal. These
+% production estimates are possibly high because the stress components
+% are not aligned with the flow (4x10^-3 m²/s³ is quite large), but if this
+% were not the case, the conclusion would be that TKE is produced (kinetic energy
+% is lost to turbulence) but not dissipated (turbulent energy is lost to
+% entropy) at this location.
 
 % Remove estimations below 0
 P(P <= 0) = NaN;
 
 % Plot production rate
 fig = figure;
-fig.Position = [100 100 800 400];
+fig.Position = [100 100 viz_width viz_height];
 
 time = datetime(ds_avg.coords.time, 'ConvertFrom', 'posixtime');
 % Use the shear-aligned range coordinate (26 bins) instead of original range (28 bins)
@@ -1211,16 +1211,8 @@ else
 end
 depth = ds_avg.depth.data;
 
-% Debug dimensions for plotting
-fprintf('Plotting dimensions:\n');
-fprintf('  time length: %d\n', length(time));
-fprintf('  range length: %d\n', length(range));
-fprintf('  P size: %s\n', mat2str(size(P)));
-
 % Create meshgrid
 [T, R] = meshgrid(time, range);
-fprintf('  Meshgrid T size: %s\n', mat2str(size(T)));
-fprintf('  Meshgrid R size: %s\n', mat2str(size(R)));
 
 % Ensure P has the right orientation for pcolor
 % pcolor expects Z to match meshgrid dimensions: [length(range) x length(time)]
@@ -1230,52 +1222,62 @@ if size(P, 1) == length(range) && size(P, 2) == length(time)
 elseif size(P, 1) == length(time) && size(P, 2) == length(range)
     % P is [time x range], transpose it
     pcolor(T, R, P');
-else
-    error('P dimensions [%d x %d] do not match time (%d) and range (%d)', size(P, 1), size(P, 2), length(time), length(range));
 end
+
 shading flat;
-colormap('turbo');
+% colormap('turbo');
+colormap(cmocean('thermal', 256));
 
 hold on;
-plot(time, depth, 'b-', 'LineWidth', 2);
+surface_elevation = plot(squeeze(time), squeeze(depth), 'Color', surface_elevation_blue, 'LineWidth', 2);
+legend(surface_elevation, 'Surface Elevation [m]', 'Location', 'northeast');
 
 xlabel('Time');
-ylabel('Altitude [m]');
+ylabel('Profile Range [m]');
 ylim([0, max(depth) + 1]);
 
 ax = gca;
 ax.XAxis.TickLabelFormat = 'HH:mm';
 
 c = colorbar;
-c.Label.String = 'TKE Production [m² s⁻³]';
+c.Label.String = 'stress\_vec';
 title('TKE Production');
 
 hold off;
 
 % Plot difference between production and dissipation rate
-figure;
-fig.Position = [100 100 800 400];
+fig = figure;
+fig.Position = [100 100 viz_width viz_height];
 
-% Create balance by expanding dissipation to match production dimensions
-eps_expanded = repmat(ds_avg.dissipation_rate_5m.data, size(P, 1), 1);
-balance = P - eps_expanded;
 
-pcolor(T, R, balance');
+% Extract dissipation rate from full profile (match Python: ds_avg["dissipation_rate"].values)
+% Align dimensions: P is [26 x time], dissipation_rate is [28 x time]
+% Use same range subset as production (centered difference removes first and last bins)
+range_start = 2;  % Skip first bin (centered difference)
+range_end = range_start + size(P, 1) - 1;  % Take 26 bins to match P
+eps_profile = ds_avg.dissipation_rate.data(range_start:range_end, :);
+
+% Calculate balance (match Python: P - ds_avg["dissipation_rate"].values)
+balance = P - eps_profile;
+
+pcolor(T, R, balance);
 shading flat;
-colormap('turbo');
+% Blue to Red
+colormap(cmocean('balance', 256));
 
 hold on;
-plot(time, depth, 'b-', 'LineWidth', 2);
+surface_elevation = plot(squeeze(time), squeeze(depth), 'Color', surface_elevation_blue, 'LineWidth', 2);
+legend(surface_elevation, 'Surface Elevation [m]', 'Location', 'northeast');
 
 xlabel('Time');
-ylabel('Altitude [m]');
+ylabel("Profile Range [m]");
 ylim([0, max(depth) + 1]);
 
 ax = gca;
 ax.XAxis.TickLabelFormat = 'HH:mm';
 
 c = colorbar;
-c.Label.String = 'TKE Balance [m² s⁻³]';
+c.Label.String = 'stress\_vec';
 title('TKE Balance');
 
 hold off;
