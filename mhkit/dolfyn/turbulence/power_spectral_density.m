@@ -128,7 +128,7 @@ end
 if strcmpi(freq_units, 'rad/s')
     freq = freq * 2 * pi;
     psd_vals = psd_vals / (2 * pi);  % Convert PSD units too
-    units_str = 'm2 s rad-1';
+    units_str = 'm2 s-1 rad-1';
 else
     units_str = 'm2 s-2 Hz-1';
 end
