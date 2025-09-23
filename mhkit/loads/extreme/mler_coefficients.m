@@ -49,67 +49,8 @@ m1 = frequency_moment(R, 1);
 m2 = frequency_moment(R, 2);
 wBar = m1/m0;
 
-% DEBUG: Print all dimensions before calculation
-fprintf('DEBUG - Variable dimensions in mler_coefficients:\n');
-fprintf('  RAO: %s\n', mat2str(size(RAO)));
-fprintf('  wave_spectrum: %s\n', mat2str(size(wave_spectrum)));
-fprintf('  freq: %s\n', mat2str(size(freq)));
-fprintf('  dw: %s (scalar: %g)\n', mat2str(size(dw)), dw);
-fprintf('  m0: %s (value: %g)\n', mat2str(size(m0)), m0);
-fprintf('  m1: %s (value: %g)\n', mat2str(size(m1)), m1);
-fprintf('  m2: %s (value: %g)\n', mat2str(size(m2)), m2);
-fprintf('  wBar: %s (value: %g)\n', mat2str(size(wBar)), wBar);
-
 % calculate coefficient_a from Quon2016 Eqn.8
-% Explicit scalar handling for MATLAB R2022b/R2023b compatibility
-% Debug output before computation
-fprintf('  BEFORE explicit scalar conversion:\n');
-fprintf('    m0 original: size=%s, class=%s, value=%g\n', mat2str(size(m0)), class(m0), m0);
-fprintf('    m1 original: size=%s, class=%s, value=%g\n', mat2str(size(m1)), class(m1), m1);
-fprintf('    m2 original: size=%s, class=%s, value=%g\n', mat2str(size(m2)), class(m2), m2);
-fprintf('    wBar original: size=%s, class=%s, value=%g\n', mat2str(size(wBar)), class(wBar), wBar);
-
-% Ensure all scalars are explicitly converted to same size as vectors
-m0_scalar = double(m0(1));  % Ensure scalar
-m1_scalar = double(m1(1));  % Ensure scalar
-m2_scalar = double(m2(1));  % Ensure scalar
-wBar_scalar = double(wBar(1));  % Ensure scalar
-
-fprintf('  AFTER explicit scalar conversion:\n');
-fprintf('    m0_scalar: size=%s, class=%s, value=%g\n', mat2str(size(m0_scalar)), class(m0_scalar), m0_scalar);
-fprintf('    m1_scalar: size=%s, class=%s, value=%g\n', mat2str(size(m1_scalar)), class(m1_scalar), m1_scalar);
-fprintf('    m2_scalar: size=%s, class=%s, value=%g\n', mat2str(size(m2_scalar)), class(m2_scalar), m2_scalar);
-fprintf('    wBar_scalar: size=%s, class=%s, value=%g\n', mat2str(size(wBar_scalar)), class(wBar_scalar), wBar_scalar);
-
-% Calculate each term explicitly with size monitoring
-term1 = abs(RAO);  % [1 x N]
-fprintf('  term1 = abs(RAO): %s\n', mat2str(size(term1)));
-
-term2 = sqrt(2 .* dw .* wave_spectrum);  % [1 x N]
-fprintf('  term2 = sqrt(2.*dw.*wave_spectrum): %s\n', mat2str(size(term2)));
-
-term3a = m2_scalar - (freq .* m1_scalar);  % [1 x N]
-fprintf('  term3a = m2_scalar - (freq.*m1_scalar): %s\n', mat2str(size(term3a)));
-
-term3b = (freq .* m0_scalar) - m1_scalar;  % [1 x N]
-fprintf('  term3b = (freq.*m0_scalar) - m1_scalar: %s\n', mat2str(size(term3b)));
-
-term3c = wBar_scalar .* term3b;  % [1 x N]
-fprintf('  term3c = wBar_scalar .* term3b: %s\n', mat2str(size(term3c)));
-
-term3 = term3a + term3c;  % [1 x N]
-fprintf('  term3 = term3a + term3c: %s\n', mat2str(size(term3)));
-
-% Final calculation with explicit element-wise operations
-numerator = term1 .* term2 .* term3;  % [1 x N]
-fprintf('  numerator = term1 .* term2 .* term3: %s\n', mat2str(size(numerator)));
-
-denominator_scalar = (m0_scalar * m2_scalar) - (m1_scalar ^ 2);  % scalar
-fprintf('  denominator_scalar: size=%s, value=%g\n', mat2str(size(denominator_scalar)), denominator_scalar);
-
-coeff_a_rn = numerator ./ denominator_scalar;  % [1 x N]
-fprintf('  coeff_a_rn final: %s\n', mat2str(size(coeff_a_rn)));
-
+coeff_a_rn = abs(RAO) .* sqrt(2*dw.*wave_spectrum) .* ((m2 - freq.*m1) + wBar.*(freq.*m0 - m1)) ./ (m0*m2 - m1^2);
 % phase delay should be positive number
 phase = unwrap(angle(RAO));
 % for negative values of Amp, add pi phase shift, flip sign
