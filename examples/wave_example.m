@@ -6,7 +6,7 @@
 % We can use MHKiT to load data downloaded from <https://www.ndbc.noaa.gov/
 % https://www.ndbc.noaa.gov>.
 
-relative_file_name = './examples/data/wave/data.txt';
+relative_file_name = './data/wave/data.txt';
 current_dir = fileparts(matlab.desktop.editor.getActiveFilename);
 full_file_name = fullfile(current_dir, relative_file_name);
 ndbc_data = read_NDBC_file(full_file_name);
