@@ -50,7 +50,7 @@ m2 = frequency_moment(R, 2);
 wBar = m1/m0;
 
 % calculate coefficient_a from Quon2016 Eqn.8
-coeff_a_rn = abs(RAO) .* sqrt(2*dw.*wave_spectrum) .* ((m2 - freq.*m1) + wBar.*(freq.*m0 - m1)) ./ (m0.*m2 - m1.^2);
+coeff_a_rn = abs(RAO) .* sqrt(2*dw.*wave_spectrum) .* ((m2 - freq.*m1) + wBar.*(freq.*m0 - m1)) ./ (m0*m2 - m1^2);
 % phase delay should be positive number
 phase = unwrap(angle(RAO));
 % for negative values of Amp, add pi phase shift, flip sign
