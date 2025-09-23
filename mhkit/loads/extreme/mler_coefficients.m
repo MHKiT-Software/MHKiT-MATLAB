@@ -7,18 +7,20 @@ function mler = mler_coefficients(RAO, wave_spectrum, response_desired)
 %
 %     Parameters
 %     ----------
-%         RAO : array
+%         RAO : array (N x 1)
 %             Response amplitude operator [-]
 %         wave_spectrum: struct
-%             Struct with wave spectral density [m^2/Hz] and frequency [Hz]
-%         response_desired: int or float
-%             Latitude longitude pairs at which to extract data.
+%             wave_spectrum.spectrum - Spectral density [m^2/Hz] (N x 1)
+%             wave_spectrum.frequency - Frequency [Hz] (N x 1)
+%         response_desired: scalar
+%             Desired response amplitude
 %
 %      Returns
 %      -------
 %         mler : struct
-%             containing conditioned wave spectral amplitude
-%             coefficient [m^2-s], and phase [rad] indexed by frequency [Hz].
+%             mler.conditioned_spectrum - Conditioned wave spectral amplitude [m^2-s] (N x 1)
+%             mler.phase - Phase [rad] (N x 1)
+%             mler.frequency - Frequency [Hz] (N x 1)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
