@@ -1,5 +1,17 @@
 # Current development
 
+## PR 176 - Wave Module Native MATLAB Implementation
+
+- Authors: @MShabara, @simmsa
+- Convert wave module functions to native MATLAB code:
+  - wave/resource/standardize_wave_spectra_frequency.m:
+  - wave/resource/frequency_moment.m:
+  - wave/resource/energy_period.m:
+  - wave/resource/significant_wave_height.m:
+  - wave/resource/jonswap_spectrum.m:
+  - wave/resource/pierson_moskowitz_spectrum.m:
+  - wave/resource/surface_elevation.m:
+
 ## PR 153 - Mooring Module
 
 - Author: @hivanov-nrel
