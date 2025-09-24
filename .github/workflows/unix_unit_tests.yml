@@ -131,11 +131,11 @@ jobs:
         os: [macos-13, "ubuntu-22.04"]
         python-version: ["3.10", 3.11, 3.12]
         # Note: It is preferred to use an actual release name as opposed to 'latest'
-        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
+        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b, R2025a, R2025b]
         mhkit-python-version: ["0.9.0"]
         exclude:
-          - python-version: "3.10" # cache_population job
-            matlab-version: R2022b
+          - python-version: "3.11" # cache_population job
+            matlab-version: R2023b
             os: "ubuntu-22.04"
           # Python 3.12 + MATLAB incompatability
           - matlab-version: R2024a
