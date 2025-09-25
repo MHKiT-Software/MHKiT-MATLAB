@@ -3,25 +3,18 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
     methods (Test)
 
         function test_mler_coefficients(testCase)
-            % `mler_coefficients` Line 54, 55
-            % phase delay should be positive number
-            % phase = -unwrap(angle(RAO));
-            % Per @simmsa, this does not perform this conversion correctly for positive RAO values
-            assumeFail(testCase, "Per @simmsa, ask @hivanov about setting RAO to negative values per the above comment");
-
             % create inputs and load validation data
             fpath = '../../examples/data/loads/mler.csv';
             validation = readtable(fpath);
             wave_freq = linspace(0,1,500);
-            js = jonswap_spectrum(wave_freq,15.1,9);
+            js = pierson_moskowitz_spectrum(wave_freq,15.1,9);
             response_desired = 1;
             RAO = validation.RAO;
-            RAO = RAO';
             % execute function
             mler = mler_coefficients(RAO, js, response_desired);
             % assertions
-            assertEqual(testCase, mler.conditioned_spectrum, validation.Res_Spec', 'RelTol',0.005)
-            assertEqual(testCase, mler.phase, validation.phase', 'RelTol',0.001)
+            assertEqual(testCase, mler.conditioned_spectrum, validation.Res_Spec, 'RelTol',0.005)
+            assertEqual(testCase, mler.phase, validation.phase, 'RelTol',0.001)
         end
 
         function test_mler_simulation(testCase)
