@@ -214,7 +214,7 @@ function ds=read_signature(filename,options)
                     first_pass = true;
                     burst_readers.(ky).nsamp_index = ...
                         find(strcmp(burst_readers.(ky).names,...
-                        'altraw_nsamp'));
+                        'nsamp_alt'));
                     tmp_idx = burst_readers.(ky).nsamp_index;
                     sz_str = fmt_str(burst_readers.(ky).format(1:tmp_idx-1),...
                         burst_readers.(ky).N(1:tmp_idx-1));
@@ -247,8 +247,8 @@ function ds=read_signature(filename,options)
                     [~, nbyte] = py_struct_2_bytes_format(sz_str, true);
                     burst_readers.(ky).nbyte = nbyte;
                     %  Initialize the array
-                    outdat.(ky).altraw_samp = zeros([sz,1,...
-                        length(outdat.(ky).altraw_samp)]);
+                    outdat.(ky).samp_alt = zeros([sz,1,...
+                        length(outdat.(ky).samp_alt)]);
                     % fix the dummy_read now that another field has been
                     % added
                     outdat.(ky).dummy_read = zeros(sum(...
@@ -731,7 +731,7 @@ function ds=read_signature(filename,options)
             out.amp = getbit(val, 6);
             out.corr = getbit(val, 7);
             out.le = getbit(val, 8);
-            out.alt_raw = getbit(val, 9);
+            out.altraw = getbit(val, 9);
             out.ast = getbit(val, 10);
             out.echo = getbit(val, 11);
             out.ahrs = getbit(val, 12);
@@ -796,7 +796,7 @@ function ds=read_signature(filename,options)
         dd.blank_dist = struct('format', 'H', 'shape', [], 'sci_func',...
                 [0.001, 0], 'units', '', 'N', 1);
         if flags.vel || flags.amp || flags.corr || flags.le || ...
-            flags.ast || flags.alt_raw || flags.p_gd || flags.std
+            flags.ast || flags.altraw || flags.p_gd || flags.std
             ME = MException('MATLAB:read_signature',['Echosounder'...
                 ' ping contains invalid data?']);
             throwAsCaller(ME)
@@ -807,7 +807,7 @@ function ds=read_signature(filename,options)
         end
         if flags.ahrs
             dd.orientmat = struct('format', 'f', 'shape', [1,3,3],...
-                'sci_func', nan, 'units', '', 'N', 9);
+                'sci_func', nan, 'units', '1', 'N', 9);
             dd.quaternions = struct('format', 'f', 'shape', [1,4],...
                 'sci_func', nan, 'units', '', 'N', 4);
             dd.angrt = struct('format', 'f', 'shape', [1,3],...
@@ -834,7 +834,7 @@ function ds=read_signature(filename,options)
         end
         if flags.ahrs
             dd.orientmat = struct('format', 'f', 'shape', [1,3,3],...
-                'sci_func', nan, 'units', '', 'N', 9);
+                'sci_func', nan, 'units', '1', 'N', 9);
             dd.quaternions = struct('format', 'f', 'shape', [1,4],...
                 'sci_func', nan, 'units', '', 'N', 4);
             dd.angrt = struct('format', 'f', 'shape', [1,3],...
@@ -884,17 +884,17 @@ function ds=read_signature(filename,options)
             dd.ast_spare = struct('format', 'B7x', 'shape', [], 'sci_func',...
                 nan, 'units', '', 'N', 1);
         end
-        if flags.alt_raw
-            dd.altraw_nsamp = struct('format', 'I', 'shape', [],...
+        if flags.altraw
+            dd.nsamp_alt = struct('format', 'I', 'shape', [],...
                 'sci_func', nan, 'units', '', 'N', 1);
-            dd.altraw_dsamp = struct('format', 'H', 'shape', [],...
+            dd.dsamp_alt = struct('format', 'H', 'shape', [],...
                 'sci_func', [0.0001, 0], 'units', 'm', 'N', 1);
-            dd.altraw_samp = struct('format', 'h', 'shape', [],...
+            dd.samp_alt = struct('format', 'h', 'shape', [],...
                 'sci_func', nan, 'units', '', 'N', 1);
         end
         if flags.ahrs
             dd.orientmat = struct('format', 'f', 'shape', [1,3,3],...
-                'sci_func', nan, 'units', '', 'N', 9);
+                'sci_func', nan, 'units', '1', 'N', 9);
             dd.quaternions = struct('format', 'f', 'shape', [1,4],...
                 'sci_func', nan, 'units', '', 'N', 4);
             dd.angrt = struct('format', 'f', 'shape', [1,3],...
@@ -1281,7 +1281,7 @@ function ds=read_signature(filename,options)
                 'dist', 'orientmat', 'angrt', 'quaternions', ...
                 'pressure_alt', 'le_dist_alt', 'le_quality_alt', 'status_alt',...
                 'ast_dist_alt', 'ast_quality_alt', 'ast_offset_time_alt',...
-                'altraw_nsamp', 'altraw_dsamp', 'altraw_samp',...
+                'nsamp_alt', 'dsamp_alt', 'samp_alt',...
                 'status0', 'fom', 'temp_press', 'press_std',...
                 'pitch_std', 'roll_std', 'heading_std', 'xmit_energy'};
             for j = 1:numel(iter_keys)
@@ -1443,11 +1443,9 @@ function ds=read_signature(filename,options)
         end
 
         % Create n_altraw coordinate for altimeter raw data
+        % MHKiT-Python: n_altraw = count of ID 26 pings
         if isfield(dat.data_vars,'samp_altraw')
             tmp = size(dat.data_vars.samp_altraw);
-            dat.coords.n_altraw = (1:tmp(1))';
-        elseif isfield(dat.altraw,'altraw_samp')
-            tmp = size(dat.altraw.altraw_samp);
             dat.coords.n_altraw = (1:tmp(1))';
         end
 
@@ -1478,14 +1476,22 @@ function ds=read_signature(filename,options)
 
         % Extract beam angle from BEAMCFGLIST
         if isfield(dat.attrs.filehead_config, 'BEAMCFGLIST')
-            theta = dat.attrs.filehead_config.BEAMCFGLIST(1);
-            if contains(theta, 'THETA=')
-                % Extract beam angle from string like "THETA=25"
-                theta_str = char(theta);
-                theta_idx = strfind(theta_str, 'THETA=');
-                if ~isempty(theta_idx)
-                    beam_angle_str = theta_str(theta_idx+6:theta_idx+7);
-                    dat.attrs.beam_angle = str2double(beam_angle_str);
+            beamcfg = dat.attrs.filehead_config.BEAMCFGLIST;
+            % Search through all elements for THETA=
+            for i = 1:length(beamcfg)
+                theta_str = char(beamcfg(i));
+                if contains(theta_str, 'THETA=')
+                    % Extract value after THETA=
+                    theta_idx = strfind(theta_str, 'THETA=');
+                    if ~isempty(theta_idx)
+                        value_start = theta_idx + 6; % Skip "THETA="
+                        value_str = theta_str(value_start:end);
+                        beam_angle_num = str2double(value_str);
+                        if ~isnan(beam_angle_num)
+                            dat.attrs.beam_angle = int32(beam_angle_num);
+                            break; % Use first valid THETA= found
+                        end
+                    end
                 end
             end
         end
@@ -1707,6 +1713,24 @@ function ds=read_signature(filename,options)
                 new_key = strrep(ky, strcat('raw', tag), strcat('_alt', tag));
                 outdat.attrs.(new_key) = outdat.attrs.(ky);
                 outdat.attrs = rmfield(outdat.attrs, ky);
+            end
+        end
+
+        % Convert *_alt fields to *_altraw format (Python naming)
+        % This only applies to fields from ID_26/ID_31 which have the 'raw' tag in their suffix
+        % The tag parameter will be '' for ID_26 and '_avg' for ID_31
+        % Fields from ID_21 don't have a tag and shouldn't be renamed
+        if ~isempty(tag) && contains(tag, 'raw')
+            data_fields = fieldnames(outdat.data_vars);
+            for i = 1:numel(data_fields)
+                ky = data_fields{i};
+                if endsWith(ky, strcat('_alt', tag))
+                    % Convert nsamp_alt+tag -> nsamp_altraw+tag
+                    % Replace '_alt' with '_altraw'
+                    new_key = strrep(ky, strcat('_alt', tag), strcat('_altraw', tag));
+                    outdat.data_vars.(new_key) = outdat.data_vars.(ky);
+                    outdat.data_vars = rmfield(outdat.data_vars, ky);
+                end
             end
         end
     end
