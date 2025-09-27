@@ -23,9 +23,9 @@ function ds = create_dataset(data)
             % beam2inst & inst2head orientation matrices
             if (contains(fn{k},'inst'))
                 ds.(fn{k}).data = data.data_vars.(fn{k});
-                ds.(fn{k}).dims = {'x_star', 'x'};
-                ds.(fn{k}).coords.x_star = beam;
-                ds.(fn{k}).coords.x = beam;
+                ds.(fn{k}).dims = {'x1', 'x2'};
+                ds.(fn{k}).coords.x1 = beam;
+                ds.(fn{k}).coords.x2 = beam;
             else
             % earth2inst orientation matrix
                 ds.(fn{k}).data = data.data_vars.(fn{k});

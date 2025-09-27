@@ -35,9 +35,9 @@ function data_set = set_inst2head_rotmat(ds, rotmat)
     end
 
     ds.inst2head_rotmat.data = rotmat;
-    ds.inst2head_rotmat.dims = {'x_star', 'x'};
-    ds.inst2head_rotmat.coords.x_star = [1,2,3];
-    ds.inst2head_rotmat.coords.x = [1,2,3];
+    ds.inst2head_rotmat.dims = {'x1', 'x2'};
+    ds.inst2head_rotmat.coords.x1 = [1,2,3];
+    ds.inst2head_rotmat.coords.x2 = [1,2,3];
     ds.attrs.inst2head_rotmat_was_set = true;
 
     if  ~strcmpi(csin, 'beam')

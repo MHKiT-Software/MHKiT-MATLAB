@@ -59,7 +59,7 @@ function ds = read_netcdf(filename)
                     convertStringsToChars(ncread(filename,name));
             else
                 if strcmpi(dimensions.Name, 'x*')
-                    ds.coords.x_star = ncread(filename,name);
+                    ds.coords.x1 = ncread(filename,name);
                 else
                     ds.coords.(name) = ncread(filename,name);
                 end
@@ -105,7 +105,7 @@ function ds = read_netcdf(filename)
             ds.(name).dims = cell(numel(dimensions),1);
             for kk = 1:numel(dimensions)
                 if strcmpi(dimensions(kk).Name, 'x*')
-                    ds.(name).dims{kk} = 'x_star';
+                    ds.(name).dims{kk} = 'x1';
                 else
                     ds.(name).dims{kk} = dimensions(kk).Name;
                 end

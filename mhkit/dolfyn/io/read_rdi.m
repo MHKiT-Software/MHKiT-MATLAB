@@ -132,11 +132,11 @@ function ds = read_rdi(filename,options)
         ds.beam2inst_orientmat.data = calc_beam_orientmat(...
             ds.attrs.beam_angle,...
             strcmp(ds.attrs.beam_pattern,'convex'), true);
-        ds.beam2inst_orientmat.dims = {'x_star', 'x'};
-        ds.beam2inst_orientmat.coords = struct('x_star',...
-            [1,2,3,4], 'x', [1,2,3,4]);
-        ds.coords.x_star = [1,2,3,4];
-        ds.coords.x = [1,2,3,4];
+        ds.beam2inst_orientmat.dims = {'x1', 'x2'};
+        ds.beam2inst_orientmat.coords = struct('x1',...
+            [1,2,3,4], 'x2', [1,2,3,4]);
+        ds.coords.x1 = [1,2,3,4];
+        ds.coords.x2 = [1,2,3,4];
     end
 
     if ~isfield(ds, 'orientmat')
