@@ -120,15 +120,19 @@
       "commands": {
         "linux": [
           "conda run -n <conda_env> pip install --upgrade netcdf4",
-          "conda run -n <conda_env> pip uninstall -y scipy",
-          "conda run -n <conda_env> pip install scipy==1.12.0"
+          "conda run -n <conda_env> conda install scipy -y"
         ],
         "mac": [
-          "conda run -n <conda_env> pip install --upgrade netcdf4",
+          "conda run -n <conda_env> conda install openssl=3.0.* -y",
+          "conda run -n <conda_env> pip install netcdf4 --no-deps",
+          "conda run -n <conda_env> pip install cftime",
           "conda run -n <conda_env> pip uninstall -y scipy",
           "conda run -n <conda_env> pip install scipy==1.12.0"
         ],
-        "windows": []
+        "windows": [
+          "conda run -n <conda_env> pip install --upgrade netcdf4",
+          "conda run -n <conda_env> conda install scipy -y"
+        ]
       },
       "environment_variables": {
         "linux": {},
