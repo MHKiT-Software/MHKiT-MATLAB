@@ -209,7 +209,7 @@ function ds=read_signature(filename,options)
             ky = join(["id",string(id)],"_");
             if any([21, 23, 24, 28] == id) % vel, bt, vel_b5, echo
                 outdat.(ky).dummy_read(:,c) = read(ky);
-            elseif id == 26 % alt_raw (altimeter burst)
+            elseif any([26, 31] == id) % alt_raw (altimeter burst) or avg alt_raw
                 if ~isfield(burst_readers.(ky),'nsamp_index')
                     first_pass = true;
                     burst_readers.(ky).nsamp_index = ...
@@ -265,9 +265,8 @@ function ds=read_signature(filename,options)
                 outdat.(ky).dummy_read(:,c) = read(ky);
                 outdat.(ky).ensemble(c26) = c;
                 c26 = c26 + 1;
-            elseif any([22, 27, 29, 30, 31, 35, 36] == id) % avg record,
-                % bt record, DVL, alt record, avg alt_raw record, raw echo,
-                % raw echo transmit
+            elseif any([22, 27, 29, 30, 35, 36] == id) % avg record,
+                % bt record, DVL, alt record, raw echo, raw echo transmit
                 warning(['Unhandled ID: 0x:%X (%d)\n    This ID is not yet' ...
                     ' handled by DOLfYN.\n'], id, id)
                 fseek(fid,hdr.sz,0);
@@ -1203,15 +1202,16 @@ function ds=read_signature(filename,options)
         id_tag = struct('id_21', struct('id', 21, 'tag', ''),...
                         'id_23', struct('id', 23, 'tag', '_bt'),...
                         'id_24', struct('id', 24, 'tag', '_b5'),...
-                        'id_26', struct('id', 26, 'tag', '_ast'),...
-                        'id_28', struct('id', 28, 'tag', '_echo'));
+                        'id_26', struct('id', 26, 'tag', 'raw'),...
+                        'id_28', struct('id', 28, 'tag', '_echo'),...
+                        'id_31', struct('id', 31, 'tag', 'raw_avg'));
         id_fields = fieldnames(id_tag);
         for i = 1:numel(id_fields)
             key = id_fields{i};
             id = id_tag.(key).id;
             tag = id_tag.(key).tag;
             if id == 24 || id == 26
-                collapse_exclude = [0.0];
+                collapse_exclude = [];  % Don't exclude 0.0 values for altimeter data
             else
                 collapse_exclude = [];
             end
@@ -1295,51 +1295,10 @@ function ds=read_signature(filename,options)
 
         % Move 'altimeter raw' data to its own down-sampled structure
         if isfield(dat,'id_26')
-            fields = fieldnames(outdat.data_vars);
-            for i = 1:numel(fields)
-                ky = fields{i};
-                if endsWith(ky,"_ast")
-                    tmp = split(ky,".");
-                    grp = tmp{1};
-                    if length(tmp) > 1 && ~isfield(outdat.altraw,grp)
-                        outdat.altraw.(grp) = struct();
-                    end
-                    outdat.altraw.(erase(ky,"_ast")) = ...
-                        outdat.data_vars.(ky);
-
-                    % Also create samp_altraw field, same as MHKiT-Python
-                    if strcmp(ky, 'altraw_samp_ast')
-                        % Transform altraw_samp_ast to samp_altraw
-                        outdat.data_vars.samp_altraw = outdat.data_vars.(ky);
-                        % Convert "signed fractional" to float (like Python)
-                        outdat.data_vars.samp_altraw = ...
-                            single(outdat.data_vars.samp_altraw) / 2^8;
-                    end
-
-                    outdat.data_vars = rmfield(outdat.data_vars,ky);
-                end
-            end
-
-            % Read altimeter status
-            alt_status = alt_status2data(outdat.data_vars.alt_status);
-            alt_fields = fieldnames(alt_status);
-            for kk=1:numel(alt_fields)
-                ky = alt_fields{kk};
-                outdat.attrs.(ky) = collapse(alt_status.(ky),ky,[]);
-            end
-            outdat.data_vars = rmfield(outdat.data_vars,'alt_status');
-
-            % Power level index
-            if outdat.attrs.power_level_idx_alt == 0
-                outdat.attrs.power_level_alt = 'high';
-            elseif outdat.attrs.power_level_idx_alt == 1
-                outdat.attrs.power_level_alt = 'med-high';
-            elseif outdat.attrs.power_level_idx_alt == 2
-                outdat.attrs.power_level_alt = 'med-low';
-            elseif outdat.attrs.power_level_idx_alt == 3
-                outdat.attrs.power_level_alt = 'low';
-            end
-            outdat.attrs = rmfield(outdat.attrs,'power_level_idx_alt');
+            outdat = altraw_reorg(outdat, '');
+        end
+        if isfield(dat,'id_31')
+            outdat = altraw_reorg(outdat, '_avg');
         end
 
         % Read status data
@@ -1658,6 +1617,83 @@ function ds=read_signature(filename,options)
             end
             % Remove dummy_read
             outdat.(id) = rmfield(outdat.(id),'dummy_read');
+        end
+    end
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+    function outdat = altraw_reorg(outdat, tag)
+        % Submethod for reorg particular to raw altimeter pings (ID 26 and 31)
+        % Equivalent to MHKiT-Python _altraw_reorg function
+
+        % Remove non-altraw data variables with raw tag
+        fields = fieldnames(outdat.data_vars);
+        for i = 1:numel(fields)
+            ky = fields{i};
+            if endsWith(ky, strcat('raw', tag)) && ~endsWith(ky, strcat('_altraw', tag))
+                outdat.data_vars = rmfield(outdat.data_vars, ky);
+            end
+        end
+
+        % Rename timeraw coordinate to time_altraw
+        coord_fields = fieldnames(outdat.coords);
+        for i = 1:numel(coord_fields)
+            ky = coord_fields{i};
+            if strcmp(ky, strcat('timeraw', tag))
+                outdat.coords.(strcat('time_altraw', tag)) = outdat.coords.(ky);
+                outdat.coords = rmfield(outdat.coords, ky);
+                break;
+            end
+        end
+
+        % Convert signed fractional to float for samp_altraw
+        samp_key = strcat('samp_altraw', tag);
+        if isfield(outdat.data_vars, samp_key)
+            outdat.data_vars.(samp_key) = single(outdat.data_vars.(samp_key)) / 2^8;
+        end
+
+        % Read altimeter status
+        status_key = strcat('status_altraw', tag);
+        if isfield(outdat.data_vars, status_key)
+            outdat.data_vars = rmfield(outdat.data_vars, status_key);
+        end
+
+        status_alt_key = strcat('status_alt', tag);
+        if isfield(outdat.data_vars, status_alt_key)
+            status_alt = alt_status2data(outdat.data_vars.(status_alt_key));
+            status_alt_fields = fieldnames(status_alt);
+            for kk = 1:numel(status_alt_fields)
+                ky = status_alt_fields{kk};
+                outdat.attrs.(strcat(ky, tag)) = collapse(status_alt.(ky), ky, []);
+            end
+            outdat.data_vars = rmfield(outdat.data_vars, status_alt_key);
+        end
+
+        % Convert power level index to string
+        power_idx_key = strcat('power_level_idx_alt', tag);
+        power_key = strcat('power_level_alt', tag);
+        if isfield(outdat.attrs, power_idx_key)
+            power_idx = outdat.attrs.(power_idx_key);
+            if power_idx == 0
+                outdat.attrs.(power_key) = 'high';
+            elseif power_idx == 1
+                outdat.attrs.(power_key) = 'med-high';
+            elseif power_idx == 2
+                outdat.attrs.(power_key) = 'med-low';
+            elseif power_idx == 3
+                outdat.attrs.(power_key) = 'low';
+            end
+            outdat.attrs = rmfield(outdat.attrs, power_idx_key);
+        end
+
+        % Convert other 'raw' attributes to '_alt' attributes
+        attr_fields = fieldnames(outdat.attrs);
+        for i = 1:numel(attr_fields)
+            ky = attr_fields{i};
+            if endsWith(ky, strcat('raw', tag))
+                % Split 'raw' from attribute name and add '_alt'
+                new_key = strrep(ky, strcat('raw', tag), strcat('_alt', tag));
+                outdat.attrs.(new_key) = outdat.attrs.(ky);
+                outdat.attrs = rmfield(outdat.attrs, ky);
+            end
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
