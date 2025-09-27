@@ -101,13 +101,14 @@
     "pre_install": {
       "commands": {
         "linux": [
-          "conda run -n <conda_env> conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 -y"
+          "conda run -n <conda_env> conda install pip hdf5 libnetcdf cftime netcdf4 gfortran -y"
         ],
         "mac": [
-          "conda run -n <conda_env> conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4 -y",
-          "conda run -n <conda_env> conda install openssl==3.0.* -y"
+          "conda run -n <conda_env> conda install pip hdf5 libnetcdf cftime netcdf4 gfortran -y"
         ],
-        "windows": []
+        "windows": [
+          "conda run -n <conda_env> conda install pip hdf5 libnetcdf netcdf4 gfortran -y"
+        ]
       },
       "environment_variables": {
         "linux": {},
