@@ -1,4 +1,21 @@
 {
+  "constants": {
+    "startup_script": {
+      "start_marker": "%% MHKiT Environment Setup - START",
+      "end_marker": "%% MHKiT Environment Setup - END"
+    },
+    "user_prompts": {
+      "startup_configuration": "MHKiT needs to add environment fixes to your MATLAB startup script\nto ensure the MHKiT-Python interconnection works correctly.\n\nFile: {file}\n\nCode to add:\n{code}\n\nRemove later with: mhkit.configure_environment.uninstall()\n\nAdd this configuration? [y/n/exit]: "
+    },
+    "platform_directories": {
+      "windows": {
+        "matlab_user_dir": "{USERPROFILE}/Documents/MATLAB"
+      },
+      "unix": {
+        "matlab_user_dir": "{HOME}/Documents/MATLAB"
+      }
+    }
+  },
   "package": {
     "name": "MHKiT",
     "version": "0.6.0",
