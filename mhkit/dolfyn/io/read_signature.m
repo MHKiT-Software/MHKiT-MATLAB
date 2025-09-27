@@ -1306,6 +1306,16 @@ function ds=read_signature(filename,options)
                     end
                     outdat.altraw.(erase(ky,"_ast")) = ...
                         outdat.data_vars.(ky);
+
+                    % Also create samp_altraw field, same as MHKiT-Python
+                    if strcmp(ky, 'altraw_samp_ast')
+                        % Transform altraw_samp_ast to samp_altraw
+                        outdat.data_vars.samp_altraw = outdat.data_vars.(ky);
+                        % Convert "signed fractional" to float (like Python)
+                        outdat.data_vars.samp_altraw = ...
+                            single(outdat.data_vars.samp_altraw) / 2^8;
+                    end
+
                     outdat.data_vars = rmfield(outdat.data_vars,ky);
                 end
             end
@@ -1471,6 +1481,15 @@ function ds=read_signature(filename,options)
             tmp = size(dat.data_vars.echo);
             dat.coords.range_echo =  (1:tmp(end)) * ...
                 dat.attrs.cell_size_echo  + dat.attrs.blank_dist_echo;
+        end
+
+        % Create n_altraw coordinate for altimeter raw data
+        if isfield(dat.data_vars,'samp_altraw')
+            tmp = size(dat.data_vars.samp_altraw);
+            dat.coords.n_altraw = (1:tmp(1))';
+        elseif isfield(dat.altraw,'altraw_samp')
+            tmp = size(dat.altraw.altraw_samp);
+            dat.coords.n_altraw = (1:tmp(1))';
         end
 
         if isfield(dat.data_vars,"orientmat")

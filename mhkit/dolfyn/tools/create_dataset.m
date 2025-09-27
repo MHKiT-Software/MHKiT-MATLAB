@@ -146,6 +146,10 @@ function ds = create_dataset(data)
     if isfield(ds,'range')
         ds.range = data.coords.range;
     end
+    if isfield(data.coords,'n_altraw')
+        ds.n_altraw = data.coords.n_altraw;
+        ds.coords.n_altraw = data.coords.n_altraw;
+    end
 
     function add_to_coords(key)
         fields = fieldnames(ds.(key).coords);
