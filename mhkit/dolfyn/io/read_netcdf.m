@@ -109,8 +109,19 @@ function ds = read_netcdf(filename)
                 else
                     ds.(name).dims{kk} = dimensions(kk).Name;
                 end
-                ds.(name).coords.(dimensions(kk).Name) = ...
-                    ds.coords.(dimensions(kk).Name);
+                % Check if coordinate variable exists before accessing it
+                dim_name = dimensions(kk).Name;
+                if isfield(ds.coords, dim_name)
+                    ds.(name).coords.(dim_name) = ds.coords.(dim_name);
+                else
+                    % Create index coordinates for dimensions without coordinate variables
+                    dim_length = dimensions(kk).Length;
+                    ds.(name).coords.(dim_name) = (0:dim_length-1)';
+                    % Also add to global coords if not present
+                    if ~isfield(ds.coords, dim_name)
+                        ds.coords.(dim_name) = (0:dim_length-1)';
+                    end
+                end
             end
             if ~isempty(attrs)
                 for ii = 1:numel(attrs)
