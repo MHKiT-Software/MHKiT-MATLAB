@@ -1476,6 +1476,20 @@ function ds=read_signature(filename,options)
         end
         dat.data_vars.beam2inst_orientmat = tm';
 
+        % Extract beam angle from BEAMCFGLIST
+        if isfield(dat.attrs.filehead_config, 'BEAMCFGLIST')
+            theta = dat.attrs.filehead_config.BEAMCFGLIST(1);
+            if contains(theta, 'THETA=')
+                % Extract beam angle from string like "THETA=25"
+                theta_str = char(theta);
+                theta_idx = strfind(theta_str, 'THETA=');
+                if ~isempty(theta_idx)
+                    beam_angle_str = theta_str(theta_idx+6:theta_idx+7);
+                    dat.attrs.beam_angle = str2double(beam_angle_str);
+                end
+            end
+        end
+
         out = dat;
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
