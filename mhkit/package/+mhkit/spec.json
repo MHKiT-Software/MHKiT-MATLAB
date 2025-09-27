@@ -14,6 +14,9 @@
       "unix": {
         "matlab_user_dir": "{HOME}/Documents/MATLAB"
       }
+    },
+    "matlab_integration": {
+      "execution_mode": "OutOfProcess"
     }
   },
   "package": {
@@ -25,6 +28,11 @@
     "toolbox": "https://github.com/MHKiT-Software/MHKiT-MATLAB/releases/download/v<version>/mhkit_v<version>.mltbx",
     "examples": "https://github.com/MHKiT-Software/MHKiT-MATLAB/releases/download/v<version>/mhkit_examples_v<version>.zip",
     "python_package": "https://github.com/MHKiT-Software/MHKiT-MATLAB/releases/download/v<version>/mhkit_python_utils_v<version>.zip"
+  },
+  "support": {
+    "conda_install_instructions": "https://docs.conda.io/projects/miniconda/en/latest/",
+    "windows_conda_install": "https://docs.conda.io/projects/miniconda/en/latest/#quick-command-line-install",
+    "github_issues": "https://github.com/MHKiT-Software/MHKiT-MATLAB/issues/new"
   },
   "matlab": {
     "minimum_version": "R2022b",
@@ -55,11 +63,18 @@
     "environment_name": "mhkit-matlab-env",
     "create": "conda create -n <conda_env> python=<python_version> -y",
     "install": {
-      "windows": [
-        "curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe -o .miniconda.exe",
-        "start /wait \"\" .miniconda.exe /S /AddToPath=1",
-        "del .miniconda.exe"
-      ],
+      "windows": {
+        "admin": [
+          "powershell -Command \"Invoke-WebRequest https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe -OutFile miniconda.exe\"",
+          "start /wait \"\" miniconda.exe /InstallationType=JustMe /RegisterPython=0 /AddToPath=1 /S /D=%USERPROFILE%\\miniconda3",
+          "del miniconda.exe"
+        ],
+        "user": [
+          "powershell -Command \"Invoke-WebRequest https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe -OutFile miniconda.exe\"",
+          "start /wait \"\" miniconda.exe /InstallationType=JustMe /RegisterPython=0 /AddToPath=0 /S /D=%USERPROFILE%\\miniconda3",
+          "del miniconda.exe"
+        ]
+      },
       "mac": {
         "arm": [
           "mkdir -p ~/miniconda3",
