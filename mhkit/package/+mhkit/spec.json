@@ -117,6 +117,29 @@
           "DYLD_LIBRARY_PATH": "<conda_lib_path>:$DYLD_LIBRARY_PATH"
         },
         "windows": {}
+      },
+      "startup_fixes": {
+        "linux": [
+          "% MHKiT: Fix Python library compatibility on Linux",
+          "if isunix && ~ismac",
+          "    setenv('LD_PRELOAD', '/lib/x86_64-linux-gnu/libstdc++.so.6');",
+          "end"
+        ],
+        "mac": [
+          "% MHKiT: Fix Python library paths on macOS",
+          "if ismac",
+          "    conda_lib_path = '<conda_lib_path>';",
+          "    if exist(conda_lib_path, 'dir')",
+          "        current_path = getenv('DYLD_LIBRARY_PATH');",
+          "        if isempty(current_path)",
+          "            setenv('DYLD_LIBRARY_PATH', conda_lib_path);",
+          "        else",
+          "            setenv('DYLD_LIBRARY_PATH', [conda_lib_path ':' current_path]);",
+          "        end",
+          "    end",
+          "end"
+        ],
+        "windows": []
       }
     }
   }
