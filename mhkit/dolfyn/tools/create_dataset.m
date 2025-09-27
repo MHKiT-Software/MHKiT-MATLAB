@@ -81,8 +81,6 @@ function ds = create_dataset(data)
 
         % Handle altimeter data fields specially
         elseif contains(fn{k}, '_alt') && ~contains(fn{k}, 'altraw')
-            % DEBUG: Found an altimeter field
-            fprintf('DEBUG: Processing altimeter field: %s\n', fn{k});
             ds.(fn{k}).data = data.data_vars.(fn{k});
             if isfield(data.units,fn{k})
                 ds.(fn{k}).units = data.units.(fn{k});
