@@ -35,7 +35,7 @@ octave = 3;
 base = 2;
 
 mspl = band_sound_pressure_level(spsd, octave, base, fmin, fmax);
-mspl.units = 'db re 1 uPa';
+mspl.units = 'dB re 1 uPa';
 mspl.name = 'Third Octave Sound Pressure Level';
 
 end

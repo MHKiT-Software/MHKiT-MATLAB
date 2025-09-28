@@ -54,6 +54,6 @@ mspl = 10 * log10(pressure_squared / reference);
 spl.data = mspl;
 spl.time = spsd.time;
 spl.name = 'Sound Pressure Level';
-spl.units = 'db re 1 uPa';
+spl.units = 'dB re 1 uPa';
 
 end

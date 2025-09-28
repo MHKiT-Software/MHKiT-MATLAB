@@ -36,7 +36,7 @@ octave = 10;
 base = 10;
 
 mspl = band_sound_pressure_level(spsd, octave, base, fmin, fmax);
-mspl.units = 'db re 1 uPa';
+mspl.units = 'dB re 1 uPa';
 mspl.name = 'Decidecade Sound Pressure Level';
 
 end
