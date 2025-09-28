@@ -1,33 +1,52 @@
 function mspl = decidecade_sound_pressure_level(spsd, fmin, fmax)
-% 
-% Calculates the sound pressure level in decidecade bands directly
-% from the mean square sound pressure spectral density (SPSD).
-% 
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Calculate sound pressure level in decidecade bands directly
+% from mean square sound pressure spectral density (SPSD).
+%
 % Parameters
-% ----------
-% spsd: struct
-%     Mean square sound pressure spectral density in [Pa^2/Hz].
-% fmin: int
-%     Lower frequency band limit (lower limit of the hydrophone).
-%     Default: 10 Hz
-% fmax: int
-%     Upper frequency band limit (Nyquist frequency).
-%     Default: 100000 Hz
-% 
+% ------------
+%   spsd: structure
+%       spsd.data : Mean square sound pressure spectral density [Pa^2/Hz]
+%       spsd.freq : Frequency vector [Hz]
+%       spsd.time : Time vector [s]
+%       spsd.fs : Sampling frequency [Hz]
+%   fmin: double
+%       Lower frequency band limit [Hz]. Default: 10
+%   fmax: double
+%       Upper frequency band limit [Hz]. Default: 100000
+%
 % Returns
-% -------
-% mspl : struct
-%     Sound pressure level [dB re 1 uPa] indexed by time and decidecade bands
+% ---------
+%   mspl: structure
+%       mspl.data : Sound pressure level [dB re 1 uPa]
+%       mspl.freq : Decidecade band center frequencies [Hz]
+%       mspl.time : Time vector [s]
+%       mspl.units : Units string
+%       mspl.name : Descriptive name string
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 arguments (Input)
     spsd struct
-    fmin {mustBeNumeric} = 10
-    fmax {mustBeNumeric} = 100000
+    fmin {mustBeNumeric, mustBePositive} = 10
+    fmax {mustBeNumeric, mustBePositive} = 100000
 end
 
 arguments (Output)
     mspl struct
+end
+
+% Validate spsd structure
+validate_spsd_struct(spsd, 'decidecade_sound_pressure_level', ...
+    'required_fields', {{'freq', 'time', 'fs'}});
+
+% Validate frequency range
+if fmin >= fmax
+    error('MHKiT:acoustics:decidecade_sound_pressure_level:InvalidInput', ...
+        'fmin must be less than fmax');
 end
 
 fmax = fmax_warning(spsd.fs/2, fmax);
