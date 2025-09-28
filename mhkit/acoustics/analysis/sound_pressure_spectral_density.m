@@ -1,22 +1,34 @@
 function spsd = sound_pressure_spectral_density(data, fs, bin_length)
-% 
-% Calculates the sound pressure spectral density (SPSD) from audio
-% samples split into FFTs with a specified bin length in seconds,
-% using Hanning windowing with 50% overlap.
-% 
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%     Calculates the sound pressure spectral density (SPSD) from audio samples split into FFTs with a specified bin length in seconds, using Hanning windowing with 50% overlap.
+%
 % Parameters
-% ----------
-% data : struct
-%     Sound pressure in [Pa] or Voltage [V]
-% fs : double
-%     Data collection sampling rate [Hz]
-% bin_length: double
-%     Length of time in seconds to create FFTs. Default: 1.
-% 
+% ------------
+%   data: structure
+%       data.data : Sound pressure [Pa] or Voltage [V]
+%       data.time : Time vector [s] or datetime
+%       data.units : Data units string
+%   fs: double
+%       Data collection sampling rate [Hz]
+%   bin_length: double
+%       Length of time in seconds to create FFTs. Default: 1.
+%
 % Returns
-% -------
-% spsd: struct
-%     Spectral density [Pa^2/Hz] indexed by time and frequency
+% ---------
+%   spsd: structure
+%       spsd.data : Mean square sound pressure spectral density [Pa^2/Hz or V^2/Hz]
+%       spsd.time : Time vector for spectral density bins [s] or datetime
+%       spsd.freq : Frequency vector [Hz]
+%       spsd.name : Description string
+%       spsd.units : Units string [Pa^2/Hz or V^2/Hz]
+%       spsd.fs : Sampling frequency [Hz]
+%       spsd.nbin : Bin length string [s]
+%       spsd.overlap : Overlap percentage string
+%       spsd.nfft : Number of FFT points
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     data struct
@@ -26,6 +38,36 @@ end
 
 arguments (Output)
     spsd struct
+end
+
+% Validate data structure has required fields
+if ~isfield(data, 'data')
+    error('MHKiT:acoustics:sound_pressure_spectral_density:MissingField', ...
+        'data structure must contain data field');
+end
+
+if ~isfield(data, 'time')
+    error('MHKiT:acoustics:sound_pressure_spectral_density:MissingField', ...
+        'data structure must contain time field');
+end
+
+% Validate field types
+if ~isnumeric(data.data)
+    error('MHKiT:acoustics:sound_pressure_spectral_density:InvalidInput', ...
+        'data.data must be numeric');
+end
+
+% Accept both numeric and datetime for time fields
+if ~(isnumeric(data.time) || isdatetime(data.time))
+    error('MHKiT:acoustics:sound_pressure_spectral_density:InvalidInput', ...
+        'data.time must be numeric or datetime');
+end
+
+% Check dimensional consistency: data length must match time length
+if length(data.data) ~= length(data.time)
+    error('MHKiT:acoustics:sound_pressure_spectral_density:DimensionMismatch', ...
+        'data.data length (%d) must match data.time length (%d)', ...
+        length(data.data), length(data.time));
 end
 
 pressure = data.data;
