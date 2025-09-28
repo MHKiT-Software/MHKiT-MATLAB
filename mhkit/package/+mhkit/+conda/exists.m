@@ -61,14 +61,36 @@ function result = exists()
 
     % Check common Conda installation paths
     % List of potential Conda installation directories
-    conda_paths = {
-        fullfile(getenv('HOME'), 'anaconda3', 'bin', 'conda')
-        fullfile(getenv('HOME'), 'miniconda3', 'bin', 'conda')
-        fullfile(getenv('USERPROFILE'), 'Anaconda3', 'Scripts', 'conda.exe')
-        fullfile(getenv('USERPROFILE'), 'Miniconda3', 'Scripts', 'conda.exe')
-        '/opt/anaconda3/bin/conda'
-        '/usr/local/anaconda3/bin/conda'
-    };
+    if ispc
+        % Windows-specific paths
+        userprofile = getenv('USERPROFILE');
+        localappdata = getenv('LOCALAPPDATA');
+        programfiles = getenv('PROGRAMFILES');
+        conda_paths = {
+            fullfile(userprofile, 'miniconda3', 'Scripts', 'conda.exe')
+            fullfile(userprofile, 'miniconda3', 'condabin', 'conda.bat')
+            fullfile(userprofile, 'Miniconda3', 'Scripts', 'conda.exe')
+            fullfile(userprofile, 'Miniconda3', 'condabin', 'conda.bat')
+            fullfile(userprofile, 'anaconda3', 'Scripts', 'conda.exe')
+            fullfile(userprofile, 'anaconda3', 'condabin', 'conda.bat')
+            fullfile(userprofile, 'Anaconda3', 'Scripts', 'conda.exe')
+            fullfile(userprofile, 'Anaconda3', 'condabin', 'conda.bat')
+            fullfile(localappdata, 'miniconda3', 'Scripts', 'conda.exe')
+            fullfile(localappdata, 'anaconda3', 'Scripts', 'conda.exe')
+            fullfile(programfiles, 'Miniconda3', 'Scripts', 'conda.exe')
+            fullfile(programfiles, 'Anaconda3', 'Scripts', 'conda.exe')
+        };
+    else
+        % Unix-like systems (Linux/macOS)
+        conda_paths = {
+            fullfile(getenv('HOME'), 'anaconda3', 'bin', 'conda')
+            fullfile(getenv('HOME'), 'miniconda3', 'bin', 'conda')
+            '/opt/anaconda3/bin/conda'
+            '/usr/local/anaconda3/bin/conda'
+            '/opt/miniconda3/bin/conda'
+            '/usr/local/miniconda3/bin/conda'
+        };
+    end
 
     % Check each potential path
     for i = 1:length(conda_paths)
