@@ -1,21 +1,31 @@
 function spl = sound_pressure_level(spsd, fmin, fmax)
-% 
-% Calculates the sound pressure level (SPL) in a specified frequency band
-% from the mean square sound pressure spectral density (SPSD).
-% 
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Calculate sound pressure level (SPL) in a specified frequency band from
+% the mean square sound pressure spectral density (SPSD)
+%
 % Parameters
-% ----------
-% spsd: struct
-%     Mean square sound pressure spectral density in [Pa^2/Hz]
-% fmin: integer
-%     Lower frequency band limit (lower limit of the hydrophone). Default: 10 Hz
-% fmax: integer
-%     Upper frequency band limit (Nyquist frequency). Default: 100000 Hz
-% 
+% ------------
+%   spsd: struct
+%       spsd.data : Mean square sound pressure spectral density [Pa^2/Hz]
+%       spsd.freq : Frequency vector [Hz]
+%       spsd.time : Time vector
+%       spsd.fs : Sampling frequency [Hz]
+%   fmin: integer
+%       Lower frequency band limit [Hz] (default: 10)
+%   fmax: integer
+%       Upper frequency band limit [Hz] (default: 100000)
+%
 % Returns
-% -------
-% spl: struct
-%     Sound pressure level [dB re 1 uPa]
+% ---------
+%   spl: struct
+%       spl.data : Sound pressure level [dB re 1 uPa]
+%       spl.time : Time vector
+%       spl.name : Data name identifier
+%       spl.units : Data units string
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct
@@ -27,12 +37,18 @@ arguments (Output)
     spl struct
 end
 
-% type checks
+% Validate spsd structure
+validate_spsd_struct(spsd, 'sound_pressure_level', ...
+    'required_fields', {{'freq', 'time', 'fs'}});
+
+% Additional parameter validation
 if fmin <= 0
-    error('fmin must be positive');
+    error('MHKiT:acoustics:sound_pressure_level:InvalidInput', ...
+        'fmin must be positive');
 end
 if fmax <= fmin
-    error('fmax must be greater than fmin');
+    error('MHKiT:acoustics:sound_pressure_level:InvalidInput', ...
+        'fmax must be greater than fmin');
 end
 fmax = fmax_warning(spsd.fs/2, fmax);
 
