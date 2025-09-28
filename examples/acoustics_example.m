@@ -150,13 +150,17 @@ spsdl = sound_pressure_spectral_density_level(spsd_cal)
 % Note, the IEC-40 requires a maximum frequency of 100,000 Hz, so a hydrophone
 % capable of sampling faster than 200,000 Hz should be used for IEC testing.
 
-% show Nyquist frequency (max in frequency vector)
-max(spsdl.freq)
-fmin = 10;
-fmax = 48000;
+% Configure spectrogram range based on available frequencies
+fmin = min(spsdl.freq);
+fmax = max(spsdl.freq);
 
-% create high resolution spectogram
-plot_spectogram(spsdl, fmin, fmax, 'hot', 0, 100)
+plot_spectrogram(spsdl, ...
+    'fmin', fmin, ...
+    'fmax', fmax, ...
+    'cm', 'hot', ...
+    'use_smoothing', true, ...
+    'smoothing_stride', 3, ...
+    'plot_method', 'imagesc')
 
 %% 
 % If you see something interesting in the spectrogram, the next step you should 
