@@ -45,7 +45,8 @@ function result = parse_info(env_name, logger)
     result.active_environment = env_name;
     
     % 2. Get Python version directly from environment
-    [status, python_version_raw] = mhkit.sys(sprintf('conda run -n %s python --version', env_name));
+    python_cmd = mhkit.sys.python_cmd();
+    [status, python_version_raw] = mhkit.sys(sprintf('conda run -n %s %s --version', env_name, python_cmd));
     if status ~= 0
         logger.error('Failed to get Python version from environment %s', env_name);
         result = struct();
@@ -60,7 +61,7 @@ function result = parse_info(env_name, logger)
     result.python_version = version_match{1}{1};
     
     % 3. Get environment location directly from Python
-    [status, env_location] = mhkit.sys(sprintf('conda run -n %s python -c "import sys; print(sys.prefix)"', env_name));
+    [status, env_location] = mhkit.sys(sprintf('conda run -n %s %s -c "import sys; print(sys.prefix)"', env_name, python_cmd));
     if status ~= 0
         logger.error('Failed to get environment location from environment %s', env_name);
         result = struct();
@@ -69,7 +70,7 @@ function result = parse_info(env_name, logger)
     result.active_env_location = strip(env_location);
     
     % 4. Get platform directly from Python
-    [status, platform_info] = mhkit.sys(sprintf('conda run -n %s python -c "import platform; print(platform.system().lower() + ''-'' + platform.machine())"', env_name));
+    [status, platform_info] = mhkit.sys(sprintf('conda run -n %s %s -c "import platform; print(platform.system().lower() + ''-'' + platform.machine())"', env_name, python_cmd));
     if status ~= 0
         logger.error('Failed to get platform info from environment %s', env_name);
         result = struct();
