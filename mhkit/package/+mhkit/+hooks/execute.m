@@ -46,7 +46,16 @@ function success = execute(hook_name, spec, logger)
             return;
         end
     end
-    
+
+    % Execute startup fixes (for environment_setup hook only)
+    if strcmp(hook_name, 'environment_setup') && isfield(hook_section, 'startup_fixes')
+        success = execute_startup_fixes(hook_section.startup_fixes, platform, spec, logger);
+        if ~success
+            logger.error('Startup script configuration failed');
+            return;
+        end
+    end
+
     logger.info('Successfully completed %s hooks for platform "%s"', hook_name, platform);
 end
 
@@ -85,7 +94,7 @@ function success = execute_environment_variables(env_vars_section, platform, spe
         var_value = platform_env_vars.(var_name);
         
         % Perform variable substitution
-        processed_value = substitute_variables(var_value, spec);
+        processed_value = mhkit.io.substitute_variables(var_value, spec);
         
         logger.debug('Setting environment variable: %s=%s', var_name, processed_value);
         
@@ -151,7 +160,7 @@ function success = execute_single_command(command, spec, logger)
     %   success (logical): True if command succeeded
     
     % Perform variable substitution
-    processed_command = substitute_variables(command, spec);
+    processed_command = mhkit.io.substitute_variables(command, spec);
     
     logger.debug('Executing command: %s', processed_command);
     
@@ -170,39 +179,31 @@ function success = execute_single_command(command, spec, logger)
     end
 end
 
-function result = substitute_variables(text, spec)
-    % Substitute variables in text using spec values
-    %
-    % Parameters:
-    %   text (string): Text with variables to substitute
-    %   spec (struct): Specification structure
-    %
-    % Returns:
-    %   result (string): Text with variables substituted
-    
-    result = text;
-    
-    % Standard substitutions
-    if contains(result, '<conda_env>')
-        result = strrep(result, '<conda_env>', spec.conda.environment_name);
+function success = execute_startup_fixes(startup_fixes_section, platform, spec, logger)
+    % Execute startup script configuration for a platform
+
+    success = true;
+
+    % Check if platform-specific startup fixes exist
+    if ~isfield(startup_fixes_section, platform)
+        logger.debug('No startup fixes found for platform "%s"', platform);
+        return;
     end
-    
-    if contains(result, '<python_version>')
-        result = strrep(result, '<python_version>', spec.python.install_version);
+
+    platform_startup_fixes = startup_fixes_section.(platform);
+
+    % Skip if empty
+    if isempty(platform_startup_fixes)
+        logger.debug('No startup fixes to apply for platform "%s"', platform);
+        return;
     end
-    
-    if contains(result, '<mhkit_python_version>')
-        result = strrep(result, '<mhkit_python_version>', spec.mhkit_python.version);
+
+    % Call the modular configure_environment function
+    % Get auto_configure setting from spec (default to false if not present)
+    auto_configure = false;
+    if isfield(spec, 'auto_configure_mhkit_matlab_python_env')
+        auto_configure = spec.auto_configure_mhkit_matlab_python_env;
     end
-    
-    % Platform-specific substitutions
-    if contains(result, '<conda_lib_path>')
-        % Get conda library path dynamically
-        conda_env = spec.conda.environment_name;
-        [status, conda_info] = mhkit.sys(sprintf('conda run -n %s python -c "import sys; import os; print(os.path.join(os.path.dirname(sys.executable), ''lib''))"', conda_env));
-        if status == 0
-            conda_lib_path = strtrim(conda_info);
-            result = strrep(result, '<conda_lib_path>', conda_lib_path);
-        end
-    end
+
+    success = mhkit.configure_environment.configure_startup(spec, logger, auto_configure);
 end
