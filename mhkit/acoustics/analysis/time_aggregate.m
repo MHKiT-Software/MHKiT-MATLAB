@@ -1,28 +1,38 @@
 function out = time_aggregate(spsdl, window, method)
-% 
-% Reorganizes spectral density level frequency tensor into
-% time windows and applies a function to them.
-% 
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Reorganize spectral density level frequency tensor into time windows and apply a function to them.
+%
 % Parameters
-% ----------
-% spsdl: struct
-%     Mean square sound pressure spectral density level in dB rel 1 uPa^2/Hz
-% window: int
-%     Time in seconds to subdivide spectral density level into. Default: 60 s.
-% method: 
-%     Method to run on the binned data. Can be a string (e.g., "median") or a dict
-%     where the key is the method and the value is its argument (e.g., {"quantile": 0.25}).
-%     Options: [median, mean, min, max, sum, quantile, std, var, count]
-% 
+% ------------
+%   spsdl: structure
+%       spsdl.data : Sound pressure spectral density level data [dB re 1 uPa^2/Hz]
+%       spsdl.time : Time vector
+%       spsdl.freq : Frequency vector [Hz]
+%       spsdl.units : Data units string
+%       spsdl.name : Data name string
+%   window: integer
+%       Time in seconds to subdivide spectral density level into. Default: 60 s.
+%   method: string or structure
+%       Method to run on the binned data. Can be a string (e.g., "median") or a structure
+%       where the field is the method and the value is its argument (e.g., struct('quantile', 0.25)).
+%       Options: [median, mean, min, max, sum, quantile, std, var, count]
+%
 % Returns
-% -------
-% out: xarray.DataArray (time_bins, freq)
-%     Time-averaged sound pressure spectral density level [dB re 1 uPa^2/Hz]
-%     indexed by time and frequency
+% ---------
+%   out: structure
+%       out.data : Time-averaged sound pressure spectral density level [dB re 1 uPa^2/Hz]
+%       out.time : Time vector for binned data
+%       out.freq : Frequency vector [Hz]
+%       out.units : Data units string
+%       out.name : Data name string
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsdl struct
-    window {mustBeInteger} = 60 %s
+    window {mustBeInteger} = 60 % seconds
     method = "median"
 end
 
@@ -30,8 +40,12 @@ arguments (Output)
     out struct
 end
 
+% Validate spsdl structure
+validate_spsdl_struct(spsdl, 'time_aggregate');
+
 if window <= 0
-    error("'window' must be a positive integer.")
+    error('MHKiT:acoustics:time_aggregate:InvalidInput', ...
+        'window must be a positive integer');
 end
 
 % validate method
