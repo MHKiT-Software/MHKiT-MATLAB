@@ -383,3 +383,70 @@ for g = 1:length(group)
     sel = sound_exposure_level(spsd_300s, group(g), fmin, fmax);
     fprintf('Group-%s SEL = %.1f\n', group(g), sel.data)
 end
+
+%% Marine Mammal Auditory Weighting Functions
+%
+% We can look at the specific marine mammal auditory weighting and noise
+% exposure functions as well using nmfs_auditory_weighting, given a frequency
+% vector and one of the mammal groups. It outputs the weighting function and
+% the exposure function (the inverse of the former) in units of dB. To
+% convert back to a unitless magnitude, use 10.^(<func> / 10). The
+% exposure function shows the SEL in dB at and above which temporary or
+% permanent hearing damage can occur to an individual in the specified group.
+% The minimum value in the exposure function is the known or estimated
+% injury level for a given group.
+
+% Calculate weighting and exposure functions
+[weight_func, exp_func] = nmfs_auditory_weighting(spsd_300s.freq, 'LF');
+
+% Visualize weighting and exposure
+figure('Position', [100, 100, 800, 400]);
+
+% Weighting Function subplot
+subplot(1, 2, 1);
+semilogx(spsd_300s.freq, weight_func, 'LineWidth', 2, 'DisplayName', 'Weighting Function');
+hold on;
+yline(0, 'k--', 'LineWidth', 1.5, 'DisplayName', 'Highest Sensitivity');
+xlabel('Frequency [Hz]');
+ylabel('Transmission [dB]');
+ylim([-50, 20]);
+xlim([10, 48000]);
+legend('Location', 'northeast');
+grid on;
+title('Auditory Weighting Function');
+
+% Exposure Function subplot
+subplot(1, 2, 2);
+semilogx(spsd_300s.freq, exp_func, 'LineWidth', 2, 'DisplayName', 'Exposure Function');
+hold on;
+yline(min(exp_func), 'k--', 'LineWidth', 1.5, 'DisplayName', 'Highest Sensitivity');
+
+% Fill injury region using fill()
+% Note: For large datasets, this downsamples for visualization performance
+if length(spsd_300s.freq) > 10000
+    % Downsample for plotting efficiency while preserving shape
+    downsample_target_size = 5000; % target size for plotting
+    downsample_factor = ceil(length(spsd_300s.freq) / downsample_target_size);
+    freq_plot = spsd_300s.freq(1:downsample_factor:end);
+    exp_plot = exp_func(1:downsample_factor:end);
+else
+    freq_plot = spsd_300s.freq;
+    exp_plot = exp_func;
+end
+
+% Create filled region FROM exp_func UP TO level fill_max_y_level
+fill_max_y_level = 300;
+fill([freq_plot; flipud(freq_plot)], ...
+     [exp_plot; repmat(fill_max_y_level, size(exp_plot))], ...
+     'r', 'FaceAlpha', 0.2, 'EdgeColor', 'none', 'DisplayName', 'Injury Region');
+
+xlabel('Frequency [Hz]');
+ylabel('Exposure Level [dB]');
+ylim([min(exp_func)-20, min(exp_func)+50]);
+xlim([10, 48000]);
+legend('Location', 'southeast');
+grid on;
+title('Auditory Exposure Function');
+
+set(gcf, 'Color', 'white');
+sgtitle('NMFS Marine Mammal Auditory Functions (LF Group)');
