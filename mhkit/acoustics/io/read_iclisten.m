@@ -1,25 +1,43 @@
 function out = read_iclisten(filename, sensitivity, use_metadata)
-%{
-    Read .wav file from a hydrophone. Returns voltage timeseries if sensitivity not
-    provided, returns pressure timeseries if it is provided.
 
-    Parameters
-    ----------
-    filename: string
-        Input filename
-    sensitivity: double
-        Hydrophone calibration sensitivity in dB re 1 V/uPa.
-        Should be negative. Default: None.
-    use_metadata: bool
-        If true and 'sensitivity' is empty, applies sensitivity value
-        stored in the .wav file. If false and 'sensitivity' is empty, a
-        sensitivity value is not applied.
-
-    Returns
-    -------
-    out: struct
-        Contains Sound pressure [Pa] or Voltage [V] along with metadata
-%}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Read .wav file from an icListen hydrophone
+%
+% Returns voltage timeseries if sensitivity not provided, returns pressure timeseries if it is provided
+%
+% Parameters
+% ------------
+%   filename: string
+%       Input filename
+%   sensitivity: float
+%       Hydrophone calibration sensitivity in dB re 1 V/uPa
+%       Should be negative. Default: None
+%   use_metadata: logical
+%       If true and 'sensitivity' is empty, applies sensitivity value
+%       stored in the .wav file. If false and 'sensitivity' is empty, a
+%       sensitivity value is not applied
+%
+% Returns
+% ---------
+%   out: struct
+%       Contains Sound pressure [Pa] or Voltage [V] along with metadata
+%       out.data : Time series data [Pa] or [V]
+%       out.time : Time vector
+%       out.units : Data units ('Pa' or 'V')
+%       out.fs : Sampling frequency [Hz]
+%       out.filename : Original filename
+%       out.serial_number : Device serial number
+%       out.bits_per_sample : Bits per sample
+%       out.peak_voltage : Peak voltage [V]
+%       out.humidity : Humidity reading
+%       out.temperature : Temperature reading
+%       out.accelerometer : Accelerometer data
+%       out.magnetometer : Magnetometer data
+%       out.count_at_peak_voltage : Count at peak voltage
+%       out.sequence_num : Sequence number
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     filename {mustBeText}
