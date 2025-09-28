@@ -160,23 +160,16 @@
         "linux": [
           "% MHKiT: Fix Python library compatibility on Linux",
           "if isunix && ~ismac",
-          "    setenv('LD_PRELOAD', '/lib/x86_64-linux-gnu/libstdc++.so.6');",
-          "end"
-        ],
-        "mac": [
-          "% MHKiT: Fix Python library paths on macOS",
-          "if ismac",
-          "    conda_lib_path = '<conda_lib_path>';",
-          "    if exist(conda_lib_path, 'dir')",
-          "        current_path = getenv('DYLD_LIBRARY_PATH');",
-          "        if isempty(current_path)",
-          "            setenv('DYLD_LIBRARY_PATH', conda_lib_path);",
-          "        else",
-          "            setenv('DYLD_LIBRARY_PATH', [conda_lib_path ':' current_path]);",
-          "        end",
+          "    ubuntu_lib = '/lib/x86_64-linux-gnu/libstdc++.so.6';",
+          "    centos_lib = '/usr/lib64/libstdc++.so.6';",
+          "    if exist(ubuntu_lib, 'file')",
+          "        setenv('LD_PRELOAD', ubuntu_lib);",
+          "    elseif exist(centos_lib, 'file')",
+          "        setenv('LD_PRELOAD', centos_lib);",
           "    end",
           "end"
         ],
+        "mac": [],
         "windows": []
       }
     }
