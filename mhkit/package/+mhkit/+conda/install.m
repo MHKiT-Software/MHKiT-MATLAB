@@ -46,11 +46,24 @@ function result = install(commands, logger)
         result = false;
     end
 
-    % Helper function to execute commands and check status
+    % Execute installation commands with deterministic error handling
+    spec = mhkit.spec();
+
     for cmd = cmd_list
+        logger.info('Executing: %s', cmd{1});
         status = system(cmd{1});
         if status ~= 0
-            error('Failed to execute command: %s', cmd{1});
+            logger.error('Command failed: %s (exit code: %d)', cmd{1}, status);
+            logger.error('');
+            logger.error('Manual installation required:');
+            if ispc
+                logger.error('  1. Install conda manually: %s', spec.support.windows_conda_install);
+            else
+                logger.error('  1. Install conda manually: %s', spec.support.conda_install_instructions);
+            end
+            logger.error('  2. Report this issue: %s', spec.support.github_issues);
+            logger.error('');
+            error('Automatic conda installation failed - see links above for manual installation');
         end
     end
     
