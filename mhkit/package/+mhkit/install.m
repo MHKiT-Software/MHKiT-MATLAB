@@ -1,11 +1,13 @@
-function install()
+function install(auto_configure_mhkit_matlab_python_env)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Install MHKiT Python dependencies and configure MATLAB integration
 %
 % Parameters
 % ------------
-%     No parameters required
+%     auto_configure_mhkit_matlab_python_env (logical, optional):
+%         If true, automatically configure startup script without user prompt.
+%         Default: false (prompts user for consent)
 %
 % Returns
 % ---------
@@ -15,12 +17,19 @@ function install()
 %
 % Example
 % -------
-%     mhkit.install()
+%     mhkit.install()                        % Prompts user for startup config
+%     mhkit.install(true)                    % Auto-configures startup script
+%     mhkit.install(false)                   % Prompts user for startup config
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    % Handle optional parameter
+    if nargin < 1
+        auto_configure_mhkit_matlab_python_env = false;
+    end
+
     % Initialize logger
-    logger = mhkit.utils.get_logger();
+    logger = mhkit.logging.get_logger();
 
     try
         fprintf('\nInstalling python dependencies for MHKiT-MATLAB...\n\n');
@@ -114,7 +123,7 @@ function install()
         logger.info('\nExecuting pre-install hooks...');
         hook_success = mhkit.hooks.execute('pre_install', spec, logger);
         if ~hook_success
-            logger.error('Pre-install hooks failed');
+            mhkit.sys.installation_error(logger, 'Pre-install hooks failed', 'Pre-install Dependencies');
             return;
         end
         logger.info('✓ Pre-install hooks completed');
@@ -162,7 +171,7 @@ function install()
         logger.info('\nExecuting post-install hooks...');
         hook_success = mhkit.hooks.execute('post_install', spec, logger);
         if ~hook_success
-            logger.error('Post-install hooks failed');
+            mhkit.sys.installation_error(logger, 'Post-install hooks failed', 'Post-install Configuration');
             return;
         end
         logger.info('✓ Post-install hooks completed');
@@ -191,12 +200,13 @@ function install()
         [status, extracted_path] = mhkit.web.download_and_unzip(download_path, spec.dirs.cache, "mhkit_python_utils");
 
         if ~status == 1
-            logger.error("Failed to download utilities from %s", download_path);
+            mhkit.sys.installation_error(logger, sprintf('Failed to download utilities from %s', download_path), 'Utilities Download');
             return
         end
 
         mhkit.sys(sprintf("conda run -n %s pip install -e ""%s""", conda_env_name, extracted_path));
-        mhkit.sys(sprintf("conda run -n %s python -c ""import mhkit_python_utils; print(mhkit_python_utils.__version__)""", conda_env_name));
+        python_cmd = mhkit.sys.python_cmd();
+        mhkit.sys(sprintf("conda run -n %s %s -c ""import mhkit_python_utils; print(mhkit_python_utils.__version__)""", conda_env_name, python_cmd));
         logger.info('✓ Utilities installed');
 
         % Configure MATLAB integration
@@ -204,6 +214,10 @@ function install()
         
         % Execute environment setup hooks
         logger.info('Executing environment setup hooks...');
+
+        % Temporarily add auto_configure setting to spec for startup fixes
+        spec.auto_configure_mhkit_matlab_python_env = auto_configure_mhkit_matlab_python_env;
+
         hook_success = mhkit.hooks.execute('environment_setup', spec, logger);
         if ~hook_success
             logger.warning('Environment setup hooks failed, continuing with Python integration');
@@ -211,7 +225,7 @@ function install()
             logger.info('✓ Environment setup hooks completed');
         end
         
-        initialize_python_integration(conda_env_name, logger);
+        initialize_python_integration(conda_env_name, logger, spec);
 
         % Final verification
         logger.info('Performing final verification...');
@@ -236,11 +250,12 @@ function install()
 end
 
 
-function initialize_python_integration(env_name, logger)
+function initialize_python_integration(env_name, logger, spec)
     % Initialize Python integration
     try
         % Get the Python executable path from the conda environment
-        conda_command = sprintf('conda run -n %s python -c "import sys; print(sys.executable)"', env_name);
+        python_cmd = mhkit.sys.python_cmd();
+        conda_command = sprintf('conda run -n %s %s -c "import sys; print(sys.executable)"', env_name, python_cmd);
         logger.info('Executing command: %s', conda_command);
         [status, python_path] = mhkit.sys(conda_command);
         
@@ -274,9 +289,10 @@ function initialize_python_integration(env_name, logger)
         setenv('PATH', new_path);
         logger.info('Added Python directory to PATH: %s', python_dir);
         
-        % Set MATLAB's Python environment with OutOfProcess execution mode (like working Unix tests)
-        pyenv(Version=python_path, ExecutionMode="OutOfProcess");
-        logger.info('Configured pyenv with OutOfProcess execution mode');
+        % Set MATLAB's Python environment with specified execution mode
+        execution_mode = spec.constants.matlab_integration.execution_mode;
+        pyenv(Version=python_path, ExecutionMode=execution_mode);
+        logger.info('Configured pyenv with %s execution mode', execution_mode);
         
         % Test Python import
         logger.info('Testing Python module imports...');

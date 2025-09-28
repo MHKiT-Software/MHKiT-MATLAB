@@ -24,7 +24,7 @@ function result = check_health()
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    logger = mhkit.utils.get_logger();
+    logger = mhkit.logging.get_logger();
     result = true; % Start optimistic
     
     try
@@ -43,10 +43,10 @@ function result = check_health()
             
             % Additional debugging for empty fields
             if isempty(pe.Version)
-                logger.warning('⚠ Python Version is empty - pyenv not configured');
+                logger.warning('  Python Version is empty - pyenv not configured');
             end
             if isempty(pe.Executable)
-                logger.warning('⚠ Python Executable is empty - no Python path set');
+                logger.warning('  Python Executable is empty - no Python path set');
             end
             
             % Validate Python is properly configured
@@ -56,7 +56,7 @@ function result = check_health()
             elseif strcmp(pe.Status, 'Loaded')
                 logger.info('✓ Python environment is loaded');
             else
-                logger.warning('⚠ Python status is: %s', pe.Status);
+                logger.warning('  Python status is: %s', pe.Status);
             end
             
         catch ME
