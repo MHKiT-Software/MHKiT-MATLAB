@@ -24,7 +24,15 @@ function result = install(commands, logger)
 
     % Get command list based on OS
     if ispc
-        cmd_list = commands.windows;
+        % Check admin rights and choose appropriate Windows installation
+        has_admin = mhkit.sys.has_admin_rights();
+        if has_admin
+            logger.info('Administrator rights detected - using admin installation');
+            cmd_list = commands.windows.admin;
+        else
+            logger.info('Limited user rights - using user installation (no PATH modification)');
+            cmd_list = commands.windows.user;
+        end
     elseif ismac
         if contains(computer('arch'), 'arm64')
             cmd_list = commands.mac.arm;
