@@ -1,15 +1,19 @@
 function success = uninstall()
-    % Remove MHKiT environment fixes from MATLAB startup script
+    % Remove MHKiT environment fixes from MATLAB startup script using shared utilities
 
-    [startup_file, ~] = get_startup_file_location();
+    % Get spec for constants
+    spec = mhkit.spec();
 
-    if ~exist(startup_file, 'file') || ~has_mhkit_fixes(startup_file)
+    % Get startup file location using shared utility
+    [~, startup_file] = mhkit.matlab.get_matlab_user_directory(spec);
+
+    if ~has_mhkit_fixes(startup_file, spec)
         fprintf('No MHKiT fixes found to remove.\n');
         success = true;
         return;
     end
 
-    success = remove_mhkit_fixes(startup_file);
+    success = remove_mhkit_fixes(startup_file, spec);
 
     if success
         fprintf('✓ Removed MHKiT fixes from: %s\n', startup_file);
@@ -19,57 +23,37 @@ function success = uninstall()
     end
 end
 
-function [startup_file, matlab_user_dir] = get_startup_file_location()
-    matlab_user_dir = userpath;
-    if isempty(matlab_user_dir)
-        if ispc
-            matlab_user_dir = fullfile(getenv('USERPROFILE'), 'Documents', 'MATLAB');
-        else
-            matlab_user_dir = fullfile(getenv('HOME'), 'Documents', 'MATLAB');
-        end
-    else
-        matlab_user_dir = strtrim(matlab_user_dir);
-        if endsWith(matlab_user_dir, pathsep)
-            matlab_user_dir = matlab_user_dir(1:end-1);
-        end
+function has_fixes = has_mhkit_fixes(startup_file, spec)
+    % Check if startup.m contains MHKiT fixes using shared utilities
+
+    [success, content] = mhkit.io.read_file_safe(startup_file);
+    if ~success
+        has_fixes = false;
+        return;
     end
-    startup_file = fullfile(matlab_user_dir, 'startup.m');
+
+    start_marker = spec.constants.startup_script.start_marker;
+    has_fixes = contains(content, start_marker);
 end
 
-function has_fixes = has_mhkit_fixes(startup_file)
-    has_fixes = false;
-    try
-        fid = fopen(startup_file, 'r');
-        if fid == -1, return; end
-        content = fread(fid, '*char')';
-        fclose(fid);
-        has_fixes = contains(content, '%% MHKiT Environment Setup - START');
-    catch
+function success = remove_mhkit_fixes(startup_file, spec)
+    % Remove MHKiT fixes using shared utilities
+
+    [read_success, content] = mhkit.io.read_file_safe(startup_file);
+    if ~read_success
+        success = false;
+        return;
     end
+
+    cleaned_content = remove_mhkit_section(content, spec);
+    success = mhkit.io.write_file_safe(startup_file, cleaned_content);
 end
 
-function success = remove_mhkit_fixes(startup_file)
-    success = false;
-    try
-        fid = fopen(startup_file, 'r');
-        if fid == -1, return; end
-        content = fread(fid, '*char')';
-        fclose(fid);
+function cleaned_content = remove_mhkit_section(content, spec)
+    % Remove MHKiT section using constants from spec
 
-        cleaned_content = remove_mhkit_section(content);
-
-        fid = fopen(startup_file, 'w');
-        if fid == -1, return; end
-        fprintf(fid, '%s', cleaned_content);
-        fclose(fid);
-        success = true;
-    catch
-    end
-end
-
-function cleaned_content = remove_mhkit_section(content)
-    start_marker = '%% MHKiT Environment Setup - START';
-    end_marker = '%% MHKiT Environment Setup - END';
+    start_marker = spec.constants.startup_script.start_marker;
+    end_marker = spec.constants.startup_script.end_marker;
 
     start_pos = strfind(content, start_marker);
     end_pos = strfind(content, end_marker);
