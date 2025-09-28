@@ -1,18 +1,26 @@
 function spsdl = sound_pressure_spectral_density_level(spsd)
-% 
-% Calculates the sound pressure spectral density level from
-% the mean square sound pressure spectral density.
-% 
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Calculate sound pressure spectral density level from mean square sound pressure spectral density
+%
 % Parameters
-% ----------
-% spsd: struct
-%     Mean square sound pressure spectral density in Pa^2/Hz
-% 
+% ------------
+%   spsd: struct
+%       spsd.data : Mean square sound pressure spectral density [Pa^2/Hz]
+%       spsd.freq : Frequency vector [Hz] (optional)
+%       spsd.time : Time vector (optional)
+%
 % Returns
-% -------
-% spsdl: struct
-%     Sound pressure spectral density level [dB re 1 uPa^2/Hz]
-%     indexed by time and frequency
+% ---------
+%   spsdl: struct
+%       spsdl.data : Sound pressure spectral density level [dB re 1 uPa^2/Hz]
+%       spsdl.freq : Frequency vector [Hz] (if present in input)
+%       spsdl.time : Time vector (if present in input)
+%       spsdl.name : Data name identifier
+%       spsdl.units : Data units string
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct
@@ -21,6 +29,10 @@ end
 arguments (Output)
     spsdl struct
 end
+
+% Validate spsd structure
+validate_spsd_struct(spsd, 'sound_pressure_spectral_density_level', ...
+    'require_positive', true, 'check_dimensions', false);
 
 % reference value of sound pressure
 reference = 1e-12; % Pa^2 to 1uPa^2
