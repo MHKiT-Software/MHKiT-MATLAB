@@ -1,26 +1,43 @@
 function [octave_bins, band] = create_frequency_bands(octave, base, fmin, fmax)
 
-% Calculates frequency bands based on the specified octave, minimum and
-% maximum frequency limits.
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Calculate frequency bands based on the specified octave, minimum and maximum frequency limits
 %
 % Parameters
-% ----------
-% octave: int
-%     Octave to subdivide spectral density level by.
-% base : int, optional
-%     Octave base. Set to 2 for the true octave band; set to base 10 for
-%     the decidecade octave band. Default: 2
-% fmin : int, optional
-%     Lower frequency band limit (lower limit of the hydrophone). Default is 10 Hz.
-% fmax : int, optional
-%     Upper frequency band limit (Nyquist frequency). Default is 100,000 Hz.
+% ------------
+%   octave: double
+%       Octave to subdivide spectral density level by
+%   base: double, optional
+%       Octave base. Set to 2 for the true octave band; set to base 10 for
+%       the decidecade octave band. Default: 2
+%   fmin: double, optional
+%       Lower frequency band limit (lower limit of the hydrophone). Default is 10 Hz
+%   fmax: double, optional
+%       Upper frequency band limit (Nyquist frequency). Default is 100,000 Hz
 %
 % Returns
-% -------
-% octave_bins: array
-%     Array of octave bin edges
-% band: struct
-%     Struct containing the frequency band edges and center frequency
+% ---------
+%   octave_bins: array
+%       Array of octave bin edges
+%   band: structure
+%       band.center_freq : Center frequencies [Hz]
+%       band.lower_limit : Lower frequency limits [Hz]
+%       band.upper_limit : Upper frequency limits [Hz]
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments (Input)
+    octave double {mustBeFinite, mustBePositive}
+    base double {mustBeFinite, mustBePositive} = 2
+    fmin double {mustBeFinite, mustBePositive} = 10
+    fmax double {mustBeFinite, mustBePositive} = 100000
+end
+
+arguments (Output)
+    octave_bins double
+    band struct
+end
 
 bandwidth = base^(1 / octave);
 half_bandwidth = base^(1 / (octave * 2));
