@@ -1,49 +1,54 @@
-function Te=energy_period(S,varargin)
+function Te = energy_period(S, varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+% Calculate wave energy period (Te) seconds from power spectral density (PSD)
 %
 % Parameters
 % ------------
-%   S: Spectral Density (m^2/Hz)
-%       Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,spectra)
-%
-%       OR
-%
-%       structure of form:
-%           S.spectrum: Spectral Density (m^2/Hz)
-%
-%           S.type: String of the spectra type, i.e. Bretschneider,
-%           time series, date stamp etc.
-%
-%           S.frequency: frequency (Hz)
+%     S: structure or numeric array
+%         If structure:
+%             S.spectrum   - Spectral density [m^2/Hz]
+%             S.frequency  - Frequency [Hz]
+%         If numeric:
+%             S is spectral density array (vector or matrix)
+%             varargin{1} must contain frequency vector
 %
 %     frequency_bins: vector (optional)
-%       Bin widths for frequency of S. Required for unevenly sized bins
-%
+%         Bin widths for frequency of S. Required for unevenly sized bins
 %
 % Returns
 % ---------
-%    Te: float
-%        Wave energy Period (s)
+%     Te: double
+%         Wave energy period [seconds] indexed by S.columns
 %
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% assign feq_bin
-if nargin == 2
-    freq_bins = py.numpy.array(varargin{1});
-elseif nargin == 1
-    freq_bins = py.None;
-else
-    ME = MException('MATLAB:energy_period','Incorrect number of input arguments');
-        throw(ME);
+arguments
+    S
 end
 
-S_py = typecast_spectra_to_mhkit_python(S);
+arguments (Repeating)
+    varargin
+end
 
-Te = py.mhkit.wave.resource.energy_period(S_py, pyargs('frequency_bins',freq_bins));
+    % Calculate moments using frequency_moment function
+    if isstruct(S)
+        % Pass struct directly
+        m0 = frequency_moment(S, 0, varargin{:});
+        m_neg1 = frequency_moment(S, -1, varargin{:});
+    elseif isnumeric(S)
+        % Pass numeric spectrum with frequency vector
+        if nargin < 2
+            error('When S is numeric, frequency vector must be provided as second argument');
+        end
+        m0 = frequency_moment(S, 0, varargin{:});
+        m_neg1 = frequency_moment(S, -1, varargin{:});
+    else
+        error('Input S must be a struct or numeric array');
+    end
 
-Te = typecast_from_mhkit_python(Te).data;
+    % Calculate energy period
+    Te = m_neg1 ./ m0;
+
+end
