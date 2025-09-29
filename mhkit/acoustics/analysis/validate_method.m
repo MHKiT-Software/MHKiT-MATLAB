@@ -1,19 +1,22 @@
 function [method_name,method_arg] = validate_method(method)
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Helper function for validating the input of possible statistical methods.
-% Returns the method name and its argument (if any).
-% 
+% Helper function for validating the input of possible statistical methods
+%
 % Parameters
-% ----------
-% method: string
-%     Name of statistical method
-% 
+% ------------
+%   method: string or cell array
+%       Name of statistical method or cell array with method and argument
+%
 % Returns
-% -------
-% method_name: string
-%     Name of validated statistical method.
-% method_arg: string or double
-%     Corresponding method argument, if applicable.
+% ---------
+%   method_name: string
+%       Name of validated statistical method
+%   method_arg: string or double
+%       Corresponding method argument, if applicable
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     method
@@ -40,26 +43,27 @@ allowed_methods = [
     "std";
     "var";];
 
-if ~isstring(method) & ~iscell(method)
-    error('validators:incorrectType', "'method' must be a string or a cell")
+if ~isstring(method) && ~iscell(method)
+    error('MHKiT:acoustics:validate_method', "'method' must be a string or a cell array")
 end
 
 if isstring(method)
-    if ~ismember(method.lower, allowed_methods)
-        error('validators:incorrectType',"'method' is not supported. See list of supported methods.")
+    if ~ismember(lower(method), allowed_methods)
+        error('MHKiT:acoustics:validate_method', "'method' is not supported. See list of supported methods.")
     end
-    method_name = method.lower;
+    method_name = lower(method);
     method_arg = [];
 end
 
 if iscell(method)
-    method_name = method{1}.lower;
+    if ~isstring(method{1}) && ~ischar(method{1})
+        error('MHKiT:acoustics:validate_method', "'method' must be a string or a cell array")
+    end
+    method_name = lower(method{1});
     if ~ismember(method_name, allowed_methods)
-        error('validators:incorrectType', "'method' is not supported. See list of supported methods")
+        error('MHKiT:acoustics:validate_method', "'method' is not supported. See list of supported methods")
     end
     method_arg = method{2};
 end
-
-
 
 end

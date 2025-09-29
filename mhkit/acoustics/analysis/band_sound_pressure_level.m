@@ -1,27 +1,35 @@
 function mspl = band_sound_pressure_level(spsd, octave, base, fmin, fmax)
 
-% Calculates band-averaged sound pressure levels from the
-% mean square sound pressure spectral density (SPSD).
-% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Calculate band-averaged sound pressure levels from the mean square sound pressure spectral density (SPSD)
+%
 % Parameters
-% ----------
-% spsd: struct
-%     Mean square sound pressure spectral density in [Pa^2/Hz]
-% octave: int
-%     Octave subdivision (1 = full octave, 3 = third-octave, etc.)
-% base: int
-%     Octave base subdivision (2 = true octave, 10 = decade octave, etc.)
-% fmin : int, optional
-%     Lower frequency band limit (lower limit of the hydrophone).
-%     Default is 10 Hz.
-% fmax : int, optional
-%     Upper frequency band limit (Nyquist frequency).
-%     Default is 100,000 Hz.
-% 
+% ------------
+%   spsd: struct
+%       Mean square sound pressure spectral density in [Pa^2/Hz]
+%       spsd.data : Spectral density data [Pa^2/Hz]
+%       spsd.freq : Frequency vector [Hz]
+%       spsd.time : Time vector
+%       spsd.fs : Sampling frequency [Hz]
+%   octave: float
+%       Octave subdivision (1 = full octave, 3 = third-octave, etc.)
+%   base: float
+%       Octave base subdivision (2 = true octave, 10 = decade octave, etc.)
+%   fmin: float
+%       Lower frequency band limit (lower limit of the hydrophone) [Hz]
+%   fmax: float
+%       Upper frequency band limit (Nyquist frequency) [Hz]
+%
 % Returns
-% -------
-% mspl: struct
-%     Sound pressure level [dB re 1 uPa] indexed by time and frequency of specified bandwidth
+% ---------
+%   mspl: struct
+%       Sound pressure level [dB re 1 uPa] indexed by time and frequency of specified bandwidth
+%       mspl.data : Sound pressure level data [dB re 1 uPa]
+%       mspl.freq : Center frequencies of bands [Hz]
+%       mspl.time : Time vector
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct
@@ -34,6 +42,10 @@ end
 arguments (Output)
     mspl struct
 end
+
+% Validate spsd structure
+validate_spsd_struct(spsd, 'band_sound_pressure_level', ...
+    'required_fields', {{'freq', 'time', 'fs'}});
 
 reference = 1e-12; % Pa^2, = 1 uPa^2
 

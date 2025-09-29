@@ -1,26 +1,39 @@
 function plot_spectra(spsdl, fmin, fmax)
-%{
-    Plots the spectrogram of the sound pressure spectral density level.
 
-    Parameters
-    ----------
-    spsdl: struct
-        Mean square sound pressure spectral density level in dB rel 1 uPa^2/Hz
-    fmin: integer
-        Lower frequency band limit (lower limit of the hydrophone). Default: 10 Hz
-    fmax: integer
-        Upper frequency band limit (Nyquist frequency). Default: 100000 Hz
-
-    Returns
-    -------
-    sp: figure
-%}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Plot spectra of the sound pressure spectral density level
+%
+% Parameters
+% ------------
+%   spsdl: struct
+%       Mean square sound pressure spectral density level in dB rel 1 uPa^2/Hz
+%       spsdl.data : Spectral density level data [dB rel 1 uPa^2/Hz]
+%       spsdl.freq : Frequency vector [Hz]
+%       spsdl.time : Time vector
+%       spsdl.name : Data name
+%       spsdl.units : Data units
+%   fmin: float
+%       Lower frequency band limit (lower limit of the hydrophone) [Hz]
+%   fmax: float
+%       Upper frequency band limit (Nyquist frequency) [Hz]
+%
+% Returns
+% ---------
+%   This function creates a figure but does not return a value
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsdl struct
     fmin {mustBeNumeric} = 10
     fmax {mustBeNumeric} = 100000
 end
+
+% Validate spsdl structure
+validate_spsdl_struct(spsdl, 'plot_spectra', ...
+    'required_fields', {{'data', 'freq', 'name', 'units'}}, ...
+    'check_dimensions', false);
 
 % check fmax
 fn = max(spsdl.freq);

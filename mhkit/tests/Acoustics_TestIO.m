@@ -137,5 +137,33 @@ classdef Acoustics_TestIO < matlab.unittest.TestCase
             testCase.verifyEqual(td_spsd_cal.data(1:5,1:5), cd_spsd, 'AbsTol', 1e-6);
             testCase.verifyEqual(posixtime(td_spsd_cal.time(1:5)), posixtime(cc'), 'AbsTol', 1e-3);
         end
+
+        function test_export_audio(testCase)
+            file_name = fullfile(testCase.datadir, '6247.230204150508.wav');
+            td_pressure = read_soundtrap(file_name, -177);
+
+            % Create output filename in plots directory
+            output_filename = fullfile(testCase.plotdir, 'test_export_audio');
+
+            % Test export_audio with default gain
+            export_audio(output_filename, td_pressure);
+
+            % Verify the output file was created
+            expected_wav_file = strcat(output_filename, '.wav');
+            testCase.verifyTrue(exist(expected_wav_file, 'file') == 2, ...
+                'Export audio should create a WAV file');
+
+            % Verify the audio file can be read back
+            [audio_data, fs_read] = audioread(expected_wav_file);
+            testCase.verifyEqual(fs_read, td_pressure.fs, ...
+                'Exported audio sample rate should match input');
+            testCase.verifyEqual(length(audio_data), length(td_pressure.data), ...
+                'Exported audio length should match input');
+
+            % Clean up test file
+            if exist(expected_wav_file, 'file')
+                delete(expected_wav_file);
+            end
+        end
     end
 end

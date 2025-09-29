@@ -135,9 +135,9 @@ classdef Acoustics_TestAnalysis < matlab.unittest.TestCase
             testCase.assertEqual(method_name, "quantile");
             testCase.assertEqual(method_arg, 0.25);
 
-            testCase.verifyError(@() validate_method('unsupported_method'), 'validators:incorrectType');
-            testCase.verifyError(@() validate_method(struct('unsupported_method', [])), 'validators:incorrectType');
-            testCase.verifyError(@() validate_method(struct('quantile', 1.5)), 'validators:incorrectType');
+            testCase.verifyError(@() validate_method('unsupported_method'), 'MHKiT:acoustics:validate_method');
+            testCase.verifyError(@() validate_method(struct('unsupported_method', [])), 'MHKiT:acoustics:validate_method');
+            testCase.verifyError(@() validate_method({'unsupported_method', 0.5}), 'MHKiT:acoustics:validate_method');
         end
     end
 end

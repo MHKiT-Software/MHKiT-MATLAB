@@ -1,28 +1,39 @@
 function out = read_hydrophone(filename, peak_voltage, sensitivity, gain, start_time)
-%{
-    Read .wav file from a hydrophone. Returns voltage timeseries if sensitivity not
-    provided, returns pressure timeseries if it is provided.
 
-    Parameters
-    ----------
-    filename: string
-        Input filename
-    peak_voltage: double
-        Peak voltage supplied to the analog to digital converter (ADC) in V.
-        (Or 1/2 of the peak to peak voltage).
-    sensitivity: double
-        Hydrophone calibration sensitivity in dB re 1 V/uPa.
-        Should be negative. Default: None.
-    gain: double
-        Amplifier gain in dB re 1 V/uPa. Default 0.
-    start_time: string
-        Start time in the format yyyy-MM-ddTHH:mm:ss
-
-    Returns
-    -------
-    out: struct
-        Contains Sound pressure [Pa] or Voltage [V] along with metadata
-%}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Read .wav file from a hydrophone. Returns voltage timeseries if 
+% sensitivity not provided, returns pressure timeseries if it is provided
+%
+% Parameters
+% ------------
+%   filename: string
+%       Input filename
+%   peak_voltage: float
+%       Peak voltage supplied to the analog to digital converter (ADC) [V]
+%       (Or 1/2 of the peak to peak voltage)
+%   sensitivity: float
+%       Hydrophone calibration sensitivity in dB re 1 V/uPa
+%       Should be negative. Default: None
+%   gain: float
+%       Amplifier gain in dB re 1 V/uPa
+%   start_time: string
+%       Start time in the format yyyy-MM-ddTHH:mm:ss
+%
+% Returns
+% ---------
+%   out: struct
+%       Contains Sound pressure [Pa] or Voltage [V] along with metadata
+%       out.data : Time series data [Pa] or [V]
+%       out.time : Time vector
+%       out.units : Data units ('Pa' or 'V')
+%       out.fs : Sampling frequency [Hz]
+%       out.filename : Original filename
+%       out.valid_min : Minimum valid data value
+%       out.valid_max : Maximum valid data value
+%       out.sensitivity : Sensitivity value (if provided)
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     filename {mustBeText}
@@ -47,7 +58,7 @@ out.time = linspace(start, ending, length(v));
 
 if ~isempty(sensitivity)
     if sensitivity > 0
-        error('Sensitivity must be negative numeric input!')
+        error('MHKiT:acoustics:read_hydrophone:InvalidSensitivity', 'Sensitivity must be negative numeric input');
     end
     sense = sensitivity - gain;
     Sf = 10^(sense/20);

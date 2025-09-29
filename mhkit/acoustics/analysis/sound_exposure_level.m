@@ -1,49 +1,75 @@
 function sel = sound_exposure_level(spsd, group, fmin, fmax)
-% 
-% Calculates the sound exposure level (SEL) across a specified frequency band
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Calculate sound exposure level (SEL) across a specified frequency band
 % from the sound pressure spectral density (SPSD). If a marine mammal group is
 % provided, the resulting SEL is weighted according to the U.S. National Marine
 % Fisheries Service (NMFS) guidelines.
-% 
+%
 % Parameters
-% ----------
-% spsd: struct
-%     Sound pressure spectral density in [Pa^2/Hz] with a bin length
-%     equal to the time over which sound exposure should be computed.
-% group: str
-%     Marine mammal group for which the auditory weighting function is applied.
-%     Options: 'LF' (low frequency cetaceans), 'HF' (high frequency cetaceans),
-%     'VHF' (very high frequency cetaceans), 'PW' (phocid pinnepeds),
-%     'OW' (otariid pinnepeds). Default: None
-% fmin: int
-%     Lower frequency band limit (lower limit of the hydrophone).
-%     Default: 10 Hz
-% fmax: int
-%     Upper frequency band limit (Nyquist frequency). Default:
-%     100000 Hz
-% 
+% ------------
+%   spsd: struct
+%       spsd.data : Sound pressure spectral density [Pa^2/Hz]
+%       spsd.freq : Frequency vector [Hz]
+%       spsd.time : Time vector [s]
+%       spsd.fs : Sampling frequency [Hz]
+%       spsd.nfft : Number of FFT points
+%       spsd.nbin : Bin length for exposure computation
+%   group: char or string
+%       Marine mammal group for auditory weighting function. Options: 
+%         'LF' (low frequency cetaceans),
+%         'HF' (high frequency cetaceans), 
+%         'VHF' (very high frequency cetaceans),
+%         'PW' (phocid pinnepeds), 
+%         'OW' (otariid pinnepeds). 
+%         Default: []
+%   fmin: double
+%       Lower frequency band limit [Hz]. Default: 10
+%   fmax: double
+%       Upper frequency band limit [Hz]. Default: 100000
+%
 % Returns
-% -------
-% sel: struct
-%     Sound exposure level [dB re 1 uPa^2 s] indexed by time
+% ---------
+%   sel: struct
+%       sel.data : Sound exposure level [dB re 1 uPa^2 s]
+%       sel.time : Time vector [s]
+%       sel.units : Units string
+%       sel.name : Descriptive name
+%       sel.group : Marine mammal group used
+%       sel.integration_time : Integration time [s]
+%       sel.freq_band_min : Lower frequency limit [Hz]
+%       sel.freq_band_max : Upper frequency limit [Hz]
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct
     group = []
-    fmin {mustBeNumeric} = 10
-    fmax {mustBeNumeric} = 100000
+    fmin double {mustBeFinite, mustBePositive} = 10
+    fmax double {mustBeFinite, mustBePositive} = 100000
 end
 
 arguments (Output)
     sel struct
 end
 
-% type checks
-if fmin <= 0
-    error('fmin must be positive');
-end
+% Validate spsd structure
+validate_spsd_struct(spsd, 'sound_exposure_level', ...
+    'required_fields', {{'freq', 'time', 'fs', 'nfft', 'nbin'}});
+
+% Validate frequency bounds
 if fmax <= fmin
-    error('fmax must be greater than fmin');
+    error('MHKiT:acoustics:sound_exposure_level:InvalidInput', 'fmax must be greater than fmin');
+end
+
+% Validate group parameter if provided
+if ~isempty(group)
+    valid_groups = {'LF', 'HF', 'VHF', 'PW', 'OW'};
+    if ~ismember(group, valid_groups)
+        error('MHKiT:acoustics:sound_exposure_level:InvalidInput', ...
+            'group must be one of: %s', strjoin(valid_groups, ', '));
+    end
 end
 fmax = fmax_warning(spsd.fs/2, fmax);
 
