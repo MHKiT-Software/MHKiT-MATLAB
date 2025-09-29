@@ -169,8 +169,9 @@ plot_spectrogram(spsdl, ...
 % in. To do this, we will utilize MATLAB's built-in functions.
 
 player = audioplayer(P.data, P.fs); % define audioplayer with data
-%play(player) % uncomment to listen
-%stop(player) % uncomment to stop
+% play(player) % uncomment to listen
+% stop(player) % uncomment to stop
+% export_audio('mhkit_acoustics_output.wav', P, 1) % uncomment to export audio
 
 %% IEC-40 Stats
 %
