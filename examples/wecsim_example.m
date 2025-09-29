@@ -150,10 +150,19 @@ plot_spectrum(ws_spectrum);
 xlim([0, 4]);
 
 %%
-% Calculate Peak Wave Period (Tp) and Significant Wave Height (Hm0)
+% Calculate Wave Statistics using MHKiT wave module functions
 
-Tp = peak_period(ws_spectrum);
 Hm0 = significant_wave_height(ws_spectrum);
+Tp = peak_period(ws_spectrum);
+Te = energy_period(ws_spectrum);
 
-fprintf('Peak Wave Period (Tp) = %.4f s\n', Tp);
-fprintf('Significant Wave Height (Hm0) = %.4f m\n', Hm0);
+wave_statistics_data = {
+    % Parameter, Value, Units
+    'Significant Wave Height, Hm0', Hm0, 'm';
+    'Peak Wave Period, Tp', Tp, 's';
+    'Energy Period, Te', Te, 's';
+};
+
+wave_statistics_table = cell2table(wave_statistics_data, 'VariableNames', {'Parameter', 'Value', 'Units'});
+wave_statistics_table.Value = round(wave_statistics_table.Value, 4);
+wave_statistics_table
