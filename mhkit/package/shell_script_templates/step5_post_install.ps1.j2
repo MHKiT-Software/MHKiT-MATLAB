@@ -1,0 +1,81 @@
+{% set script_title = "Step 5: Post-Install Configuration" %}
+{% include "_header.ps1.j2" %}
+
+# Function to install post-install dependencies
+function Install-PostDependencies {
+    param([string]$CondaPath)
+
+    Write-Info "Installing post-install dependencies..."
+
+    {% for cmd in hooks.post_install.commands.windows %}
+    Write-Info "Executing: {{ cmd }}"
+    try {
+        {{ cmd }}
+    } catch {
+        Write-Error "Failed to execute: {{ cmd }}"
+        Write-Output "POST_DEPS_INSTALLED=false"
+        exit 1
+    }
+    {% endfor %}
+
+    Write-Success "Post-install dependencies installed"
+    Write-Output "POST_DEPS_INSTALLED=true"
+}
+
+# Function to test functionality
+function Test-Functionality {
+    param([string]$CondaPath)
+
+    Write-Info "Testing mhkit functionality..."
+
+    try {
+        $testResult = & "$CondaPath" run -n $CONDA_ENV_NAME python -c "import mhkit; print(mhkit.river.performance.circular(30))" 2>$null
+
+        if ($testResult -like "*30*" -and $testResult -like "*706*") {
+            Write-Success "Functionality test passed: $testResult"
+            Write-Output "FUNCTIONALITY_TEST=passed"
+        } else {
+            Write-Error "Functionality test failed. Output: $testResult"
+            Write-Output "FUNCTIONALITY_TEST=failed"
+            exit 1
+        }
+    } catch {
+        Write-Error "Functionality test failed: $_"
+        Write-Output "FUNCTIONALITY_TEST=failed"
+        exit 1
+    }
+}
+
+# Function to get Python executable path
+function Get-PythonPath {
+    param([string]$CondaPath)
+
+    try {
+        $pythonPath = & "$CondaPath" run -n $CONDA_ENV_NAME python -c "import sys; print(sys.executable)"
+        Write-Output "PYTHON_PATH=$pythonPath"
+    } catch {
+        Write-Error "Failed to get Python path: $_"
+        exit 1
+    }
+}
+
+function Main {
+    param([string]$CondaPath)
+
+    if (-not $CondaPath) {
+        Write-Error "No conda path provided. Usage: script.ps1 <conda_path>"
+        exit 1
+    }
+
+    Write-Info "Step 5: Post-install configuration..."
+    Write-Info "Using conda at: $CondaPath"
+
+    Install-PostDependencies $CondaPath
+    Test-Functionality $CondaPath
+    Get-PythonPath $CondaPath
+
+    Write-Success "Post-install configuration completed!"
+}
+
+# Run main function with arguments
+Main $args[0]

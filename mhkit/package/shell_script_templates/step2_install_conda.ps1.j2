@@ -1,0 +1,50 @@
+{% set script_title = "Step 2: Install Miniconda" %}
+{% include "_header.ps1.j2" %}
+
+# Function to install miniconda
+function Install-Conda {
+    Write-Info "Installing miniconda..."
+
+    $minicondaUrl = "{{ conda.miniconda_urls.windows }}"
+    $tempDir = [System.IO.Path]::GetTempPath()
+    $installerPath = Join-Path $tempDir "miniconda.exe"
+
+    # Download miniconda installer
+    Write-Info "Downloading miniconda installer..."
+    try {
+        Invoke-WebRequest -Uri $minicondaUrl -OutFile $installerPath
+    } catch {
+        Write-Error "Failed to download miniconda installer: $_"
+        Write-Output "CONDA_INSTALLED=false"
+        exit 1
+    }
+
+    # Install miniconda silently
+    Write-Info "Installing miniconda to $env:USERPROFILE\miniconda3..."
+    try {
+        $installArgs = @("/S", "/InstallationType=JustMe", "/AddToPath=0", "/RegisterPython=0", "/D=$env:USERPROFILE\miniconda3")
+        Start-Process -FilePath $installerPath -ArgumentList $installArgs -Wait -NoNewWindow
+    } catch {
+        Write-Error "Failed to install miniconda: $_"
+        Write-Output "CONDA_INSTALLED=false"
+        exit 1
+    }
+
+    # Remove installer
+    Remove-Item $installerPath -Force -ErrorAction SilentlyContinue
+
+    Write-Success "Miniconda installed successfully"
+
+    # Output conda path for next steps
+    $condaPath = Join-Path $env:USERPROFILE "miniconda3\Scripts\conda.exe"
+    Write-Output "CONDA_PATH=$condaPath"
+}
+
+# Main execution
+function Main {
+    Write-Info "Step 2: Installing miniconda..."
+    Install-Conda
+}
+
+# Run main function
+Main
