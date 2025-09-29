@@ -1,0 +1,85 @@
+{% set script_title = "Step 5: Post-Install Configuration" %}
+{% include "_header.sh.j2" %}
+
+# Function to install post-install dependencies
+install_post_dependencies() {
+    local conda_path="$1"
+    log_info "Installing post-install dependencies..."
+
+    local conda_dir=$(dirname "$conda_path")
+    export PATH="$conda_dir:$PATH"
+
+    if [[ "$OS_TYPE" == "Darwin" ]]; then
+        {% for cmd in hooks.post_install.commands.mac %}
+        log_info "Executing: {{ cmd }}"
+        {{ cmd }}
+        if [ $? -ne 0 ]; then
+            log_error "Failed to execute: {{ cmd }}"
+            echo "POST_DEPS_INSTALLED=false"
+            exit 1
+        fi
+        {% endfor %}
+    else
+        {% for cmd in hooks.post_install.commands.linux %}
+        log_info "Executing: {{ cmd }}"
+        {{ cmd }}
+        if [ $? -ne 0 ]; then
+            log_error "Failed to execute: {{ cmd }}"
+            echo "POST_DEPS_INSTALLED=false"
+            exit 1
+        fi
+        {% endfor %}
+    fi
+
+    log_success "Post-install dependencies installed"
+    echo "POST_DEPS_INSTALLED=true"
+}
+
+# Function to test functionality
+test_functionality() {
+    local conda_path="$1"
+    log_info "Testing mhkit functionality..."
+
+    local conda_dir=$(dirname "$conda_path")
+    export PATH="$conda_dir:$PATH"
+
+    local test_result=$("$conda_path" run -n "$CONDA_ENV_NAME" python -c "import mhkit; print(mhkit.river.performance.circular(30))" 2>/dev/null)
+
+    if [[ "$test_result" == *"30"* ]] && [[ "$test_result" == *"706"* ]]; then
+        log_success "Functionality test passed: $test_result"
+        echo "FUNCTIONALITY_TEST=passed"
+    else
+        log_error "Functionality test failed. Output: $test_result"
+        echo "FUNCTIONALITY_TEST=failed"
+        exit 1
+    fi
+}
+
+# Function to get Python executable path
+get_python_path() {
+    local conda_path="$1"
+    local conda_dir=$(dirname "$conda_path")
+    export PATH="$conda_dir:$PATH"
+
+    local python_path=$("$conda_path" run -n "$CONDA_ENV_NAME" which python)
+    echo "PYTHON_PATH=$python_path"
+}
+
+main() {
+    local conda_path="$1"
+    if [[ -z "$conda_path" ]]; then
+        log_error "No conda path provided. Usage: $0 <conda_path>"
+        exit 1
+    fi
+
+    log_info "Step 5: Post-install configuration..."
+    log_info "Using conda at: $conda_path"
+
+    install_post_dependencies "$conda_path"
+    test_functionality "$conda_path"
+    get_python_path "$conda_path"
+
+    log_success "Post-install configuration completed!"
+}
+
+main "$@"
