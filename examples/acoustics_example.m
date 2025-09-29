@@ -150,9 +150,9 @@ spsdl = sound_pressure_spectral_density_level(spsd_cal)
 % Note, the IEC-40 requires a maximum frequency of 100,000 Hz, so a hydrophone
 % capable of sampling faster than 200,000 Hz should be used for IEC testing.
 
-% Configure spectrogram range based on available frequencies
-fmin = min(spsdl.freq);
-fmax = max(spsdl.freq);
+% Specify spectrogram range
+fmin = 10;
+fmax = 48000;
 
 plot_spectrogram(spsdl, ...
     'fmin', fmin, ...
