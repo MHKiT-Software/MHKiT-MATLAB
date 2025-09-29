@@ -33,20 +33,32 @@ arguments (Output)
     spec {mustBeNumeric}
 end
 
-x0 = x-mean(x); % demean the time series
-N = length(x); % get length of time series
-w = 0.5 * (1-cos(2*pi*(0:1:N-1) / (N-1))); % generate hanning window
-xx = x0.*w'; % apply hamming window
-Fn = fs/2; % Nyquist frequency
-NumFFT  = nfft;
-TempFFT = fft(xx,NumFFT);                     % Take FFT, padding with zeros.
-NumUniquePts = ceil((NumFFT)/2);
-spec         = TempFFT(1:NumUniquePts);         % FFT is symmetric, throw away second half                 
-spec         = spec*2;                          % Multiply by 2 to take into account the fact that we
-                                                % threw out second half of TempFFT above
-spec(1)           = spec(1)/2;            % Account for endpoint uniqueness
-spec(length(spec))= spec(length(spec))/2;  % We know NumFFT is even
-spec              = spec/length(xx);       % Scale the FFT so that it is not a function of the length of x.
-f                 = (1:NumUniquePts)*2*Fn/NumFFT;
+% Pre-process the input signal
+x0 = x - mean(x);                                    % Demean the time series
+N = length(x);                                       % Get length of time series
+
+% Generate and apply Hanning window
+w = 0.5 * (1 - cos(2*pi*(0:1:N-1) / (N-1)));         % Generate Hanning window coefficients
+xx = x0 .* w';                                       % Apply Hanning window
+
+% Calculate FFT parameters
+Fn = fs / 2;                                         % Nyquist frequency
+NumFFT = nfft;                                       % Number of FFT points
+NumUniquePts = ceil(NumFFT / 2);                     % Number of unique FFT points
+
+% Compute FFT
+TempFFT = fft(xx, NumFFT);                           % Take FFT, padding with zeros if needed
+spec = TempFFT(1:NumUniquePts);                      % Keep only positive frequencies
+
+% Adjust spectrum for single-sided representation
+spec = spec * 2;                                     % Account for negative frequencies
+spec(1) = spec(1) / 2;                               % DC component should not be doubled
+if mod(NumFFT, 2) == 0                               % For even NumFFT
+    spec(end) = spec(end) / 2;                       % Nyquist frequency should not be doubled
+end
+
+% Normalize spectrum and generate frequency vector
+spec = spec / length(xx);                           % Normalize by signal length
+f = (1:NumUniquePts) * 2 * Fn / NumFFT;             % Generate frequency vector
 
 end
