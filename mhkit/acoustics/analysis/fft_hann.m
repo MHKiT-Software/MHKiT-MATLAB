@@ -1,27 +1,31 @@
 function [f, spec] = fft_hann(fs, x, nfft)
-% 
-% Apply Fast-Fourier-Transform to a time series using a Hanning window.
-% 
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Apply Fast-Fourier-Transform to a time series using a Hanning window
+%
 % Parameters
-% -----------
-% fs: int
-%     Sample rate of data.
-% x: array
-%     Array of timeseries data.
-% nfft: int
-%     Number of elements in the FFT.
-% 
+% ------------
+%   fs: double
+%       Sample rate of data [Hz]
+%   x: double array
+%       Array of time series data
+%   nfft: double
+%       Number of elements in the FFT
+%
 % Returns
-% -------
-% f: array
-%     Frequency array vector.
-% spec: array
-%     Frequency spectra resulting from the FFT.
+% ---------
+%   f: double array
+%       Frequency array vector [Hz]
+%   spec: complex double array
+%       Frequency spectra resulting from the FFT
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
-    fs {mustBeNumeric}
+    fs {mustBeNumeric, mustBePositive}
     x {mustBeNumeric}
-    nfft {mustBeNumeric}
+    nfft {mustBeNumeric, mustBePositive, mustBeInteger}
 end
 
 arguments (Output)
