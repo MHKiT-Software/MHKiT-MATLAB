@@ -48,15 +48,18 @@ if ~isstring(method) && ~iscell(method)
 end
 
 if isstring(method)
-    if ~ismember(method.lower, allowed_methods)
+    if ~ismember(lower(method), allowed_methods)
         error('MHKiT:acoustics:validate_method', "'method' is not supported. See list of supported methods.")
     end
-    method_name = method.lower;
+    method_name = lower(method);
     method_arg = [];
 end
 
 if iscell(method)
-    method_name = method{1}.lower;
+    if ~isstring(method{1}) && ~ischar(method{1})
+        error('MHKiT:acoustics:validate_method', "'method' must be a string or a cell array")
+    end
+    method_name = lower(method{1});
     if ~ismember(method_name, allowed_methods)
         error('MHKiT:acoustics:validate_method', "'method' is not supported. See list of supported methods")
     end
