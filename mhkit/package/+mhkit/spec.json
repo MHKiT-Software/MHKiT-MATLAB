@@ -161,13 +161,13 @@
     "pre_install": {
       "commands": {
         "linux": [
-          "conda run -n <conda_env> conda install pip hdf5 libnetcdf cftime netcdf4 pandas numpy -y"
+          "conda run -n <conda_env> conda install pip hdf5 libnetcdf cftime netcdf4 pandas numpy -c conda-forge -y"
         ],
         "mac": [
-          "conda run -n <conda_env> conda install pip hdf5 libnetcdf cftime netcdf4 pandas numpy -y"
+          "conda run -n <conda_env> conda install pip hdf5 libnetcdf cftime netcdf4 pandas numpy -c conda-forge -y"
         ],
         "windows": [
-          "conda run -n <conda_env> conda install pip hdf5 libnetcdf netcdf4 pandas numpy -y"
+          "conda run -n <conda_env> conda install pip hdf5 libnetcdf netcdf4 pandas numpy -c conda-forge -y"
         ]
       },
       "environment_variables": {
