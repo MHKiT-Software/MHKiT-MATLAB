@@ -1,4 +1,4 @@
-classdef Test_Dolfyn_Analysis < matlab.unittest.TestCase
+classdef Dolfyn_Test_Analysis_Workflow < matlab.unittest.TestCase
 
     properties
         test_data_path
