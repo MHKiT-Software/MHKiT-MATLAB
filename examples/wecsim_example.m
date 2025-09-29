@@ -22,7 +22,7 @@
 % Mooring, MoorDyn, and PTOSim classes.
 
 % Relative location and filename of simulated WEC-Sim data (run with mooring)
-filename = './examples/data/RM3MooringMatrix_matlabWorkspace.mat'
+filename = './data/RM3MooringMatrix_matlabWorkspace.mat'
 load(filename, 'output');
 
 %% 2. WEC-Sim Simulated Data
