@@ -49,185 +49,41 @@ function install(auto_configure_mhkit_matlab_python_env)
 
         logger.info('✓ MATLAB version %s is compatible with MHKiT', version("-release"));
 
+        % Step 2: Run platform-specific shell script for Python environment setup
+        logger.info('Running Python environment setup script...');
+        python_path = run_environment_setup_script(logger);
 
-        % Step 2: Check and install Conda if necessary
-        logger.info('Checking Conda installation...');
-        if ~mhkit.conda.exists();
-            logger.info('Installing Conda...');
-            success = mhkit.conda.install(spec.conda.install, logger);
-            if ~success
-                logger.error("Failed to install Conda");
-                return
-            end
-            logger.info('✓ Conda installed successfully');
-        else
-            logger.info('✓ Found existing Conda installation');
-        end
-
-        % Step 3: Create or verify Conda environment
-        conda_env_name = spec.conda.environment_name;
-        logger.info('\nSetting up Python environment...');
-        conda_env_exists = mhkit.conda.env_exists(conda_env_name, logger);
-
-        if ~conda_env_exists
-            logger.info('Creating environment "%s"...', conda_env_name);
-            command = spec.conda.create;
-            logger.info('Original command template: %s', command);
-            command = replace(command, '<conda_env>', conda_env_name);
-            command = replace(command, '<python_version>', spec.python.install_version);
-            logger.info('Final conda create command: %s', command);
-            logger.info('Using Python version: %s', spec.python.install_version);
-            [status, output] = mhkit.sys(command);
-            logger.info('Conda create exit status: %d', status);
-            if ~isempty(output)
-                logger.info('Conda create output: %s', output);
-            end
-            if status ~= 0
-                logger.error('Conda create command failed!');
-                return;
-            end
-            logger.info('✓ Environment created');
-        else
-            logger.info('✓ Environment "%s" ready', conda_env_name);
-        end
-
-        logger.info('Verifying Python configuration...');
-
-        conda_info = mhkit.conda.parse_info(conda_env_name, logger);
-
-        conda_env_python = conda_info.python_version;
-
-        is_conda_python_within_bounds = mhkit.python.version_within(conda_env_python, spec.python.minimum_version, spec.python.maximum_version, logger);
-
-        if ~is_conda_python_within_bounds
-            logger.info('Recreating %s Conda environment', conda_env_name);
-            mhkit.sys(sprintf('conda remove -n  %s --all -y', conda_env_name));
-            command = spec.conda.create;
-            logger.info('Recreation - Original command template: %s', command);
-            command = replace(command, '<conda_env>', conda_env_name);
-            command = replace(command, '<python_version>', spec.python.install_version);
-            logger.info('Recreation - Final conda create command: %s', command);
-            logger.info('Recreation - Using Python version: %s', spec.python.install_version);
-            [status, output] = mhkit.sys(command);
-            logger.info('Recreation - Conda create exit status: %d', status);
-            if ~isempty(output)
-                logger.info('Recreation - Conda create output: %s', output);
-            end
-            if status ~= 0
-                logger.error('Recreation - Conda create command failed!');
-                return;
-            end
-        end
-
-        % Execute pre-install hooks
-        logger.info('\nExecuting pre-install hooks...');
-        hook_success = mhkit.hooks.execute('pre_install', spec, logger);
-        if ~hook_success
-            mhkit.sys.installation_error(logger, 'Pre-install hooks failed', 'Pre-install Dependencies');
-            return;
-        end
-        logger.info('✓ Pre-install hooks completed');
-
-        % Check if `mhkit` is in `conda list`
-        has_correct_mhkit_python = false;
-        conda_packages = mhkit.conda.list(conda_env_name);
-
-        if isfield(conda_packages, "mhkit")
-            if contains(conda_packages.mhkit.version, spec.mhkit_python.version)
-                has_correct_mhkit_python = true;
-                logger.info('✓ Python %s configured', conda_env_python);
-            end
-        end
-
-        if ~has_correct_mhkit_python
-            % Step 4: Install MHKiT-Python
-            logger.info('\nInstalling MHKiT-Python v%s...', spec.mhkit_python.version);
-            
-            % Get platform-specific install command
-            platform = mhkit.sys.get_platform();
-            command = spec.mhkit_python.install.(platform);
-            command = replace(command, '<mhkit_python_version>', spec.mhkit_python.version);
-            mhkit.sys(sprintf("conda run -n %s %s", conda_env_name, command));
-
-            % Temporary command to get macos arm to the correct mhkit-python version
-            if ismac
-                mhkit.sys(sprintf("conda run -n %s pip install --upgrade mhkit==%s", conda_env_name, spec.mhkit_python.version));
-            end
-
-            logger.info('Verifying installation...');
-            [status, out] = mhkit.sys(sprintf("conda run -n %s %s", conda_env_name, spec.mhkit_python.verify_version.command));
-            mhkit_python_version = strip(out);
-            expected_mhkit_python_version = spec.mhkit_python.verify_version.expect;
-            if ~contains(mhkit_python_version, expected_mhkit_python_version)
-                logger.error("Version mismatch: got %s, expected %s", mhkit_python_version, expected_mhkit_python_version);
-                return
-            end
-            logger.info('✓ Installation successful');
-        else
-            logger.info('✓ MHKiT-Python v%s ready', spec.mhkit_python.version);
-        end
-
-        % Execute post-install hooks
-        logger.info('\nExecuting post-install hooks...');
-        hook_success = mhkit.hooks.execute('post_install', spec, logger);
-        if ~hook_success
-            mhkit.sys.installation_error(logger, 'Post-install hooks failed', 'Post-install Configuration');
-            return;
-        end
-        logger.info('✓ Post-install hooks completed');
-
-        logger.info('Testing functionality...');
-        command = spec.mhkit_python.verify_operation.command;
-        command = sprintf("conda run -n %s %s", conda_env_name, command);
-        [status, out] = mhkit.sys(command);
-        mhkit_python_output = strip(out);
-        expected_mhkit_python_output = spec.mhkit_python.verify_operation.expect;
-        
-        % Extract numbers from both outputs for comparison
-        if contains(mhkit_python_output, '(30,') && contains(mhkit_python_output, '706.')
-            logger.info('✓ Functionality verified');
-        else
-            logger.error("Functionality test failed - output: %s", mhkit_python_output);
-            logger.error("Expected pattern: %s", expected_mhkit_python_output);
+        if isempty(python_path)
+            logger.error('Python environment setup failed');
             return
         end
 
+        logger.info('✓ Python environment setup completed');
+        logger.info('Python executable: %s', python_path);
 
-        % Install utilities
-        logger.info('\nInstalling utilities...');
-        download_path = spec.package.python_package;
-        download_path = replace(download_path, "<version>", spec.package.version);
-        [status, extracted_path] = mhkit.web.download_and_unzip(download_path, spec.dirs.cache, "mhkit_python_utils");
-
-        if ~status == 1
-            mhkit.sys.installation_error(logger, sprintf('Failed to download utilities from %s', download_path), 'Utilities Download');
-            return
-        end
-
-        mhkit.sys(sprintf("conda run -n %s pip install -e ""%s""", conda_env_name, extracted_path));
-        python_cmd = mhkit.sys.python_cmd();
-        mhkit.sys(sprintf("conda run -n %s %s -c ""import mhkit_python_utils; print(mhkit_python_utils.__version__)""", conda_env_name, python_cmd));
+        % Step 3: Install utilities (still done in MATLAB since it requires the package)
+        logger.info('Installing utilities...');
+        install_utilities(spec, logger);
         logger.info('✓ Utilities installed');
 
-        % Configure MATLAB integration
-        logger.info('\nConfiguring MATLAB integration...');
-        
-        % Execute environment setup hooks
+        % Step 4: Configure MATLAB integration
+        logger.info('Configuring MATLAB integration...');
+
+        % Execute environment setup hooks for startup fixes
         logger.info('Executing environment setup hooks...');
-
-        % Temporarily add auto_configure setting to spec for startup fixes
         spec.auto_configure_mhkit_matlab_python_env = auto_configure_mhkit_matlab_python_env;
-
         hook_success = mhkit.hooks.execute('environment_setup', spec, logger);
         if ~hook_success
             logger.warning('Environment setup hooks failed, continuing with Python integration');
         else
             logger.info('✓ Environment setup hooks completed');
         end
-        
-        initialize_python_integration(conda_env_name, logger, spec);
 
-        % Final verification
+        % Configure MATLAB's Python integration
+        execution_mode = spec.constants.matlab_integration.execution_mode;
+        mhkit.python.configure_integration(python_path, execution_mode, logger);
+
+        % Step 5: Final verification
         logger.info('Performing final verification...');
         verify_installation(logger);
 
@@ -250,61 +106,388 @@ function install(auto_configure_mhkit_matlab_python_env)
 end
 
 
-function initialize_python_integration(env_name, logger, spec)
-    % Initialize Python integration
-    try
-        % Get the Python executable path from the conda environment
-        python_cmd = mhkit.sys.python_cmd();
-        conda_command = sprintf('conda run -n %s %s -c "import sys; print(sys.executable)"', env_name, python_cmd);
-        logger.info('Executing command: %s', conda_command);
-        [status, python_path] = mhkit.sys(conda_command);
-        
-        logger.info('Command status: %d', status);
-        logger.info('Raw Python path output: "%s"', python_path);
-        
-        if status ~= 0
-            logger.error('Failed to get Python executable path from conda environment');
-            logger.error('Command output: %s', python_path);
-            return
-        end
-        
-        python_path = strip(python_path);
-        logger.info('Cleaned Python executable: %s', python_path);
-        
-        % Verify the Python executable exists
-        if ~exist(python_path, 'file')
-            logger.error('Python executable does not exist at path: %s', python_path);
-            return
-        end
-        logger.info('✓ Verified Python executable exists');
-        
-        % Add Python directory to system PATH (like the working Unix tests)
-        python_dir = fileparts(python_path);
-        current_path = getenv('PATH');
-        if isunix
-            new_path = [python_dir ':' current_path];
-        else
-            new_path = [python_dir ';' current_path];
-        end
-        setenv('PATH', new_path);
-        logger.info('Added Python directory to PATH: %s', python_dir);
-        
-        % Set MATLAB's Python environment with specified execution mode
-        execution_mode = spec.constants.matlab_integration.execution_mode;
-        pyenv(Version=python_path, ExecutionMode=execution_mode);
-        logger.info('Configured pyenv with %s execution mode', execution_mode);
-        
-        % Test Python import
-        logger.info('Testing Python module imports...');
-        py.importlib.import_module('mhkit');
-        py.importlib.import_module('mhkit_python_utils');
+function python_path = run_environment_setup_script(logger)
+    % Run step-by-step shell scripts for better user feedback and environment persistence
 
-        logger.info('Python integration initialized successfully');
-    catch ME
-        logger.error('Failed to initialize Python integration: %s', ME.message);
-        % Don't throw error - this is not critical enough to stop installation
+    % Get the directory containing the shell scripts
+    current_file_path = mfilename('fullpath');
+    [mhkit_dir, ~, ~] = fileparts(current_file_path);  % This is the +mhkit directory
+    [package_dir, ~, ~] = fileparts(mhkit_dir);        % Go up one level to package directory
+    scripts_dir = fullfile(package_dir, 'shell_scripts');
+
+    % Determine platform
+    if ispc
+        logger.info('Installing MHKiT-Python environment (Windows) - Step-by-step...');
+        python_path = run_windows_step_by_step_installation(scripts_dir, logger);
+    else
+        logger.info('Installing MHKiT-Python environment (Unix) - Step-by-step...');
+        python_path = run_unix_step_by_step_installation(scripts_dir, logger);
     end
 end
+
+
+function python_path = run_windows_step_by_step_installation(scripts_dir, logger)
+    % Run Windows installation using step-by-step scripts for better user feedback
+
+    conda_path = '';
+
+    try
+        %% Step 1: Detect Conda
+        logger.info('Step 1/5: Detecting conda installation...');
+        step1_script = fullfile(scripts_dir, 'step1_detect_conda.ps1');
+        if ~exist(step1_script, 'file')
+            error('Step 1 script not found: %s', step1_script);
+        end
+
+        output = run_powershell_script_with_error_handling(step1_script, 'Step 1', logger);
+
+        conda_detected = parse_script_output(output, 'CONDA_DETECTED', logger);
+
+        if strcmp(conda_detected, 'true')
+            conda_path = parse_script_output(output, 'CONDA_PATH', logger);
+            logger.info('✓ Found conda at: %s', conda_path);
+        else
+            logger.info('No conda installation detected, will install miniconda');
+
+            %% Step 2: Install Conda
+            logger.info('Step 2/5: Installing miniconda...');
+            step2_script = fullfile(scripts_dir, 'step2_install_conda.ps1');
+            if ~exist(step2_script, 'file')
+                error('Step 2 script not found: %s', step2_script);
+            end
+
+            output = run_powershell_script_with_error_handling(step2_script, 'Step 2', logger);
+
+            conda_path = parse_script_output(output, 'CONDA_PATH', logger);
+            logger.info('✓ Installed miniconda at: %s', conda_path);
+        end
+
+        %% Step 3: Create Environment
+        logger.info('Step 3/5: Creating conda environment...');
+        step3_script = fullfile(scripts_dir, 'step3_create_env.ps1');
+        if ~exist(step3_script, 'file')
+            error('Step 3 script not found: %s', step3_script);
+        end
+
+        output = run_powershell_script_with_error_handling(step3_script, 'Step 3', logger, conda_path);
+
+        env_exists = parse_script_output(output, 'ENV_EXISTS', logger);
+        if strcmp(env_exists, 'false')
+            env_created = parse_script_output(output, 'ENV_CREATED', logger);
+            if strcmp(env_created, 'true')
+                logger.info('✓ Created conda environment: mhkit-matlab-env');
+            else
+                error('Failed to create conda environment');
+            end
+        else
+            logger.info('✓ Using existing conda environment: mhkit-matlab-env');
+        end
+
+        %% Step 4: Install Dependencies
+        logger.info('Step 4/5: Installing dependencies (this may take several minutes)...');
+        step4_script = fullfile(scripts_dir, 'step4_install_dependencies.ps1');
+        if ~exist(step4_script, 'file')
+            error('Step 4 script not found: %s', step4_script);
+        end
+
+        output = run_powershell_script_with_error_handling(step4_script, 'Step 4', logger, conda_path);
+
+        mhkit_installed = parse_script_output(output, 'MHKIT_INSTALLED', logger);
+        utils_installed = parse_script_output(output, 'UTILS_INSTALLED', logger);
+
+        if strcmp(mhkit_installed, 'true') && strcmp(utils_installed, 'true')
+            logger.info('✓ Dependencies installed successfully');
+        else
+            if ~strcmp(mhkit_installed, 'true')
+                error('Failed to install mhkit-python');
+            end
+            if ~strcmp(utils_installed, 'true')
+                error('Failed to install mhkit_python_utils');
+            end
+        end
+
+        %% Step 5: Post-Install Configuration
+        logger.info('Step 5/5: Post-install configuration and testing...');
+        step5_script = fullfile(scripts_dir, 'step5_post_install.ps1');
+        if ~exist(step5_script, 'file')
+            error('Step 5 script not found: %s', step5_script);
+        end
+
+        output = run_powershell_script_with_error_handling(step5_script, 'Step 5', logger, conda_path);
+
+        functionality_test = parse_script_output(output, 'FUNCTIONALITY_TEST', logger);
+        if strcmp(functionality_test, 'passed')
+            logger.info('✓ Functionality test passed');
+        else
+            error('Functionality test failed');
+        end
+
+        % Extract Python path
+        python_path = parse_script_output(output, 'PYTHON_PATH', logger);
+        if isempty(python_path)
+            error('Failed to get Python executable path');
+        end
+
+        % Verify the Python executable exists
+        if ~exist(python_path, 'file')
+            error('Python executable not found at reported path: %s', python_path);
+        end
+
+        logger.info('✓ Step-by-step installation completed successfully');
+
+    catch ME
+        logger.error('Step-by-step installation failed: %s', ME.message);
+        python_path = '';
+        rethrow(ME);
+    end
+end
+
+
+function python_path = run_unix_step_by_step_installation(scripts_dir, logger)
+    % Run Unix installation using step-by-step scripts for better user feedback
+
+    conda_path = '';
+
+    try
+        %% Step 1: Detect Conda
+        logger.info('Step 1/5: Detecting conda installation...');
+        step1_script = fullfile(scripts_dir, 'step1_detect_conda.sh');
+        if ~exist(step1_script, 'file')
+            error('Step 1 script not found: %s', step1_script);
+        end
+
+        output = run_script_with_error_handling(step1_script, 'Step 1', logger);
+
+        conda_detected = parse_script_output(output, 'CONDA_DETECTED', logger);
+
+        if strcmp(conda_detected, 'true')
+            conda_path = parse_script_output(output, 'CONDA_PATH', logger);
+            logger.info('✓ Found conda at: %s', conda_path);
+        else
+            logger.info('No conda installation detected, will install miniconda');
+
+            %% Step 2: Install Conda
+            logger.info('Step 2/5: Installing miniconda...');
+            step2_script = fullfile(scripts_dir, 'step2_install_conda.sh');
+            if ~exist(step2_script, 'file')
+                error('Step 2 script not found: %s', step2_script);
+            end
+
+            output = run_script_with_error_handling(step2_script, 'Step 2', logger);
+
+            conda_path = parse_script_output(output, 'CONDA_PATH', logger);
+            logger.info('✓ Installed miniconda at: %s', conda_path);
+        end
+
+        %% Step 3: Create Environment
+        logger.info('Step 3/5: Creating conda environment...');
+        step3_script = fullfile(scripts_dir, 'step3_create_env.sh');
+        if ~exist(step3_script, 'file')
+            error('Step 3 script not found: %s', step3_script);
+        end
+
+        output = run_script_with_error_handling(step3_script, 'Step 3', logger, conda_path);
+
+        env_exists = parse_script_output(output, 'ENV_EXISTS', logger);
+        if strcmp(env_exists, 'false')
+            env_created = parse_script_output(output, 'ENV_CREATED', logger);
+            if strcmp(env_created, 'true')
+                logger.info('✓ Created conda environment: mhkit-matlab-env');
+            else
+                error('Failed to create conda environment');
+            end
+        else
+            logger.info('✓ Using existing conda environment: mhkit-matlab-env');
+        end
+
+        %% Step 4: Install Dependencies
+        logger.info('Step 4/5: Installing dependencies (this may take several minutes)...');
+        step4_script = fullfile(scripts_dir, 'step4_install_dependencies.sh');
+        if ~exist(step4_script, 'file')
+            error('Step 4 script not found: %s', step4_script);
+        end
+
+        output = run_script_with_error_handling(step4_script, 'Step 4', logger, conda_path);
+
+        mhkit_installed = parse_script_output(output, 'MHKIT_INSTALLED', logger);
+        utils_installed = parse_script_output(output, 'UTILS_INSTALLED', logger);
+
+        if strcmp(mhkit_installed, 'true') && strcmp(utils_installed, 'true')
+            logger.info('✓ Dependencies installed successfully');
+        else
+            if ~strcmp(mhkit_installed, 'true')
+                error('Failed to install mhkit-python');
+            end
+            if ~strcmp(utils_installed, 'true')
+                error('Failed to install mhkit_python_utils');
+            end
+        end
+
+        %% Step 5: Post-Install Configuration
+        logger.info('Step 5/5: Post-install configuration and testing...');
+        step5_script = fullfile(scripts_dir, 'step5_post_install.sh');
+        if ~exist(step5_script, 'file')
+            error('Step 5 script not found: %s', step5_script);
+        end
+
+        output = run_script_with_error_handling(step5_script, 'Step 5', logger, conda_path);
+
+        functionality_test = parse_script_output(output, 'FUNCTIONALITY_TEST', logger);
+        if strcmp(functionality_test, 'passed')
+            logger.info('✓ Functionality test passed');
+        else
+            error('Functionality test failed');
+        end
+
+        % Extract Python path
+        python_path = parse_script_output(output, 'PYTHON_PATH', logger);
+        if isempty(python_path)
+            error('Failed to get Python executable path');
+        end
+
+        % Verify the Python executable exists
+        if ~exist(python_path, 'file')
+            error('Python executable not found at reported path: %s', python_path);
+        end
+
+        logger.info('✓ Step-by-step installation completed successfully');
+
+    catch ME
+        logger.error('Step-by-step installation failed: %s', ME.message);
+        python_path = '';
+        rethrow(ME);
+    end
+end
+
+
+function output = run_script_with_error_handling(script_path, step_name, logger, varargin)
+    % DRY helper function to run scripts with consistent error handling and output display
+
+    % Build command with optional arguments
+    if nargin > 3
+        args = sprintf(' "%s"', varargin{:});
+        command = sprintf('bash "%s"%s', script_path, args);
+    else
+        command = sprintf('bash "%s"', script_path);
+    end
+
+    % Run the script
+    [status, output] = system(command);
+
+    % Always display script output for debugging
+    if ~isempty(output)
+        fprintf('\n--- %s Output ---\n%s\n--- End %s Output ---\n', step_name, output, step_name);
+    end
+
+    % Handle errors with consistent reporting
+    if status ~= 0
+        spec = mhkit.spec();
+        logger.error('%s failed with exit code: %d', step_name, status);
+        logger.error('Script output above. Please report this issue: %s', spec.support.github_issues);
+        error('%s failed with exit code: %d', step_name, status);
+    end
+end
+
+
+function output = run_powershell_script_with_error_handling(script_path, step_name, logger, varargin)
+    % DRY helper function to run PowerShell scripts with consistent error handling and output display
+
+    % Build command with optional arguments
+    if nargin > 3
+        args = sprintf(' "%s"', varargin{:});
+        command = sprintf('powershell -ExecutionPolicy Bypass -File "%s"%s', script_path, args);
+    else
+        command = sprintf('powershell -ExecutionPolicy Bypass -File "%s"', script_path);
+    end
+
+    % Run the script
+    [status, output] = system(command);
+
+    % Always display script output for debugging
+    if ~isempty(output)
+        fprintf('\n--- %s Output ---\n%s\n--- End %s Output ---\n', step_name, output, step_name);
+    end
+
+    % Handle errors with consistent reporting
+    if status ~= 0
+        spec = mhkit.spec();
+        logger.error('%s failed with exit code: %d', step_name, status);
+        logger.error('Script output above. Please report this issue: %s', spec.support.github_issues);
+        error('%s failed with exit code: %d', step_name, status);
+    end
+end
+
+
+function value = parse_script_output(output, key, logger)
+    % Parse key=value pairs from script output
+    value = '';
+
+    % Split output into lines
+    lines = strsplit(output, '\n');
+
+    % Look for key=value lines
+    for i = 1:length(lines)
+        line = strtrim(lines{i});
+        if startsWith(line, [key '='])
+            value = line((length(key)+2):end);  % Skip 'KEY=' part
+            return;
+        end
+    end
+
+    if isempty(value)
+        logger.warning('Could not find %s in script output', key);
+    end
+end
+
+
+function python_path = extract_python_path_from_output(output, logger)
+    % Extract Python path from shell script output
+    % Looking for line like: PYTHON_PATH=/path/to/python
+
+    python_path = '';
+
+    % Split output into lines
+    lines = strsplit(output, {'\n', '\r\n'});
+
+    % Look for PYTHON_PATH line
+    for i = 1:length(lines)
+        line = strtrim(lines{i});
+        if startsWith(line, 'PYTHON_PATH=')
+            python_path = extractAfter(line, 'PYTHON_PATH=');
+            python_path = strtrim(python_path);
+            logger.info('Extracted Python path: %s', python_path);
+            return;
+        end
+    end
+
+    logger.warning('Could not find PYTHON_PATH in script output');
+end
+
+
+function install_utilities(spec, logger)
+    % Install MHKiT Python utilities package
+    % This still needs to be done in MATLAB since it requires downloading the package
+
+    conda_env_name = spec.conda.environment_name;
+
+    % Download utilities package
+    download_path = spec.package.python_package;
+    download_path = replace(download_path, "<version>", spec.package.version);
+    [status, extracted_path] = mhkit.web.download_and_unzip(download_path, spec.dirs.cache, "mhkit_python_utils");
+
+    if ~status == 1
+        mhkit.sys.installation_error(logger, sprintf('Failed to download utilities from %s', download_path), 'Utilities Download');
+        return
+    end
+
+    % Install utilities using pip in the conda environment
+    mhkit.sys(sprintf("conda run -n %s pip install -e ""%s""", conda_env_name, extracted_path));
+
+    % Verify installation
+    python_cmd = mhkit.sys.python_cmd();
+    mhkit.sys(sprintf("conda run -n %s %s -c ""import mhkit_python_utils; print(mhkit_python_utils.__version__)""", conda_env_name, python_cmd));
+end
+
 
 function verify_installation(logger)
     % Perform final verification of installation
@@ -312,12 +495,12 @@ function verify_installation(logger)
         % Simple verification test - check if mhkit modules can be imported
         logger.info('Testing basic mhkit module import...');
         py.importlib.import_module('mhkit');
-        
+
         % Test a simple function call
         logger.info('Testing basic mhkit functionality...');
         result = py.mhkit.river.performance.circular(30);
         logger.info('Test result: %s', char(result));
-        
+
         logger.info('Installation verification successful');
     catch ME
         logger.warning('Installation verification failed: %s', ME.message);
@@ -327,4 +510,3 @@ function verify_installation(logger)
         % Don't throw error - this is not critical enough to stop installation
     end
 end
-
