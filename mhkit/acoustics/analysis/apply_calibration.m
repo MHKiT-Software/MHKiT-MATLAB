@@ -31,8 +31,8 @@ function spsd_cal = apply_calibration(spsd,sensitivity_curve, fill_value)
 
 arguments (Input)
     spsd struct
-    sensitivity_curve (:,2) {mustBeNumeric, mustBeFinite}
-    fill_value (1,1) {mustBeNumeric, mustBeFinite}
+    sensitivity_curve {mustBeNumeric, mustBeFinite}
+    fill_value {mustBeNumeric, mustBeFinite}
 end
 
 arguments (Output)
