@@ -62,6 +62,66 @@
   "conda": {
     "environment_name": "mhkit-matlab-env",
     "create": "conda create -n <conda_env> python=<python_version> -y",
+    "miniconda_urls": {
+      "mac_arm": "https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh",
+      "mac_intel": "https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh",
+      "linux": "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh",
+      "windows": "https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe"
+    },
+    "detection": {
+      "common_paths": {
+        "unix": [
+          "~/miniconda3/bin/conda",
+          "~/miniconda3/condabin/conda",
+          "~/anaconda3/bin/conda",
+          "~/anaconda3/condabin/conda",
+          "/opt/miniconda3/bin/conda",
+          "/opt/miniconda3/condabin/conda",
+          "/opt/anaconda3/bin/conda",
+          "/opt/anaconda3/condabin/conda",
+          "/usr/local/miniconda3/bin/conda",
+          "/usr/local/miniconda3/condabin/conda",
+          "/usr/local/anaconda3/bin/conda",
+          "/usr/local/anaconda3/condabin/conda",
+          "/usr/bin/conda",
+          "/usr/local/bin/conda",
+          "~/.local/bin/conda",
+          "/opt/homebrew/bin/conda",
+          "/opt/homebrew/condabin/conda",
+          "/usr/local/Caskroom/miniconda/base/bin/conda",
+          "/usr/local/Caskroom/miniconda/base/condabin/conda"
+        ],
+        "windows": [
+          "%USERPROFILE%\\miniconda3\\Scripts\\conda.exe",
+          "%USERPROFILE%\\miniconda3\\condabin\\conda.bat",
+          "%USERPROFILE%\\Miniconda3\\Scripts\\conda.exe",
+          "%USERPROFILE%\\Anaconda3\\Scripts\\conda.exe",
+          "%USERPROFILE%\\anaconda3\\Scripts\\conda.exe",
+          "C:\\ProgramData\\Miniconda3\\Scripts\\conda.exe",
+          "C:\\ProgramData\\Anaconda3\\Scripts\\conda.exe",
+          "C:\\tools\\miniconda3\\Scripts\\conda.exe",
+          "C:\\tools\\Miniconda3\\Scripts\\conda.exe",
+          "%LOCALAPPDATA%\\Continuum\\miniconda3\\Scripts\\conda.exe",
+          "%LOCALAPPDATA%\\Continuum\\anaconda3\\Scripts\\conda.exe"
+        ]
+      },
+      "environment_variables": [
+        "CONDA_EXE",
+        "CONDA_PREFIX"
+      ],
+      "conda_config_paths": {
+        "unix": [
+          "~/.condarc",
+          "~/.conda/condarc",
+          "/opt/miniconda3/.condarc",
+          "/opt/anaconda3/.condarc"
+        ],
+        "windows": [
+          "%USERPROFILE%\\.condarc",
+          "%USERPROFILE%\\.conda\\condarc"
+        ]
+      }
+    },
     "install": {
       "windows": {
         "admin": [
@@ -123,11 +183,13 @@
           "conda run -n <conda_env> conda install scipy -y"
         ],
         "mac": [
-          "conda run -n <conda_env> conda install openssl=3.0.* -y",
-          "conda run -n <conda_env> pip install netcdf4 --no-deps",
-          "conda run -n <conda_env> pip install cftime",
+          "conda run -n <conda_env> conda install openssl=3.0.* ca-certificates -c conda-forge -y",
+          "conda run -n <conda_env> pip uninstall -y netcdf4",
+          "conda run -n <conda_env> pip install netcdf4 --no-deps --no-cache-dir",
+          "conda run -n <conda_env> pip install cftime --no-cache-dir",
           "conda run -n <conda_env> pip uninstall -y scipy",
-          "conda run -n <conda_env> pip install scipy==1.12.0"
+          "conda run -n <conda_env> pip install scipy==1.12.0 --no-cache-dir",
+          "conda run -n <conda_env> conda clean --all -y"
         ],
         "windows": [
           "conda run -n <conda_env> pip install --upgrade netcdf4",
@@ -148,13 +210,8 @@
       },
       "environment_variables": {
         "linux": {},
-        "mac": {
-          "DYLD_FALLBACK_LIBRARY_PATH": "/opt/anaconda3/envs/mhkit-matlab-env/lib",
-          "CONDA_DLL_SEARCH_MODIFICATION_ENABLE": "1"
-        },
-        "windows": {
-          "CONDA_DLL_SEARCH_MODIFICATION_ENABLE": "1"
-        }
+        "mac": {},
+        "windows": {}
       },
       "startup_fixes": {
         "linux": [
@@ -169,7 +226,25 @@
           "    end",
           "end"
         ],
-        "mac": [],
+        "mac": [
+          "% MHKiT: Fix Python library compatibility on macOS",
+          "if ismac",
+          "    % Get conda environment path dynamically",
+          "    try",
+          "        pe = pyenv();",
+          "        if ~isempty(pe.Executable) && contains(pe.Executable, 'mhkit-matlab-env')",
+          "            [env_path, ~, ~] = fileparts(fileparts(pe.Executable));",
+          "            lib_path = fullfile(env_path, 'lib');",
+          "            if exist(lib_path, 'dir')",
+          "                setenv('DYLD_FALLBACK_LIBRARY_PATH', lib_path);",
+          "                setenv('CONDA_DLL_SEARCH_MODIFICATION_ENABLE', '1');",
+          "            end",
+          "        end",
+          "    catch",
+          "        % Ignore errors - Python may not be configured yet",
+          "    end",
+          "end"
+        ],
         "windows": []
       }
     }
