@@ -2,7 +2,7 @@ function validate_spsdl_struct(spsdl_struct, function_name, options)
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Validates SPSDL (Sound Pressure Spectral Density Level) structure format and content
+% Validate SPSDL (Sound Pressure Spectral Density Level) structure format and content
 %
 % Parameters
 % ------------
