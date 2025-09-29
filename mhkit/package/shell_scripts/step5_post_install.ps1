@@ -125,7 +125,6 @@ function Get-PythonPath {
     }
 }
 
-# Main execution
 function Main {
     param([string]$CondaPath)
 

@@ -144,11 +144,9 @@ function Find-Conda {
     Write-Output "CONDA_DETECTED=false"
 }
 
-# Main execution
 function Main {
     Write-Info "Step 1: Detecting conda installation..."
     Find-Conda
 }
 
-# Run main function
 Main

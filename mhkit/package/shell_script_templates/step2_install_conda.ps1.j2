@@ -40,11 +40,9 @@ function Install-Conda {
     Write-Output "CONDA_PATH=$condaPath"
 }
 
-# Main execution
 function Main {
     Write-Info "Step 2: Installing miniconda..."
     Install-Conda
 }
 
-# Run main function
 Main

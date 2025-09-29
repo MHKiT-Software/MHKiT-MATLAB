@@ -114,11 +114,9 @@ install_conda() {
     echo "CONDA_PATH=$HOME/miniconda3/bin/conda"
 }
 
-# Main execution
 main() {
     log_info "Step 2: Installing miniconda..."
     install_conda
 }
 
-# Run main function
 main "$@"

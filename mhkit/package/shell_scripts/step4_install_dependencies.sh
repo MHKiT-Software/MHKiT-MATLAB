@@ -76,18 +76,18 @@ install_pre_dependencies() {
     export PATH="$conda_dir:$PATH"
 
     if [[ "$OS_TYPE" == "Darwin" ]]; then
-        log_info "Executing: conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf cftime netcdf4 gfortran pandas numpy -y"
-        conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf cftime netcdf4 gfortran pandas numpy -y
+        log_info "Executing: conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf cftime netcdf4 pandas numpy -c conda-forge -y"
+        conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf cftime netcdf4 pandas numpy -c conda-forge -y
         if [ $? -ne 0 ]; then
-            log_error "Failed to execute: conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf cftime netcdf4 gfortran pandas numpy -y"
+            log_error "Failed to execute: conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf cftime netcdf4 pandas numpy -c conda-forge -y"
             echo "PRE_DEPS_INSTALLED=false"
             exit 1
         fi
     else
-        log_info "Executing: conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf cftime netcdf4 gfortran pandas numpy -y"
-        conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf cftime netcdf4 gfortran pandas numpy -y
+        log_info "Executing: conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf cftime netcdf4 pandas numpy -c conda-forge -y"
+        conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf cftime netcdf4 pandas numpy -c conda-forge -y
         if [ $? -ne 0 ]; then
-            log_error "Failed to execute: conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf cftime netcdf4 gfortran pandas numpy -y"
+            log_error "Failed to execute: conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf cftime netcdf4 pandas numpy -c conda-forge -y"
             echo "PRE_DEPS_INSTALLED=false"
             exit 1
         fi
@@ -213,7 +213,6 @@ install_mhkit_python_utils() {
     fi
 }
 
-# Main execution
 main() {
     local conda_path="$1"
     if [[ -z "$conda_path" ]]; then
@@ -233,5 +232,4 @@ main() {
     install_mhkit_python_utils "$conda_path"
 }
 
-# Run main function
 main "$@"

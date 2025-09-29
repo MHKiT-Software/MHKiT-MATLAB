@@ -159,11 +159,9 @@ detect_conda() {
     return 1
 }
 
-# Main execution
 main() {
     log_info "Step 1: Detecting conda installation..."
     detect_conda
 }
 
-# Run main function
 main "$@"

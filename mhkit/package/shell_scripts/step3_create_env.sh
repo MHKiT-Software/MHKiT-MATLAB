@@ -128,7 +128,6 @@ verify_python_version() {
     fi
 }
 
-# Main execution
 main() {
     local conda_path="$1"
     if [[ -z "$conda_path" ]]; then
@@ -151,9 +150,8 @@ main() {
         log_info "Recreating environment with correct Python version..."
         "$conda_path" remove -n "$CONDA_ENV_NAME" --all -y >/dev/null 2>&1 || true
         create_conda_env "$conda_path"
-        verify_python_version "$conda_path"  # This should succeed now
+        verify_python_version "$conda_path"
     fi
 }
 
-# Run main function
 main "$@"

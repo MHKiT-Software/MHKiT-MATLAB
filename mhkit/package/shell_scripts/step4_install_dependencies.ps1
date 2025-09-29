@@ -67,11 +67,11 @@ function Install-PreDependencies {
 
     Write-Info "Installing pre-install dependencies..."
 
-    Write-Info "Executing: conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf netcdf4 gfortran pandas numpy -y"
+    Write-Info "Executing: conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf netcdf4 pandas numpy -c conda-forge -y"
     try {
-        conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf netcdf4 gfortran pandas numpy -y
+        conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf netcdf4 pandas numpy -c conda-forge -y
     } catch {
-        Write-Error "Failed to execute: conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf netcdf4 gfortran pandas numpy -y"
+        Write-Error "Failed to execute: conda run -n mhkit-matlab-env conda install pip hdf5 libnetcdf netcdf4 pandas numpy -c conda-forge -y"
         Write-Output "PRE_DEPS_INSTALLED=false"
         exit 1
     }
@@ -196,7 +196,6 @@ function Install-MhkitPythonUtils {
     }
 }
 
-# Main execution
 function Main {
     param([string]$CondaPath)
 

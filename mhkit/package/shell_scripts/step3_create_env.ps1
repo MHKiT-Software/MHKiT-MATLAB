@@ -129,7 +129,6 @@ function Test-PythonVersion {
     }
 }
 
-# Main execution
 function Main {
     param([string]$CondaPath)
 
@@ -149,7 +148,7 @@ function Main {
         Write-Info "Recreating environment with correct Python version..."
         & "$CondaPath" remove -n $CONDA_ENV_NAME --all -y 2>$null
         New-CondaEnv $CondaPath
-        Test-PythonVersion $CondaPath  # This should succeed now
+        Test-PythonVersion $CondaPath 
     }
 }
 

@@ -176,7 +176,6 @@ get_python_path() {
     echo "PYTHON_PATH=$python_path"
 }
 
-# Main execution
 main() {
     local conda_path="$1"
     if [[ -z "$conda_path" ]]; then
@@ -194,5 +193,4 @@ main() {
     log_success "Post-install configuration completed!"
 }
 
-# Run main function
 main "$@"
