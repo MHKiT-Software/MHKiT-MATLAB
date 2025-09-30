@@ -3,25 +3,18 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
     methods (Test)
 
         function test_mler_coefficients(testCase)
-            % `mler_coefficients` Line 54, 55
-            % phase delay should be positive number
-            % phase = -unwrap(angle(RAO));
-            % Per @simmsa, this does not perform this conversion correctly for positive RAO values
-            assumeFail(testCase, "Per @simmsa, ask @hivanov about setting RAO to negative values per the above comment");
-
             % create inputs and load validation data
             fpath = '../../examples/data/loads/mler.csv';
             validation = readtable(fpath);
             wave_freq = linspace(0,1,500);
-            js = jonswap_spectrum(wave_freq,15.1,9);
+            js = pierson_moskowitz_spectrum(wave_freq,15.1,9);
             response_desired = 1;
             RAO = validation.RAO;
-            RAO = RAO';
             % execute function
             mler = mler_coefficients(RAO, js, response_desired);
             % assertions
-            assertEqual(testCase, mler.conditioned_spectrum, validation.Res_Spec', 'RelTol',0.005)
-            assertEqual(testCase, mler.phase, validation.phase', 'RelTol',0.001)
+            assertEqual(testCase, mler.conditioned_spectrum, validation.Res_Spec, 'RelTol',0.005)
+            assertEqual(testCase, mler.phase, validation.phase, 'RelTol',0.001)
         end
 
         function test_mler_simulation(testCase)
@@ -158,5 +151,31 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             assertEqual(testCase, lte_cdf, w(1)*ste1 + w(2)*ste2, 'AbsTol', 0.00005)
         end
 
+        function test_automatic_hs_threshold(testCase)
+            relative_file_name = '../../examples/data/loads/data_loads_hs.csv';
+            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+            data = readtable(full_file_name);
+            peaks = table2array(data);
+            years = 2.97;
+            [pct, threshold] = automatic_hs_threshold(peaks, years);
+
+            assertEqual(testCase, pct, 0.9913, 'AbsTol', 0.00005)
+            assertEqual(testCase, threshold, 1.032092, 'AbsTol', 0.00005)
+        end
+
+        function test_return_year_value(testCase)
+            dist = py.scipy.stats.norm;
+            stp = 1;
+            ry = 50;
+
+            val = return_year_value(dist, ry, stp);
+            want = 4.5839339;
+
+            assertEqual(testCase, val, want, 'AbsTol', 0.00005)
+
+        end
+       
+
     end
 end
+
