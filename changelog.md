@@ -1,4 +1,21 @@
-# Current development
+# Version 1.0.0
+
+## Release Highlights
+
+- New acoustics, and mooring modules
+- Improvements to Wave, WDRT, and DOLFYN modules
+- New examples for acoustics, mooring, and WEC-sim, and improved examples for DOLFYN and wave modules
+- Multiple bug fixes and performance improvements
+
+## PR #174 - Acoustics Module
+
+- Authors: @hivanov-nrel, @simmsa
+- Addition of acoustics module:
+  - Reading and standardization of of OceanSonics icListen and OceanInstruments Soundtrap hydrophone files
+  - Implementation of numerical computation sections IEC 62600-40 "Acoustic characterization of marine energy converters" standard
+  - Spectrogram data visualizations using `plot_spectrogram`
+  - Sound exposure level calculations with auditory weighting functions for 5 groups of marine mammals
+  - Complete example livescript in examples/acoustics_example.mlx
 
 ## PR 176 - Wave Module Native MATLAB Implementation
 
@@ -21,6 +38,13 @@
   - Functions to visualize mooring line dynamics in 2D or 3D.
   - Example LiveScript demonstrating the functionality of the mooring module
 
+## PR #173 - Dolfyn Turbulence Functionality
+
+- Author: @simmsa, @browniea
+- Addition of turbulence calculations for acoustic doppler instruments
+  - Turbulence intensity, noise, and reynolds stress calculations
+  - Updates to examples/adcp_example.mlx live script
+
 ## PR 170 - WDRT leftovers
 
 - Author: @hivanov-nrel
@@ -30,6 +54,14 @@
 
 - Author: @simmsa
 - Fix code compatibility issues detailed in issues #115, #116, #117, #118, #119, #120, #121, and #122
+
+## Bug Fixes
+
+- Issue #172 - Fix Failing MLER Test - @hivanov-nrel
+- Issue #152 - Fix dimensionality differences in environmental_contours_example - @simmsa
+- Issue #146, #74 - Finish WDRT Parity - @hivanov-nrel
+- Issue #145 - Fix build errors in documentation - @simmsa
+- Issue #114, #115, #116, #117, #118, #119, #121, #122 - MATLAB code compatibility issues
 
 # MHKiT-MATLAB v0.6.0
 
