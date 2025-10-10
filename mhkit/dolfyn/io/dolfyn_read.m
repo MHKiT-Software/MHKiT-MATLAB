@@ -14,8 +14,13 @@ function ds=dolfyn_read(filename,options)
 %     nens: nan, int, or 2-element array (optional)
 %         nan (default: read entire file), int, or 2-element tuple
 %         (start, stop) Number of pings to read from the file.
+%     use_raw_types: bool (optional)
+%         false (default: standardize types for compatibility with NetCDF files
+%                and other dolfyn implementations)
+%         true: use raw data types from binary reading (may not be compatible
+%               with dolfyn processing functions or Python implementations)
 %
-%     call with options -> dolfyn_read(filename,'userdata',false,'nens',12)
+%     call with options -> dolfyn_read(filename,'userdata',false,'nens',12,'use_raw_types',true)
 %
 % Returns
 % ---------
@@ -27,6 +32,7 @@ function ds=dolfyn_read(filename,options)
         filename
         options.userdata = true;
         options.nens = nan;
+        options.use_raw_types = false;
     end
 
     % check to see if the filename input is a string
@@ -79,6 +85,11 @@ function ds=dolfyn_read(filename,options)
         try
             ds = feval(fun_map.(reader),...
                 filename,'userdata',options.userdata,'nens',options.nens);
+
+            % Convert to standardized types unless user wants raw types
+            if ~options.use_raw_types
+                ds = dolfyn_convert_dataset_to_defined_types(ds);
+            end
         catch e
             fprintf("\nError in read: %s\n", e.message);
         end
