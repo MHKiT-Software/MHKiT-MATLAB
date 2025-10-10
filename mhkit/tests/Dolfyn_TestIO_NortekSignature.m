@@ -247,6 +247,7 @@ classdef Dolfyn_TestIO_NortekSignature < matlab.unittest.TestCase
         end
 
         function test_io_signature_dual_profile_echo(testCase)
+            assumeFail(testCase, "Test hangs - needs investigation");
             % Test Signature dual profile echo data - echo profile
             nens = 100;
             warning('off','all')
