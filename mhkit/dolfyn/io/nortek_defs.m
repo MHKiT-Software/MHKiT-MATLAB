@@ -1,4 +1,14 @@
-% Run this file to generate the nortek_defs.mat file
+function [vec_data, vec_sysdata, awac_profile] = nortek_defs()
+% Returns nortek instrument type definitions
+%
+% Returns
+% -------
+% vec_data : struct
+%     Vector data type definitions
+% vec_sysdata : struct
+%     Vector system data type definitions
+% awac_profile : struct
+%     AWAC profile data type definitions
 
 vec_data = struct();
 vec_sysdata = struct();
