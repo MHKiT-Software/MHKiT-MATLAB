@@ -27,7 +27,7 @@ function ds = create_dataset(data)
                 ds.(fn{k}).coords.x1 = beam;
                 ds.(fn{k}).coords.x2 = beam;
                 % Add units for beam2inst_orientmat
-                ds.(fn{k}).units = '1';
+                ds.(fn{k}).units = '';
             else
             % earth2inst orientation matrix
                 ds.(fn{k}).data = data.data_vars.(fn{k});
@@ -37,7 +37,7 @@ function ds = create_dataset(data)
                 ds.(fn{k}).coords.inst = inst;
                 ds.(fn{k}).coords.earth = earth;
                 % Add units for orientmat
-                ds.(fn{k}).units = '1';
+                ds.(fn{k}).units = '';
             end
 
         % quaternion units never change

@@ -673,7 +673,7 @@ function ds=read_nortek(filename,options)
                             data.attrs.rotate_vars{end+1} = rv{i};
                         end
                     end
-                    data.units.accel = "m/s^2";
+                    data.units.accel = "m s-2";
                     data.units.angrt = "rad/s";
                 case {204, 210}
                     orient_dnames = {"accel", "angrt", "mag", "orientmat"};
@@ -693,7 +693,7 @@ function ds=read_nortek(filename,options)
                         data.data_vars.orientmat = nan([n_samp_guess,1,3,3],...
                         'single');
                     end
-                    data.units.accel = "m/s^2";
+                    data.units.accel = "m s-2";
                     data.units.angrt = "rad/s";
                     data.units.mag   = "gauss";
                 case 211
@@ -710,7 +710,7 @@ function ds=read_nortek(filename,options)
                             data.attrs.rotate_vars{end+1} = rv{i};
                         end
                     end
-                    data.units.accel = "m/s^2";
+                    data.units.accel = "m s-2";
                     data.units.angrt = "rad/s";
                     data.units.mag   = "gauss";
                 otherwise
