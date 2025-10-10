@@ -1,28 +1,33 @@
 function out = water_depth_from_pressure(ds, options)
 
-%%%%%%%%%%%%%%%%%%%%
-% Calculates the distance to the water surface. Temperature and salinity
-% are used to calculate seawater density, which is in turn used with the
-% pressure data to calculate depth.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Calculate water depth from pressure using seawater density
+%
+% This function calculates the distance to the water surface using pressure
+% ADCP sensor data. Temperature and salinity are used to calculate seawater density,
+% which is then used with pressure data to calculate depth%
 %
 % Parameters
-% ----------
-% ds: Dataset
-%   The full adcp dataset
-% salinity: numeric
-%   Water salinity in psu
+% ------------
+%   ds : structure
+%       ADCP dataset structure containing pressure and temperature data
+%       ds.pressure.data : Pressure measurements [dbar]
+%       ds.temp.data : Temperature measurements [°C]  
+%       ds.attrs.h_deploy : Optional deployment height above seafloor [m]
+%   salinity : double, optional (name-value)
+%       Water salinity [psu] (default: 35)
 %
 % Returns
-% -------
-% out: Dataset
-%   adds the variables "water_density" and "depth" to the input dataset.
+% ---------
+%   out : structure
+%       Input dataset with added depth and density fields:
+%       out.depth.data : Water depth measurements [m]
+%       out.water_density.data : Seawater density [kg/m³]
+%       out.depth.long_name : Descriptive name
+%       out.depth.units : "m"
 %
-% Notes
-% -----
-% Requires that the instrument's pressure sensor was calibrated/zeroed
-% before deployment to remove atmospheric pressure.
-%
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     arguments
         ds

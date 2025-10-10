@@ -1,8 +1,12 @@
 function ds=dolfyn_read(filename,options)
 
-%%%%%%%%%%%%%%%%%%%%
-%     Read a binary Nortek (e.g., .VEC, .wpr, .ad2cp, etc.) or RDI
-%    (.000, .PD0, .ENX, etc.) data file.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Read binary ADCP data files from Nortek or RDI instruments
+%
+% This function reads binary ADCP data files in .VEC, .wpr, .ad2cp (Nortek)-
+% and .000, .PD0, .ENX, (RDI) formats into MATLAB structures that can be saved
+% as .nc files and used with MHKiT-MATLAB dolfyn ADCP analysis functions.
 %
 % Parameters
 % ------------
@@ -24,10 +28,24 @@ function ds=dolfyn_read(filename,options)
 %
 % Returns
 % ---------
-%     ds: structure
-%         Structure from the binary instrument data
+%   ds : structure
+%       ADCP dataset structure containing:
+%       ds.vel.data : Velocity data [range x time x beam] [m/s]
+%       ds.coords : Coordinate information (time, range, beam)
+%       ds.attrs : Instrument metadata and deployment information
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Examples
+% --------
+% Read entire ADCP file, may be slow for large (>1GB) files
+% ds = dolfyn_read('deployment.ad2cp');
+%
+% Read first 1000 ensembles without userdata
+% ds = dolfyn_read('deployment.ad2cp', 'userdata', false, 'nens', 1000);
+%
+% Read specific ensemble range
+% ds = dolfyn_read('deployment.ad2cp', 'nens', [500, 1500]);
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     arguments
         filename
         options.userdata = true;
