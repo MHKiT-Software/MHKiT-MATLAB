@@ -1,6 +1,6 @@
 function win = mhkit_get_window(window_type, n_fft)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Dispatch window function for signal processing applications
 %
@@ -16,7 +16,7 @@ function win = mhkit_get_window(window_type, n_fft)
 %   win: double
 %       Window values as column vector [n_fft x 1]
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     window_type

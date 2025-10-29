@@ -1,6 +1,6 @@
 function out = read_hydrophone(filename, peak_voltage, sensitivity, gain, start_time)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Read .wav file from a hydrophone. Returns voltage timeseries if 
 % sensitivity not provided, returns pressure timeseries if it is provided
@@ -33,7 +33,7 @@ function out = read_hydrophone(filename, peak_voltage, sensitivity, gain, start_
 %       out.valid_max : Maximum valid data value
 %       out.sensitivity : Sensitivity value (if provided)
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     filename {mustBeText}
