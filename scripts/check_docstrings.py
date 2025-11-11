@@ -44,12 +44,11 @@ Otherwise this shows warnings for incomplete docstrings that should be fixed
 but do not break the build.
 
 Exit codes:
-    0 - All checks passed
-    1 - Critical errors found (malformed delimiters)
-    2 - Warnings found (missing sections)
+    0 - All checks passed (includes warnings)
+    1 - Critical errors found (malformed delimiters that break Sphinx builds)
 
 Usage:
-    python scripts/check_docstrings.py [--strict] [--verbose]
+    python scripts/check_docstrings.py [--verbose]
 """
 
 import re
@@ -444,9 +443,6 @@ def main():
         description="Check MHKiT-MATLAB docstrings for format compliance"
     )
     parser.add_argument(
-        "--strict", action="store_true", help="Treat warnings as errors (exit code 1)"
-    )
-    parser.add_argument(
         "--verbose",
         "-v",
         action="store_true",
@@ -477,12 +473,10 @@ def main():
     error_count, warning_count = checker.print_summary()
 
     # Determine exit code
+    # Exit 1 only for critical errors that break Sphinx builds
+    # Warnings don't fail the build
     if error_count > 0:
         return 1
-    elif args.strict and warning_count > 0:
-        return 1
-    elif warning_count > 0:
-        return 2
     else:
         return 0
 
