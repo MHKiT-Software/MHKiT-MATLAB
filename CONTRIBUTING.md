@@ -122,6 +122,67 @@ If you encounter issues with Python integration, please sumbit an issue.
 
 ## Writing Code
 
+## Documentation
+
+### Docstring Format
+
+All public functions **must** have properly formatted docstrings. This is loosely enforced by automated CI checks. Where a specific format is not specified, developers should use the template below as a guide.
+
+### Docstring Function Template
+
+```matlab
+function result = descriptive_function_name(input_1, input_2, input_3)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Brief one-line description of what the function does
+%
+% Optional extended description paragraph. Can span multiple lines
+% to provide additional context, mathematical background, data sources,
+% or important behavioral notes about the function.
+%
+% Parameters
+% ------------
+% input_1 : type [units]
+%   Description of first parameter. Can span multiple lines.
+%   Additional details aligned with first line. Use two spaces for indentation
+%     input_1.fieldname_1 : type [units]
+%       Description of field
+%     input_1.fieldname_2 : type [units]
+%       Description of field
+% input_2 : type [units]
+%   Description of second parameter
+% input_t : type [units] (optional)
+%   Description of second parameter. Mark optional parameters
+%   with (optional) after the type.
+%
+% Returns
+% ---------
+% output : type
+%   Description of return value. For structure outputs,
+%   document nested fields with indentation:
+%     output.field1 : type [units]
+%       Field 1 description
+%     output.field2 : type [units]
+%       Field description
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments (Input)
+    input_1 struct
+    input_2 {mustBeInteger, mustBePositive}
+    input_3 {mustBeInteger} = 2
+end
+
+arguments (Output)
+    result struct
+end
+
+% Function implementation goes here
+
+end
+```
+
 ### Use the `arguments` Block
 
 All functions must use MATLAB's `arguments` block for input validation.

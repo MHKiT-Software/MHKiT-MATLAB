@@ -13,28 +13,36 @@ This is the expected docstring format for all MHKiT-MATLAB functions:
 ```
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%   Brief one-line description of what the function does
+% Brief one-line description of what the function does
 %
-%   Optional extended description paragraph. Can span multiple lines
-%   to provide additional context, mathematical background, data sources,
-%   or important behavioral notes about the function.
+% Optional extended description paragraph. Can span multiple lines
+% to provide additional context, mathematical background, data sources,
+% or important behavioral notes about the function.
 %
 % Parameters
 % ------------
-%   param1 : type [units]
-%       Description of first parameter. Can span multiple lines.
-%       Additional details aligned with first line.
-%   param2 : type [units] (optional)
-%       Description of second parameter. Mark optional parameters
-%       with (optional) after the type.
+% input_1 : type [units]
+%   Description of first parameter. Can span multiple lines.
+%   Additional details aligned with first line. Use two spaces for indentation
+%     input_1.fieldname_1 : type [units]
+%       Description of field
+%     input_1.fieldname_2 : type [units]
+%       Description of field
+% input_2 : type [units]
+%   Description of second parameter
+% input_t : type [units] (optional)
+%   Description of second parameter. Mark optional parameters
+%   with (optional) after the type.
 %
 % Returns
 % ---------
-%   output : type
-%       Description of return value. For structure outputs,
-%       document nested fields with indentation:
-%       output.field1 : Field description
-%       output.field2 : Field description
+% output : type
+%   Description of return value. For structure outputs,
+%   document nested fields with indentation:
+%     output.field1 : type [units]
+%       Field 1 description
+%     output.field2 : type [units]
+%       Field description
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
