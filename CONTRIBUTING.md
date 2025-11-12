@@ -185,7 +185,7 @@ end
 
 ### Use the `arguments` Block
 
-All functions must use MATLAB's `arguments` block for input validation.
+All functions must use [MATLAB's `arguments` block](https://www.mathworks.com/help/matlab/ref/arguments.html) for input/output type validation.
 
 #### Simple Example
 
