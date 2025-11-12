@@ -474,7 +474,6 @@ def main():
         return 1
 
     print(f"Checking docstrings in: {check_path}")
-    print(f"Template: {script_dir / 'DOCSTRING_TEMPLATE.md'}\n")
 
     checker = DocstringChecker(verbose=args.verbose)
     checker.check_directory(check_path)
