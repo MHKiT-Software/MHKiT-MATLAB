@@ -72,8 +72,8 @@ classdef Loads_TestExtreme < matlab.unittest.TestCase
             x = cos(2*pi*Fc*t);
             [t_peaks, peaks] = global_peaks(t, x);
 
-            assertEqual(testCase, t_peaks, validation.t_peaks', 'AbsTol', 0.00005)
-            assertEqual(testCase, peaks, validation.peaks', 'AbsTol', 0.00005)
+            assertEqual(testCase, t_peaks, validation.t_peaks, 'AbsTol', 0.00005)
+            assertEqual(testCase, peaks, validation.peaks, 'AbsTol', 0.00005)
         end
         
         function test_number_of_short_term_peaks(testCase)
