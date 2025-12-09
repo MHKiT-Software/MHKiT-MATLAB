@@ -41,7 +41,7 @@ description = sprintf([ ...
 
 author_name = 'Rebecca Fao';
 author_email = 'rebecca.fao@nrel.gov';
-author_company = 'National Renewable Energy Laboratory';
+author_company = 'National Laboratory of the Rockies';
 
 fprintf('Starting %s toolbox build process...\n\n', project_name);
 
