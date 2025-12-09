@@ -1,6 +1,6 @@
 function [step, n_segments, n_fft_used] = dolfyn_stepsize(l, n_fft, n_segments, step)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Calculate step size for overlapping FFT segments
 %
@@ -26,7 +26,7 @@ function [step, n_segments, n_fft_used] = dolfyn_stepsize(l, n_fft, n_segments, 
 %   n_fft_used : double
 %       Actual FFT size used (may be reduced if l < n_fft) [samples]
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     l (1,1) {mustBeNumeric, mustBePositive}

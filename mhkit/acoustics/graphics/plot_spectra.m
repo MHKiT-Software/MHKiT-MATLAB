@@ -1,6 +1,6 @@
 function plot_spectra(spsdl, fmin, fmax)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Plot spectra of the sound pressure spectral density level
 %
@@ -22,7 +22,7 @@ function plot_spectra(spsdl, fmin, fmax)
 % ---------
 %   This function creates a figure but does not return a value
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsdl struct

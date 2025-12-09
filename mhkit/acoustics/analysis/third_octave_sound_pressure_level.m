@@ -1,6 +1,6 @@
 function mspl = third_octave_sound_pressure_level(spsd, fmin, fmax)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Calculate sound pressure level in third octave bands directly
 % from the mean square sound pressure spectral density (SPSD).
@@ -26,7 +26,7 @@ function mspl = third_octave_sound_pressure_level(spsd, fmin, fmax)
 %         mspl.units : Units string 'dB re 1 uPa'
 %         mspl.name : Descriptive name 'Third Octave Sound Pressure Level'
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct

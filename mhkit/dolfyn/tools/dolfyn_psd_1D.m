@@ -1,6 +1,6 @@
 function psd = dolfyn_psd_1D(data, n_fft, fs, options)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Compute 1D power spectral density using Welch's method
 %
@@ -26,7 +26,7 @@ function psd = dolfyn_psd_1D(data, n_fft, fs, options)
 %       Size: [n_freq x 1] where n_freq = floor(n_fft/2)
 %       Frequencies correspond to positive frequencies only (DC component excluded)
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     data (:,1) {mustBeNumeric}
