@@ -3,8 +3,6 @@ classdef Loads_TestLoads < matlab.unittest.TestCase
     methods (Test)
 
         function test_bin_statistics(testCase)
-            %assumeFail(testCase, "Temporarily Disabled - Need to ask @hivanov about nan vs zero comparison")
-
             % create array containg wind speeds to use as bin edges
             bin_edges = 3:1:25;
             relative_file_name = '../../examples/data/loads/loads_data_dict.json';
