@@ -18,7 +18,7 @@ display_name = 'Marine and Hydrokinetic Toolkit (MHKiT)';
 %   7 indicates a beta version
 %   6 indicates a release candidate version
 % i.e.: Development build for version 0.7.0-dev.2 would be 0.7.0.9002
-project_version = '1.0.0';
+project_version = '1.0.1';
 matlab_minimum_release_supported = 'R2022b';
 summary = 'Marine energy data analysis and visualization toolbox';
 description = sprintf([ ...
@@ -41,7 +41,7 @@ description = sprintf([ ...
 
 author_name = 'Rebecca Fao';
 author_email = 'rebecca.fao@nrel.gov';
-author_company = 'National Renewable Energy Laboratory';
+author_company = 'National Laboratory of the Rockies';
 
 fprintf('Starting %s toolbox build process...\n\n', project_name);
 

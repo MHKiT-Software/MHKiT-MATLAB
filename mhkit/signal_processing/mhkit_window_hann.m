@@ -1,6 +1,6 @@
 function win = mhkit_window_hann(n_fft)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Generate Hann window for signal processing applications
 %
@@ -14,7 +14,7 @@ function win = mhkit_window_hann(n_fft)
 %   win: double
 %       Hann window values as column vector [n_fft x 1]
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     n_fft (1,1) {mustBeNumeric, mustBePositive}

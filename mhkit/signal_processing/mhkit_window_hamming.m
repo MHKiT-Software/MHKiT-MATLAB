@@ -1,6 +1,6 @@
 function win = mhkit_window_hamming(n_fft)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Generate Hamming window for signal processing applications
 %
@@ -14,7 +14,7 @@ function win = mhkit_window_hamming(n_fft)
 %   win: double
 %       Hamming window values as column vector [n_fft x 1]
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     n_fft (1,1) {mustBeNumeric, mustBePositive, mustBeInteger}

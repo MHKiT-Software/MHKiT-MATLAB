@@ -1,6 +1,6 @@
 function validate_spsd_struct(spsd_struct, function_name, options)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Validate SPSD (Sound Pressure Spectral Density) structure format and content
 %
@@ -19,7 +19,7 @@ function validate_spsd_struct(spsd_struct, function_name, options)
 % ---------
 %   No return value - throws error if validation fails
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd_struct struct

@@ -1,6 +1,6 @@
 function detrended = mhkit_detrend_array(data)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Detrend array by removing mean and linear trend
 %
@@ -24,7 +24,7 @@ function detrended = mhkit_detrend_array(data)
 %    slope = mean(x * data_centered) / mean(x^2)
 %    detrended = data_centered - slope * x_centered
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     data {mustBeNumeric}
