@@ -1,70 +1,174 @@
-function harmonics=harmonics(x,freq,grid_freq)
+function harmonics = harmonics(x, freq, grid_freq)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Calculates the harmonics from time series of voltage or current based on IEC 61000-4-7.
+%
+% Calculates the harmonics from time series of voltage or current based on IEC 61000-4-7.
 %
 % Parameters
-% -----------
-%     x: structure with x.time and x.current or x.voltage as values
-%         Time-series of voltage [V] or current [A]
+% ------------
+%   x: structure
+%       x.current : Current time series data [A] 
+%       x.voltage : Voltage time series data [V]
+%       x.time : Time vector [s]
 %
-%     freq: double
-%         Frequency of the time-series data [Hz]
+%   freq: double
+%       Frequency of the time-series data [Hz]
 %
-%     grid_freq: int
-%         Value indicating if the power supply is 50 or 60 Hz. Options = 50 or 60
+%   grid_freq: double
+%       Value indicating if the power supply is 50 or 60 Hz. Options = 50 or 60
 %
 % Returns
-% -------
-%     harmonics: structure
-%         harmonic amplitude and frequency of the time-series data
+% ---------
+%   harmonics: structure
+%       harmonics.amplitude : Harmonic amplitude values
+%       harmonics.harmonic : Harmonic frequency values [Hz]
+%       harmonics.type : Type of signal analyzed ('current' or 'voltage')
 %
+% Key Equations
+% -------------
+% 1. Sample spacing calculation:
+%    sample_spacing = 1 / freq
+%
+% 2. FFT amplitude calculation:
+%    harmonics_amplitude = abs(fft(signal_data))
+%
+% 3. Normalization:
+%    normalized_amplitude = harmonics_amplitude / length(signal_data) * 2
+%
+% 4. Frequency bin calculation:
+%    frequency_bins = (0:length(signal_data)-1) * freq / length(signal_data)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
-% py.importlib.import_module('numpy');
-py.importlib.import_module('mhkit_python_utils');
+    % Create input parser
+    p = inputParser;
+    
+    % Define validation functions
+    validStruct = @(x) isstruct(x);
+    validNumeric = @(x) isnumeric(x) && isscalar(x);
+    validGridFreq = @(x) isnumeric(x) && isscalar(x) && (x == 50 || x == 60);
+    
+    % Add required parameters
+    addRequired(p, 'x', validStruct);
+    addRequired(p, 'freq', validNumeric);
+    addRequired(p, 'grid_freq', validGridFreq);
+    
+    % Parse inputs
+    parse(p, x, freq, grid_freq);
+    
+    % Extract validated inputs
+    x = p.Results.x;
+    freq = p.Results.freq;
+    grid_freq = p.Results.grid_freq;
+    
+    % Validate input structure has required fields
+    if ~isfield(x, 'time')
+        error('MHKiT:harmonics: x structure must contain time field');
+    end
+    
+    % Determine signal type and extract data
+    if isfield(x, 'current')
+        signal_data = x.current;
+        signal_type = 'current';
+    elseif isfield(x, 'voltage')
+        signal_data = x.voltage;
+        signal_type = 'voltage';
+    else
+        error('MHKiT:harmonics: x structure must contain either current or voltage field');
+    end
+    
+    % Validate frequency parameter
+    if freq <= 0
+        error('MHKiT:harmonics: freq must be positive');
+    end
+    
+    % Get data dimensions
+    data_size = size(signal_data);
+    data_length = data_size(1);
+    num_columns = data_size(2);
+    
+    % Validate time vector dimensions
+    if length(x.time) ~= data_length
+        error('MHKiT:harmonics: time vector length must match signal data length');
+    end
+    
+    % Calculate sample spacing
+    sample_spacing = 1.0 / freq;
+    
+    % Calculate frequency bin centers (only positive frequencies)
+    frequency_bin_centers = (0:data_length-1) * freq / data_length;
+    
+    % Calculate FFT amplitude for each column
+    harmonics_amplitude = zeros(data_length, num_columns);
+    
+    for col = 1:num_columns
+        % Calculate FFT
+        fft_result = fft(signal_data(:, col));
+        
+        % Calculate amplitude
+        harmonics_amplitude(:, col) = abs(fft_result);
+    end
+    
+    % Calculate Nyquist frequency and corresponding bin
+    nyquist_freq = freq / 2;
+    nyquist_bin = floor(data_length / 2) + 1;
+    
+    % Define parameters based on IEC 61000-4-7
+    max_harmonic_base = 51; % Base harmonic number from IEC 61000-4-7
+    harmonic_step = 5; % Step size in Hz for harmonic bins
 
-time= x.time ;
+    if grid_freq == 60
+        max_freq = 3060; % Exactly 51st harmonic (60 * 51)
+    elseif grid_freq == 50
+        max_freq = 2570; % 51.4th harmonic (intentional extension)
+    end
 
-if isfield(x, 'current')
-    data = x.current;
-    dname = 'current';
-elseif isfield(x,'voltage')
-    data = x.voltage;
-    dname = 'voltage';
-else
-    ME = MException('MATLAB:harmonics','invalid handles in structure, must contain x.current or x.voltage');
-        throw(ME);
+    % Create frequency range (exclusive upper bound like Python's arange)
+    hz_range = 0:harmonic_step:(max_freq - harmonic_step);
+    
+    % Interpolate to standard frequency grid using nearest neighbor
+    harmonics_reindexed = zeros(length(hz_range), num_columns);
+    
+    for col = 1:num_columns
+        for i = 1:length(hz_range)
+            target_freq = hz_range(i);
+            
+            % Skip frequencies above Nyquist frequency to avoid aliasing
+            if target_freq > nyquist_freq
+                harmonics_reindexed(i, col) = 0;
+                continue;
+            end
+            
+            % Calculate the exact FFT bin for this target frequency
+            % FFT bin k corresponds to frequency k * fs / N
+            % So for target frequency f, bin = f * N / fs
+            exact_bin = target_freq * data_length / freq;
+            
+            % Round to nearest integer bin and convert to MATLAB index (+1)
+            closest_idx = round(exact_bin) + 1; % +1 for MATLAB 1-based indexing
+            
+            % Make sure index is within bounds and within positive frequency range
+            if closest_idx >= 1 && closest_idx <= nyquist_bin
+                harmonics_reindexed(i, col) = harmonics_amplitude(closest_idx, col);
+            else
+                harmonics_reindexed(i, col) = 0;
+            end
+        end
+    end
+    
+    % Normalize: divide by length and multiply by 2
+    % But DC component (frequency = 0) should only be divided by length
+    harmonics_normalized = harmonics_reindexed / data_length * 2;
+    
+    % Correct DC component normalization (first element if hz_range starts at 0)
+    if hz_range(1) == 0
+        harmonics_normalized(1, :) = harmonics_reindexed(1, :) / data_length;
+    end
+    
+    % Create output structure
+    harmonics = struct();
+    harmonics.amplitude = harmonics_normalized;
+    harmonics.harmonic = hz_range(:);
+    harmonics.type = signal_type;
+
 end
-
-dsize=size(data);
-
-li=py.list();
-if dsize(2)>1
-   for i = 1:dsize(2)
-      app=py.list(data(:,i));
-      li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-   end
-   data_pd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time(:,1),li,int32(dsize(2)));
-elseif dsize(2)==1
-   data_pd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time,py.numpy.array(data),dsize(2));
-end
-
-harmonics_pd = py.mhkit.power.quality.harmonics(data_pd,freq,grid_freq);
-
-vals=double(py.array.array('d',py.numpy.nditer(harmonics_pd.values)));
-sha=cell(harmonics_pd.values.shape);
-x=int64(sha{1,1});
-y=int64(sha{1,2});
-vals=reshape(vals,[x,y]);
-
-
-
-harmonics.amplitude=vals;
-harmonics.harmonic = double(py.array.array('d',py.numpy.nditer(harmonics_pd.index)));
-harmonics.type = dname;
-
-

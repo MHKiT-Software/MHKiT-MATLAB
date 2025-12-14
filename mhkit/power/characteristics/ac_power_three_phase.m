@@ -1,110 +1,153 @@
-function P=ac_power_three_phase(voltage,current,power_factor,varargin)
+function P = ac_power_three_phase(voltage, current, power_factor, varargin)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Calculates the real power from three phase ac voltage and current.
+% Calculates magnitude of active AC power from line to neutral voltage and current
+%     
+% Computes three-phase AC power by taking absolute values of voltage and current,
+% applying line-to-line correction if specified, summing across phases, and 
+% applying power factor.
 %
 % Parameters
 % ------------
-%    voltage: Time series of all three measured voltages [V]
-%        Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time,voltage)
-%
-%        OR
-%
-%        structure of form:
-%           voltage.voltage : matrix of all three phases
-%
-%           voltage.time : time vector
-%
-%    current: Time series of all three measured current [A]
-%         Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time,current)
-%
-%        OR
-%
-%        structure of form:
-%           current.current : matrix of all three phases
-%
-%           current.time : time vector
-%
-%     power_factor : float
-%         power factor for the system
-%
-%     line_to_line: bool (Optional)
-%         set true if the given voltage measurement is line_to_line
+%   voltage: structure or matrix
+%       voltage.voltage : Three-phase voltage measurements [V] (n_time x 3 matrix)
+%                        Each row represents one time step, columns are phases A, B, C
+%       voltage.time : Time vector (n_time x 1) (if time series data)
+%   current: structure or matrix
+%       current.current : Three-phase current measurements [A] (n_time x 3 matrix)
+%                        Each row represents one time step, columns are phases A, B, C
+%       current.time : Time vector (n_time x 1) (if time series data)
+%   power_factor: numeric scalar
+%       Power factor for the efficiency of the system [dimensionless]
+%   'LineToLine': name-value pair (optional)
+%       Set to true if voltage measurements are line-to-line (default: false)
 %
 % Returns
 % ---------
-%     P: Structure
+%   P: structure
+%       P.power : Magnitude of active AC power [W]
+%       P.time : Time vector
 %
+% Key Equations
+% -------------
+% 1. Line-to-neutral power:
+%    P_phase = |V| * |I|
 %
-%       P.power [W]
+% 2. Line-to-line power:
+%    P_phase = |V| * sqrt(3) * |I|
 %
-%       P.time
+% 3. Total power:
+%    P_total = sum(P_phase) * power_factor
 %
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
+    % Create input parser
+    p = inputParser;
+    
+    % Define validation functions
+    validStructOrNumeric = @(x) isstruct(x) || isnumeric(x);
+    validNumeric = @(x) isnumeric(x) && isscalar(x);
+    validLogical = @(x) islogical(x) && isscalar(x);
+    
+    % Add required parameters
+    addRequired(p, 'voltage', validStructOrNumeric);
+    addRequired(p, 'current', validStructOrNumeric);
+    addRequired(p, 'power_factor', validNumeric);
+    
+    % Add optional name-value pairs
+    addParameter(p, 'LineToLine', false, validLogical);
+    
+    % Parse inputs
+    parse(p, voltage, current, power_factor, varargin{:});
+    
+    % Extract validated inputs
+    voltage = p.Results.voltage;
+    current = p.Results.current;
+    power_factor = p.Results.power_factor;
+    line_to_line = p.Results.LineToLine;
 
-py.importlib.import_module('mhkit_python_utils');
-
-if (isa(voltage,'py.pandas.core.frame.DataFrame')~=1)
-    if (isstruct(voltage)==1)
-        x=size(voltage.voltage);
-        li=py.list();
-        if x(2)==3
-            for i = 1:x(2)
-                app=py.list(double(voltage.voltage(:,i)));
-                li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-            end
-            voltage=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(voltage.time(:,1)),li,int32(x(2)));
-        elseif x(2)==1
-            ME = MException('MATLAB:ac_power_three_phase','Three lines of voltage measurements are required');
-            throw(ME);
-        end
-
-    else
-        ME = MException('MATLAB:ac_power_three_phase','voltage needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one or a structure');
-        throw(ME);
+    % Validate power factor is between 0 and 1
+    if power_factor < 0 || power_factor > 1
+        error('MHKiT:ac_power_three_phase: power_factor must be between 0 and 1 (inclusive). Received: %.3f', power_factor);
     end
-end
 
-if (isa(current,'py.pandas.core.frame.DataFrame')~=1)
-    if (isstruct(current)==1)
-        x=size(current.current);
-        li=py.list();
-        if x(2)==3
-            for i = 1:x(2)
-                app=py.list(double(current.current(:,i)));
-                li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-            end
-            current=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(double(current.time(:,1)),li,int32(x(2)));
-        elseif x(2)==1
-            ME = MException('MATLAB:ac_power_three_phase','Three lines of voltage measurements are required');
-            throw(ME);
+    % Extract data and time vectors
+    if isstruct(voltage)
+        % Validate input structures have required fields
+        if ~isfield(voltage, 'voltage')
+            error('MHKiT:ac_power_three_phase: voltage structure must contain voltage field');
         end
-
+        if ~isfield(voltage, 'time')
+            error('MHKiT:ac_power_three_phase: voltage structure must contain time field');
+        end
+        voltage_data = voltage.voltage;
+        voltage_time = voltage.time;
     else
-        ME = MException('MATLAB:ac_power_three_phase','voltage needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one or a structure');
-        throw(ME);
+        voltage_data = voltage;
+        voltage_time = (1:size(voltage, 1))';  % Default time vector
     end
+    
+    if isstruct(current)
+        % Validate input structures have required fields
+        if ~isfield(current, 'current')
+            error('MHKiT:ac_power_three_phase: current structure must contain current field');
+        end
+        if ~isfield(current, 'time')
+            error('MHKiT:ac_power_three_phase: current structure must contain time field');
+        end
+        current_data = current.current;
+        current_time = current.time;
+    else
+        current_data = current;
+        current_time = (1:size(current, 1))';  % Default time vector
+    end
+
+    % Validate voltage has three columns
+    if size(voltage_data, 2) ~= 3
+        error('MHKiT:ac_power_three_phase: voltage must have three columns for three-phase measurements');
+    end
+    
+    % Validate current has three columns
+    if size(current_data, 2) ~= 3
+        error('MHKiT:ac_power_three_phase: current must have three columns for three-phase measurements');
+    end
+    
+    % Validate dimensions match
+    if ~isequal(size(voltage_data), size(current_data))
+        error('MHKiT:ac_power_three_phase: voltage and current must have the same dimensions');
+    end
+
+    % Validate time vectors match
+    if ~isequal(voltage_time, current_time)
+        error('MHKiT:ac_power_three_phase: Time vectors must match between voltage and current structures');
+    end
+
+    % After validation, use the time vector from voltage
+    time_vector = voltage_time;
+
+    % Calculate absolute values of voltage and current
+    abs_voltage = abs(voltage_data);
+    abs_current = abs(current_data);
+    
+    % Calculate power for each phase
+    if line_to_line
+        % For line-to-line measurements, apply sqrt(3) correction
+        power_per_phase = abs_current .* (abs_voltage * sqrt(3));
+    else
+        % For line-to-neutral measurements
+        power_per_phase = abs_current .* abs_voltage;
+    end
+    
+    % Sum power across all three phases (sum along columns)
+    total_power = sum(power_per_phase, 2);
+    
+    % Apply power factor
+    active_power = total_power * power_factor;
+    
+    % Create output structure
+    P = struct();
+    P.power = active_power;
+    P.time = time_vector;
+
 end
-
-if nargin == 4
-    p_pd=py.mhkit.power.characteristics.ac_power_three_phase(voltage,current,power_factor,pyargs('line_to_line',varargin{1}));
-elseif nargin ==3
-    p_pd=py.mhkit.power.characteristics.ac_power_three_phase(voltage,current,power_factor);
-else
-    ME = MException('MATLAB:ac_power_three_phase','incorrect number of input arguments');
-    throw(ME);
-end
-
-P.power=double(py.array.array('d',py.numpy.nditer(p_pd.values)));
-P.time=double(py.array.array('d',py.numpy.nditer(p_pd.index)));
-
