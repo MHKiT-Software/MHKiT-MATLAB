@@ -1,3 +1,33 @@
+# Version 1.0.1
+
+## Release Highlights
+
+Bug fixes and documentation improvements
+
+## Details
+
+### Bug Fixes
+
+- Issue #171 - Failing Loads: bin_statistics test
+  - Fixed by @hivanov-nrel in PR #188
+- MHKiT-Documentation build errors:
+  <https://github.com/MHKiT-Software/MHKiT/pull/92#issuecomment-3457331254> - Fixed by @simmsa in PR #187
+
+### Documentation Improvements
+
+- Added GitHub Action to check docstring formatting
+  - Verifies docstrings use a format that is compatible with MHKiT-Documentation build system
+  - <https://github.com/MHKiT-Software/MHKiT-MATLAB/actions/workflows/check_docstrings.yml>
+  - Implemented by @simmsa in PR #187
+- Added CONTRIBUTING.md
+  - Details guidelines for developers contributing to MHKiT-MATLAB
+  - Implemented by @simmsa in PR #187
+- Added INSTALL.md
+  - Provides developer installation instructions for MHKiT-MATLAB
+  - Implemented by @simmsa in PR #187
+- Updated National Laboratory of the Rockies (NLR) branding
+  - Implemented by @simmsa in PR #189
+
 # Version 1.0.0
 
 ## Release Highlights

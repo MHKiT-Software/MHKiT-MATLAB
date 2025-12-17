@@ -1,6 +1,6 @@
 function spsd = sound_pressure_spectral_density(data, fs, bin_length)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Calculate sound pressure spectral density (SPSD) from audio samples split into FFTs
 % with a specified bin length in seconds, using Hanning windowing with 50% overlap.
@@ -29,7 +29,7 @@ function spsd = sound_pressure_spectral_density(data, fs, bin_length)
 %       spsd.overlap : Overlap percentage string
 %       spsd.nfft : Number of FFT points
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     data struct

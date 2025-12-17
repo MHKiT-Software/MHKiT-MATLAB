@@ -1,6 +1,6 @@
 function win = mhkit_window_rectwin(n_fft)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Generate rectangular window for signal processing applications
 %
@@ -15,7 +15,7 @@ function win = mhkit_window_rectwin(n_fft)
 %       Rectangular window values as column vector [n_fft x 1]
 %       All values are 1
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     n_fft (1,1) {mustBeNumeric, mustBePositive, mustBeInteger}

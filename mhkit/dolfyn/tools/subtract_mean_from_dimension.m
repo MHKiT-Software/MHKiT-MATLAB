@@ -1,6 +1,6 @@
 function data_out = subtract_mean_from_dimension(data_in, dim)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Subtract mean along specified dimension
 %
@@ -16,7 +16,7 @@ function data_out = subtract_mean_from_dimension(data_in, dim)
 %   data_out : array
 %       Same dimensions as input data
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     data_in {mustBeNumeric}
