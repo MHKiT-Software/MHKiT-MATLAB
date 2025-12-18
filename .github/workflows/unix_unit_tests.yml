@@ -137,16 +137,15 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [macos-13, "ubuntu-22.04"]
+        os: [macos-15, macos-15-intel, "ubuntu-22.04"]
         python-version: ["3.10", 3.11, 3.12]
         # Note: It is preferred to use an actual release name as opposed to 'latest'
-        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
+        # macos-15 is ARM (Apple Silicon) - R2023b+ run natively
+        # macos-15-intel is x64 - R2022b/R2023a run natively (no Rosetta needed)
+        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b, R2025a]
         mhkit-python-version: ["0.9.0"]
         exclude:
-          - python-version: "3.10" # cache_population job
-            matlab-version: R2022b
-            os: "ubuntu-22.04"
-          # Python 3.12 + MATLAB incompatability
+          # Python 3.12 + MATLAB incompatibility
           - matlab-version: R2024a
             python-version: 3.12
           - matlab-version: R2023b
@@ -155,23 +154,40 @@ jobs:
             python-version: 3.12
           - matlab-version: R2022b
             python-version: 3.12
-          # Python 3.11 + MATLAB incompatability
+          - matlab-version: R2025a
+            python-version: 3.12
+          # Python 3.11 + MATLAB incompatibility
           - matlab-version: R2023a
             python-version: 3.11
           - matlab-version: R2022b
             python-version: 3.11
+          # Architecture-specific macOS exclusions
+          # Intel MATLAB (R2022b, R2023a) should only run on macos-15-intel
+          - matlab-version: R2022b
+            os: macos-15
+          - matlab-version: R2023a
+            os: macos-15
+          # ARM MATLAB (R2023b+) should only run on macos-15 (ARM)
+          - matlab-version: R2023b
+            os: macos-15-intel
+          - matlab-version: R2024a
+            os: macos-15-intel
+          - matlab-version: R2024b
+            os: macos-15-intel
+          - matlab-version: R2025a
+            os: macos-15-intel
           # Specific MATLAB/Python/OS Errors
           # Error using _cythonized_array_utils>init
           # scipy.linalg._cythonized_array_utils (line 1)
           # Python Error: ValueError: numpy.dtype size changed, may indicate binary
           # incompatibility. Expected 96 from C header, got 88 from PyObject
-          - matlab-version: R2024b
-            python-version: 3.12
-            os: macos-13
+          # - matlab-version: R2024b
+          #   python-version: 3.12
+          #   os: macos-15
           # Unable to resolve the name 'py.mhkit.wave.resource.jonswap_spectrum'
-          - matlab-version: R2023a
-            python-version: 3.10
-            os: "ubuntu-22.04"
+          # - matlab-version: R2023a
+          #   python-version: 3.10
+          #   os: "ubuntu-22.04"
 
     runs-on: ${{ matrix.os }}
 
@@ -275,20 +291,27 @@ jobs:
         run: ls -R
         working-directory: .
 
+      - name: Install Amazon Corretto 11 for ARM MATLAB
+        if: runner.os == 'macOS'
+        run: |
+          # ARM MATLAB (R2023b+) requires Java 11
+          brew install --cask corretto11
+          echo "JAVA_HOME=$(/usr/libexec/java_home -v 11)" >> $GITHUB_ENV
+
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
         with:
           release: ${{ matrix.matlab-version }}
 
       - name: Configure OpenSSL for MacOS/MATLAB
-        if: matrix.os == 'macos-13'
+        if: runner.os == 'macOS'
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           conda install openssl=="3.0.*"
           CONDA_LIB_PATH=$(python -c "import sys; import os; print(os.path.join(os.path.dirname(sys.executable), 'lib'))")
           export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$DYLD_LIBRARY_PATH"
-          echo "export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Add Python Dir to Path
         shell: bash -l {0}
