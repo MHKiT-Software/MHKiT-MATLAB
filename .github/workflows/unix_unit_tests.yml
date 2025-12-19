@@ -295,7 +295,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           # ARM MATLAB (R2023b+) requires Java 11
-          brew install --cask corretto11
+          brew install --cask corretto@11
           echo "JAVA_HOME=$(/usr/libexec/java_home -v 11)" >> $GITHUB_ENV
 
       - name: Set up MATLAB
