@@ -45,6 +45,8 @@ classdef Tidal_TestIO < matlab.unittest.TestCase
 
         function test_request_noaa_data_multiple_months(testCase)
 
+            assumeFail(testCase, "Temporarily disable NOAA api calls - failures need further investigation per @simmsa")
+
             data = request_noaa_data('s08010', 'currents','20180101','20180331');
 
             assertTrue(testCase, isfield(data,'s'));
