@@ -103,6 +103,16 @@ jobs:
         run: >
           "pyenv(Version='{0}', ExecutionMode='OutOfProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
 
+      # Warm up Python OutOfProcess worker to prevent intermittent "Unable to resolve" errors
+      - name: Add Python environment verification
+        shell: bash
+        run: |
+          echo "% Verify Python environment and warm up OutOfProcess worker" >> run.m
+          echo "pe = pyenv;" >> run.m
+          echo "disp(pe);" >> run.m
+          echo "py.importlib.import_module('mhkit');" >> run.m
+          echo "disp('Python environment verified: mhkit imported successfully');" >> run.m
+
       - name: Check Python System Path
         shell: bash -l {0}
         run: |
@@ -284,6 +294,17 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')\n" $(python -c "import sys; print(sys.executable)") >> run.m
+
+      # Warm up Python OutOfProcess worker to prevent intermittent "Unable to resolve" errors
+      - name: Add Python environment verification
+        shell: bash
+        run: |
+          echo "% Verify Python environment and warm up OutOfProcess worker" >> run.m
+          echo "pe = pyenv;" >> run.m
+          echo "disp(pe);" >> run.m
+          echo "py.importlib.import_module('mhkit');" >> run.m
+          echo "disp('Python environment verified: mhkit imported successfully');" >> run.m
+
       - name: Check Python System Path
         shell: bash -l {0}
         run: |

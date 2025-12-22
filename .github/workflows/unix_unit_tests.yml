@@ -319,6 +319,14 @@ jobs:
           conda activate mhkit_conda_env
           printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
 
+      # On Linux, set LD_PRELOAD BEFORE pyenv() to ensure OutOfProcess Python uses system libstdc++
+      - name: Configure LD_PRELOAD for Linux
+        if: matrix.os == 'ubuntu-22.04'
+        shell: bash
+        run: |
+          echo "% Force OutOfProcess Python to use system libstdc++ (must be before pyenv)" >> run.m
+          echo "setenv('LD_PRELOAD', '/usr/lib/x86_64-linux-gnu/libstdc++.so.6');" >> run.m
+
       # OutOfProcess is required to properly call netcdf/hdf5 and works reliably on macos and ubuntu
       - name: Configure MATLAB Python Environment
         shell: bash -l {0}
@@ -329,6 +337,16 @@ jobs:
           if [[ $OSTYPE == "darwin"* ]]; then
             echo "setenv('DYLD_LIBRARY_PATH', getenv('DYLD_LIBRARY_PATH'));" >> run.m
           fi
+
+      # Warm up Python OutOfProcess worker to prevent intermittent "Unable to resolve" errors
+      - name: Add Python environment verification
+        shell: bash
+        run: |
+          echo "% Verify Python environment and warm up OutOfProcess worker" >> run.m
+          echo "pe = pyenv;" >> run.m
+          echo "disp(pe);" >> run.m
+          echo "py.importlib.import_module('mhkit');" >> run.m
+          echo "disp('Python environment verified: mhkit imported successfully');" >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
