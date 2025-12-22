@@ -45,12 +45,13 @@ function clm=capture_length_matrix(Hm0,Te,L,statistic,Hm0_bins,Te_bins)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Hm0 = py.numpy.array(Hm0);
-Te = py.numpy.array(Te);
-L = py.numpy.array(L);
+% Flatten arrays to 1D to handle both row and column vectors
+Hm0 = py.numpy.array(Hm0).flatten();
+Te = py.numpy.array(Te).flatten();
+L = py.numpy.array(L).flatten();
 
-py_Hm0_bins = py.numpy.array(Hm0_bins);
-py_Te_bins = py.numpy.array(Te_bins);
+py_Hm0_bins = py.numpy.array(Hm0_bins).flatten();
+py_Te_bins = py.numpy.array(Te_bins).flatten();
 
 LM = py.mhkit.wave.performance.capture_length_matrix(Hm0, Te, L, statistic, py_Hm0_bins, py_Te_bins);
 

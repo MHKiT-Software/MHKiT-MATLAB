@@ -20,10 +20,9 @@ function maep=mean_annual_energy_production_timeseries(L,J)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-py.importlib.import_module('mhkit');
-
-J=py.numpy.array(J);
-L=py.numpy.array(L);
+% Flatten arrays to 1D to handle both row and column vectors
+J=py.numpy.array(J).flatten();
+L=py.numpy.array(L).flatten();
 
 maep=double(py.mhkit.wave.performance.mean_annual_energy_production_timeseries(L,J));
 

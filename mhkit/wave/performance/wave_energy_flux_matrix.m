@@ -45,13 +45,12 @@ function WEFM=wave_energy_flux_matrix(Hm0,Te,J,statistic,Hm0_bins,Te_bins)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-py.importlib.import_module('mhkit');
-
-Hm0=py.numpy.array(Hm0);
-Te=py.numpy.array(Te);
-J=py.numpy.array(J);
-Hm0_bins=py.numpy.array(Hm0_bins);
-Te_bins=py.numpy.array(Te_bins);
+% Flatten arrays to 1D to handle both row and column vectors
+Hm0=py.numpy.array(Hm0).flatten();
+Te=py.numpy.array(Te).flatten();
+J=py.numpy.array(J).flatten();
+Hm0_bins=py.numpy.array(Hm0_bins).flatten();
+Te_bins=py.numpy.array(Te_bins).flatten();
 
 JM=py.mhkit.wave.performance.wave_energy_flux_matrix(Hm0,Te,J,statistic,Hm0_bins,Te_bins);
 vals=double(py.array.array('d',py.numpy.nditer(JM.values)));
