@@ -20,8 +20,9 @@ function L = capture_length(Power, J)
 
 
 
-Power = py.numpy.array(Power);
-J = py.numpy.array(J);
+% Flatten arrays to 1D to handle both row and column vectors
+Power = py.numpy.array(Power).flatten();
+J = py.numpy.array(J).flatten();
 
 L = py.mhkit.wave.performance.capture_length(Power, J);
 
