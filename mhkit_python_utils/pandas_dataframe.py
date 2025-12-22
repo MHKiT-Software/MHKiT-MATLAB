@@ -39,28 +39,35 @@ def convert_number_array_and_index_to_dataframe(columns_as_lists, index, transpo
     index = ['2023-01-01', '2023-01-02']
     df = convert_timeseries_to_dataframe(time_series, index, transpose_threshold=2)
     """
+    # Ensure index is 1D (MATLAB may pass 2D column/row vectors depending on version)
+    index = np.asarray(index).flatten()
 
     if transpose_threshold > 1:
-        time_series = list(map(list, zip(*time_series)))
-        df = pd.DataFrame(data=time_series, index=index)
+        columns_as_lists = list(map(list, zip(*columns_as_lists)))
+        df = pd.DataFrame(data=columns_as_lists, index=index)
     else:
-        df = pd.DataFrame(data=time_series, index=index)
+        df = pd.DataFrame(data=columns_as_lists, index=index)
 
     return df.astype('float64')
 
 
 def list_to_series(input_list, index=None):
+    # Ensure index is 1D if provided (MATLAB may pass 2D column/row vectors depending on version)
+    if index is not None:
+        index = np.asarray(index).flatten()
     return pd.Series(input_list, index)
 
 def spectra_to_pandas(frequency,spectra,x,cols=None):
-    if x>1:       
-        ts=list(map(list,zip(*spectra)))       
-        df=pd.DataFrame(data=ts,index=frequency)  
+    # Ensure frequency index is 1D (MATLAB may pass 2D column/row vectors depending on version)
+    frequency = np.asarray(frequency).flatten()
+
+    if x>1:
+        ts=list(map(list,zip(*spectra)))
+        df=pd.DataFrame(data=ts,index=frequency)
     else:
         df=pd.DataFrame(data=spectra,index=frequency)
         df.indexname='(Hz)'
-        c_name=['PM']
-    if cols is not None: 
+    if cols is not None:
         df.columns = cols
     return df.astype('float64')
 
