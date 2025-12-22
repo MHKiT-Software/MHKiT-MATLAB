@@ -99,9 +99,10 @@ jobs:
 
       - name: Configure MATLAB pyenv Version and ExecutionMode
         if: ${{ matrix.os == 'windows-latest' }}
-        shell: pwsh
-        run: >
-          "pyenv(Version='{0}', ExecutionMode='OutOfProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')\n" $(python -c "import sys; print(sys.executable)") > run.m
 
       # Warm up Python OutOfProcess worker to prevent intermittent "Unable to resolve" errors
       - name: Add Python environment verification
