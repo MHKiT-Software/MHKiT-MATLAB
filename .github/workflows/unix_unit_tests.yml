@@ -49,8 +49,11 @@ jobs:
       - name: Fix libstdc++ compatibility
         if: matrix.os == 'ubuntu-22.04'
         run: |
-          # Force MATLAB to use system libstdc++
-          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6:/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+          # Force MATLAB to use system libstdc++ instead of its bundled (older) version
+          # LD_PRELOAD forces the library to be loaded first
+          # LD_LIBRARY_PATH ensures symbol resolution finds the system library
+          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -217,12 +220,11 @@ jobs:
       - name: Fix libstdc++ compatibility
         if: matrix.os == 'ubuntu-22.04'
         run: |
-          # Force MATLAB to use system libstdc++
-          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6:/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
-
-      # - name: Setup MATLAB Path on Ubuntu
-      #   if: ${{ matrix.os == '"ubuntu-22.04"' }}
-      #   run: echo "LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+          # Force MATLAB to use system libstdc++ instead of its bundled (older) version
+          # LD_PRELOAD forces the library to be loaded first
+          # LD_LIBRARY_PATH ensures symbol resolution finds the system library
+          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Print Python executable
         shell: bash -l {0}
@@ -319,15 +321,8 @@ jobs:
           conda activate mhkit_conda_env
           printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
 
-      # On Linux, set LD_PRELOAD BEFORE pyenv() to ensure OutOfProcess Python uses system libstdc++
-      - name: Configure LD_PRELOAD for Linux
-        if: matrix.os == 'ubuntu-22.04'
-        shell: bash
-        run: |
-          echo "% Force OutOfProcess Python to use system libstdc++ (must be before pyenv)" >> run.m
-          echo "setenv('LD_PRELOAD', '/usr/lib/x86_64-linux-gnu/libstdc++.so.6');" >> run.m
-
       # OutOfProcess is required to properly call netcdf/hdf5 and works reliably on macos and ubuntu
+      # Note: LD_PRELOAD and LD_LIBRARY_PATH are set via GITHUB_ENV earlier for Linux
       - name: Configure MATLAB Python Environment
         shell: bash -l {0}
         run: |
