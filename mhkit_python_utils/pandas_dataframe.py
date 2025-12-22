@@ -6,11 +6,13 @@ import numpy as np
 
 
 def timeseries_to_pandas(ts,ind,x):
-    
+    # Ensure index is 1D (MATLAB may pass 2D column/row vectors depending on version)
+    ind = np.asarray(ind).flatten()
+
     if x>1:
-        ts=list(map(list,zip(*ts)))       
-        df=pd.DataFrame(data=ts,index=ind)        
-    else:        
+        ts=list(map(list,zip(*ts)))
+        df=pd.DataFrame(data=ts,index=ind)
+    else:
         df=pd.DataFrame(data=ts,index=ind)
         
     return df.astype('float64')
