@@ -89,8 +89,18 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
+      # Set Python environment variables BEFORE any MATLAB/Python interaction
+      - name: Configure Python environment for MATLAB
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          echo "PYTHONHOME=$CONDA_PREFIX" >> $GITHUB_ENV
+          echo "PYTHONPATH=$CONDA_PREFIX/Lib/site-packages" >> $GITHUB_ENV
+          echo "$CONDA_PREFIX" >> $GITHUB_PATH
+          echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
+          echo "$CONDA_PREFIX/Scripts" >> $GITHUB_PATH
+
       - name: Set PYBIND11 GIL workaround
-        # if: ${{ matrix.matlab-version == 'R2025a' }}
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
@@ -104,24 +114,54 @@ jobs:
           conda activate mhkit_conda_env
           printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')\n" $(python -c "import sys; print(sys.executable)") > run.m
 
-      # Warm up Python OutOfProcess worker to prevent intermittent "Unable to resolve" errors
-      - name: Add Python environment verification
+      # Diagnostic and warm-up for Python OutOfProcess worker
+      - name: Add Python environment diagnostics and verification
         shell: bash
         run: |
-          echo "% Verify Python environment and warm up OutOfProcess worker" >> run.m
-          echo "pe = pyenv;" >> run.m
-          echo "disp(pe);" >> run.m
-          echo "py.importlib.import_module('mhkit');" >> run.m
-          echo "disp('Python environment verified: mhkit imported successfully');" >> run.m
+          cat >> run.m << 'MATLABEOF'
+          % ============ Python Environment Diagnostics ============
+          disp('=== MATLAB pyenv status ===');
+          pe = pyenv;
+          disp(pe);
 
-      - name: Check Python System Path
-        shell: bash -l {0}
-        run: |
-          echo "py.sys.path" >> run.m
+          disp('=== Python sys.path ===');
+          disp(py.sys.path);
+
+          disp('=== Python sys.executable ===');
+          disp(py.sys.executable);
+
+          disp('=== Testing direct numpy import via importlib ===');
+          np = py.importlib.import_module('numpy');
+          disp(['numpy version: ', char(np.__version__)]);
+          disp(['numpy location: ', char(np.__file__)]);
+
+          disp('=== Testing py.numpy.array resolution ===');
+          try
+              test_arr = py.numpy.array([1,2,3]);
+              disp('py.numpy.array: SUCCESS');
+          catch ME
+              disp(['py.numpy.array FAILED: ', ME.message]);
+          end
+
+          disp('=== Importing mhkit ===');
+          py.importlib.import_module('mhkit');
+          disp('mhkit imported successfully');
+
+          disp('=== Loaded Python modules (numpy-related) ===');
+          mods = py.list(py.sys.modules.keys());
+          for i = 1:length(mods)
+              m = char(mods{i});
+              if contains(m, 'numpy')
+                  disp(m);
+              end
+          end
+          disp('============ End Diagnostics ============');
+          MATLABEOF
 
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version,
+          pyenv,
           addpath(genpath('mhkit')),
           import matlab.unittest.TestSuite,
           import matlab.unittest.TestRunner,
@@ -276,8 +316,22 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
+      # Set Python environment variables BEFORE any MATLAB/Python interaction
+      # This ensures MATLAB's Python interface knows exactly where to find Python and its packages
+      - name: Configure Python environment for MATLAB
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          # PYTHONHOME tells Python where the installation is
+          echo "PYTHONHOME=$CONDA_PREFIX" >> $GITHUB_ENV
+          # PYTHONPATH ensures site-packages is in the search path
+          echo "PYTHONPATH=$CONDA_PREFIX/Lib/site-packages" >> $GITHUB_ENV
+          # Also add to Windows PATH for DLL resolution
+          echo "$CONDA_PREFIX" >> $GITHUB_PATH
+          echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
+          echo "$CONDA_PREFIX/Scripts" >> $GITHUB_PATH
+
       - name: Set PYBIND11 GIL workaround
-        # if: ${{ matrix.matlab-version == 'R2025a' }}
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
@@ -297,14 +351,16 @@ jobs:
           printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')\n" $(python -c "import sys; print(sys.executable)") >> run.m
 
       # Warm up Python OutOfProcess worker to prevent intermittent "Unable to resolve" errors
+      # Must explicitly import numpy so py.numpy.* calls work in tests
       - name: Add Python environment verification
         shell: bash
         run: |
           echo "% Verify Python environment and warm up OutOfProcess worker" >> run.m
           echo "pe = pyenv;" >> run.m
           echo "disp(pe);" >> run.m
+          echo "py.importlib.import_module('numpy');" >> run.m
           echo "py.importlib.import_module('mhkit');" >> run.m
-          echo "disp('Python environment verified: mhkit imported successfully');" >> run.m
+          echo "disp('Python environment verified: numpy and mhkit imported successfully');" >> run.m
 
       - name: Check Python System Path
         shell: bash -l {0}
