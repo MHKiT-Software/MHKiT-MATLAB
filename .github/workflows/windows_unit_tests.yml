@@ -90,12 +90,14 @@ jobs:
           release: ${{ matrix.matlab-version }}
 
       # Set Python environment variables BEFORE any MATLAB/Python interaction
+      # NOTE: Do NOT set PYTHONHOME - it causes "SRE module mismatch" errors
       - name: Configure Python environment for MATLAB
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          echo "PYTHONHOME=$CONDA_PREFIX" >> $GITHUB_ENV
+          # Add site-packages to Python's search path
           echo "PYTHONPATH=$CONDA_PREFIX/Lib/site-packages" >> $GITHUB_ENV
+          # Add conda paths for DLL resolution
           echo "$CONDA_PREFIX" >> $GITHUB_PATH
           echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
           echo "$CONDA_PREFIX/Scripts" >> $GITHUB_PATH
@@ -104,7 +106,6 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          export PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1
           echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
 
       - name: Configure MATLAB pyenv Version and ExecutionMode
@@ -317,16 +318,14 @@ jobs:
           release: ${{ matrix.matlab-version }}
 
       # Set Python environment variables BEFORE any MATLAB/Python interaction
-      # This ensures MATLAB's Python interface knows exactly where to find Python and its packages
+      # NOTE: Do NOT set PYTHONHOME - it causes "SRE module mismatch" errors
       - name: Configure Python environment for MATLAB
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          # PYTHONHOME tells Python where the installation is
-          echo "PYTHONHOME=$CONDA_PREFIX" >> $GITHUB_ENV
-          # PYTHONPATH ensures site-packages is in the search path
+          # Add site-packages to Python's search path
           echo "PYTHONPATH=$CONDA_PREFIX/Lib/site-packages" >> $GITHUB_ENV
-          # Also add to Windows PATH for DLL resolution
+          # Add conda paths for DLL resolution
           echo "$CONDA_PREFIX" >> $GITHUB_PATH
           echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
           echo "$CONDA_PREFIX/Scripts" >> $GITHUB_PATH
@@ -335,7 +334,6 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          export PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1
           echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
 
       - name: Add Python Dir to Path
