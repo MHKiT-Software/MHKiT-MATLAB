@@ -118,7 +118,7 @@ jobs:
 
           python_exe = sys.executable.replace('\\\\', '/')
 
-          content = f'''pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
+          content = f'''pyenv(Version='{python_exe}', ExecutionMode='InProcess')
           % Verify Python environment and warm up OutOfProcess worker
           pe = pyenv;
           disp(pe);
@@ -323,8 +323,8 @@ jobs:
           content = f'''getenv('path')
           setenv('path', ['{python_dir};', getenv('path')])
           getenv('path')
-          pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
-          % Verify Python environment and warm up OutOfProcess worker
+          pyenv(Version='{python_exe}', ExecutionMode='InProcess')
+          % Verify Python environment
           pe = pyenv;
           disp(pe);
           py.importlib.import_module('numpy');
