@@ -123,6 +123,10 @@ jobs:
           pe = pyenv;
           disp(pe);
           py.importlib.import_module('numpy');
+          % Force MATLAB to resolve py.numpy namespace by making an actual call
+          dummy = py.numpy.array([1,2,3]);
+          clear dummy;
+          disp('py.numpy.array: resolved successfully');
           py.importlib.import_module('mhkit');
           disp('Python environment verified: numpy and mhkit imported successfully');
           version
@@ -214,7 +218,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install -c conda forge mhkit==$MHKIT_PYTHON_VERSION
+          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION
       - name: Output python executable
         shell: bash -l {0}
         run: |
@@ -324,6 +328,10 @@ jobs:
           pe = pyenv;
           disp(pe);
           py.importlib.import_module('numpy');
+          % Force MATLAB to resolve py.numpy namespace by making an actual call
+          dummy = py.numpy.array([1,2,3]);
+          clear dummy;
+          disp('py.numpy.array: resolved successfully');
           py.importlib.import_module('mhkit');
           disp('Python environment verified: numpy and mhkit imported successfully');
           py.sys.path
