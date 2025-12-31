@@ -226,6 +226,57 @@ jobs:
           echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
           echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
+      # Pin compatible ICU version based on MATLAB's bundled libstdc++ capabilities
+      # Older MATLAB versions bundle older libstdc++ missing newer GLIBCXX symbols
+      - name: Pin compatible ICU version for MATLAB
+        if: matrix.os == 'ubuntu-22.04'
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+
+          # Lookup table: MATLAB version -> max compatible ICU version
+          # Based on GLIBCXX symbols available in MATLAB's bundled libstdc++
+          declare -A ICU_COMPAT=(
+            ["R2022a"]="70"
+            ["R2022b"]="70"
+            ["R2023a"]="70"
+            ["R2023b"]=""  # empty = use latest (has modern libstdc++)
+            ["R2024a"]=""
+            ["R2024b"]=""
+            ["R2025a"]=""
+          )
+
+          MATLAB_VERSION="${{ matrix.matlab-version }}"
+          ICU_VERSION="${ICU_COMPAT[$MATLAB_VERSION]}"
+
+          if [ -n "$ICU_VERSION" ]; then
+            echo "MATLAB $MATLAB_VERSION requires older ICU. Installing icu=$ICU_VERSION"
+            conda install -y "icu<=$ICU_VERSION"
+          else
+            echo "MATLAB $MATLAB_VERSION has modern libstdc++, using default ICU"
+          fi
+
+      # Diagnostic: Check what GLIBC symbols are required by key libraries
+      - name: Diagnose library dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-22.04'
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          echo "=== System libstdc++ GLIBCXX versions ==="
+          strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX | tail -10
+          echo ""
+          echo "=== Conda libicuuc location and GLIBCXX requirements ==="
+          ICUUC=$(find $CONDA_PREFIX -name "libicuuc.so*" 2>/dev/null | head -1)
+          if [ -n "$ICUUC" ]; then
+            echo "Found: $ICUUC"
+            strings "$ICUUC" | grep GLIBCXX || echo "No GLIBCXX requirements"
+          else
+            echo "libicuuc not found in conda env"
+          fi
+          echo ""
+          echo "=== MATLAB libstdc++ location (if accessible) ==="
+          ls -la /opt/hostedtoolcache/MATLAB/*/x64/sys/os/glnxa64/libstdc++.so.6 2>/dev/null || echo "MATLAB libstdc++ not found"
+
       - name: Print Python executable
         shell: bash -l {0}
         run: |
@@ -340,8 +391,9 @@ jobs:
           echo "% Verify Python environment and warm up OutOfProcess worker" >> run.m
           echo "pe = pyenv;" >> run.m
           echo "disp(pe);" >> run.m
+          echo "py.importlib.import_module('numpy');" >> run.m
           echo "py.importlib.import_module('mhkit');" >> run.m
-          echo "disp('Python environment verified: mhkit imported successfully');" >> run.m
+          echo "disp('Python environment verified: numpy and mhkit imported successfully');" >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
