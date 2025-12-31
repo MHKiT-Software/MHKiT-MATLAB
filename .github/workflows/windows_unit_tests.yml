@@ -108,47 +108,50 @@ jobs:
           conda activate mhkit_conda_env
           echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
 
-      - name: Configure MATLAB pyenv Version and ExecutionMode
+      # Generate run.m using Python to avoid shell encoding issues on Windows
+      - name: Generate run.m
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')\n" $(python -c "import sys; print(sys.executable)") > run.m
+          python -c "
+          import sys
 
-      # Diagnostic and warm-up for Python OutOfProcess worker
-      - name: Add Python environment diagnostics and verification
-        shell: bash
-        run: |
-          echo "% ============ Python Environment Diagnostics ============" >> run.m
-          echo "disp('=== MATLAB pyenv status ===');" >> run.m
-          echo "pe = pyenv;" >> run.m
-          echo "disp(pe);" >> run.m
-          echo "disp('=== Python sys.path ===');" >> run.m
-          echo "disp(py.sys.path);" >> run.m
-          echo "disp('=== Python sys.executable ===');" >> run.m
-          echo "disp(py.sys.executable);" >> run.m
-          echo "disp('=== Testing numpy import via importlib ===');" >> run.m
-          echo "np = py.importlib.import_module('numpy');" >> run.m
-          echo "disp(np.__version__);" >> run.m
-          echo "disp(np.__file__);" >> run.m
-          echo "disp('=== Testing py.numpy.array resolution ===');" >> run.m
-          echo "try, test_arr = py.numpy.array([1,2,3]); disp('py.numpy.array: SUCCESS'); catch ME, disp(ME.message); end" >> run.m
-          echo "disp('=== Importing mhkit ===');" >> run.m
-          echo "py.importlib.import_module('mhkit');" >> run.m
-          echo "disp('mhkit imported successfully');" >> run.m
-          echo "disp('============ End Diagnostics ============');" >> run.m
+          python_exe = sys.executable.replace('\\\\', '/')
 
-      - name: Add MATLAB test commands
-        shell: bash
-        run: echo "version,
-          pyenv,
-          addpath(genpath('mhkit')),
-          import matlab.unittest.TestSuite,
-          import matlab.unittest.TestRunner,
-          testFolder = ['mhkit' filesep 'tests'],
-          suite = TestSuite.fromFolder(testFolder),
-          runner = TestRunner.withTextOutput,
-          results = runner.run(suite),
-          assertSuccess(results)" >> run.m
+          content = f'''pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
+          % ============ Python Environment Diagnostics ============
+          disp('=== MATLAB pyenv status ===');
+          pe = pyenv;
+          disp(pe);
+          disp('=== Python sys.path ===');
+          disp(py.sys.path);
+          disp('=== Python sys.executable ===');
+          disp(py.sys.executable);
+          disp('=== Testing numpy import via importlib ===');
+          np = py.importlib.import_module('numpy');
+          disp(py.getattr(np, '__version__'));
+          disp(py.getattr(np, '__file__'));
+          disp('=== Testing py.numpy.array resolution ===');
+          try, test_arr = py.numpy.array([1,2,3]); disp('py.numpy.array: SUCCESS'); catch ME, disp(ME.message); end
+          disp('=== Importing mhkit ===');
+          py.importlib.import_module('mhkit');
+          disp('mhkit imported successfully');
+          disp('============ End Diagnostics ============');
+          version
+          pyenv
+          addpath(genpath('mhkit'))
+          import matlab.unittest.TestSuite
+          import matlab.unittest.TestRunner
+          testFolder = ['mhkit' filesep 'tests'];
+          suite = TestSuite.fromFolder(testFolder);
+          runner = TestRunner.withTextOutput;
+          results = runner.run(suite);
+          assertSuccess(results)
+          '''
+
+          with open('run.m', 'w', encoding='utf-8', newline='\\n') as f:
+              f.write(content)
+          "
 
       - name: Output Run.m
         shell: bash
@@ -313,47 +316,44 @@ jobs:
           conda activate mhkit_conda_env
           echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
 
-      - name: Add Python Dir to Path
+      # Generate run.m using Python to avoid shell encoding issues on Windows
+      - name: Generate run.m
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
-      # OutOfProcess works reliably on linux, macos, and windows
-      - name: Configure MATLAB pyenv Version and ExecutionMode
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')\n" $(python -c "import sys; print(sys.executable)") >> run.m
+          python -c "
+          import sys
+          import os
 
-      # Warm up Python OutOfProcess worker to prevent intermittent "Unable to resolve" errors
-      # Must explicitly import numpy so py.numpy.* calls work in tests
-      - name: Add Python environment verification
-        shell: bash
-        run: |
-          echo "% Verify Python environment and warm up OutOfProcess worker" >> run.m
-          echo "pe = pyenv;" >> run.m
-          echo "disp(pe);" >> run.m
-          echo "py.importlib.import_module('numpy');" >> run.m
-          echo "py.importlib.import_module('mhkit');" >> run.m
-          echo "disp('Python environment verified: numpy and mhkit imported successfully');" >> run.m
+          python_exe = sys.executable.replace('\\\\', '/')
+          python_dir = os.path.dirname(sys.executable).replace('\\\\', '/')
 
-      - name: Check Python System Path
-        shell: bash -l {0}
-        run: |
-          echo "py.sys.path" >> run.m
+          content = f'''getenv('path')
+          setenv('path', ['{python_dir};', getenv('path')])
+          getenv('path')
+          pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
+          % Verify Python environment and warm up OutOfProcess worker
+          pe = pyenv;
+          disp(pe);
+          py.importlib.import_module('numpy');
+          py.importlib.import_module('mhkit');
+          disp('Python environment verified: numpy and mhkit imported successfully');
+          py.sys.path
+          version
+          pyenv
+          addpath(genpath('mhkit'))
+          import matlab.unittest.TestSuite
+          import matlab.unittest.TestRunner
+          testFolder = ['mhkit' filesep 'tests'];
+          suite = TestSuite.fromFolder(testFolder);
+          runner = TestRunner.withTextOutput;
+          results = runner.run(suite);
+          assertSuccess(results)
+          '''
 
-      - name: Add MATLAB test commands
-        shell: bash
-        run: echo "version,
-          pyenv,
-          addpath(genpath('mhkit')),
-          import matlab.unittest.TestSuite,
-          import matlab.unittest.TestRunner,
-          testFolder = ['mhkit' filesep 'tests'],
-          suite = TestSuite.fromFolder(testFolder),
-          runner = TestRunner.withTextOutput,
-          results = runner.run(suite),
-          assertSuccess(results)" >> run.m
+          with open('run.m', 'w', encoding='utf-8', newline='\\n') as f:
+              f.write(content)
+          "
 
       - name: Output Run.m
         shell: bash
