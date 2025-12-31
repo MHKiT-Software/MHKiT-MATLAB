@@ -119,45 +119,24 @@ jobs:
       - name: Add Python environment diagnostics and verification
         shell: bash
         run: |
-          cat >> run.m << 'MATLABEOF'
-          % ============ Python Environment Diagnostics ============
-          disp('=== MATLAB pyenv status ===');
-          pe = pyenv;
-          disp(pe);
-
-          disp('=== Python sys.path ===');
-          disp(py.sys.path);
-
-          disp('=== Python sys.executable ===');
-          disp(py.sys.executable);
-
-          disp('=== Testing direct numpy import via importlib ===');
-          np = py.importlib.import_module('numpy');
-          disp(['numpy version: ', char(np.__version__)]);
-          disp(['numpy location: ', char(np.__file__)]);
-
-          disp('=== Testing py.numpy.array resolution ===');
-          try
-              test_arr = py.numpy.array([1,2,3]);
-              disp('py.numpy.array: SUCCESS');
-          catch ME
-              disp(['py.numpy.array FAILED: ', ME.message]);
-          end
-
-          disp('=== Importing mhkit ===');
-          py.importlib.import_module('mhkit');
-          disp('mhkit imported successfully');
-
-          disp('=== Loaded Python modules (numpy-related) ===');
-          mods = py.list(py.sys.modules.keys());
-          for i = 1:length(mods)
-              m = char(mods{i});
-              if contains(m, 'numpy')
-                  disp(m);
-              end
-          end
-          disp('============ End Diagnostics ============');
-          MATLABEOF
+          echo "% ============ Python Environment Diagnostics ============" >> run.m
+          echo "disp('=== MATLAB pyenv status ===');" >> run.m
+          echo "pe = pyenv;" >> run.m
+          echo "disp(pe);" >> run.m
+          echo "disp('=== Python sys.path ===');" >> run.m
+          echo "disp(py.sys.path);" >> run.m
+          echo "disp('=== Python sys.executable ===');" >> run.m
+          echo "disp(py.sys.executable);" >> run.m
+          echo "disp('=== Testing numpy import via importlib ===');" >> run.m
+          echo "np = py.importlib.import_module('numpy');" >> run.m
+          echo "disp(np.__version__);" >> run.m
+          echo "disp(np.__file__);" >> run.m
+          echo "disp('=== Testing py.numpy.array resolution ===');" >> run.m
+          echo "try, test_arr = py.numpy.array([1,2,3]); disp('py.numpy.array: SUCCESS'); catch ME, disp(ME.message); end" >> run.m
+          echo "disp('=== Importing mhkit ===');" >> run.m
+          echo "py.importlib.import_module('mhkit');" >> run.m
+          echo "disp('mhkit imported successfully');" >> run.m
+          echo "disp('============ End Diagnostics ============');" >> run.m
 
       - name: Add MATLAB test commands
         shell: bash
@@ -364,6 +343,7 @@ jobs:
         shell: bash -l {0}
         run: |
           echo "py.sys.path" >> run.m
+
       - name: Add MATLAB test commands
         shell: bash
         run: echo "version,
