@@ -27,7 +27,7 @@ jobs:
 
     env:
       mhkit-python-dir: "MHKiT-Python"
-      MHKIT_PYTHON_VERSION: '0.9.0'
+      MHKIT_PYTHON_VERSION: '1.0.1'
     steps:
       - name: Install/Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -43,7 +43,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install mhkit==$MHKIT_PYTHON_VERSION
+          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
@@ -119,24 +119,12 @@ jobs:
           python_exe = sys.executable.replace('\\\\', '/')
 
           content = f'''pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
-          % ============ Python Environment Diagnostics ============
-          disp('=== MATLAB pyenv status ===');
+          % Verify Python environment and warm up OutOfProcess worker
           pe = pyenv;
           disp(pe);
-          disp('=== Python sys.path ===');
-          disp(py.sys.path);
-          disp('=== Python sys.executable ===');
-          disp(py.sys.executable);
-          disp('=== Testing numpy import via importlib ===');
-          np = py.importlib.import_module('numpy');
-          disp(py.getattr(np, '__version__'));
-          disp(py.getattr(np, '__file__'));
-          disp('=== Testing py.numpy.array resolution ===');
-          try, test_arr = py.numpy.array([1,2,3]); disp('py.numpy.array: SUCCESS'); catch ME, disp(ME.message); end
-          disp('=== Importing mhkit ===');
+          py.importlib.import_module('numpy');
           py.importlib.import_module('mhkit');
-          disp('mhkit imported successfully');
-          disp('============ End Diagnostics ============');
+          disp('Python environment verified: numpy and mhkit imported successfully');
           version
           pyenv
           addpath(genpath('mhkit'))
@@ -180,7 +168,7 @@ jobs:
         python-version: ["3.10", 3.11, 3.12]
         # matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
         matlab-version: [R2023a, R2023b, R2024a, R2024b]
-        mhkit-python-version: ["0.9.0"]
+        mhkit-python-version: ["1.0.1"]
         exclude:
           # Cache population job
           - matlab-version: R2023b
@@ -226,7 +214,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install mhkit==$MHKIT_PYTHON_VERSION
+          conda install -c conda forge mhkit==$MHKIT_PYTHON_VERSION
       - name: Output python executable
         shell: bash -l {0}
         run: |
