@@ -107,6 +107,8 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
+          # Allow duplicate OpenMP libraries (MATLAB's libiomp5md.dll + numpy's libomp.dll)
+          echo "KMP_DUPLICATE_LIB_OK=TRUE" >> $GITHUB_ENV
 
       # Generate run.m using Python to avoid shell encoding issues on Windows
       - name: Generate run.m
@@ -307,6 +309,8 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
+          # Allow duplicate OpenMP libraries (MATLAB's libiomp5md.dll + numpy's libomp.dll)
+          echo "KMP_DUPLICATE_LIB_OK=TRUE" >> $GITHUB_ENV
 
       # Generate run.m using Python to avoid shell encoding issues on Windows
       - name: Generate run.m
