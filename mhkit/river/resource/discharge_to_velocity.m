@@ -84,9 +84,12 @@ si=size(vals);
  for i=1:si(2)
     test=string(py.str(vv{i}));
     newname=split(test,",");
-
-    V.(newname(1))=vals(:,i);
-
+    % Map Python column names to expected MATLAB field names
+    if newname(1) == "velocity"
+        V.V=vals(:,i);
+    else
+        V.(newname(1))=vals(:,i);
+    end
  end
  V.time=double(py.array.array('d',py.numpy.nditer(Vdf.index)));
 
