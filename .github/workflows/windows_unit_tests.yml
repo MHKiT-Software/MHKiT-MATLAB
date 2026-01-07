@@ -129,18 +129,22 @@ jobs:
 
           python_exe = sys.executable.replace('\\\\', '/')
 
-          content = f'''pyenv(Version='{python_exe}', ExecutionMode='InProcess')
+          content = f'''pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
           % Verify Python environment
           pe = pyenv;
           disp(pe);
-          % Warm up numpy
+          % Warm up numpy - must call function to force resolution
           py.importlib.import_module('numpy');
           dummy = py.numpy.array([1,2,3]);
+          disp(class(dummy));
           clear dummy;
           disp('py.numpy.array: resolved');
-          % Warm up mhkit
+          % Warm up mhkit submodules - force resolution by calling functions
           py.importlib.import_module('mhkit');
-          disp('mhkit: resolved');
+          py.importlib.import_module('mhkit.wave.io.ndbc');
+          py.importlib.import_module('mhkit.wave.io.swan');
+          py.importlib.import_module('mhkit.river.resource');
+          disp('mhkit submodules: imported');
           version
           pyenv
           addpath(genpath('mhkit'))
