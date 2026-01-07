@@ -128,16 +128,17 @@ jobs:
           python_exe = sys.executable.replace('\\\\', '/')
 
           content = f'''pyenv(Version='{python_exe}', ExecutionMode='InProcess')
-          % Verify Python environment and warm up OutOfProcess worker
+          % Verify Python environment
           pe = pyenv;
           disp(pe);
+          % Warm up numpy
           py.importlib.import_module('numpy');
-          % Force MATLAB to resolve py.numpy namespace by making an actual call
           dummy = py.numpy.array([1,2,3]);
           clear dummy;
-          disp('py.numpy.array: resolved successfully');
+          disp('py.numpy.array: resolved');
+          % Warm up mhkit
           py.importlib.import_module('mhkit');
-          disp('Python environment verified: numpy and mhkit imported successfully');
+          disp('mhkit: resolved');
           version
           pyenv
           addpath(genpath('mhkit'))
@@ -337,13 +338,14 @@ jobs:
           % Verify Python environment
           pe = pyenv;
           disp(pe);
+          % Warm up numpy
           py.importlib.import_module('numpy');
-          % Force MATLAB to resolve py.numpy namespace by making an actual call
           dummy = py.numpy.array([1,2,3]);
           clear dummy;
-          disp('py.numpy.array: resolved successfully');
+          disp('py.numpy.array: resolved');
+          % Warm up mhkit
           py.importlib.import_module('mhkit');
-          disp('Python environment verified: numpy and mhkit imported successfully');
+          disp('mhkit: resolved');
           py.sys.path
           version
           pyenv
