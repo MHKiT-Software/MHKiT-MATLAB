@@ -53,12 +53,14 @@ jobs:
           conda activate mhkit_conda_env
           pip install -e .
 
+      # mhkit 1.0.1 requires numpy 2.0+ (uses np.trapezoid)
+      # scipy 1.14+ is compatible with numpy 2.0
       - name: Pin scipy version
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
           pip uninstall -y scipy
-          pip install scipy==1.12.0
+          pip install scipy==1.14.0
 
       - name: List Installed Python Packages using Conda
         shell: bash -l {0}
