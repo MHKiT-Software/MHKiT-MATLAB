@@ -87,9 +87,12 @@ si=size(vals);
  for i=1:si(2)
     test=string(py.str(vv{i}));
     newname=split(test,",");
-
-    p.(newname(1))=vals(:,i);
-
+    % Map Python column names to expected MATLAB field names
+    if newname(1) == "power"
+        p.P=vals(:,i);
+    else
+        p.(newname(1))=vals(:,i);
+    end
  end
  p.time=double(py.array.array('d',py.numpy.nditer(Pdf.index)));
 
