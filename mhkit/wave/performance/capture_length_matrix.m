@@ -53,7 +53,7 @@ L = py.numpy.array(L).flatten();
 py_Hm0_bins = py.numpy.array(Hm0_bins).flatten();
 py_Te_bins = py.numpy.array(Te_bins).flatten();
 
-LM = py.mhkit.wave.performance.capture_length_matrix(Hm0, Te, L, statistic, py_Hm0_bins, py_Te_bins);
+LM = py.mhkit.wave.performance.capture_width_matrix(Hm0, Te, L, statistic, py_Hm0_bins, py_Te_bins);
 
 LM = typecast_from_mhkit_python(LM);
 
