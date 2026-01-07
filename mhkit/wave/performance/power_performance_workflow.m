@@ -100,9 +100,18 @@ end; clear S_temp
 L = capture_length(P,J);
 
 % Need to set our Hm0 and Te bins for the capture length matrix
-Hm0_bins = -0.5:0.5:max(fix(Hm0))+0.5; % Input is min, max, and n indecies for vector
-Hm0_bins = Hm0_bins+0.25 ;
-Te_bins = 0:1:max(fix(Te));
+Hm0_max = max(fix(Hm0));
+if Hm0_max < 1
+    Hm0_max = 1;  % Ensure at least 2 bin edges
+end
+Hm0_bins = -0.5:0.5:Hm0_max+0.5;
+Hm0_bins = Hm0_bins+0.25;
+
+Te_max = max(fix(Te));
+if Te_max < 1
+    Te_max = 1;  % Ensure at least 2 bin edges
+end
+Te_bins = 0:1:Te_max;
 Te_bins = Te_bins+0.5;
 
 % Calculate the necessary capture length matrices for each statistic based
