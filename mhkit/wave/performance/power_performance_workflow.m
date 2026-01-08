@@ -100,19 +100,22 @@ end; clear S_temp
 L = capture_length(P,J);
 
 % Need to set our Hm0 and Te bins for the capture length matrix
+% mhkit-python 1.0.1 changed _performance_matrix to insert 0 as first edge
+% instead of -inf. Bin centers must be offset by +0.5 step to produce the
+% same internal edges [0, 0.5, 1, ...] as before.
 Hm0_max = max(fix(Hm0));
 if Hm0_max < 1
     Hm0_max = 1;  % Ensure at least 2 bin edges
 end
-Hm0_bins = -0.5:0.5:Hm0_max+0.5;
-Hm0_bins = Hm0_bins+0.25;
+Hm0_bins = 0:0.5:Hm0_max+0.5;
+Hm0_bins = Hm0_bins + 0.25;  % Offset so midpoints give edges [0, 0.5, 1, ...]
 
 Te_max = max(fix(Te));
 if Te_max < 1
     Te_max = 1;  % Ensure at least 2 bin edges
 end
 Te_bins = 0:1:Te_max;
-Te_bins = Te_bins+0.5;
+Te_bins = Te_bins + 0.5;  % Offset so midpoints give edges [0, 1, 2, ...]
 
 % Calculate the necessary capture length matrices for each statistic based
 % on IEC/TS 62600-100
