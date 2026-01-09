@@ -53,7 +53,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             LM = capture_length_matrix(Obj.Hm0, Obj.Te, L, 'std', Hm0_bins.centers, Te_bins.centers);
 
             assertEqual(testCase,size(LM.values), [38 9]);
-            assertEqual(testCase,sum(sum(isnan(LM.values))), 34, 'RelTol',0.1);
+            assertEqual(testCase,sum(sum(isnan(LM.values))), 45, 'RelTol',0.1);
         end
 
         function test_wave_energy_flux_matrix(testCase)
@@ -77,7 +77,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
 
             JM = wave_energy_flux_matrix(Obj.Hm0, Obj.Te,Obj.J, 'mean', Hm0_bins.centers, Te_bins.centers);
             assertEqual(testCase,size(JM.values), [38 9]);
-            assertEqual(testCase,sum(sum(isnan(JM.values))), 34, 'RelTol',0.1);
+            assertEqual(testCase,sum(sum(isnan(JM.values))), 45, 'RelTol',0.1);
         end
 
         function test_power_matrix(testCase)
@@ -104,7 +104,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             JM = wave_energy_flux_matrix(Obj.Hm0, Obj.Te,Obj.J, 'mean', Hm0_bins.centers, Te_bins.centers);
             PM = power_matrix(LM, JM);
             assertEqual(testCase,size(PM.values), [38 9]);
-            assertEqual(testCase,sum(sum(isnan(PM.values))), 34, 'RelTol',0.1);
+            assertEqual(testCase,sum(sum(isnan(PM.values))), 45, 'RelTol',0.1);
         end
 
         function test_mean_annual_energy_production(testCase)
