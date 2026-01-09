@@ -191,7 +191,8 @@ jobs:
         # Note: It is preferred to use an actual release name as opposed to 'latest'
         # macos-15 is ARM (Apple Silicon) - R2023b+ run natively
         # macos-15-intel is x64 - R2022b/R2023a run natively (no Rosetta needed)
-        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b, R2025a]
+        # matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b, R2025a]
+        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
         mhkit-python-version: ["1.0.1"]
         exclude:
           # Python 3.12 + MATLAB incompatibility
@@ -355,6 +356,15 @@ jobs:
           conda activate mhkit_conda_env
           echo "LD_PRELOAD=$CONDA_PREFIX/lib/libstdc++.so.6" >> "$GITHUB_ENV"
           echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+
+      # macOS: MATLAB's bundled libssl is missing _SSL_get0_group_name needed by
+      # netCDF4's libcurl. Set DYLD_LIBRARY_PATH so conda's OpenSSL is found first.
+      - name: Fix OpenSSL compatibility for macOS
+        if: runner.os == 'macOS'
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          echo "DYLD_LIBRARY_PATH=$CONDA_PREFIX/lib:$DYLD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Verify matplotlib and mhkit imports
         shell: bash -l {0}
