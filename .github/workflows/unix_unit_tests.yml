@@ -60,11 +60,21 @@ jobs:
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
+      # mhkit depends on matplotlib-base, but pandas tries to register a matplotlib
+      # plotting backend during mhkit import. matplotlib-base may not be sufficient
+      # for this registration, so we install full matplotlib explicitly.
       - name: Conda install mhkit
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION
+          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION matplotlib
+
+      - name: Verify matplotlib and mhkit imports
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python -c "import matplotlib; print(f'matplotlib: {matplotlib.__version__}')"
+          python -c "import mhkit; print(f'mhkit: {mhkit.__version__}')"
 
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
