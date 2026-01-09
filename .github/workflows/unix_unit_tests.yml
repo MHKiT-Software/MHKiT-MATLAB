@@ -46,16 +46,16 @@ jobs:
       #     conda activate mhkit_conda_env
       #     conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
 
-      # OutOfProcess mode runs Python in a separate process, so LD_PRELOAD
-      # can force system libstdc++ for Python without affecting MATLAB's internals
-      - name: Fix libstdc++ compatibility
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          # Force MATLAB to use system libstdc++ instead of its bundled (older) version
-          # LD_PRELOAD forces the library to be loaded first
-          # LD_LIBRARY_PATH ensures symbol resolution finds the system library
-          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
-          echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+      # NOTE: System libstdc++ lacks CXXABI_1.3.15 needed by matplotlib
+      # Conda's libstdc++ should be used instead - set after conda install below
+      # - name: Fix libstdc++ compatibility
+      #   if: matrix.os == 'ubuntu-22.04'
+      #   run: |
+      #     # Force MATLAB to use system libstdc++ instead of its bundled (older) version
+      #     # LD_PRELOAD forces the library to be loaded first
+      #     # LD_LIBRARY_PATH ensures symbol resolution finds the system library
+      #     echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+      #     echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -68,6 +68,16 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION matplotlib
+
+      # Use conda's libstdc++ which has both GLIBCXX_3.4.29 (for pandas) and
+      # CXXABI_1.3.15 (for matplotlib). System libstdc++ is too old.
+      - name: Fix libstdc++ compatibility (use conda's libstdc++)
+        if: matrix.os == 'ubuntu-22.04'
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          echo "LD_PRELOAD=$CONDA_PREFIX/lib/libstdc++.so.6" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Verify matplotlib and mhkit imports
         shell: bash -l {0}
