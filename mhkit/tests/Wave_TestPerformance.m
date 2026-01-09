@@ -1,8 +1,19 @@
 classdef Wave_TestPerformance < matlab.unittest.TestCase
 
+    methods (Static)
+        function bins = make_bins(bin_start, bin_end, bin_interval)
+            % Generate bins for Python's capture_length_matrix.
+            % Python expects "bin centers" but internally converts them to
+            % edges. To maintain compatibility, we pass the edge values
+            % directly as "centers" (excluding the final edge).
+            bins.edges = bin_start:bin_interval:bin_end;
+            bins.centers = bins.edges(1:end-1);  % Pass to Python as "centers"
+        end
+    end
+
     methods (Test)
 
-        function test_capture_length(testCase)
+        function test_capture_width(testCase)
             a = 40;
             b = 200;
             Obj.P = (b-a).*rand(1,100000) + a;
@@ -17,7 +28,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             assertEqual(testCase,L_stats, 1.4, 'RelTol',0.1);
         end
 
-        function test_capture_length_matrix(testCase)
+        function test_capture_width_matrix(testCase)
             seednum = 123;
             rng(seednum);
             a = 0.8;
@@ -35,11 +46,11 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             sigma = 4;
             Obj.Hm0 = abs(sigma*randn(1,100000)+1i*sigma*randn(1,100000));
             %Obj.Hm0 = raylrnd(4, [1,100000]);
-            Obj.Hm0_bins = 0:0.5:18.5;
-            Obj.Te_bins = 0:1:8;
+            Hm0_bins = Wave_TestPerformance.make_bins(0, 19, 0.5);
+            Te_bins = Wave_TestPerformance.make_bins(0, 9, 1);
 
             L = capture_length(Obj.P, Obj.J);
-            LM = capture_length_matrix(Obj.Hm0, Obj.Te, L, 'std', Obj.Hm0_bins, Obj.Te_bins);
+            LM = capture_length_matrix(Obj.Hm0, Obj.Te, L, 'std', Hm0_bins.centers, Te_bins.centers);
 
             assertEqual(testCase,size(LM.values), [38 9]);
             assertEqual(testCase,sum(sum(isnan(LM.values))), 34, 'RelTol',0.1);
@@ -61,10 +72,10 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             Obj.J = (b-a).*randn(1,100000) + a;
             sigma = 4;
             Obj.Hm0 = abs(sigma*randn(1,100000)+1i*sigma*randn(1,100000));
-            Obj.Hm0_bins = 0:0.5:18.5;
-            Obj.Te_bins = 0:1:8;
+            Hm0_bins = Wave_TestPerformance.make_bins(0, 19, 0.5);
+            Te_bins = Wave_TestPerformance.make_bins(0, 9, 1);
 
-            JM = wave_energy_flux_matrix(Obj.Hm0, Obj.Te,Obj.J, 'mean', Obj.Hm0_bins, Obj.Te_bins);
+            JM = wave_energy_flux_matrix(Obj.Hm0, Obj.Te,Obj.J, 'mean', Hm0_bins.centers, Te_bins.centers);
             assertEqual(testCase,size(JM.values), [38 9]);
             assertEqual(testCase,sum(sum(isnan(JM.values))), 34, 'RelTol',0.1);
         end
@@ -85,12 +96,12 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             Obj.J = (b-a).*randn(1,100000) + a;
             sigma = 4;
             Obj.Hm0 = abs(sigma*randn(1,100000)+1i*sigma*randn(1,100000));
-            Obj.Hm0_bins = 0:0.5:18.5;
-            Obj.Te_bins = 0:1:8;
+            Hm0_bins = Wave_TestPerformance.make_bins(0, 19, 0.5);
+            Te_bins = Wave_TestPerformance.make_bins(0, 9, 1);
 
             L = capture_length(Obj.P, Obj.J);
-            LM = capture_length_matrix(Obj.Hm0, Obj.Te,L, 'mean', Obj.Hm0_bins, Obj.Te_bins);
-            JM = wave_energy_flux_matrix(Obj.Hm0, Obj.Te,Obj.J, 'mean', Obj.Hm0_bins, Obj.Te_bins);
+            LM = capture_length_matrix(Obj.Hm0, Obj.Te,L, 'mean', Hm0_bins.centers, Te_bins.centers);
+            JM = wave_energy_flux_matrix(Obj.Hm0, Obj.Te,Obj.J, 'mean', Hm0_bins.centers, Te_bins.centers);
             PM = power_matrix(LM, JM);
             assertEqual(testCase,size(PM.values), [38 9]);
             assertEqual(testCase,sum(sum(isnan(PM.values))), 34, 'RelTol',0.1);
@@ -135,9 +146,9 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             Obj.J = (b-a).*randn(1,100000) + a;
             sigma = 4;
             Obj.Hm0 = abs(sigma*randn(1,100000)+1i*sigma*randn(1,100000));
-            Obj.Hm0_bins = 0:0.5:18.5;
-            Obj.Te_bins = 0:1:8;
-            M = wave_energy_flux_matrix(Obj.Hm0,Obj.Te,Obj.J, 'mean', Obj.Hm0_bins, Obj.Te_bins);
+            Hm0_bins = Wave_TestPerformance.make_bins(0, 19, 0.5);
+            Te_bins = Wave_TestPerformance.make_bins(0, 9, 1);
+            M = wave_energy_flux_matrix(Obj.Hm0,Obj.Te,Obj.J, 'mean', Hm0_bins.centers, Te_bins.centers);
 
             plot_matrix(M,'Wave Energy Flux Matrix',"savepath",filename);
 
