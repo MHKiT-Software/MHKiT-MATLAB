@@ -256,12 +256,12 @@ jobs:
           activate-environment: mhkit_conda_env
           channels: conda-forge,defaults
 
-      # This is necessary to fix any issues with netcdf4 and hdf5 headers
-      - name: "Conda install netcdf4, hdf5"
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
+      # # This is necessary to fix any issues with netcdf4 and hdf5 headers
+      # - name: "Conda install netcdf4, hdf5"
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
 
       # NOTE: System libstdc++ lacks CXXABI_1.3.15 needed by matplotlib
       # Conda's libstdc++ is used instead - set after conda install below
