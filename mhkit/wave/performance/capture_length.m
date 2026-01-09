@@ -24,6 +24,6 @@ function L = capture_length(Power, J)
 Power = py.numpy.array(Power).flatten();
 J = py.numpy.array(J).flatten();
 
-L = py.mhkit.wave.performance.capture_length(Power, J);
+L = py.mhkit.wave.performance.capture_width(Power, J);
 
 L = typecast_from_mhkit_python(L).data;
