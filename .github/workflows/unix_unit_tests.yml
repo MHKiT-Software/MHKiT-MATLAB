@@ -426,46 +426,54 @@ jobs:
       #     export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$DYLD_LIBRARY_PATH"
       #     echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
 
-      - name: Add Python Dir to Path
+      # Generate run.m using Python to match cache_population job
+      # OutOfProcess mode with LD_PRELOAD allows Python to use conda's libstdc++
+      - name: Generate run.m
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
+          python -c "
+          import sys
+          import platform
 
-      # OutOfProcess is required to properly call netcdf/hdf5 and works reliably on macos and ubuntu
-      # Note: LD_PRELOAD and LD_LIBRARY_PATH are set via GITHUB_ENV earlier for Linux
-      - name: Configure MATLAB Python Environment
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") >> run.m
-          # Pass dynamic library paths to MATLAB only on macOS
-          if [[ $OSTYPE == "darwin"* ]]; then
-            echo "setenv('DYLD_LIBRARY_PATH', getenv('DYLD_LIBRARY_PATH'));" >> run.m
-          fi
+          python_exe = sys.executable
+          is_macos = platform.system() == 'Darwin'
 
-      # Warm up Python OutOfProcess worker to prevent intermittent "Unable to resolve" errors
-      - name: Add Python environment verification
-        shell: bash
-        run: |
-          echo "% Verify Python environment and warm up OutOfProcess worker" >> run.m
-          echo "pe = pyenv;" >> run.m
-          echo "disp(pe);" >> run.m
-          echo "py.importlib.import_module('numpy');" >> run.m
-          echo "py.importlib.import_module('mhkit');" >> run.m
-          echo "disp('Python environment verified: numpy and mhkit imported successfully');" >> run.m
+          # macOS needs DYLD_LIBRARY_PATH passed to MATLAB
+          dyld_line = \"setenv('DYLD_LIBRARY_PATH', getenv('DYLD_LIBRARY_PATH'));\" if is_macos else ''
 
-      - name: Add MATLAB test commands
-        shell: bash
-        run: echo "version,
-          addpath(genpath('mhkit')),
-          import matlab.unittest.TestSuite,
-          import matlab.unittest.TestRunner,
-          testFolder = ['mhkit' filesep 'tests'],
-          suite = TestSuite.fromFolder(testFolder),
-          runner = TestRunner.withTextOutput,
-          results = runner.run(suite),
-          assertSuccess(results)" >> run.m
+          content = f'''pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
+          {dyld_line}
+          % Verify Python environment
+          pe = pyenv;
+          disp(pe);
+          % Warm up numpy - must call function to force resolution
+          py.importlib.import_module('numpy');
+          dummy = py.numpy.array([1,2,3]);
+          disp(class(dummy));
+          clear dummy;
+          disp('py.numpy.array: resolved');
+          % Warm up mhkit submodules - force resolution by calling functions
+          py.importlib.import_module('mhkit');
+          py.importlib.import_module('mhkit.wave.io.ndbc');
+          py.importlib.import_module('mhkit.wave.io.swan');
+          py.importlib.import_module('mhkit.river.resource');
+          disp('mhkit submodules: imported');
+          version
+          pyenv
+          addpath(genpath('mhkit'))
+          import matlab.unittest.TestSuite
+          import matlab.unittest.TestRunner
+          testFolder = ['mhkit' filesep 'tests'];
+          suite = TestSuite.fromFolder(testFolder);
+          runner = TestRunner.withTextOutput;
+          results = runner.run(suite);
+          assertSuccess(results)
+          '''
+
+          with open('run.m', 'w', encoding='utf-8', newline='\\n') as f:
+              f.write(content)
+          "
 
       - name: Output run.m
         shell: bash
