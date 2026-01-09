@@ -58,11 +58,11 @@ jobs:
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
-      - name: pip install mhkit from pypi
+      - name: Conda install mhkit
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          pip install mhkit==$MHKIT_PYTHON_VERSION
+          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION
 
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
