@@ -67,7 +67,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION matplotlib
+          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION matplotlib scipy==1.14.0
 
       # Use conda's libstdc++ which has both GLIBCXX_3.4.29 (for pandas) and
       # CXXABI_1.3.15 (for matplotlib). System libstdc++ is too old.
@@ -92,12 +92,13 @@ jobs:
           conda activate mhkit_conda_env
           pip install -e .
 
-      - name: Pin scipy version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip uninstall -y scipy
-          pip install scipy==1.14.0
+      # scipy is now pinned in the conda install step above
+      # - name: Pin scipy version
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip uninstall -y scipy
+      #     pip install scipy==1.14.0
 
       - name: List installed pip modules
         shell: bash -l {0}
@@ -345,7 +346,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION matplotlib
+          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION matplotlib scipy==1.14.0
 
       # Use conda's libstdc++ which has both GLIBCXX_3.4.29 (for pandas) and
       # CXXABI_1.3.15 (for matplotlib). System libstdc++ is too old.
@@ -379,12 +380,12 @@ jobs:
           conda activate mhkit_conda_env
           pip install -e .
 
-      - name: Pin scipy version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip uninstall -y scipy
-          pip install scipy==1.14.0
+      # - name: Pin scipy version
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip uninstall -y scipy
+      #     pip install scipy==1.14.0
 
       - name: List installed pip modules
         shell: bash -l {0}
