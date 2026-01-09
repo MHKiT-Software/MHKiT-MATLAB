@@ -45,15 +45,17 @@ jobs:
       #   run: |
       #     conda activate mhkit_conda_env
       #     conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
-      #
-      # - name: Fix libstdc++ compatibility
-      #   if: matrix.os == 'ubuntu-22.04'
-      #   run: |
-      #     # Force MATLAB to use system libstdc++ instead of its bundled (older) version
-      #     # LD_PRELOAD forces the library to be loaded first
-      #     # LD_LIBRARY_PATH ensures symbol resolution finds the system library
-      #     echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
-      #     echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+
+      # OutOfProcess mode runs Python in a separate process, so LD_PRELOAD
+      # can force system libstdc++ for Python without affecting MATLAB's internals
+      - name: Fix libstdc++ compatibility
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          # Force MATLAB to use system libstdc++ instead of its bundled (older) version
+          # LD_PRELOAD forces the library to be loaded first
+          # LD_LIBRARY_PATH ensures symbol resolution finds the system library
+          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
@@ -98,7 +100,7 @@ jobs:
           release: ${{ matrix.matlab-version }}
 
       # Generate run.m using Python to match Windows workflow approach
-      # Using InProcess mode for cache_population job
+      # OutOfProcess mode with LD_PRELOAD allows Python to use system libstdc++
       - name: Generate run.m
         shell: bash -l {0}
         run: |
@@ -108,7 +110,7 @@ jobs:
 
           python_exe = sys.executable
 
-          content = f'''pyenv(Version='{python_exe}', ExecutionMode='InProcess')
+          content = f'''pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
           % Verify Python environment
           pe = pyenv;
           disp(pe);
