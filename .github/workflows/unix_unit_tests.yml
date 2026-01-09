@@ -416,15 +416,15 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
-      - name: Configure OpenSSL for MacOS/MATLAB
-        if: runner.os == 'macOS'
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          conda install openssl=="3.0.*"
-          CONDA_LIB_PATH=$(python -c "import sys; import os; print(os.path.join(os.path.dirname(sys.executable), 'lib'))")
-          export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$DYLD_LIBRARY_PATH"
-          echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+      # - name: Configure OpenSSL for MacOS/MATLAB
+      #   if: runner.os == 'macOS'
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     conda install openssl=="3.0.*"
+      #     CONDA_LIB_PATH=$(python -c "import sys; import os; print(os.path.join(os.path.dirname(sys.executable), 'lib'))")
+      #     export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$DYLD_LIBRARY_PATH"
+      #     echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Add Python Dir to Path
         shell: bash -l {0}
