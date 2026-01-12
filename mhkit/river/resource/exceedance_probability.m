@@ -86,9 +86,12 @@ si=size(vals);
  for i=1:si(2)
     test=string(py.str(vv{i}));
     newname=split(test,",");
-
-    F.(newname(1))=vals(:,i);
-
+    % Map Python column names to expected MATLAB field names
+    if newname(1) == "exceedance_probability"
+        F.F=vals(:,i);
+    else
+        F.(newname(1))=vals(:,i);
+    end
  end
  F.time=double(py.array.array('d',py.numpy.nditer(EPpd.index)));
 

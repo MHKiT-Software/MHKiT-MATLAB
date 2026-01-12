@@ -44,12 +44,8 @@ function datast=read_NDBC_file(file_name,varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
-% Note: This adds all numpy functions to the MATLAB namespace and leads a
-% large amount of warnings. We need to figure out how to just import the
-% one matlab function we need. Note 'numpy.nditer' does not work. You also
-% cannot save this to a variable and access it that way...
-% py.importlib.import_module('numpy');
+% Force load lazy-loaded mhkit.wave.io submodule
+py.importlib.import_module('mhkit.wave.io.ndbc');
 
 if nargin == 2
     missing=py.list(varargin{1});

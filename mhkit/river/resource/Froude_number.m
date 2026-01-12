@@ -23,8 +23,8 @@ function Fr=Froude_number(v,h,g)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if nargin == 3
-     Fr=py.mhkit.river.resource.Froude_number(v,h,pyargs('g',g));
+     Fr=py.mhkit.river.resource.froude_number(v,h,pyargs('g',g));
 else
-     Fr=py.mhkit.river.resource.Froude_number(v,h);
+     Fr=py.mhkit.river.resource.froude_number(v,h);
 end
 

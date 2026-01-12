@@ -29,7 +29,7 @@ jobs:
 
     env:
       mhkit-python-dir: "MHKiT-Python"
-      MHKIT_PYTHON_VERSION: '0.9.0'
+      MHKIT_PYTHON_VERSION: '1.0.1'
     steps:
       - name: Install & Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -40,26 +40,51 @@ jobs:
           activate-environment: mhkit_conda_env
           channels: conda-forge,defaults
 
-      - name: "Conda install netcdf4, hdf5"
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
+      # - name: "Conda install netcdf4, hdf5"
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
 
-      - name: Fix libstdc++ compatibility
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          # Force MATLAB to use system libstdc++
-          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6:/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+      # NOTE: System libstdc++ lacks CXXABI_1.3.15 needed by matplotlib
+      # Conda's libstdc++ should be used instead - set after conda install below
+      # - name: Fix libstdc++ compatibility
+      #   if: matrix.os == 'ubuntu-22.04'
+      #   run: |
+      #     # Force MATLAB to use system libstdc++ instead of its bundled (older) version
+      #     # LD_PRELOAD forces the library to be loaded first
+      #     # LD_LIBRARY_PATH ensures symbol resolution finds the system library
+      #     echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+      #     echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
-      - name: pip install mhkit from pypi
+      # mhkit depends on matplotlib-base, but pandas tries to register a matplotlib
+      # plotting backend during mhkit import. matplotlib-base may not be sufficient
+      # for this registration, so we install full matplotlib explicitly.
+      - name: Conda install mhkit
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          pip install mhkit==$MHKIT_PYTHON_VERSION
+          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION matplotlib scipy==1.14.0
+
+      # Use conda's libstdc++ which has both GLIBCXX_3.4.29 (for pandas) and
+      # CXXABI_1.3.15 (for matplotlib). System libstdc++ is too old.
+      - name: Fix libstdc++ compatibility (use conda's libstdc++)
+        if: matrix.os == 'ubuntu-22.04'
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          echo "LD_PRELOAD=$CONDA_PREFIX/lib/libstdc++.so.6" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+
+      - name: Verify matplotlib and mhkit imports
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python -c "import matplotlib; print(f'matplotlib: {matplotlib.__version__}')"
+          python -c "import mhkit; print(f'mhkit: {mhkit.__version__}')"
 
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
@@ -67,12 +92,13 @@ jobs:
           conda activate mhkit_conda_env
           pip install -e .
 
-      - name: Pin scipy version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip uninstall -y scipy
-          pip install scipy==1.12.0
+      # scipy is now pinned in the conda install step above
+      # - name: Pin scipy version
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip uninstall -y scipy
+      #     pip install scipy==1.14.0
 
       - name: List installed pip modules
         shell: bash -l {0}
@@ -94,24 +120,48 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
-      # OutOfProcess is required to properly call netcdf/hdf5 and works reliably on macos and ubuntu
-      - name: Configure MATLAB Python Environment
+      # Generate run.m using Python to match Windows workflow approach
+      # OutOfProcess mode with LD_PRELOAD allows Python to use system libstdc++
+      - name: Generate run.m
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
+          python -c "
+          import sys
 
-      - name: Add MATLAB test commands
-        shell: bash
-        run: echo "version,
-          addpath(genpath('mhkit')),
-          import matlab.unittest.TestSuite,
-          import matlab.unittest.TestRunner,
-          testFolder = ['mhkit' filesep 'tests'],
-          suite = TestSuite.fromFolder(testFolder),
-          runner = TestRunner.withTextOutput,
-          results = runner.run(suite),
-          assertSuccess(results)" >> run.m
+          python_exe = sys.executable
+
+          content = f'''pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
+          % Verify Python environment
+          pe = pyenv;
+          disp(pe);
+          % Warm up numpy - must call function to force resolution
+          py.importlib.import_module('numpy');
+          dummy = py.numpy.array([1,2,3]);
+          disp(class(dummy));
+          clear dummy;
+          disp('py.numpy.array: resolved');
+          % Warm up mhkit submodules - force resolution by calling functions
+          py.importlib.import_module('mhkit');
+          py.importlib.import_module('mhkit.wave.io.ndbc');
+          py.importlib.import_module('mhkit.wave.io.swan');
+          py.importlib.import_module('mhkit.river.resource');
+          disp('mhkit submodules: imported');
+          version
+          pyenv
+          addpath(genpath('mhkit'))
+          import matlab.unittest.TestSuite
+          import matlab.unittest.TestRunner
+          testFolder = ['mhkit' filesep 'tests'];
+          suite = TestSuite.fromFolder(testFolder);
+          runner = TestRunner.withTextOutput;
+          results = runner.run(suite);
+          assertSuccess(results)
+          '''
+
+          with open('run.m', 'w', encoding='utf-8', newline='\\n') as f:
+              f.write(content)
+          "
 
       - name: Output run.m
         shell: bash
@@ -137,16 +187,16 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [macos-13, "ubuntu-22.04"]
+        os: [macos-15, macos-15-intel, "ubuntu-22.04"]
         python-version: ["3.10", 3.11, 3.12]
         # Note: It is preferred to use an actual release name as opposed to 'latest'
+        # macos-15 is ARM (Apple Silicon) - R2023b+ run natively
+        # macos-15-intel is x64 - R2022b/R2023a run natively (no Rosetta needed)
+        # matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b, R2025a]
         matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
-        mhkit-python-version: ["0.9.0"]
+        mhkit-python-version: ["1.0.1"]
         exclude:
-          - python-version: "3.10" # cache_population job
-            matlab-version: R2022b
-            os: "ubuntu-22.04"
-          # Python 3.12 + MATLAB incompatability
+          # Python 3.12 + MATLAB incompatibility
           - matlab-version: R2024a
             python-version: 3.12
           - matlab-version: R2023b
@@ -155,23 +205,40 @@ jobs:
             python-version: 3.12
           - matlab-version: R2022b
             python-version: 3.12
-          # Python 3.11 + MATLAB incompatability
+          - matlab-version: R2025a
+            python-version: 3.12
+          # Python 3.11 + MATLAB incompatibility
           - matlab-version: R2023a
             python-version: 3.11
           - matlab-version: R2022b
             python-version: 3.11
+          # Architecture-specific macOS exclusions
+          # Intel MATLAB (R2022b, R2023a) should only run on macos-15-intel
+          - matlab-version: R2022b
+            os: macos-15
+          - matlab-version: R2023a
+            os: macos-15
+          # ARM MATLAB (R2023b+) should only run on macos-15 (ARM)
+          - matlab-version: R2023b
+            os: macos-15-intel
+          - matlab-version: R2024a
+            os: macos-15-intel
+          - matlab-version: R2024b
+            os: macos-15-intel
+          - matlab-version: R2025a
+            os: macos-15-intel
           # Specific MATLAB/Python/OS Errors
           # Error using _cythonized_array_utils>init
           # scipy.linalg._cythonized_array_utils (line 1)
           # Python Error: ValueError: numpy.dtype size changed, may indicate binary
           # incompatibility. Expected 96 from C header, got 88 from PyObject
-          - matlab-version: R2024b
-            python-version: 3.12
-            os: macos-13
+          # - matlab-version: R2024b
+          #   python-version: 3.12
+          #   os: macos-15
           # Unable to resolve the name 'py.mhkit.wave.resource.jonswap_spectrum'
-          - matlab-version: R2023a
-            python-version: 3.10
-            os: "ubuntu-22.04"
+          # - matlab-version: R2023a
+          #   python-version: 3.10
+          #   os: "ubuntu-22.04"
 
     runs-on: ${{ matrix.os }}
 
@@ -191,22 +258,74 @@ jobs:
           activate-environment: mhkit_conda_env
           channels: conda-forge,defaults
 
-      # This is necessary to fix any issues with netcdf4 and hdf5 headers
-      - name: "Conda install netcdf4, hdf5"
+      # # This is necessary to fix any issues with netcdf4 and hdf5 headers
+      # - name: "Conda install netcdf4, hdf5"
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
+
+      # NOTE: System libstdc++ lacks CXXABI_1.3.15 needed by matplotlib
+      # Conda's libstdc++ is used instead - set after conda install below
+      # - name: Fix libstdc++ compatibility
+      #   if: matrix.os == 'ubuntu-22.04'
+      #   run: |
+      #     # Force MATLAB to use system libstdc++ instead of its bundled (older) version
+      #     # LD_PRELOAD forces the library to be loaded first
+      #     # LD_LIBRARY_PATH ensures symbol resolution finds the system library
+      #     echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+      #     echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+
+      # Pin compatible ICU version based on MATLAB's bundled libstdc++ capabilities
+      # Older MATLAB versions bundle older libstdc++ missing newer GLIBCXX symbols
+      - name: Pin compatible ICU version for MATLAB
+        if: matrix.os == 'ubuntu-22.04'
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
 
-      - name: Fix libstdc++ compatibility
+          # Lookup table: MATLAB version -> max compatible ICU version
+          # Based on GLIBCXX symbols available in MATLAB's bundled libstdc++
+          declare -A ICU_COMPAT=(
+            ["R2022a"]="70"
+            ["R2022b"]="70"
+            ["R2023a"]="70"
+            ["R2023b"]=""  # empty = use latest (has modern libstdc++)
+            ["R2024a"]=""
+            ["R2024b"]=""
+            ["R2025a"]=""
+          )
+
+          MATLAB_VERSION="${{ matrix.matlab-version }}"
+          ICU_VERSION="${ICU_COMPAT[$MATLAB_VERSION]}"
+
+          if [ -n "$ICU_VERSION" ]; then
+            echo "MATLAB $MATLAB_VERSION requires older ICU. Installing icu=$ICU_VERSION"
+            conda install -y "icu<=$ICU_VERSION"
+          else
+            echo "MATLAB $MATLAB_VERSION has modern libstdc++, using default ICU"
+          fi
+
+      # Diagnostic: Check what GLIBC symbols are required by key libraries
+      - name: Diagnose library dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-22.04'
+        shell: bash -l {0}
         run: |
-          # Force MATLAB to use system libstdc++
-          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6:/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
-
-      # - name: Setup MATLAB Path on Ubuntu
-      #   if: ${{ matrix.os == '"ubuntu-22.04"' }}
-      #   run: echo "LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
+          conda activate mhkit_conda_env
+          echo "=== System libstdc++ GLIBCXX versions ==="
+          strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX | tail -10
+          echo ""
+          echo "=== Conda libicuuc location and GLIBCXX requirements ==="
+          ICUUC=$(find $CONDA_PREFIX -name "libicuuc.so*" 2>/dev/null | head -1)
+          if [ -n "$ICUUC" ]; then
+            echo "Found: $ICUUC"
+            strings "$ICUUC" | grep GLIBCXX || echo "No GLIBCXX requirements"
+          else
+            echo "libicuuc not found in conda env"
+          fi
+          echo ""
+          echo "=== MATLAB libstdc++ location (if accessible) ==="
+          ls -la /opt/hostedtoolcache/MATLAB/*/x64/sys/os/glnxa64/libstdc++.so.6 2>/dev/null || echo "MATLAB libstdc++ not found"
 
       - name: Print Python executable
         shell: bash -l {0}
@@ -220,19 +339,31 @@ jobs:
           conda activate mhkit_conda_env
           python --version
 
-      - name: pip install mhkit from pypi
+      # mhkit depends on matplotlib-base, but pandas tries to register a matplotlib
+      # plotting backend during mhkit import. matplotlib-base may not be sufficient
+      # for this registration, so we install full matplotlib explicitly.
+      - name: Conda install mhkit
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-          pip install mhkit==$MHKIT_PYTHON_VERSION
+          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION matplotlib scipy==1.14.0
 
-      - name: pip upgrade netcdf4
+      # Use conda's libstdc++ which has both GLIBCXX_3.4.29 (for pandas) and
+      # CXXABI_1.3.15 (for matplotlib). System libstdc++ is too old.
+      - name: Fix libstdc++ compatibility (use conda's libstdc++)
+        if: matrix.os == 'ubuntu-22.04'
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-          pip install --upgrade netcdf4
+          echo "LD_PRELOAD=$CONDA_PREFIX/lib/libstdc++.so.6" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+
+      - name: Verify matplotlib and mhkit imports
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python -c "import matplotlib; print(f'matplotlib: {matplotlib.__version__}')"
+          python -c "import mhkit; print(f'mhkit: {mhkit.__version__}')"
 
       - name: pip install mhkit-python-utils module from source
         shell: bash -l {0}
@@ -240,12 +371,12 @@ jobs:
           conda activate mhkit_conda_env
           pip install -e .
 
-      - name: Pin scipy version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip uninstall -y scipy
-          pip install scipy==1.12.0
+      # - name: Pin scipy version
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     pip uninstall -y scipy
+      #     pip install scipy==1.14.0
 
       - name: List installed pip modules
         shell: bash -l {0}
@@ -275,49 +406,143 @@ jobs:
         run: ls -R
         working-directory: .
 
+      - name: Install Amazon Corretto 11 for ARM MATLAB
+        if: runner.os == 'macOS'
+        run: |
+          # ARM MATLAB (R2023b+) requires Java 11
+          brew install --cask corretto@11
+          echo "JAVA_HOME=$(/usr/libexec/java_home -v 11)" >> $GITHUB_ENV
+
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
         with:
           release: ${{ matrix.matlab-version }}
 
-      - name: Configure OpenSSL for MacOS/MATLAB
-        if: matrix.os == 'macos-13'
+      # - name: Configure OpenSSL for MacOS/MATLAB
+      #   if: runner.os == 'macOS'
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda activate mhkit_conda_env
+      #     conda install openssl=="3.0.*"
+
+      # Diagnostic: Show OpenSSL library dependencies to understand the full chain
+      - name: Diagnose OpenSSL dependencies (macOS)
+        if: runner.os == 'macOS'
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install openssl=="3.0.*"
-          CONDA_LIB_PATH=$(python -c "import sys; import os; print(os.path.join(os.path.dirname(sys.executable), 'lib'))")
-          export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$DYLD_LIBRARY_PATH"
-          echo "export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "=== libssl dependencies ==="
+          otool -L $CONDA_PREFIX/lib/libssl*.dylib 2>/dev/null | head -20 || echo "libssl not found"
+          echo ""
+          echo "=== libcrypto dependencies ==="
+          otool -L $CONDA_PREFIX/lib/libcrypto*.dylib 2>/dev/null | head -20 || echo "libcrypto not found"
 
-      - name: Add Python Dir to Path
+      # Generate run.m using Python to match cache_population job
+      # OutOfProcess mode with LD_PRELOAD allows Python to use conda's libstdc++
+      - name: Generate run.m
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
+          python -c "
+          import sys
+          import platform
+          import os
 
-      # OutOfProcess is required to properly call netcdf/hdf5 and works reliably on macos and ubuntu
-      - name: Configure MATLAB Python Environment
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") >> run.m
-          # Pass dynamic library paths to MATLAB only on macOS
-          if [[ $OSTYPE == "darwin"* ]]; then
-            echo "setenv('DYLD_LIBRARY_PATH', getenv('DYLD_LIBRARY_PATH'));" >> run.m
-          fi
+          python_exe = sys.executable
+          is_macos = platform.system() == 'Darwin'
 
-      - name: Add MATLAB test commands
-        shell: bash
-        run: echo "version,
-          addpath(genpath('mhkit')),
-          import matlab.unittest.TestSuite,
-          import matlab.unittest.TestRunner,
-          testFolder = ['mhkit' filesep 'tests'],
-          suite = TestSuite.fromFolder(testFolder),
-          runner = TestRunner.withTextOutput,
-          results = runner.run(suite),
-          assertSuccess(results)" >> run.m
+          # macOS: Use DYLD_FALLBACK_LIBRARY_PATH instead of DYLD_LIBRARY_PATH
+          # FALLBACK is checked after default locations, so MATLAB's libs load first
+          # but conda's libs are available as fallback for symbols MATLAB doesn't have
+          dyld_line = ''
+          if is_macos:
+              conda_lib_path = os.path.join(os.path.dirname(os.path.dirname(python_exe)), 'lib')
+              dyld_line = f\"setenv('DYLD_FALLBACK_LIBRARY_PATH', '{conda_lib_path}');\"
+
+          # macOS: Preload conda's OpenSSL libs with RTLD_GLOBAL so libcurl finds
+          # the correct symbols instead of MATLAB's older bundled versions.
+          # Use otool -L to programmatically find all dependencies and load them in order.
+          ssl_preload = ''
+          if is_macos:
+              import subprocess
+              import ctypes.util
+
+              def get_conda_lib_deps(lib_path, conda_lib_dir):
+                  '''Get conda library dependencies using otool -L'''
+                  try:
+                      result = subprocess.run(['otool', '-L', lib_path], capture_output=True, text=True)
+                      deps = []
+                      for line in result.stdout.strip().split('\n')[1:]:  # Skip first line (the lib itself)
+                          line = line.strip()
+                          if line and '(' in line:
+                              dep_path = line.split('(')[0].strip()
+                              # Only include conda libs, not system libs
+                              if conda_lib_dir in dep_path or dep_path.startswith('@rpath'):
+                                  if '@rpath' in dep_path:
+                                      dep_path = dep_path.replace('@rpath', conda_lib_dir)
+                                  deps.append(dep_path)
+                      return deps
+                  except Exception:
+                      return []
+
+              conda_lib_dir = os.path.join(os.path.dirname(os.path.dirname(python_exe)), 'lib')
+              ssl_lib_path = os.path.join(conda_lib_dir, 'libssl.dylib')
+
+              # Build dependency chain recursively
+              def collect_deps(lib_path, collected, seen):
+                  '''Recursively collect library and its dependencies (depth-first)'''
+                  if lib_path in seen or not os.path.exists(lib_path):
+                      return
+                  seen.add(lib_path)
+                  # First collect dependencies (so they come before this lib)
+                  for dep in get_conda_lib_deps(lib_path, conda_lib_dir):
+                      collect_deps(dep, collected, seen)
+                  # Then add this lib
+                  collected.append(lib_path)
+
+              all_libs = []
+              collect_deps(ssl_lib_path, all_libs, set())
+
+              if all_libs:
+                  preload_lines = ['% Preload conda OpenSSL libs with RTLD_GLOBAL (dependencies first)']
+                  for lib in all_libs:
+                      preload_lines.append(f\"          py.ctypes.CDLL('{lib}', pyargs('mode', py.ctypes.RTLD_GLOBAL));\")
+                  preload_lines.append(f\"          disp('Preloaded {len(all_libs)} conda libs with RTLD_GLOBAL');\")
+                  ssl_preload = '\\n'.join(preload_lines)
+
+          content = f'''pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
+          {dyld_line}
+          % Verify Python environment
+          pe = pyenv;
+          disp(pe);
+          {ssl_preload}
+          % Warm up numpy - must call function to force resolution
+          py.importlib.import_module('numpy');
+          dummy = py.numpy.array([1,2,3]);
+          disp(class(dummy));
+          clear dummy;
+          disp('py.numpy.array: resolved');
+          % Warm up mhkit submodules - force resolution by calling functions
+          py.importlib.import_module('mhkit');
+          py.importlib.import_module('mhkit.wave.io.ndbc');
+          py.importlib.import_module('mhkit.wave.io.swan');
+          py.importlib.import_module('mhkit.river.resource');
+          disp('mhkit submodules: imported');
+          version
+          pyenv
+          addpath(genpath('mhkit'))
+          import matlab.unittest.TestSuite
+          import matlab.unittest.TestRunner
+          testFolder = ['mhkit' filesep 'tests'];
+          suite = TestSuite.fromFolder(testFolder);
+          runner = TestRunner.withTextOutput;
+          results = runner.run(suite);
+          assertSuccess(results)
+          '''
+
+          with open('run.m', 'w', encoding='utf-8', newline='\\n') as f:
+              f.write(content)
+          "
 
       - name: Output run.m
         shell: bash

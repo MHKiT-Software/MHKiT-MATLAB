@@ -20,14 +20,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest]
+        os: [windows-2025]
         python-version: ["3.11"]
         matlab-version: [R2023b]
     runs-on: ${{ matrix.os }}
 
     env:
       mhkit-python-dir: "MHKiT-Python"
-      MHKIT_PYTHON_VERSION: '0.9.0'
+      MHKIT_PYTHON_VERSION: '1.0.1'
     steps:
       - name: Install/Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -43,7 +43,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install mhkit==$MHKIT_PYTHON_VERSION
+          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v4
 
@@ -52,6 +52,15 @@ jobs:
         run: |
           conda activate mhkit_conda_env
           pip install -e .
+
+      # mhkit 1.0.1 requires numpy 2.0+ (uses np.trapezoid)
+      # scipy 1.14+ is compatible with numpy 2.0
+      - name: Pin scipy version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip uninstall -y scipy
+          pip install scipy==1.14.0
 
       - name: List Installed Python Packages using Conda
         shell: bash -l {0}
@@ -89,36 +98,68 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
-      - name: Set PYBIND11 GIL workaround
-        # if: ${{ matrix.matlab-version == 'R2025a' }}
+      # Set Python environment variables BEFORE any MATLAB/Python interaction
+      # NOTE: Do NOT set PYTHONHOME - it causes "SRE module mismatch" errors
+      - name: Configure Python environment for MATLAB
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          export PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1
-          echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
+          # Add site-packages to Python's search path
+          echo "PYTHONPATH=$CONDA_PREFIX/Lib/site-packages" >> $GITHUB_ENV
+          # Add conda paths for DLL resolution
+          echo "$CONDA_PREFIX" >> $GITHUB_PATH
+          echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
+          echo "$CONDA_PREFIX/Scripts" >> $GITHUB_PATH
 
-      - name: Configure MATLAB pyenv Version and ExecutionMode
-        if: ${{ matrix.os == 'windows-latest' }}
-        shell: pwsh
-        run: >
-          "pyenv(Version='{0}', ExecutionMode='OutOfProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
-
-      - name: Check Python System Path
+      - name: Set PYBIND11 GIL workaround
         shell: bash -l {0}
         run: |
-          echo "py.sys.path" >> run.m
+          conda activate mhkit_conda_env
+          echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
+          # Allow duplicate OpenMP libraries (MATLAB's libiomp5md.dll + numpy's libomp.dll)
+          echo "KMP_DUPLICATE_LIB_OK=TRUE" >> $GITHUB_ENV
 
-      - name: Add MATLAB test commands
-        shell: bash
-        run: echo "version,
-          addpath(genpath('mhkit')),
-          import matlab.unittest.TestSuite,
-          import matlab.unittest.TestRunner,
-          testFolder = ['mhkit' filesep 'tests'],
-          suite = TestSuite.fromFolder(testFolder),
-          runner = TestRunner.withTextOutput,
-          results = runner.run(suite),
-          assertSuccess(results)" >> run.m
+      # Generate run.m using Python to avoid shell encoding issues on Windows
+      - name: Generate run.m
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          python -c "
+          import sys
+
+          python_exe = sys.executable.replace('\\\\', '/')
+
+          content = f'''pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
+          % Verify Python environment
+          pe = pyenv;
+          disp(pe);
+          % Warm up numpy - must call function to force resolution
+          py.importlib.import_module('numpy');
+          dummy = py.numpy.array([1,2,3]);
+          disp(class(dummy));
+          clear dummy;
+          disp('py.numpy.array: resolved');
+          % Warm up mhkit submodules - force resolution by calling functions
+          py.importlib.import_module('mhkit');
+          py.importlib.import_module('mhkit.wave.io.ndbc');
+          py.importlib.import_module('mhkit.wave.io.swan');
+          py.importlib.import_module('mhkit.river.resource');
+          disp('mhkit submodules: imported');
+          version
+          pyenv
+          addpath(genpath('mhkit'))
+          import matlab.unittest.TestSuite
+          import matlab.unittest.TestRunner
+          testFolder = ['mhkit' filesep 'tests'];
+          suite = TestSuite.fromFolder(testFolder);
+          runner = TestRunner.withTextOutput;
+          results = runner.run(suite);
+          assertSuccess(results)
+          '''
+
+          with open('run.m', 'w', encoding='utf-8', newline='\\n') as f:
+              f.write(content)
+          "
 
       - name: Output Run.m
         shell: bash
@@ -143,11 +184,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest]
+        os: [windows-2025]
         python-version: ["3.10", 3.11, 3.12]
         # matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
         matlab-version: [R2023a, R2023b, R2024a, R2024b]
-        mhkit-python-version: ["0.9.0"]
+        mhkit-python-version: ["1.0.1"]
         exclude:
           # Cache population job
           - matlab-version: R2023b
@@ -193,7 +234,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          conda install mhkit==$MHKIT_PYTHON_VERSION
+          conda install -c conda-forge mhkit==$MHKIT_PYTHON_VERSION
       - name: Output python executable
         shell: bash -l {0}
         run: |
@@ -213,19 +254,19 @@ jobs:
           conda activate mhkit_conda_env
           pip3 install -e .
 
-      # - name: Pin scipy version
-      #   shell: bash -l {0}
-      #   run: |
-      #     conda activate mhkit_conda_env
-      #     pip uninstall -y scipy
-      #     pip install scipy==1.10.1
-      #
+      # mhkit 1.0.1 requires numpy 2.0+ (uses np.trapezoid)
+      # scipy 1.14+ is compatible with numpy 2.0
+      - name: Pin scipy version
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          pip uninstall -y scipy
+          pip install scipy==1.14.0
 
       # Some tests fail with:
       # Python Error: ImportError: DLL load failed while importing pyexpat: The operating system cannot run %1.
       # One potential fix is to install expat and lxml
       - name: Install Windows XML dependencies
-        if: ${{ matrix.os == 'windows-latest' }}
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
@@ -265,41 +306,74 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
-      - name: Set PYBIND11 GIL workaround
-        # if: ${{ matrix.matlab-version == 'R2025a' }}
+      # Set Python environment variables BEFORE any MATLAB/Python interaction
+      # NOTE: Do NOT set PYTHONHOME - it causes "SRE module mismatch" errors
+      - name: Configure Python environment for MATLAB
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          export PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1
-          echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
+          # Add site-packages to Python's search path
+          echo "PYTHONPATH=$CONDA_PREFIX/Lib/site-packages" >> $GITHUB_ENV
+          # Add conda paths for DLL resolution
+          echo "$CONDA_PREFIX" >> $GITHUB_PATH
+          echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
+          echo "$CONDA_PREFIX/Scripts" >> $GITHUB_PATH
 
-      - name: Add Python Dir to Path
+      - name: Set PYBIND11 GIL workaround
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
-      # OutOfProcess works reliably on linux, macos, and windows
-      - name: Configure MATLAB pyenv Version and ExecutionMode
+          echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
+          # Allow duplicate OpenMP libraries (MATLAB's libiomp5md.dll + numpy's libomp.dll)
+          echo "KMP_DUPLICATE_LIB_OK=TRUE" >> $GITHUB_ENV
+
+      # Generate run.m using Python to avoid shell encoding issues on Windows
+      - name: Generate run.m
         shell: bash -l {0}
         run: |
           conda activate mhkit_conda_env
-          printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')\n" $(python -c "import sys; print(sys.executable)") >> run.m
-      - name: Check Python System Path
-        shell: bash -l {0}
-        run: |
-          echo "py.sys.path" >> run.m
-      - name: Add MATLAB test commands
-        shell: bash
-        run: echo "version,
-          pyenv,
-          addpath(genpath('mhkit')),
-          import matlab.unittest.TestSuite,
-          import matlab.unittest.TestRunner,
-          testFolder = ['mhkit' filesep 'tests'],
-          suite = TestSuite.fromFolder(testFolder),
-          runner = TestRunner.withTextOutput,
-          results = runner.run(suite),
-          assertSuccess(results)" >> run.m
+          python -c "
+          import sys
+          import os
+
+          python_exe = sys.executable.replace('\\\\', '/')
+          python_dir = os.path.dirname(sys.executable).replace('\\\\', '/')
+
+          content = f'''getenv('path')
+          setenv('path', ['{python_dir};', getenv('path')])
+          getenv('path')
+          pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
+          % Verify Python environment
+          pe = pyenv;
+          disp(pe);
+          % Warm up numpy - must call function to force resolution
+          py.importlib.import_module('numpy');
+          dummy = py.numpy.array([1,2,3]);
+          disp(class(dummy));
+          clear dummy;
+          disp('py.numpy.array: resolved');
+          % Warm up mhkit submodules - force resolution by calling functions
+          py.importlib.import_module('mhkit');
+          py.importlib.import_module('mhkit.wave.io.ndbc');
+          py.importlib.import_module('mhkit.wave.io.swan');
+          py.importlib.import_module('mhkit.river.resource');
+          disp('mhkit submodules: imported');
+          py.sys.path
+          version
+          pyenv
+          addpath(genpath('mhkit'))
+          import matlab.unittest.TestSuite
+          import matlab.unittest.TestRunner
+          testFolder = ['mhkit' filesep 'tests'];
+          suite = TestSuite.fromFolder(testFolder);
+          runner = TestRunner.withTextOutput;
+          results = runner.run(suite);
+          assertSuccess(results)
+          '''
+
+          with open('run.m', 'w', encoding='utf-8', newline='\\n') as f:
+              f.write(content)
+          "
 
       - name: Output Run.m
         shell: bash

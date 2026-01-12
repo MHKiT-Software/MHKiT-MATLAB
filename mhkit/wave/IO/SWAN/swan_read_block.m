@@ -14,6 +14,9 @@ function data=swan_read_block(swan_file)
 %     data: Structure
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Force load lazy-loaded mhkit.wave.io submodule
+py.importlib.import_module('mhkit.wave.io.swan');
+
 datatp = py.mhkit.wave.io.swan.read_block(swan_file);
 datac=cell(datatp);
 datapd=datac{1};
