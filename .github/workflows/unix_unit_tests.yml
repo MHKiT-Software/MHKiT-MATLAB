@@ -358,15 +358,6 @@ jobs:
           echo "LD_PRELOAD=$CONDA_PREFIX/lib/libstdc++.so.6" >> "$GITHUB_ENV"
           echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
-      # macOS: MATLAB's bundled libssl is missing _SSL_get0_group_name needed by
-      # netCDF4's libcurl. Set DYLD_LIBRARY_PATH so conda's OpenSSL is found first.
-      - name: Fix OpenSSL compatibility for macOS
-        if: runner.os == 'macOS'
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          echo "DYLD_LIBRARY_PATH=$CONDA_PREFIX/lib:$DYLD_LIBRARY_PATH" >> "$GITHUB_ENV"
-
       - name: Verify matplotlib and mhkit imports
         shell: bash -l {0}
         run: |
@@ -426,6 +417,16 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         with:
           release: ${{ matrix.matlab-version }}
+
+      # macOS: MATLAB's bundled libssl is missing _SSL_get0_group_name needed by
+      # netCDF4's libcurl. Set DYLD_LIBRARY_PATH so conda's OpenSSL is found first.
+      # NOTE: Must be AFTER "Set up MATLAB" or MATLAB installer fails with _iconv error
+      - name: Fix OpenSSL compatibility for macOS
+        if: runner.os == 'macOS'
+        shell: bash -l {0}
+        run: |
+          conda activate mhkit_conda_env
+          echo "DYLD_LIBRARY_PATH=$CONDA_PREFIX/lib:$DYLD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       # - name: Configure OpenSSL for MacOS/MATLAB
       #   if: runner.os == 'macOS'
