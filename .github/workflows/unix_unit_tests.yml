@@ -450,11 +450,25 @@ jobs:
               conda_lib_path = os.path.join(os.path.dirname(os.path.dirname(python_exe)), 'lib')
               dyld_line = f\"setenv('DYLD_FALLBACK_LIBRARY_PATH', '{conda_lib_path}');\"
 
+          # macOS: Preload conda's libssl with RTLD_GLOBAL so libcurl finds
+          # SSL_get0_group_name in conda's library instead of MATLAB's older one
+          ssl_preload = ''
+          if is_macos:
+              import ssl
+              import ctypes.util
+              # Get the libssl path that Python's ssl module uses
+              ssl_lib = ctypes.util.find_library('ssl')
+              if ssl_lib:
+                  ssl_preload = f'''% Preload conda's libssl with RTLD_GLOBAL to avoid MATLAB's older bundled version
+          py.ctypes.CDLL(py.ctypes.util.find_library('ssl'), pyargs('mode', py.ctypes.RTLD_GLOBAL));
+          disp('Preloaded libssl with RTLD_GLOBAL');'''
+
           content = f'''pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
           {dyld_line}
           % Verify Python environment
           pe = pyenv;
           disp(pe);
+          {ssl_preload}
           % Warm up numpy - must call function to force resolution
           py.importlib.import_module('numpy');
           dummy = py.numpy.array([1,2,3]);
