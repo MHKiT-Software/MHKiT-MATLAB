@@ -418,16 +418,6 @@ jobs:
         with:
           release: ${{ matrix.matlab-version }}
 
-      # macOS: MATLAB's bundled libssl is missing _SSL_get0_group_name needed by
-      # netCDF4's libcurl. Set DYLD_LIBRARY_PATH so conda's OpenSSL is found first.
-      # NOTE: Must be AFTER "Set up MATLAB" or MATLAB installer fails with _iconv error
-      - name: Fix OpenSSL compatibility for macOS
-        if: runner.os == 'macOS'
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          echo "DYLD_LIBRARY_PATH=$CONDA_PREFIX/lib:$DYLD_LIBRARY_PATH" >> "$GITHUB_ENV"
-
       # - name: Configure OpenSSL for MacOS/MATLAB
       #   if: runner.os == 'macOS'
       #   shell: bash -l {0}
@@ -447,12 +437,17 @@ jobs:
           python -c "
           import sys
           import platform
+          import os
 
           python_exe = sys.executable
           is_macos = platform.system() == 'Darwin'
 
-          # macOS needs DYLD_LIBRARY_PATH passed to MATLAB
-          dyld_line = \"setenv('DYLD_LIBRARY_PATH', getenv('DYLD_LIBRARY_PATH'));\" if is_macos else ''
+          # macOS: Set DYLD_LIBRARY_PATH directly in run.m (not via env var)
+          # This avoids breaking MATLAB's launcher while still fixing OpenSSL for Python
+          dyld_line = ''
+          if is_macos:
+              conda_lib_path = os.path.join(os.path.dirname(os.path.dirname(python_exe)), 'lib')
+              dyld_line = f\"setenv('DYLD_LIBRARY_PATH', '{conda_lib_path}');\"
 
           content = f'''pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
           {dyld_line}
