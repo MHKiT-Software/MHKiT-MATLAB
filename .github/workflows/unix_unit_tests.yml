@@ -442,12 +442,13 @@ jobs:
           python_exe = sys.executable
           is_macos = platform.system() == 'Darwin'
 
-          # macOS: Set DYLD_LIBRARY_PATH directly in run.m (not via env var)
-          # This avoids breaking MATLAB's launcher while still fixing OpenSSL for Python
+          # macOS: Use DYLD_FALLBACK_LIBRARY_PATH instead of DYLD_LIBRARY_PATH
+          # FALLBACK is checked after default locations, so MATLAB's libs load first
+          # but conda's libs are available as fallback for symbols MATLAB doesn't have
           dyld_line = ''
           if is_macos:
               conda_lib_path = os.path.join(os.path.dirname(os.path.dirname(python_exe)), 'lib')
-              dyld_line = f\"setenv('DYLD_LIBRARY_PATH', '{conda_lib_path}');\"
+              dyld_line = f\"setenv('DYLD_FALLBACK_LIBRARY_PATH', '{conda_lib_path}');\"
 
           content = f'''pyenv(Version='{python_exe}', ExecutionMode='OutOfProcess')
           {dyld_line}
