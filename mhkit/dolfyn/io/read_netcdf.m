@@ -59,7 +59,7 @@ function ds = read_netcdf(filename)
                     convertStringsToChars(ncread(filename,name));
             else
                 if strcmpi(dimensions.Name, 'x*')
-                    ds.coords.x_star = ncread(filename,name);
+                    ds.coords.x1 = ncread(filename,name);
                 else
                     ds.coords.(name) = ncread(filename,name);
                 end
@@ -105,12 +105,23 @@ function ds = read_netcdf(filename)
             ds.(name).dims = cell(numel(dimensions),1);
             for kk = 1:numel(dimensions)
                 if strcmpi(dimensions(kk).Name, 'x*')
-                    ds.(name).dims{kk} = 'x_star';
+                    ds.(name).dims{kk} = 'x1';
                 else
                     ds.(name).dims{kk} = dimensions(kk).Name;
                 end
-                ds.(name).coords.(dimensions(kk).Name) = ...
-                    ds.coords.(dimensions(kk).Name);
+                % Check if coordinate variable exists before accessing it
+                dim_name = dimensions(kk).Name;
+                if isfield(ds.coords, dim_name)
+                    ds.(name).coords.(dim_name) = ds.coords.(dim_name);
+                else
+                    % Create index coordinates for dimensions without coordinate variables
+                    dim_length = dimensions(kk).Length;
+                    ds.(name).coords.(dim_name) = (0:dim_length-1)';
+                    % Also add to global coords if not present
+                    if ~isfield(ds.coords, dim_name)
+                        ds.coords.(dim_name) = (0:dim_length-1)';
+                    end
+                end
             end
             if ~isempty(attrs)
                 for ii = 1:numel(attrs)

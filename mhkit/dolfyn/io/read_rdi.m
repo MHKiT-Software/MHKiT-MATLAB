@@ -132,11 +132,12 @@ function ds = read_rdi(filename,options)
         ds.beam2inst_orientmat.data = calc_beam_orientmat(...
             ds.attrs.beam_angle,...
             strcmp(ds.attrs.beam_pattern,'convex'), true);
-        ds.beam2inst_orientmat.dims = {'x_star', 'x'};
-        ds.beam2inst_orientmat.coords = struct('x_star',...
-            [1,2,3,4], 'x', [1,2,3,4]);
-        ds.coords.x_star = [1,2,3,4];
-        ds.coords.x = [1,2,3,4];
+        ds.beam2inst_orientmat.dims = {'x1', 'x2'};
+        ds.beam2inst_orientmat.coords = struct('x1',...
+            [1,2,3,4], 'x2', [1,2,3,4]);
+        ds.beam2inst_orientmat.units = '';
+        ds.coords.x1 = [1,2,3,4];
+        ds.coords.x2 = [1,2,3,4];
     end
 
     if ~isfield(ds, 'orientmat')
@@ -145,6 +146,7 @@ function ds = read_rdi(filename,options)
         ds.orientmat.coords.inst = {'X' 'Y' 'Z'};
         ds.orientmat.coords.earth = {'E' 'N' 'U'};
         ds.orientmat.dims = {'time', 'inst', 'earth'};
+        ds.orientmat.units = '';
     end
 
     % Check magnetic declination if provided via software and/or userdata
@@ -797,7 +799,7 @@ function ds = read_rdi(filename,options)
         out.c_sound.data = zeros(navg);
         out.c_sound.dtype = "float32";
         out.c_sound.group = "data_vars";
-        out.c_sound.units = "m/s";
+        out.c_sound.units = "m s-1";
 
         out.depth.data = zeros(navg);
         out.depth.dtype = "float32";
@@ -807,22 +809,22 @@ function ds = read_rdi(filename,options)
         out.pitch.data = zeros(navg);
         out.pitch.dtype = "float32";
         out.pitch.group = "data_vars";
-        out.pitch.units = "deg";
+        out.pitch.units = "degree";
 
         out.roll.data = zeros(navg);
         out.roll.dtype = "float32";
         out.roll.group = "data_vars";
-        out.roll.units = "deg";
+        out.roll.units = "degree";
 
         out.heading.data = zeros(navg);
         out.heading.dtype = "float32";
         out.heading.group = "data_vars";
-        out.heading.units = "deg";
+        out.heading.units = "degree";
 
         out.temp.data = zeros(navg);
         out.temp.dtype = "float32";
         out.temp.group = "data_vars";
-        out.temp.units = "C";
+        out.temp.units = "degree_C";
 
         out.salinity.data = zeros(navg);
         out.salinity.dtype = "float32";
@@ -837,27 +839,27 @@ function ds = read_rdi(filename,options)
         out.heading_std.data = zeros(navg);
         out.heading_std.dtype = "float32";
         out.heading_std.group = "data_vars";
-        out.heading_std.units = "deg";
+        out.heading_std.units = "degree";
 
         out.pitch_std.data = zeros(navg);
         out.pitch_std.dtype = "float32";
         out.pitch_std.group = "data_vars";
-        out.pitch_std.units = "deg";
+        out.pitch_std.units = "degree";
 
         out.roll_std.data = zeros(navg);
         out.roll_std.dtype = "float32";
         out.roll_std.group = "data_vars";
-        out.roll_std.units = "deg";
+        out.roll_std.units = "degree";
 
         out.adc.data = zeros(navg, 1, 8);
         out.adc.dtype = "uint8";
         out.adc.group = "sys";
-        out.adc.units = "";
+        out.adc.units = "1";
 
         out.error_status_wd.data = zeros(navg);
         out.error_status_wd.dtype = "float32";
         out.error_status_wd.group = "attrs";
-        out.error_status_wd.units = "";
+        out.error_status_wd.units = "1";
 
         out.pressure.data = zeros(navg);
         out.pressure.dtype = "float32";
@@ -872,7 +874,7 @@ function ds = read_rdi(filename,options)
         out.vel.data = zeros(navg, 1, 4, ncells);
         out.vel.dtype = "float32";
         out.vel.group = "data_vars";
-        out.vel.units = "m/s";
+        out.vel.units = "m s-1";
 
         out.amp.data = zeros(navg, 1, 4, ncells);
         out.amp.dtype = "uint8";
@@ -892,7 +894,7 @@ function ds = read_rdi(filename,options)
         out.status.data = zeros(navg, 1, 4, ncells);
         out.status.dtype = "float32";
         out.status.group = "data_vars";
-        out.status.units = "";
+        out.status.units = "1";
 
         out.dist_bt.data = zeros(navg, 1, 4);
         out.dist_bt.dtype = "float32";
@@ -902,7 +904,7 @@ function ds = read_rdi(filename,options)
         out.vel_bt.data = zeros(navg, 1, 4);
         out.vel_bt.dtype = "float32";
         out.vel_bt.group = "data_vars";
-        out.vel_bt.units = "m/s";
+        out.vel_bt.units = "m s-1";
 
         out.corr_bt.data = zeros(navg, 1, 4);
         out.corr_bt.dtype = "uint8";
@@ -922,47 +924,47 @@ function ds = read_rdi(filename,options)
         out.time.data = zeros(navg);
         out.time.dtype = "float64";
         out.time.group = "coords";
-        out.time.units = "";
+        out.time.units = "1";
 
         out.etime_gps.data = zeros(navg);
         out.etime_gps.dtype = "float64";
         out.etime_gps.group = "coords";
-        out.etime_gps.units = "";
+        out.etime_gps.units = "1";
 
         out.elatitude_gps.data = zeros(navg);
         out.elatitude_gps.dtype = "float64";
         out.elatitude_gps.group = "data_vars";
-        out.elatitude_gps.units = "deg";
+        out.elatitude_gps.units = "degree";
 
         out.elongitude_gps.data = zeros(navg);
         out.elongitude_gps.dtype = "float64";
         out.elongitude_gps.group = "data_vars";
-        out.elongitude_gps.units = "deg";
+        out.elongitude_gps.units = "degree";
 
         out.time_gps.data = zeros(navg);
         out.time_gps.dtype = "float64";
         out.time_gps.group = "coords";
-        out.time_gps.units = "";
+        out.time_gps.units = "1";
 
         out.latitude_gps.data = zeros(navg);
         out.latitude_gps.dtype = "float64";
         out.latitude_gps.group = "data_vars";
-        out.latitude_gps.units = "deg";
+        out.latitude_gps.units = "degree";
 
         out.longitude_gps.data = zeros(navg);
         out.longitude_gps.dtype = "float64";
         out.longitude_gps.group = "data_vars";
-        out.longitude_gps.units = "deg";
+        out.longitude_gps.units = "degree";
 
         out.ntime.data = zeros(navg);
         out.ntime.dtype = "float64";
         out.ntime.group = "coords";
-        out.ntime.units = "";
+        out.ntime.units = "1";
 
         out.flags.data = zeros(navg);
         out.flags.dtype = "float32";
         out.flags.group = "data_vars";
-        out.flags.units = "";
+        out.flags.units = "1";
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function size = find_filesize()

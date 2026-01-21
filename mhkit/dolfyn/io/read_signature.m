@@ -164,6 +164,7 @@ function ds=read_signature(filename,options)
         ds.orientmat.coords.time = ds.time;
         ds.orientmat.coords.inst = {'X' 'Y' 'Z'};
         ds.orientmat.coords.earth = {'E' 'N' 'U'};
+        ds.orientmat.units = '';
     end
 
     if ~isnan(declin)
@@ -209,12 +210,12 @@ function ds=read_signature(filename,options)
             ky = join(["id",string(id)],"_");
             if any([21, 23, 24, 28] == id) % vel, bt, vel_b5, echo
                 outdat.(ky).dummy_read(:,c) = read(ky);
-            elseif id == 26 % alt_raw (altimeter burst)
+            elseif any([26, 31] == id) % alt_raw (altimeter burst) or avg alt_raw
                 if ~isfield(burst_readers.(ky),'nsamp_index')
                     first_pass = true;
                     burst_readers.(ky).nsamp_index = ...
                         find(strcmp(burst_readers.(ky).names,...
-                        'altraw_nsamp'));
+                        'nsamp_alt'));
                     tmp_idx = burst_readers.(ky).nsamp_index;
                     sz_str = fmt_str(burst_readers.(ky).format(1:tmp_idx-1),...
                         burst_readers.(ky).N(1:tmp_idx-1));
@@ -247,8 +248,8 @@ function ds=read_signature(filename,options)
                     [~, nbyte] = py_struct_2_bytes_format(sz_str, true);
                     burst_readers.(ky).nbyte = nbyte;
                     %  Initialize the array
-                    outdat.(ky).altraw_samp = zeros([sz,1,...
-                        length(outdat.(ky).altraw_samp)]);
+                    outdat.(ky).samp_alt = zeros([sz,1,...
+                        length(outdat.(ky).samp_alt)]);
                     % fix the dummy_read now that another field has been
                     % added
                     outdat.(ky).dummy_read = zeros(sum(...
@@ -265,9 +266,8 @@ function ds=read_signature(filename,options)
                 outdat.(ky).dummy_read(:,c) = read(ky);
                 outdat.(ky).ensemble(c26) = c;
                 c26 = c26 + 1;
-            elseif any([22, 27, 29, 30, 31, 35, 36] == id) % avg record,
-                % bt record, DVL, alt record, avg alt_raw record, raw echo,
-                % raw echo transmit
+            elseif any([22, 27, 29, 30, 35, 36] == id) % avg record,
+                % bt record, DVL, alt record, raw echo, raw echo transmit
                 warning(['Unhandled ID: 0x:%X (%d)\n    This ID is not yet' ...
                     ' handled by DOLfYN.\n'], id, id)
                 fseek(fid,hdr.sz,0);
@@ -731,8 +731,8 @@ function ds=read_signature(filename,options)
             out.vel = getbit(val, 5);
             out.amp = getbit(val, 6);
             out.corr = getbit(val, 7);
-            out.alt = getbit(val, 8);
-            out.alt_raw = getbit(val, 9);
+            out.le = getbit(val, 8);
+            out.altraw = getbit(val, 9);
             out.ast = getbit(val, 10);
             out.echo = getbit(val, 11);
             out.ahrs = getbit(val, 12);
@@ -795,9 +795,9 @@ function ds=read_signature(filename,options)
         flags = headconfig_int2dict(cfg,'burst');
         dd = get_burst_hdr_struct();
         dd.blank_dist = struct('format', 'H', 'shape', [], 'sci_func',...
-                [0.001, 0], 'units', '', 'N', 1);
-        if flags.vel || flags.amp || flags.corr || flags.alt || ...
-            flags.ast || flags.alt_raw || flags.p_gd || flags.std
+                [0.001, 0], 'units', '1', 'N', 1);
+        if flags.vel || flags.amp || flags.corr || flags.le || ...
+            flags.ast || flags.altraw || flags.p_gd || flags.std
             ME = MException('MATLAB:read_signature',['Echosounder'...
                 ' ping contains invalid data?']);
             throwAsCaller(ME)
@@ -808,9 +808,9 @@ function ds=read_signature(filename,options)
         end
         if flags.ahrs
             dd.orientmat = struct('format', 'f', 'shape', [1,3,3],...
-                'sci_func', nan, 'units', '', 'N', 9);
+                'sci_func', nan, 'units', '1', 'N', 9);
             dd.quaternions = struct('format', 'f', 'shape', [1,4],...
-                'sci_func', nan, 'units', '', 'N', 4);
+                'sci_func', nan, 'units', '1', 'N', 4);
             dd.angrt = struct('format', 'f', 'shape', [1,3],...
                 'sci_func', [pi / 180, 0], 'units', 'rad/s', 'N', 3);
         end
@@ -823,7 +823,7 @@ function ds=read_signature(filename,options)
         dd = get_bt_hdr_struct();
         if flags.vel
             dd.vel = struct('format', 'i', 'shape', [1, nb], 'sci_func',...
-                nan, 'units', 'm/s', 'N', nb);
+                nan, 'units', 'm s-1', 'N', nb);
         end
         if flags.dist
             dd.dist = struct('format', 'i', 'shape', [1, nb], 'sci_func',...
@@ -831,13 +831,13 @@ function ds=read_signature(filename,options)
         end
         if flags.fom
             dd.fom = struct('format', 'H', 'shape', [1, nb], 'sci_func',...
-                nan, 'units', '', 'N', nb);
+                nan, 'units', '1', 'N', nb);
         end
         if flags.ahrs
             dd.orientmat = struct('format', 'f', 'shape', [1,3,3],...
-                'sci_func', nan, 'units', '', 'N', 9);
+                'sci_func', nan, 'units', '1', 'N', 9);
             dd.quaternions = struct('format', 'f', 'shape', [1,4],...
-                'sci_func', nan, 'units', '', 'N', 4);
+                'sci_func', nan, 'units', '1', 'N', 4);
             dd.angrt = struct('format', 'f', 'shape', [1,3],...
                 'sci_func', [pi / 180, 0], 'units', 'rad/s', 'N', 3);
         end
@@ -855,7 +855,7 @@ function ds=read_signature(filename,options)
         end
         if flags.vel
             dd.vel = struct('format', 'h', 'shape', [1,nc,nb], 'sci_func',...
-                nan, 'units', 'm/s', 'N', nb*nc);
+                nan, 'units', 'm s-1', 'N', nb*nc);
         end
         if flags.amp
             dd.amp = struct('format', 'B', 'shape', [1,nc,nb], 'sci_func',...
@@ -865,39 +865,39 @@ function ds=read_signature(filename,options)
             dd.corr = struct('format', 'B', 'shape', [1,nc,nb], 'sci_func',...
                 nan, 'units', '%', 'N', nb*nc);
         end
-        if flags.alt
-            dd.alt_dist = struct('format', 'f', 'shape', [], 'sci_func',...
+        if flags.le
+            dd.le_dist_alt = struct('format', 'f', 'shape', [], 'sci_func',...
                 [1, 0], 'units', 'm', 'N', 1);
-            dd.alt_quality = struct('format', 'H', 'shape', [], 'sci_func',...
+            dd.le_quality_alt = struct('format', 'H', 'shape', [], 'sci_func',...
                 [0.01, 0], 'units', 'dB', 'N', 1);
-            dd.alt_status = struct('format', 'H', 'shape', [], 'sci_func',...
-                nan, 'units', '', 'N', 1);
+            dd.status_alt = struct('format', 'H', 'shape', [], 'sci_func',...
+                nan, 'units', '1', 'N', 1);
         end
         if flags.ast
-            dd.ast_dist = struct('format', 'f', 'shape', [], 'sci_func',...
+            dd.ast_dist_alt = struct('format', 'f', 'shape', [], 'sci_func',...
                 [1, 0], 'units', 'm', 'N', 1);
-            dd.ast_quality = struct('format', 'H', 'shape', [], 'sci_func',...
+            dd.ast_quality_alt = struct('format', 'H', 'shape', [], 'sci_func',...
                 [0.01, 0], 'units', 'dB', 'N', 1);
-            dd.ast_offset_time = struct('format', 'h', 'shape', [],...
+            dd.ast_offset_time_alt = struct('format', 'h', 'shape', [],...
                 'sci_func', [0.0001, 0], 'units', 's', 'N', 1);
-            dd.ast_pressure = struct('format', 'f', 'shape', [], 'sci_func',...
+            dd.pressure_alt = struct('format', 'f', 'shape', [], 'sci_func',...
                 nan, 'units', 'dbar', 'N', 1);
             dd.ast_spare = struct('format', 'B7x', 'shape', [], 'sci_func',...
-                nan, 'units', '', 'N', 1);
+                nan, 'units', '1', 'N', 1);
         end
-        if flags.alt_raw
-            dd.altraw_nsamp = struct('format', 'I', 'shape', [],...
-                'sci_func', nan, 'units', '', 'N', 1);
-            dd.altraw_dsamp = struct('format', 'H', 'shape', [],...
+        if flags.altraw
+            dd.nsamp_alt = struct('format', 'I', 'shape', [],...
+                'sci_func', nan, 'units', '1', 'N', 1);
+            dd.dsamp_alt = struct('format', 'H', 'shape', [],...
                 'sci_func', [0.0001, 0], 'units', 'm', 'N', 1);
-            dd.altraw_samp = struct('format', 'h', 'shape', [],...
-                'sci_func', nan, 'units', '', 'N', 1);
+            dd.samp_alt = struct('format', 'h', 'shape', [],...
+                'sci_func', nan, 'units', '1', 'N', 1);
         end
         if flags.ahrs
             dd.orientmat = struct('format', 'f', 'shape', [1,3,3],...
-                'sci_func', nan, 'units', '', 'N', 9);
+                'sci_func', nan, 'units', '1', 'N', 9);
             dd.quaternions = struct('format', 'f', 'shape', [1,4],...
-                'sci_func', nan, 'units', '', 'N', 4);
+                'sci_func', nan, 'units', '1', 'N', 4);
             dd.angrt = struct('format', 'f', 'shape', [1,3],...
                 'sci_func', [pi / 180, 0], 'units', 'rad/s', 'N', 3);
         end
@@ -907,15 +907,15 @@ function ds=read_signature(filename,options)
         end
         if flags.std
             dd.pitch_std = struct('format', 'h', 'shape', [],...
-                'sci_func', [0.01, 0], 'units', 'deg', 'N', 1);
+                'sci_func', [0.01, 0], 'units', 'degree', 'N', 1);
             dd.roll_std = struct('format', 'h', 'shape', [],...
-                'sci_func', [0.01, 0], 'units', 'deg', 'N', 1);
+                'sci_func', [0.01, 0], 'units', 'degree', 'N', 1);
             dd.heading_std = struct('format', 'h', 'shape', [],...
-                'sci_func', [0.01, 0], 'units', 'deg', 'N', 1);
+                'sci_func', [0.01, 0], 'units', 'degree', 'N', 1);
             dd.press_std = struct('format', 'h', 'shape', [],...
                 'sci_func', [0.1, 0], 'units', 'dbar', 'N', 1);
             dd.std_spare = struct('format', 'H22x', 'shape', [],...
-                'sci_func', nan, 'units', '', 'N', 1);
+                'sci_func', nan, 'units', '1', 'N', 1);
         end
         out = datadef(dd);
     end
@@ -951,41 +951,41 @@ function ds=read_signature(filename,options)
     function dd = get_burst_hdr_struct()
         dd = struct();
         dd.ver = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.DatOffset = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.config = struct('format', 'H', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.SerialNum = struct('format', 'I', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.year = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.month = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.day = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.hour = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.minute = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.second = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.usec100 = struct('format', 'H', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.c_sound = struct('format', 'H', 'shape', [], 'sci_func',...
-            [0.1, 0], 'units', 'm/s', 'N', 1); %sci_func -> [scale, offset]
+            [0.1, 0], 'units', 'm s-1', 'N', 1); %sci_func -> [scale, offset]
         dd.temp = struct('format', 'H', 'shape', [], 'sci_func',...
-            [0.01, 0], 'units', 'deg C', 'N', 1);
+            [0.01, 0], 'units', 'degree_C', 'N', 1);
         dd.pressure = struct('format', 'I', 'shape', [], 'sci_func',...
             [0.001, 0], 'units', 'dbar', 'N', 1);
         dd.heading = struct('format', 'H', 'shape', [], 'sci_func',...
-            [0.01, 0], 'units', 'deg', 'N', 1);
+            [0.01, 0], 'units', 'degree', 'N', 1);
         dd.pitch = struct('format', 'h', 'shape', [], 'sci_func',...
-            [0.01, 0], 'units', 'deg', 'N', 1);
+            [0.01, 0], 'units', 'degree', 'N', 1);
         dd.roll = struct('format', 'h', 'shape', [], 'sci_func',...
-            [0.01, 0], 'units', 'deg', 'N', 1);
+            [0.01, 0], 'units', 'degree', 'N', 1);
         dd.beam_config = struct('format', 'H', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.cell_size = struct('format', 'H', 'shape', [], 'sci_func',...
             [0.001, 0], 'units', 'm', 'N', 1);
         dd.blank_dist = struct('format', 'H', 'shape', [], 'sci_func',...
@@ -993,75 +993,75 @@ function ds=read_signature(filename,options)
         dd.nominal_corr = struct('format', 'B', 'shape', [], 'sci_func',...
             nan, 'units', '%', 'N', 1);
         dd.temp_press = struct('format', 'B', 'shape', [], 'sci_func',...
-            [0.2,-20], 'units', 'deg C', 'N', 1);
+            [0.2,-20], 'units', 'degree_C', 'N', 1);
         dd.batt = struct('format', 'H', 'shape', [], 'sci_func',...
             [0.1, 0], 'units', 'V', 'N', 1);
         dd.mag = struct('format', 'h', 'shape', [1,3], 'sci_func',...
             [0.1, 0], 'units', 'uT', 'N', 3);
         dd.accel = struct('format', 'h', 'shape', [1,3], 'sci_func',...
-            [1. / 16384 * 9.81, 0], 'units', 'm/s^2', 'N', 3);
+            [1. / 16384 * 9.81, 0], 'units', 'm s-2', 'N', 3);
         dd.ambig_vel = struct('format', 'h', 'shape', [], 'sci_func',...
-            [0.001, 0], 'units', 'm/s', 'N', 1);
+            [0.001, 0], 'units', 'm s-1', 'N', 1);
         dd.data_desc = struct('format', 'H', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.xmit_energy = struct('format', 'H', 'shape', [], 'sci_func',...
             nan, 'units', 'dB', 'N', 1);
         dd.vel_scale = struct('format', 'b', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.power_level_dB = struct('format', 'b', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.temp_mag = struct('format', 'h', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.temp_clock = struct('format', 'h', 'shape', [], 'sci_func',...
-            [0.01, 0], 'units', 'deg C', 'N', 1);
+            [0.01, 0], 'units', 'degree_C', 'N', 1);
         dd.error = struct('format', 'H', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.status0 = struct('format', 'H', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.status = struct('format', 'I', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.ensemble_ = struct('format', 'I', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function dd = get_bt_hdr_struct()
         dd = struct();
         dd.ver = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.DatOffset = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.config = struct('format', 'H', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.SerialNum = struct('format', 'I', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.year = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.month = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.day = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.hour = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.minute = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.second = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.usec100 = struct('format', 'H', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.c_sound = struct('format', 'H', 'shape', [], 'sci_func',...
-            [0.1, 0], 'units', 'm/s', 'N', 1); %sci_func -> [scale, offset]
+            [0.1, 0], 'units', 'm s-1', 'N', 1); %sci_func -> [scale, offset]
         dd.temp = struct('format', 'H', 'shape', [], 'sci_func',...
-            [0.01, 0], 'units', 'deg C', 'N', 1);
+            [0.01, 0], 'units', 'degree_C', 'N', 1);
         dd.pressure = struct('format', 'I', 'shape', [], 'sci_func',...
             [0.001, 0], 'units', 'dbar', 'N', 1);
         dd.heading = struct('format', 'H', 'shape', [], 'sci_func',...
-            [0.01, 0], 'units', 'deg', 'N', 1);
+            [0.01, 0], 'units', 'degree', 'N', 1);
         dd.pitch = struct('format', 'h', 'shape', [], 'sci_func',...
-            [0.01, 0], 'units', 'deg', 'N', 1);
+            [0.01, 0], 'units', 'degree', 'N', 1);
         dd.roll = struct('format', 'h', 'shape', [], 'sci_func',...
-            [0.01, 0], 'units', 'deg', 'N', 1);
+            [0.01, 0], 'units', 'degree', 'N', 1);
         dd.beam_config = struct('format', 'H', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.cell_size = struct('format', 'H', 'shape', [], 'sci_func',...
             [0.001, 0], 'units', 'm', 'N', 1);
         dd.blank_dist = struct('format', 'H', 'shape', [], 'sci_func',...
@@ -1069,33 +1069,33 @@ function ds=read_signature(filename,options)
         dd.nominal_corr = struct('format', 'B', 'shape', [], 'sci_func',...
             nan, 'units', '%', 'N', 1);
         dd.unused = struct('format', 'B', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.batt = struct('format', 'H', 'shape', [], 'sci_func',...
             [0.1, 0], 'units', 'V', 'N', 1);
         dd.mag = struct('format', 'h', 'shape', [1,3], 'sci_func',...
             nan, 'units', 'gauss', 'N', 3);
         dd.accel = struct('format', 'h', 'shape', [1,3], 'sci_func',...
-            [1. / 16384 * 9.81, 0], 'units', 'm/s^2', 'N', 3);
+            [1. / 16384 * 9.81, 0], 'units', 'm s-2', 'N', 3);
         dd.ambig_vel = struct('format', 'I', 'shape', [], 'sci_func',...
-            [0.001, 0], 'units', 'm/s', 'N', 1);
+            [0.001, 0], 'units', 'm s-1', 'N', 1);
         dd.data_desc = struct('format', 'H', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.xmit_energy = struct('format', 'H', 'shape', [], 'sci_func',...
             nan, 'units', 'dB', 'N', 1);
         dd.vel_scale = struct('format', 'b', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.power_level_dB = struct('format', 'b', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.temp_mag = struct('format', 'h', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.temp_clock = struct('format', 'h', 'shape', [], 'sci_func',...
-            [0.01, 0], 'units', 'deg C', 'N', 1);
+            [0.01, 0], 'units', 'degree_C', 'N', 1);
         dd.error = struct('format', 'I', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.status = struct('format', 'I', 'shape', [], 'sci_func',...
-            nan, 'units', 'binary', 'N', 1);
+            nan, 'units', '1', 'N', 1);
         dd.ensemble_ = struct('format', 'I', 'shape', [], 'sci_func',...
-            nan, 'units', '', 'N', 1);
+            nan, 'units', '1', 'N', 1);
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     function out_chr = fmt_str(fmt_,N_)
@@ -1203,15 +1203,16 @@ function ds=read_signature(filename,options)
         id_tag = struct('id_21', struct('id', 21, 'tag', ''),...
                         'id_23', struct('id', 23, 'tag', '_bt'),...
                         'id_24', struct('id', 24, 'tag', '_b5'),...
-                        'id_26', struct('id', 26, 'tag', '_ast'),...
-                        'id_28', struct('id', 28, 'tag', '_echo'));
+                        'id_26', struct('id', 26, 'tag', 'raw'),...
+                        'id_28', struct('id', 28, 'tag', '_echo'),...
+                        'id_31', struct('id', 31, 'tag', 'raw_avg'));
         id_fields = fieldnames(id_tag);
         for i = 1:numel(id_fields)
             key = id_fields{i};
             id = id_tag.(key).id;
             tag = id_tag.(key).tag;
             if id == 24 || id == 26
-                collapse_exclude = [0.0];
+                collapse_exclude = [];  % Don't exclude 0.0 values for altimeter data
             else
                 collapse_exclude = [];
             end
@@ -1279,9 +1280,9 @@ function ds=read_signature(filename,options)
 
             iter_keys = {'vel', 'amp', 'corr', 'prcnt_gd', 'echo',...
                 'dist', 'orientmat', 'angrt', 'quaternions', ...
-                'ast_pressure', 'alt_dist', 'alt_quality', 'alt_status',...
-                'ast_dist', 'ast_quality', 'ast_offset_time',...
-                'altraw_nsamp', 'altraw_dsamp', 'altraw_samp',...
+                'pressure_alt', 'le_dist_alt', 'le_quality_alt', 'status_alt',...
+                'ast_dist_alt', 'ast_quality_alt', 'ast_offset_time_alt',...
+                'nsamp_alt', 'dsamp_alt', 'samp_alt',...
                 'status0', 'fom', 'temp_press', 'press_std',...
                 'pitch_std', 'roll_std', 'heading_std', 'xmit_energy'};
             for j = 1:numel(iter_keys)
@@ -1295,41 +1296,10 @@ function ds=read_signature(filename,options)
 
         % Move 'altimeter raw' data to its own down-sampled structure
         if isfield(dat,'id_26')
-            fields = fieldnames(outdat.data_vars);
-            for i = 1:numel(fields)
-                ky = fields{i};
-                if endsWith(ky,"_ast")
-                    tmp = split(ky,".");
-                    grp = tmp{1};
-                    if length(tmp) > 1 && ~isfield(outdat.altraw,grp)
-                        outdat.altraw.(grp) = struct();
-                    end
-                    outdat.altraw.(erase(ky,"_ast")) = ...
-                        outdat.data_vars.(ky);
-                    outdat.data_vars = rmfield(outdat.data_vars,ky);
-                end
-            end
-
-            % Read altimeter status
-            alt_status = alt_status2data(outdat.data_vars.alt_status);
-            alt_fields = fieldnames(alt_status);
-            for kk=1:numel(alt_fields)
-                ky = alt_fields{kk};
-                outdat.attrs.(ky) = collapse(alt_status.(ky),ky,[]);
-            end
-            outdat.data_vars = rmfield(outdat.data_vars,'alt_status');
-
-            % Power level index
-            if outdat.attrs.power_level_idx_alt == 0
-                outdat.attrs.power_level_alt = 'high';
-            elseif outdat.attrs.power_level_idx_alt == 1
-                outdat.attrs.power_level_alt = 'med-high';
-            elseif outdat.attrs.power_level_idx_alt == 2
-                outdat.attrs.power_level_alt = 'med-low';
-            elseif outdat.attrs.power_level_idx_alt == 3
-                outdat.attrs.power_level_alt = 'low';
-            end
-            outdat.attrs = rmfield(outdat.attrs,'power_level_idx_alt');
+            outdat = altraw_reorg(outdat, '');
+        end
+        if isfield(dat,'id_31')
+            outdat = altraw_reorg(outdat, '_avg');
         end
 
         % Read status data
@@ -1473,6 +1443,13 @@ function ds=read_signature(filename,options)
                 dat.attrs.cell_size_echo  + dat.attrs.blank_dist_echo;
         end
 
+        % Create n_altraw coordinate for altimeter raw data
+        % MHKiT-Python: n_altraw = count of ID 26 pings (0-based indexing)
+        if isfield(dat.data_vars,'samp_altraw')
+            tmp = size(dat.data_vars.samp_altraw);
+            dat.coords.n_altraw = (0:(tmp(1)-1))';  % 0-based to match Python/xarray
+        end
+
         if isfield(dat.data_vars,"orientmat")
             dat.attrs.has_imu = true;
             % Signature AHRS rotation matrix returned in "inst->earth"
@@ -1497,6 +1474,29 @@ function ds=read_signature(filename,options)
             end
         end
         dat.data_vars.beam2inst_orientmat = tm';
+        dat.units.beam2inst_orientmat = '';
+
+        % Extract beam angle from BEAMCFGLIST
+        if isfield(dat.attrs.filehead_config, 'BEAMCFGLIST')
+            beamcfg = dat.attrs.filehead_config.BEAMCFGLIST;
+            % Search through all elements for THETA=
+            for i = 1:length(beamcfg)
+                theta_str = char(beamcfg(i));
+                if contains(theta_str, 'THETA=')
+                    % Extract value after THETA=
+                    theta_idx = strfind(theta_str, 'THETA=');
+                    if ~isempty(theta_idx)
+                        value_start = theta_idx + 6; % Skip "THETA="
+                        value_str = theta_str(value_start:end);
+                        beam_angle_num = str2double(value_str);
+                        if ~isnan(beam_angle_num)
+                            dat.attrs.beam_angle = int32(beam_angle_num);
+                            break; % Use first valid THETA= found
+                        end
+                    end
+                end
+            end
+        end
 
         out = dat;
     end
@@ -1639,6 +1639,101 @@ function ds=read_signature(filename,options)
             end
             % Remove dummy_read
             outdat.(id) = rmfield(outdat.(id),'dummy_read');
+        end
+    end
+    % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+    function outdat = altraw_reorg(outdat, tag)
+        % Submethod for reorg particular to raw altimeter pings (ID 26 and 31)
+        % Equivalent to MHKiT-Python _altraw_reorg function
+
+        % Remove non-altraw data variables with raw tag
+        fields = fieldnames(outdat.data_vars);
+        for i = 1:numel(fields)
+            ky = fields{i};
+            if endsWith(ky, strcat('raw', tag)) && ~endsWith(ky, strcat('_altraw', tag))
+                outdat.data_vars = rmfield(outdat.data_vars, ky);
+            end
+        end
+
+        % Rename timeraw coordinate to time_altraw
+        coord_fields = fieldnames(outdat.coords);
+        for i = 1:numel(coord_fields)
+            ky = coord_fields{i};
+            if strcmp(ky, strcat('timeraw', tag))
+                outdat.coords.(strcat('time_altraw', tag)) = outdat.coords.(ky);
+                outdat.coords = rmfield(outdat.coords, ky);
+                break;
+            end
+        end
+
+        % Convert signed fractional to float for samp_altraw
+        samp_key = strcat('samp_altraw', tag);
+        if isfield(outdat.data_vars, samp_key)
+            outdat.data_vars.(samp_key) = single(outdat.data_vars.(samp_key)) / 2^8;
+        end
+
+        % Read altimeter status
+        status_key = strcat('status_altraw', tag);
+        if isfield(outdat.data_vars, status_key)
+            outdat.data_vars = rmfield(outdat.data_vars, status_key);
+        end
+
+        status_alt_key = strcat('status_alt', tag);
+        if isfield(outdat.data_vars, status_alt_key)
+            status_alt = alt_status2data(outdat.data_vars.(status_alt_key));
+            status_alt_fields = fieldnames(status_alt);
+            for kk = 1:numel(status_alt_fields)
+                ky = status_alt_fields{kk};
+                outdat.attrs.(strcat(ky, tag)) = collapse(status_alt.(ky), ky, []);
+            end
+            outdat.data_vars = rmfield(outdat.data_vars, status_alt_key);
+        end
+
+        % Convert power level index to string
+        power_idx_key = strcat('power_level_idx_alt', tag);
+        power_key = strcat('power_level_alt', tag);
+        if isfield(outdat.attrs, power_idx_key)
+            power_idx = outdat.attrs.(power_idx_key);
+            if power_idx == 0
+                outdat.attrs.(power_key) = 'high';
+            elseif power_idx == 1
+                outdat.attrs.(power_key) = 'med-high';
+            elseif power_idx == 2
+                outdat.attrs.(power_key) = 'med-low';
+            elseif power_idx == 3
+                outdat.attrs.(power_key) = 'low';
+            end
+            outdat.attrs = rmfield(outdat.attrs, power_idx_key);
+        end
+
+        % Convert other 'raw' attributes to '_alt' attributes
+        attr_fields = fieldnames(outdat.attrs);
+        for i = 1:numel(attr_fields)
+            ky = attr_fields{i};
+            if endsWith(ky, strcat('raw', tag))
+                % Split 'raw' from attribute name and add '_alt'
+                new_key = strrep(ky, strcat('raw', tag), strcat('_alt', tag));
+                outdat.attrs.(new_key) = outdat.attrs.(ky);
+                outdat.attrs = rmfield(outdat.attrs, ky);
+            end
+        end
+
+        % Convert *_alt fields to *_altraw format (Python naming)
+        % This only applies to fields from ID_26/ID_31 which have the 'raw' tag in their suffix
+        % The tag parameter will be '' for ID_26 and '_avg' for ID_31
+        % Fields from ID_21 don't have a tag and shouldn't be renamed
+        if ~isempty(tag) && contains(tag, 'raw')
+            data_fields = fieldnames(outdat.data_vars);
+            for i = 1:numel(data_fields)
+                ky = data_fields{i};
+                if endsWith(ky, strcat('_alt', tag))
+                    % Convert nsamp_alt+tag -> nsamp_altraw+tag
+                    % Replace '_alt' with '_altraw'
+                    new_key = strrep(ky, strcat('_alt', tag), strcat('_altraw', tag));
+                    outdat.data_vars.(new_key) = outdat.data_vars.(ky);
+                    outdat.data_vars = rmfield(outdat.data_vars, ky);
+                end
+            end
         end
     end
     % <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>

@@ -60,7 +60,7 @@ function out = water_depth_from_pressure(ds, options)
     ds.water_density.data = rho_atm0;
     ds.water_density.dims = { 'time' };
     ds.water_density.coords.time = ds.coords.time;
-    ds.water_density.units = "kg/m^3";
+    ds.water_density.units = "kg m-3";
     ds.water_density.description = ['Water density according to UNESCO '...
         '1981 equation of state'];
 

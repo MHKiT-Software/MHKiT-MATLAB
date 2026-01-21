@@ -66,8 +66,8 @@ function ds = read_h5(filename)
                     convertStringsToChars(h5read(filename,path));
             else
                 if strcmpi(name, 'x*')
-                    coord_vals(end) = {'x_star'};
-                    ds.coords.x_star = h5read(filename,path);
+                    coord_vals(end) = {'x1'};
+                    ds.coords.x1 = h5read(filename,path);
                 else
                     ds.coords.(name) = h5read(filename,path);
                 end

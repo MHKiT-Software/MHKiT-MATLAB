@@ -23,9 +23,11 @@ function ds = create_dataset(data)
             % beam2inst & inst2head orientation matrices
             if (contains(fn{k},'inst'))
                 ds.(fn{k}).data = data.data_vars.(fn{k});
-                ds.(fn{k}).dims = {'x_star', 'x'};
-                ds.(fn{k}).coords.x_star = beam;
-                ds.(fn{k}).coords.x = beam;
+                ds.(fn{k}).dims = {'x1', 'x2'};
+                ds.(fn{k}).coords.x1 = beam;
+                ds.(fn{k}).coords.x2 = beam;
+                % Add units for beam2inst_orientmat
+                ds.(fn{k}).units = '';
             else
             % earth2inst orientation matrix
                 ds.(fn{k}).data = data.data_vars.(fn{k});
@@ -34,6 +36,8 @@ function ds = create_dataset(data)
                     data.coords.(strcat('time',tg));
                 ds.(fn{k}).coords.inst = inst;
                 ds.(fn{k}).coords.earth = earth;
+                % Add units for orientmat
+                ds.(fn{k}).units = '';
             end
 
         % quaternion units never change
@@ -44,6 +48,75 @@ function ds = create_dataset(data)
             ds.(fn{k}).coords.(strcat('time',tg))= ...
                     data.coords.(strcat('time',tg));
             ds.(fn{k}).coords.q = {'w', 'x', 'y', 'z'};
+
+        % Handle altraw variables specially to add time_altraw coordinates
+        elseif contains(fn{k}, 'altraw') && ~contains(fn{k}, 'samp_altraw')
+            ds.(fn{k}).data = data.data_vars.(fn{k});
+            if isfield(data.units,fn{k})
+                ds.(fn{k}).units = data.units.(fn{k});
+            else
+                % Special handling for altraw pressure
+                if contains(fn{k}, 'pressure_altraw')
+                    ds.(fn{k}).units = 'dbar';
+                end
+            end
+
+            % Determine tag for altraw coordinates
+            if contains(fn{k}, '_avg')
+                altraw_tag = '_avg';
+            else
+                altraw_tag = '';
+            end
+
+            % Add time_altraw coordinate
+            time_altraw_key = strcat('time_altraw', altraw_tag);
+            if isfield(data.coords, time_altraw_key)
+                shp = size(data.data_vars.(fn{k}));
+                if length(shp) == 2 && shp(2) == 1
+                    % 1D altraw variable
+                    ds.(fn{k}).dims = {time_altraw_key};
+                    ds.(fn{k}).coords.(time_altraw_key) = data.coords.(time_altraw_key);
+                end
+            end
+
+        % Handle altimeter data fields specially
+        elseif contains(fn{k}, '_alt') && ~contains(fn{k}, 'altraw')
+            ds.(fn{k}).data = data.data_vars.(fn{k});
+            if isfield(data.units,fn{k})
+                ds.(fn{k}).units = data.units.(fn{k});
+            else
+                % Set default units for known altimeter fields
+                if contains(fn{k}, 'pressure_alt')
+                    ds.(fn{k}).units = 'dbar';
+                elseif contains(fn{k}, 'dist_alt')
+                    ds.(fn{k}).units = 'm';
+                elseif contains(fn{k}, 'quality_alt')
+                    ds.(fn{k}).units = 'dB';
+                elseif contains(fn{k}, 'offset_time_alt')
+                    ds.(fn{k}).units = 's';
+                else
+                    ds.(fn{k}).units = '';
+                end
+            end
+
+            % Determine tag and time coordinate for altimeter data
+            if contains(fn{k}, '_avg')
+                alt_tag = '_avg';
+                time_coord = 'time_avg';
+            else
+                alt_tag = '';
+                time_coord = 'time';
+            end
+
+            % Add time coordinate for 1D altimeter variables
+            shp = size(data.data_vars.(fn{k}));
+            if length(shp) == 2 && shp(2) == 1
+                % 1D altimeter variable - use regular time coordinate
+                if isfield(data.coords, time_coord)
+                    ds.(fn{k}).dims = {time_coord};
+                    ds.(fn{k}).coords.(time_coord) = data.coords.(time_coord);
+                end
+            end
         else
             ds.(fn{k}).data = data.data_vars.(fn{k});
             if isfield(data.units,fn{k})
@@ -145,6 +218,87 @@ function ds = create_dataset(data)
     ds.time = data.coords.time;
     if isfield(ds,'range')
         ds.range = data.coords.range;
+    end
+    if isfield(data.coords,'n_altraw')
+        ds.n_altraw = data.coords.n_altraw;
+        ds.coords.n_altraw = data.coords.n_altraw;
+    end
+
+    % Add sampling structures for altraw data if they exist
+    % nsamp_altraw structure
+    if isfield(data.data_vars, 'nsamp_altraw')
+        ds.nsamp_altraw.data = data.data_vars.nsamp_altraw;
+        ds.nsamp_altraw.dims = {'time_altraw'};
+        if isfield(data.coords, 'time_altraw')
+            ds.nsamp_altraw.coords.time_altraw = data.coords.time_altraw;
+        end
+        if isfield(data.units, 'nsamp_altraw')
+            ds.nsamp_altraw.units = data.units.nsamp_altraw;
+        else
+            ds.nsamp_altraw.units = '';
+        end
+    end
+
+    % dsamp_altraw structure
+    if isfield(data.data_vars, 'dsamp_altraw')
+        ds.dsamp_altraw.data = data.data_vars.dsamp_altraw;
+        ds.dsamp_altraw.dims = {'time_altraw'};
+        if isfield(data.coords, 'time_altraw')
+            ds.dsamp_altraw.coords.time_altraw = data.coords.time_altraw;
+        end
+        if isfield(data.units, 'dsamp_altraw')
+            ds.dsamp_altraw.units = data.units.dsamp_altraw;
+        else
+            ds.dsamp_altraw.units = 'm';
+        end
+    end
+
+    % samp_altraw structure
+    if isfield(data.data_vars, 'samp_altraw')
+        ds.samp_altraw.data = data.data_vars.samp_altraw;
+        ds.samp_altraw.dims = {'n_altraw', 'time_altraw'};
+        if isfield(data.coords, 'n_altraw')
+            ds.samp_altraw.coords.n_altraw = data.coords.n_altraw;
+        end
+        if isfield(data.coords, 'time_altraw')
+            ds.samp_altraw.coords.time_altraw = data.coords.time_altraw;
+        end
+        if isfield(data.units, 'samp_altraw')
+            ds.samp_altraw.units = data.units.samp_altraw;
+        else
+            ds.samp_altraw.units = '';
+        end
+    end
+
+    % Handle _avg versions as well
+    if isfield(data.data_vars, 'nsamp_altraw_avg')
+        ds.nsamp_altraw_avg.data = data.data_vars.nsamp_altraw_avg;
+        ds.nsamp_altraw_avg.dims = {'time_altraw_avg'};
+        if isfield(data.coords, 'time_altraw_avg')
+            ds.nsamp_altraw_avg.coords.time_altraw_avg = data.coords.time_altraw_avg;
+        end
+        ds.nsamp_altraw_avg.units = '';
+    end
+
+    if isfield(data.data_vars, 'dsamp_altraw_avg')
+        ds.dsamp_altraw_avg.data = data.data_vars.dsamp_altraw_avg;
+        ds.dsamp_altraw_avg.dims = {'time_altraw_avg'};
+        if isfield(data.coords, 'time_altraw_avg')
+            ds.dsamp_altraw_avg.coords.time_altraw_avg = data.coords.time_altraw_avg;
+        end
+        ds.dsamp_altraw_avg.units = 'm';
+    end
+
+    if isfield(data.data_vars, 'samp_altraw_avg')
+        ds.samp_altraw_avg.data = data.data_vars.samp_altraw_avg;
+        ds.samp_altraw_avg.dims = {'n_altraw', 'time_altraw_avg'};
+        if isfield(data.coords, 'n_altraw')
+            ds.samp_altraw_avg.coords.n_altraw = data.coords.n_altraw;
+        end
+        if isfield(data.coords, 'time_altraw_avg')
+            ds.samp_altraw_avg.coords.time_altraw_avg = data.coords.time_altraw_avg;
+        end
+        ds.samp_altraw_avg.units = '';
     end
 
     function add_to_coords(key)
