@@ -1,0 +1,56 @@
+{% set script_title = "Step 2: Install Miniconda" %}
+{% include "_header.sh.j2" %}
+
+# Function to install miniconda
+install_conda() {
+    log_info "Installing miniconda..."
+
+    if [[ "$OS_TYPE" == "Darwin" ]]; then
+        if [[ "$ARCH_TYPE" == "arm64" ]]; then
+            MINICONDA_URL="{{ conda.miniconda_urls.mac_arm }}"
+        else
+            MINICONDA_URL="{{ conda.miniconda_urls.mac_intel }}"
+        fi
+    elif [[ "$OS_TYPE" == "Linux" ]]; then
+        MINICONDA_URL="{{ conda.miniconda_urls.linux }}"
+    else
+        log_error "Unsupported operating system: $OS_TYPE"
+        exit 1
+    fi
+
+    # Create miniconda directory
+    mkdir -p ~/miniconda3
+
+    # Download miniconda installer
+    log_info "Downloading miniconda installer..."
+    if command -v curl >/dev/null 2>&1; then
+        curl -L "$MINICONDA_URL" -o ~/miniconda3/miniconda.sh
+    elif command -v wget >/dev/null 2>&1; then
+        wget "$MINICONDA_URL" -O ~/miniconda3/miniconda.sh
+    else
+        log_error "Neither curl nor wget found. Please install one of them first."
+        exit 1
+    fi
+
+    # Install miniconda
+    log_info "Installing miniconda to ~/miniconda3..."
+    bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+
+    # Remove installer
+    rm ~/miniconda3/miniconda.sh
+
+    # Initialize conda for future shells
+    ~/miniconda3/bin/conda init bash >/dev/null 2>&1 || true
+
+    log_success "Miniconda installed successfully"
+
+    # Output conda path for next steps
+    echo "CONDA_PATH=$HOME/miniconda3/bin/conda"
+}
+
+main() {
+    log_info "Step 2: Installing miniconda..."
+    install_conda
+}
+
+main "$@"

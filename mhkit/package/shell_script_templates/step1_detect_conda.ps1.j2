@@ -1,0 +1,70 @@
+{% set script_title = "Step 1: Conda Detection" %}
+{% include "_header.ps1.j2" %}
+
+# Function to check if conda is available
+function Find-Conda {
+    Write-Info "Starting comprehensive conda detection..."
+
+    # Step 1: Check if conda is already in PATH and working
+    try {
+        $condaCmd = Get-Command conda -ErrorAction SilentlyContinue
+        if ($condaCmd) {
+            Write-Info "Found conda in PATH"
+            if (Test-Conda $condaCmd.Source) {
+                Write-Output "CONDA_DETECTED=true"
+                Write-Output "CONDA_PATH=$($condaCmd.Source)"
+                return
+            } else {
+                Write-Warning "Conda in PATH is not working properly"
+            }
+        }
+    } catch {
+        # Continue to other detection methods
+    }
+
+    # Step 2: Check environment variables
+    {% for env_var in conda.detection.environment_variables %}
+    $envValue = [Environment]::GetEnvironmentVariable("{{ env_var }}")
+    if ($envValue) {
+        Write-Info "Checking environment variable {{ env_var }}: $envValue"
+        $condaFromEnv = ""
+        if ("{{ env_var }}" -eq "CONDA_EXE") {
+            $condaFromEnv = $envValue
+        } elseif ("{{ env_var }}" -eq "CONDA_PREFIX") {
+            $condaFromEnv = Join-Path $envValue "Scripts\conda.exe"
+        }
+
+        if ($condaFromEnv -and (Test-Conda $condaFromEnv)) {
+            Write-Output "CONDA_DETECTED=true"
+            Write-Output "CONDA_PATH=$condaFromEnv"
+            return
+        }
+    }
+    {% endfor %}
+
+    # Step 3: Check all common installation paths systematically
+    Write-Info "Checking common conda installation paths..."
+    $pathsToCheck = @(
+        {% for path in conda.detection.common_paths.windows %}
+        [Environment]::ExpandEnvironmentVariables("{{ path }}"){{ "," if not loop.last }}
+        {% endfor %}
+    )
+
+    foreach ($path in $pathsToCheck) {
+        if (Test-Conda $path) {
+            Write-Output "CONDA_DETECTED=true"
+            Write-Output "CONDA_PATH=$path"
+            return
+        }
+    }
+
+    Write-Info "No working conda installation found"
+    Write-Output "CONDA_DETECTED=false"
+}
+
+function Main {
+    Write-Info "Step 1: Detecting conda installation..."
+    Find-Conda
+}
+
+Main

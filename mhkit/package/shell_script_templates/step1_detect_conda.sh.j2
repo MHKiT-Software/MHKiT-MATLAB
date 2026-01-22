@@ -1,0 +1,69 @@
+{% set script_title = "Step 1: Conda Detection" %}
+{% include "_header.sh.j2" %}
+
+# Function to check if conda is available
+detect_conda() {
+    log_info "Starting comprehensive conda detection..."
+
+    # Step 1: Check if conda is already in PATH and working
+    if command -v conda >/dev/null 2>&1; then
+        log_info "Found conda in PATH"
+        if test_conda_installation "$(command -v conda)"; then
+            echo "CONDA_DETECTED=true"
+            echo "CONDA_PATH=$(command -v conda)"
+            return 0
+        else
+            log_warning "Conda in PATH is not working properly"
+        fi
+    fi
+
+    # Step 2: Check environment variables
+    {% for env_var in conda.detection.environment_variables %}
+    if [[ -n "${{ '${' }}{{ env_var }}:-}" ]]; then
+        log_info "Checking environment variable {{ env_var }}: ${{ '${' }}{{ env_var }}}"
+        local conda_from_env=""
+        if [[ "{{ env_var }}" == "CONDA_EXE" ]]; then
+            conda_from_env="${{ '${' }}{{ env_var }}}"
+        elif [[ "{{ env_var }}" == "CONDA_PREFIX" ]]; then
+            conda_from_env="${{ '${' }}{{ env_var }}}/bin/conda"
+        fi
+
+        if [[ -n "$conda_from_env" ]]; then
+            conda_from_env=$(expand_path "$conda_from_env")
+            if test_conda_installation "$conda_from_env"; then
+                echo "CONDA_DETECTED=true"
+                echo "CONDA_PATH=$conda_from_env"
+                return 0
+            fi
+        fi
+    fi
+    {% endfor %}
+
+    # Step 3: Check all common installation paths systematically
+    log_info "Checking common conda installation paths..."
+    local paths_to_check=(
+        {% for path in conda.detection.common_paths.unix %}
+        "{{ path }}"
+        {% endfor %}
+    )
+
+    for path in "${paths_to_check[@]}"; do
+        local expanded_path=$(expand_path "$path")
+        if test_conda_installation "$expanded_path"; then
+            echo "CONDA_DETECTED=true"
+            echo "CONDA_PATH=$expanded_path"
+            return 0
+        fi
+    done
+
+    log_info "No working conda installation found"
+    echo "CONDA_DETECTED=false"
+    return 1
+}
+
+main() {
+    log_info "Step 1: Detecting conda installation..."
+    detect_conda
+}
+
+main "$@"
