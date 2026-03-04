@@ -4,7 +4,7 @@ function m = frequency_moment(S, N, varargin)
 %
 % Calculates the Nth frequency moment of the spectrum
 %
-% Computes: m_N = sum(f^N * S(f) * df) per Eq 8 in IEC 62600-101 Ed. 2.0 en 2024
+% Computes: m_N = sum(f^N * S(f) * df) per Eq 2 in IEC 62600-101 Ed. 2.0 en 2024
 %
 % Parameters
 % ------------
