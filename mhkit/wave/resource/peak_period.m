@@ -1,34 +1,60 @@
-function Tp=peak_period(S)
+function Tp = peak_period(S)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Calculates wave energy period from spectra
+%
+% Calculates wave peak period from spectra
+%
+% Peak period is the inverse of the frequency at which the spectrum
+% has maximum energy (Eq 14 in IEC 62600-101 Ed. 2.0 en 2024).
 %
 % Parameters
 % ------------
-%    S: Spectral Density (m^2/Hz)
-%       Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,spectra)
-%
-%       OR
-%
-%       structure of form:
-%           S.spectrum: Spectral Density (m^2/Hz)
-%
-%           S.type: String of the spectra type, i.e. Bretschneider,
-%           time series, date stamp etc.
-%
-%           S.frequency: frequency (Hz)
+% S : struct
+%   Wave spectrum structure:
+%     S.spectrum : vector or matrix [m^2/Hz]
+%       Spectral density
+%     S.frequency : vector [Hz]
+%       Frequency
+%     S.type : string (optional)
+%       Spectra type description
 %
 % Returns
 % ---------
-%    Tp float
-%        Wave Peak Period (s)
+% Tp : double or vector [s]
+%   Wave peak period. Returns a vector if S.spectrum is a matrix
+%   (one value per column).
 %
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-S_py = typecast_spectra_to_mhkit_python(S);
+arguments (Input)
+    S struct
+end
 
-Tp = py.mhkit.wave.resource.peak_period(S_py);
-Tp = typecast_from_mhkit_python(Tp).data;
+arguments (Output)
+    Tp {mustBeNumeric}
+end
+
+% Validate input structure
+if ~isfield(S, 'spectrum') || ~isfield(S, 'frequency')
+    error('MHKiT:peak_period:InvalidInput', ...
+        'S must be a structure with spectrum and frequency fields');
+end
+
+spectrum = S.spectrum;
+frequency = S.frequency(:);
+
+% Handle both vector and matrix spectra
+if isvector(spectrum)
+    spectrum = spectrum(:);
+    [~, idx] = max(spectrum);
+    fp = frequency(idx);
+else
+    % Matrix case: find max along first dimension (frequency)
+    [~, idx] = max(spectrum, [], 1);
+    fp = frequency(idx);
+end
+
+% Eq 14 in IEC 62600-101 Ed. 2.0 en 2024
+Tp = 1 ./ fp;
+
+end
