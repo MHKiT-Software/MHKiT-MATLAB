@@ -63,6 +63,8 @@ end
     end
 
     % Calculate Nth moment: m_N = sum(f^N * S * df)
+    % Return as column vector (MATLAB convention for time series)
     m = sum((frequency.^N) .* spectrum .* freq_bins, 1);
+    m = m(:);
 
 end
