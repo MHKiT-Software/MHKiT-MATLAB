@@ -1,4 +1,4 @@
-function spsd = sound_pressure_spectral_density(data, fs, bin_length)
+function spsd = sound_pressure_spectral_density(data, fs, bin_length, fft_length)
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -15,6 +15,8 @@ function spsd = sound_pressure_spectral_density(data, fs, bin_length)
 %       Data collection sampling rate [Hz]
 %   bin_length: double
 %       Length of time in seconds to create FFTs. Default: 1.
+%   fft_length: double
+%       Length of FFT to use. If none, uses bin_length*fs. Default: None.        
 %
 % Returns
 % ---------
@@ -25,9 +27,9 @@ function spsd = sound_pressure_spectral_density(data, fs, bin_length)
 %       spsd.name : Description string
 %       spsd.units : Units string [Pa^2/Hz or V^2/Hz]
 %       spsd.fs : Sampling frequency [Hz]
-%       spsd.nbin : Bin length string [s]
+%       spsd.bin_length : Bin length string [s]
 %       spsd.overlap : Overlap percentage string
-%       spsd.nfft : Number of FFT points
+%       spsd.n_fft : Number of FFT points
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -35,6 +37,7 @@ arguments (Input)
     data struct
     fs {mustBeNumeric}
     bin_length {mustBeNumeric} = 1
+    fft_length {mustBeNumeric} = 0
 end
 
 arguments (Output)
@@ -73,8 +76,12 @@ end
 
 pressure = data.data;
 
-% cut into multiple 1-second samples, calculate PSD of each sample
-win  = bin_length*fs;  % window length of each time series
+% cut into multiple samples, calculate PSD of each sample
+if fft_length == 0
+    win  = bin_length*fs;  % window length of each time series
+else
+    win = fft_length;
+end
 step = 0.5*win; % overlap betewen each window
 ns   = floor((length(pressure)-win)/step)+1; % number of time series samples
 nfft = win; % number of fft points
@@ -100,8 +107,8 @@ spsd.freq = freq';
 spsd.name = "Mean Square Sound Pressure Spectral Density";
 spsd.units = strcat(data.units, "^2/Hz");
 spsd.fs = fs;
-spsd.nbin = strcat(string(bin_length)," s");
+spsd.bin_length = bin_length;
 spsd.overlap = "50%";
-spsd.nfft = nfft;
+spsd.n_fft = nfft;
 
 end

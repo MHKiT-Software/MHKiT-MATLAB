@@ -32,7 +32,8 @@ classdef Acoustics_TestAnalysis < matlab.unittest.TestCase
             testCase.assertTrue(isfield(spsd, 'freq'));
             testCase.assertTrue(isfield(spsd, 'time'));
             testCase.assertEqual(spsd.units, "Pa^2/Hz");
-            testCase.assertEqual(spsd.nbin, sprintf("%g s", bin_length));
+            testCase.assertEqual(spsd.bin_length, bin_length);
+            testCase.assertEqual(spsd.n_fft, bin_length*fs);
             
             overlap = 0.5; % 50% overlap
             expected_segments = floor(length(pressure.data) / (win_samples*(1-overlap)));

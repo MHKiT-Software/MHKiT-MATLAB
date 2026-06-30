@@ -56,7 +56,7 @@ end
 
 % Validate spsd structure
 validate_spsd_struct(spsd, 'sound_exposure_level', ...
-    'required_fields', {{'freq', 'time', 'fs', 'nfft', 'nbin'}});
+    'required_fields', {{'freq', 'time', 'fs', 'n_fft', 'bin_length'}});
 
 % Validate frequency bounds
 if fmax <= fmin
@@ -95,14 +95,14 @@ w = w(idx);
 exposure = trapz(freqs, band.*w);
 
 % Sound exposure level (L_{E,p}) = (L_{p,rms} + 10log10(t))
-s = 10 * log10(exposure / reference) + 10 * log10(spsd.nfft / spsd.fs);  % n_points / (n_points/s)
+s = 10 * log10(exposure / reference) + 10 * log10(spsd.bin_length);
 
 sel.data = s;
 sel.time = spsd.time;
 sel.units = "dB re 1 uPa^2 s";
 sel.name = name;
 sel.group = group;
-sel.integration_time = spsd.nbin;
+sel.integration_time = spsd.bin_length;
 sel.freq_band_min = fmin;
 sel.freq_band_max = fmax;
 
