@@ -15,15 +15,15 @@ function [weighting_func,exposure_func] = nmfs_auditory_weighting(frequency, gro
 % https://www.fisheries.noaa.gov/national/marine-mammal-protection/marine-mammal-acoustic-technical-guidance-other-acoustic-tools
 % 
 % Parameters
-% ----------
-% frequency: array
-%     Frequency vector in [Hz].
-% group: str
-%     Marine mammal group for which the auditory weighting function is applied.
-%     Options: 'LF' (low frequency cetaceans), 'HF' (high frequency cetaceans),
-%     'VHF' (very high frequency cetaceans), 'PW' (phocid pinnepeds),
-%     'OW' (otariid pinnepeds)
-% 
+% ------------
+%   frequency : vector
+%       Frequency vector [Hz]
+%   group : string
+%       Marine mammal group for which the auditory weighting function is applied.
+%       Options: 'LF' (low frequency cetaceans), 'HF' (high frequency cetaceans),
+%       'VHF' (very high frequency cetaceans), 'PW' (phocid pinnepeds),
+%       'OW' (otariid pinnepeds)
+%
 % Returns
 % -------
 % weighting_func: struct

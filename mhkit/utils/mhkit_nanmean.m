@@ -1,6 +1,6 @@
 function m = mhkit_nanmean(x, dim)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Compute mean ignoring NaN values
 %
@@ -31,7 +31,7 @@ function m = mhkit_nanmean(x, dim)
 %   x = [1 2 3; NaN 5 6; 7 8 NaN];
 %   m = mhkit_nanmean(x, 1);  % Returns [4, 5, 4.5]
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     x {mustBeNumeric}
