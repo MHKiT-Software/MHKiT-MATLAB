@@ -111,8 +111,10 @@ function bands = get_band_table(freq, bands_per_division, base, use_fft_res_at_b
         linear_bin_count = floor(max_linear_bin_hz - 1);
     end
 
-    % Count the log space frequencies
-    log_bin_count = length(band_count_m:numel(band.center_freq));
+    % Log spaced bands — exclude centers at or beyond max_freq to match Python's
+    % exclusive upper-bound behaviour in np.arange inside create_frequency_bands.
+    idx = find(band.center_freq > max_linear_bin_hz * fft_bin_size & band.center_freq < max_freq);
+    log_bin_count = length(idx);
 
     % Generate the linear and log frequencies
     total_bins = linear_bin_count + log_bin_count;
@@ -129,9 +131,6 @@ function bands = get_band_table(freq, bands_per_division, base, use_fft_res_at_b
         bands(1:linear_bin_count, 3) = uppers';
     end
 
-    % Log spaced bands
-    idx = find(band.center_freq > max_linear_bin_hz * fft_bin_size);
-    
     bands(linear_bin_count+1:end, 1) = band.lower_limit(idx);
     bands(linear_bin_count+1:end, 2) = band.center_freq(idx);
     bands(linear_bin_count+1:end, 3) = band.upper_limit(idx);
