@@ -34,10 +34,48 @@ classdef Acoustics_TestAnalysis < matlab.unittest.TestCase
             testCase.assertEqual(spsd.units, "Pa^2/Hz");
             testCase.assertEqual(spsd.bin_length, bin_length);
             testCase.assertEqual(spsd.n_fft, bin_length*fs);
+            testCase.assertEqual(spsd.name, "Mean Square Sound Pressure Spectral Density");
             
             overlap = 0.5; % 50% overlap
             expected_segments = floor(length(pressure.data) / (win_samples*(1-overlap)));
             testCase.assertEqual(size(spsd.data, 2), expected_segments - 1);
+
+            % Test with rms = false
+            spsd_no_rms = sound_pressure_spectral_density(pressure, fs, bin_length, 0, false);
+            testCase.assertEqual(spsd_no_rms.name, "Sound Pressure Spectral Density");
+            testCase.assertEqual(size(spsd_no_rms.data, 2), expected_segments - 1);
+        end
+
+        function test_convert_to_bands(testCase)
+            % Test converting SPSD to custom and standard bands
+            m_spsd = testCase.spsd;
+            
+            % 1. Convert to millidecade
+            mdec = convert_to_millidecade(m_spsd);
+            testCase.assertTrue(isstruct(mdec));
+            testCase.assertEqual(mdec.name, 'Millidecade Sound Pressure Spectral Density');
+            testCase.assertEqual(size(mdec.data, 2), size(m_spsd.data, 2));
+            testCase.verifyFalse(any(isnan(mdec.data(:))));
+
+            % 2. Convert to decidecade
+            ddec = convert_to_decidecade(m_spsd);
+            testCase.assertTrue(isstruct(ddec));
+            testCase.assertEqual(ddec.name, 'Decidecade Sound Pressure Spectral Density');
+            testCase.assertEqual(size(ddec.data, 2), size(m_spsd.data, 2));
+            testCase.verifyFalse(any(isnan(ddec.data(:))));
+
+            % 3. Convert to third octave
+            toct = convert_to_third_octave(m_spsd);
+            testCase.assertTrue(isstruct(toct));
+            testCase.assertEqual(toct.name, 'Third-Octave Sound Pressure Spectral Density');
+            testCase.assertEqual(size(toct.data, 2), size(m_spsd.data, 2));
+            testCase.verifyFalse(any(isnan(toct.data(:))));
+
+            % 4. Convert to custom bands
+            cust = convert_to_custom_bands(m_spsd, 20, 2, false);
+            testCase.assertTrue(isstruct(cust));
+            testCase.assertEqual(size(cust.data, 2), size(m_spsd.data, 2));
+            testCase.verifyFalse(any(isnan(cust.data(:))));
         end
 
         function test_apply_calibration(testCase)
