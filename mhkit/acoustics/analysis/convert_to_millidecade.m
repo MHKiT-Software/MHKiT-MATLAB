@@ -1,6 +1,6 @@
 function out = convert_to_millidecade(spsd)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Convert sound pressure spectral density to millidecade spacing
 %
@@ -22,7 +22,7 @@ function out = convert_to_millidecade(spsd)
 %       out.name : Descriptive string
 %       out.units : Units string
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct

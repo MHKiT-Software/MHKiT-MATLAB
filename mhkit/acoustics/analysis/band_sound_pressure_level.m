@@ -1,6 +1,6 @@
 function mspl = band_sound_pressure_level(spsd, octave, base, fmin, fmax)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Calculate band-averaged sound pressure levels from the mean square sound pressure spectral density (SPSD)
 %
@@ -29,7 +29,7 @@ function mspl = band_sound_pressure_level(spsd, octave, base, fmin, fmax)
 %       mspl.freq : Center frequencies of bands [Hz]
 %       mspl.time : Time vector
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct

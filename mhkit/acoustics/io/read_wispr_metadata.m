@@ -1,6 +1,6 @@
 function metadata = read_wispr_metadata(filename)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Reads the metadata from the WISPR .dat file and
 % returns the metadata in a structure.
@@ -16,7 +16,7 @@ function metadata = read_wispr_metadata(filename)
 %       A structure containing metadata such as sampling_rate,
 %       adc_vref, gain, etc.
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     filename {mustBeText}

@@ -1,6 +1,6 @@
 function out = convert_to_decidecade(spsd)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Convert sound pressure spectral density to decidecade spacing
 %
@@ -22,7 +22,7 @@ function out = convert_to_decidecade(spsd)
 %       out.name : Descriptive string
 %       out.units : Units string
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct

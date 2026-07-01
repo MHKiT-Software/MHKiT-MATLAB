@@ -1,6 +1,6 @@
 function out = time_aggregate(spsdl, window, method)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Reorganize spectral density level frequency tensor into time windows and apply a function to them.
 %
@@ -28,7 +28,7 @@ function out = time_aggregate(spsdl, window, method)
 %       out.units : Data units string
 %       out.name : Data name string
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsdl struct

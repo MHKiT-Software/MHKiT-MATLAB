@@ -1,5 +1,7 @@
 function [weighting_func,exposure_func] = nmfs_auditory_weighting(frequency, group)
-% 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 % Calculates the auditory weighting and exposure functions for marine mammals
 % based on the National Marine Fisheries Service (NMFS) guidelines.
 % 
@@ -28,6 +30,8 @@ function [weighting_func,exposure_func] = nmfs_auditory_weighting(frequency, gro
 %     Auditory weighting function [unitless] indexed by frequency
 % exposure_func: struct
 %     Log-transformed auditory exposure function [dB] indexed by frequency
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     frequency {mustBeVector}

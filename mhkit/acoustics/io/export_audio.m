@@ -1,6 +1,6 @@
 function export_audio(filename, pressure_data, peak_voltage, gain, resample_multiplier)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Export human-scaled audio data from hydrophone recording into WAV file
 %
@@ -28,7 +28,7 @@ function export_audio(filename, pressure_data, peak_voltage, gain, resample_mult
 % ---------
 %   None (writes WAV file to disk)
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     filename {mustBeText}

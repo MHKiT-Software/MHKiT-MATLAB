@@ -1,6 +1,6 @@
 function spsd_cal = apply_calibration(spsd,sensitivity_curve, fill_value, interp_method)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Apply custom calibration to spectral density values
 %
@@ -30,7 +30,7 @@ function spsd_cal = apply_calibration(spsd,sensitivity_curve, fill_value, interp
 %       spsd_cal.name : Data name
 %       spsd_cal.units : Data units
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct

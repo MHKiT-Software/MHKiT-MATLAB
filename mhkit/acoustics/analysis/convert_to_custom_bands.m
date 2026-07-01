@@ -1,6 +1,6 @@
 function out = convert_to_custom_bands(spsd, bands_per_division, base, use_fft_res_at_bottom)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Convert sound pressure spectral density to custom band spacing based on specified
 % parameters.
@@ -37,7 +37,7 @@ function out = convert_to_custom_bands(spsd, bands_per_division, base, use_fft_r
 %       out.name : Descriptive string
 %       out.units : Units string
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct

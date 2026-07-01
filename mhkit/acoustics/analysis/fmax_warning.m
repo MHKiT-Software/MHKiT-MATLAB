@@ -1,6 +1,6 @@
 function fmax_out = fmax_warning(fn, fmax)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Check maximum frequency limit isn't greater than the Nyquist frequency
 %
@@ -17,7 +17,7 @@ function fmax_out = fmax_warning(fn, fmax)
 %       The adjusted maximum frequency limit, ensuring it does not exceed
 %       the Nyquist frequency [Hz]
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     fn {mustBeNumeric}

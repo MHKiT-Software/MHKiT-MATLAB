@@ -1,6 +1,6 @@
 function fmin = minimum_frequency(water_depth, c, c_seabed)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Estimate the shallow water cutoff frequency based on the speed of
 % sound in the water column and the speed of sound in the seabed
@@ -24,7 +24,7 @@ function fmin = minimum_frequency(water_depth, c, c_seabed)
 % ---------
 %   Jennings 2011 - Computational Ocean Acoustics, 2nd ed.
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     water_depth {mustBeNumeric}

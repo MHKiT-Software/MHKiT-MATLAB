@@ -1,6 +1,6 @@
 function out = read_wispr(filename)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Read WISPR .dat file and return voltage time series structure.
 %
@@ -28,7 +28,7 @@ function out = read_wispr(filename)
 %       out.sfw_version : WISPR software version
 %       out.location_id : Location ID of deployment
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     filename {mustBeText}

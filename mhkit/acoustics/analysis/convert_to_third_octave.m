@@ -1,6 +1,6 @@
 function out = convert_to_third_octave(spsd)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Convert sound pressure spectral density to third-octave spacing
 %
@@ -22,7 +22,7 @@ function out = convert_to_third_octave(spsd)
 %       out.name : Descriptive string
 %       out.units : Units string
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct

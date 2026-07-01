@@ -1,6 +1,6 @@
 function out = read_soundtrap(filename, sensitivity, gain)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Read .wav file from an Ocean Instruments SoundTrap hydrophone
 %
@@ -29,7 +29,7 @@ function out = read_soundtrap(filename, sensitivity, gain)
 %       out.valid_max : Maximum valid data value
 %       out.sensitivity : Sensitivity value (if provided)
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     filename {mustBeText}

@@ -1,6 +1,6 @@
 function sel = sound_exposure_level(spsd, group, fmin, fmax)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Calculate sound exposure level (SEL) across a specified frequency band
 % from the sound pressure spectral density (SPSD). If a marine mammal group is
@@ -41,7 +41,7 @@ function sel = sound_exposure_level(spsd, group, fmin, fmax)
 %       sel.freq_band_min : Lower frequency limit [Hz]
 %       sel.freq_band_max : Upper frequency limit [Hz]
 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct
