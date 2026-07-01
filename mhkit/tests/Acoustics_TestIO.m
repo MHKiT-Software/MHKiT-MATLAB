@@ -138,6 +138,64 @@ classdef Acoustics_TestIO < matlab.unittest.TestCase
             testCase.verifyEqual(posixtime(td_spsd_cal.time(1:5)), posixtime(cc'), 'AbsTol', 1e-3);
         end
 
+        function test_read_wispr_metadata(testCase)
+            file_name = fullfile(testCase.datadir, 'WISPR_230825_003936.dat');
+            metadata = read_wispr_metadata(file_name);
+
+            expected_metadata = struct(...
+                'version', 1.2, ...
+                'time', "08:25:23:00:39:36", ...
+                'instrument_id', "PERI_1", ...
+                'location_id', "PWSPNE", ...
+                'volts', 15.77, ...
+                'blocks_free', 20.98, ...
+                'file_size', 58575, ...
+                'buffer_size', 16896, ...
+                'samples_per_buffer', 8448, ...
+                'sample_size', 2, ...
+                'sampling_rate', 50000, ...
+                'gain', 0, ...
+                'decimation', 16, ...
+                'adc_vref', 5, ...
+                'file_length_sec', 299.904 ...
+            );
+
+            fields = fieldnames(expected_metadata);
+            for i = 1:numel(fields)
+                key = fields{i};
+                expected_value = expected_metadata.(key);
+                testCase.verifyTrue(isfield(metadata, key));
+                if isnumeric(expected_value)
+                    testCase.verifyEqual(metadata.(key), expected_value, 'AbsTol', 1e-4);
+                else
+                    testCase.verifyEqual(metadata.(key), expected_value);
+                end
+            end
+        end
+
+        function test_read_wispr(testCase)
+            file_name = fullfile(testCase.datadir, 'WISPR_230825_003936.dat');
+            out = read_wispr(file_name);
+
+            testCase.verifyEqual(out.units, 'V');
+            testCase.verifyEqual(out.fs, 50000);
+            testCase.verifyEqual(out.peak_voltage, 5);
+            testCase.verifyEqual(out.valid_min, -5);
+            testCase.verifyEqual(out.valid_max, 5);
+
+            expected_first_voltages = [-0.001678466796875, -0.001678466796875, -0.00152587890625, -0.0018310546875, -0.001068115234375]';
+            testCase.verifyEqual(out.data(1:5), expected_first_voltages, 'AbsTol', 1e-9);
+
+            cc = datetime([ ...
+                "2023-08-25T00:39:36.000000"
+                "2023-08-25T00:39:36.000020"
+                "2023-08-25T00:39:36.000040"
+                "2023-08-25T00:39:36.000060"
+                "2023-08-25T00:39:36.000080"], 'InputFormat', 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS');
+
+            testCase.verifyLessThanOrEqual(abs(out.time(1:5) - cc), seconds(1e-6));
+        end
+
         function test_export_audio(testCase)
             file_name = fullfile(testCase.datadir, '6247.230204150508.wav');
             td_pressure = read_soundtrap(file_name, -177);
@@ -163,6 +221,19 @@ classdef Acoustics_TestIO < matlab.unittest.TestCase
             % Clean up test file
             if exist(expected_wav_file, 'file')
                 delete(expected_wav_file);
+            end
+
+            % Test export_audio with resampling multiplier
+            resampled_output_filename = fullfile(testCase.plotdir, 'test_export_audio_resampled');
+            export_audio(resampled_output_filename, td_pressure, [], 1, 2);
+            expected_resampled_wav = strcat(resampled_output_filename, '.wav');
+            testCase.verifyTrue(exist(expected_resampled_wav, 'file') == 2, ...
+                'Export resampled audio should create a WAV file');
+            [audio_data_res, fs_res] = audioread(expected_resampled_wav);
+            testCase.verifyEqual(fs_res, td_pressure.fs);
+            testCase.verifyEqual(length(audio_data_res), floor(length(td_pressure.data)/2));
+            if exist(expected_resampled_wav, 'file')
+                delete(expected_resampled_wav);
             end
         end
     end

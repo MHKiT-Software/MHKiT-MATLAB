@@ -1,6 +1,6 @@
 function [f, spec] = fft_hann(fs, x, nfft)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Apply Fast-Fourier-Transform to a time series using a Hanning window
 %
@@ -20,7 +20,7 @@ function [f, spec] = fft_hann(fs, x, nfft)
 %   spec: complex double array
 %       Frequency spectra resulting from the FFT
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     fs {mustBeNumeric, mustBePositive}

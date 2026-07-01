@@ -1,6 +1,6 @@
 function [method_name,method_arg] = validate_method(method)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Helper function for validating the input of possible statistical methods
 %

@@ -1,6 +1,6 @@
 function out = read_hydrophone(filename, peak_voltage, sensitivity, gain, start_time)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Read .wav file from a hydrophone. Returns voltage timeseries if 
 % sensitivity not provided, returns pressure timeseries if it is provided
@@ -60,7 +60,7 @@ if ~isempty(sensitivity)
     if sensitivity > 0
         error('MHKiT:acoustics:read_hydrophone:InvalidSensitivity', 'Sensitivity must be negative numeric input');
     end
-    sense = sensitivity - gain;
+    sense = sensitivity + gain;
     Sf = 10^(sense/20);
     Pu = v / Sf;  % sound pressure in uPa
     P = Pu/10^6;  % sound pressure in Pa

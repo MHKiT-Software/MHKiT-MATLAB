@@ -1,6 +1,6 @@
 function plot_spectrogram(spsdl, options)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Plot spectrogram of the sound pressure spectral density level
 %

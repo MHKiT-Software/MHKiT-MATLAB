@@ -1,6 +1,6 @@
 function spsdl = sound_pressure_spectral_density_level(spsd)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Calculate sound pressure spectral density level from mean square sound pressure spectral density
 %
@@ -20,7 +20,7 @@ function spsdl = sound_pressure_spectral_density_level(spsd)
 %       spsdl.name : Data name identifier
 %       spsdl.units : Data units string
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct

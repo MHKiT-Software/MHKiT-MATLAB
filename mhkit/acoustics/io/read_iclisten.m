@@ -1,6 +1,6 @@
 function out = read_iclisten(filename, sensitivity, use_metadata)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Read .wav file from an icListen hydrophone
 %

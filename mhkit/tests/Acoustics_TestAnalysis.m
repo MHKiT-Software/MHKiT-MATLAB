@@ -32,11 +32,77 @@ classdef Acoustics_TestAnalysis < matlab.unittest.TestCase
             testCase.assertTrue(isfield(spsd, 'freq'));
             testCase.assertTrue(isfield(spsd, 'time'));
             testCase.assertEqual(spsd.units, "Pa^2/Hz");
-            testCase.assertEqual(spsd.nbin, sprintf("%g s", bin_length));
+            testCase.assertEqual(spsd.bin_length, bin_length);
+            testCase.assertEqual(spsd.n_fft, bin_length*fs);
+            testCase.assertEqual(spsd.name, "Mean Square Sound Pressure Spectral Density");
             
             overlap = 0.5; % 50% overlap
             expected_segments = floor(length(pressure.data) / (win_samples*(1-overlap)));
             testCase.assertEqual(size(spsd.data, 2), expected_segments - 1);
+
+            % Test with rms = false
+            spsd_no_rms = sound_pressure_spectral_density(pressure, fs, bin_length, 0, false);
+            testCase.assertEqual(spsd_no_rms.name, "Sound Pressure Spectral Density");
+            testCase.assertEqual(size(spsd_no_rms.data, 2), expected_segments - 1);
+        end
+
+        function test_frequency_bands(testCase)
+            [~, third_octaves] = create_frequency_bands(3, 2, 1, 48000);
+            [~, decidecades] = create_frequency_bands(10, 10, 1, 48000);
+            
+            m_spsd = testCase.spsd;
+            % For custom bands, slice the spsd.freq to match Python's test_analysis.py exactly
+            sliced_spsd = m_spsd;
+            sliced_spsd.freq = m_spsd.freq(1:460);
+            sliced_spsd.data = m_spsd.data(1:460, :);
+            bands_table = convert_to_custom_bands(sliced_spsd, 1000, 10, true);
+            millidecades = bands_table.freq;
+
+            cd_third_octaves_head = [1.0, 1.25992105, 1.58740105, 2.0, 2.5198421, 3.1748021, 4.0];
+            cd_third_octaves_tail = [16384.0, 20642.54648148, 26007.97883545, 32768.0, 41285.09296296];
+            cd_decidecades_head = [1.0, 1.25892541, 1.58489319, 1.99526231, 2.51188643, 3.16227766];
+            cd_decidecades_tail = [19952.62314969, 25118.8643151, 31622.77660168, 39810.71705535];
+            cd_millidecades = [454.0, 455.0, 456.03691595, 457.08818961, 458.14188671, 459.19801284];
+
+            testCase.verifyEqual(third_octaves.center_freq(1:7), cd_third_octaves_head, 'AbsTol', 1e-4);
+            % MATLAB's create_frequency_bands generates one extra band beyond fmax (inclusive
+            % colon operator vs Python's exclusive np.arange), so compare end-1 to align with Python.
+            testCase.verifyEqual(third_octaves.center_freq(end-5:end-1), cd_third_octaves_tail, 'AbsTol', 1e-4);
+            testCase.verifyEqual(decidecades.center_freq(1:6), cd_decidecades_head, 'AbsTol', 1e-4);
+            testCase.verifyEqual(decidecades.center_freq(end-4:end-1), cd_decidecades_tail, 'AbsTol', 1e-4);
+            testCase.verifyEqual(millidecades(end-5:end), cd_millidecades', 'AbsTol', 1e-4);
+        end
+
+        function test_convert_to_bands(testCase)
+            % Test converting SPSD to custom and standard bands
+            m_spsd = testCase.spsd;
+            
+            % 1. Convert to millidecade
+            mdec = convert_to_millidecade(m_spsd);
+            testCase.assertTrue(isstruct(mdec));
+            testCase.assertEqual(mdec.name, 'Millidecade Sound Pressure Spectral Density');
+            testCase.assertEqual(size(mdec.data, 2), size(m_spsd.data, 2));
+            testCase.verifyFalse(any(isnan(mdec.data(:))));
+
+            % 2. Convert to decidecade
+            ddec = convert_to_decidecade(m_spsd);
+            testCase.assertTrue(isstruct(ddec));
+            testCase.assertEqual(ddec.name, 'Decidecade Sound Pressure Spectral Density');
+            testCase.assertEqual(size(ddec.data, 2), size(m_spsd.data, 2));
+            testCase.verifyFalse(any(isnan(ddec.data(:))));
+
+            % 3. Convert to third octave
+            toct = convert_to_third_octave(m_spsd);
+            testCase.assertTrue(isstruct(toct));
+            testCase.assertEqual(toct.name, 'Third-Octave Sound Pressure Spectral Density');
+            testCase.assertEqual(size(toct.data, 2), size(m_spsd.data, 2));
+            testCase.verifyFalse(any(isnan(toct.data(:))));
+
+            % 4. Convert to custom bands
+            cust = convert_to_custom_bands(m_spsd, 20, 2, false);
+            testCase.assertTrue(isstruct(cust));
+            testCase.assertEqual(size(cust.data, 2), size(m_spsd.data, 2));
+            testCase.verifyFalse(any(isnan(cust.data(:))));
         end
 
         function test_apply_calibration(testCase)

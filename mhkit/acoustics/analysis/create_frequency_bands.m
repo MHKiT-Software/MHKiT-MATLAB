@@ -1,6 +1,6 @@
 function [octave_bins, band] = create_frequency_bands(octave, base, fmin, fmax)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Calculate frequency bands based on the specified octave, minimum and maximum frequency limits
 %
@@ -25,7 +25,7 @@ function [octave_bins, band] = create_frequency_bands(octave, base, fmin, fmax)
 %       band.lower_limit : Lower frequency limits [Hz]
 %       band.upper_limit : Upper frequency limits [Hz]
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     octave double {mustBeFinite, mustBePositive}

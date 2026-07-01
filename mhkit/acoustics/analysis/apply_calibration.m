@@ -1,6 +1,6 @@
-function spsd_cal = apply_calibration(spsd,sensitivity_curve, fill_value)
+function spsd_cal = apply_calibration(spsd,sensitivity_curve, fill_value, interp_method)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Apply custom calibration to spectral density values
 %
@@ -16,6 +16,9 @@ function spsd_cal = apply_calibration(spsd,sensitivity_curve, fill_value)
 %       First column should be frequency, second column should be calibration values
 %   fill_value: float
 %       Value with which to fill missing values from the calibration curve [dB rel 1 V^2/uPa^2]
+%   interp_method: string
+%       Interpolation method to use when interpolating the calibration
+%       curve to the frequencies in 'spsd'. Default is "linear". 
 %
 % Returns
 % ---------
@@ -27,12 +30,13 @@ function spsd_cal = apply_calibration(spsd,sensitivity_curve, fill_value)
 %       spsd_cal.name : Data name
 %       spsd_cal.units : Data units
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct
     sensitivity_curve {mustBeNumeric, mustBeFinite}
     fill_value {mustBeNumeric, mustBeFinite}
+    interp_method {mustBeTextScalar} = "linear"
 end
 
 arguments (Output)
@@ -47,7 +51,7 @@ spsd_cal = spsd;
 
 % interpolate calibration
 calibration = interp1(sensitivity_curve(:,1), ...
-    sensitivity_curve(:,2), spsd.freq, "linear");
+    sensitivity_curve(:,2), spsd.freq, interp_method);
 % use first cal value to fill NaNs in lower freq
 idx = find(spsd.freq < sensitivity_curve(1,1));
 calibration(idx) = fillmissing(calibration(idx),'constant',sensitivity_curve(1,2));

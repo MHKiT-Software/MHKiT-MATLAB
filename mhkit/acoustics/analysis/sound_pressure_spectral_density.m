@@ -1,6 +1,6 @@
-function spsd = sound_pressure_spectral_density(data, fs, bin_length)
+function spsd = sound_pressure_spectral_density(data, fs, bin_length, fft_length, rms)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Calculate sound pressure spectral density (SPSD) from audio samples split into FFTs
 % with a specified bin length in seconds, using Hanning windowing with 50% overlap.
@@ -15,6 +15,10 @@ function spsd = sound_pressure_spectral_density(data, fs, bin_length)
 %       Data collection sampling rate [Hz]
 %   bin_length: double
 %       Length of time in seconds to create FFTs. Default: 1.
+%   fft_length: double
+%       Length of FFT to use. If none, uses bin_length*fs. Default: None.        
+%   rms: logical
+%       If true, scales PSD by mean square of original signal. Default: true.
 %
 % Returns
 % ---------
@@ -25,16 +29,18 @@ function spsd = sound_pressure_spectral_density(data, fs, bin_length)
 %       spsd.name : Description string
 %       spsd.units : Units string [Pa^2/Hz or V^2/Hz]
 %       spsd.fs : Sampling frequency [Hz]
-%       spsd.nbin : Bin length string [s]
+%       spsd.bin_length : Bin length string [s]
 %       spsd.overlap : Overlap percentage string
-%       spsd.nfft : Number of FFT points
+%       spsd.n_fft : Number of FFT points
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     data struct
     fs {mustBeNumeric}
     bin_length {mustBeNumeric} = 1
+    fft_length {mustBeNumeric} = 0
+    rms logical = true
 end
 
 arguments (Output)
@@ -73,8 +79,12 @@ end
 
 pressure = data.data;
 
-% cut into multiple 1-second samples, calculate PSD of each sample
-win  = bin_length*fs;  % window length of each time series
+% cut into multiple samples, calculate PSD of each sample
+if fft_length == 0
+    win  = bin_length*fs;  % window length of each time series
+else
+    win = fft_length;
+end
 step = 0.5*win; % overlap betewen each window
 ns   = floor((length(pressure)-win)/step)+1; % number of time series samples
 nfft = win; % number of fft points
@@ -86,22 +96,30 @@ Pf2  = zeros(nfreq,ns);  % mean-squared sound pressure spectral density
 for i=1:ns
     sample   = pressure((i-1)*step+1:(i-1)*step+win);
     sample   = sample-mean(sample); 
-    t_power  = sum(sample.^2)/length(sample); % mean squred sound pressure; power in time domain
     [f,spec] = fft_hann(fs,sample, nfft);  % spectrum
     psd      = spec.*conj(spec)/df/2;  % PSD
-    f_power  = sum(psd)*df; % power in frequency domain
-    psd_adj  = psd*t_power/f_power; % adjust the amplitude of PSD according to Parseval's theorem
+    if rms
+        t_power  = sum(sample.^2)/length(sample); % mean squred sound pressure; power in time domain
+        f_power  = sum(psd)*df; % power in frequency domain
+        psd_adj  = psd*t_power/f_power; % adjust the amplitude of PSD according to Parseval's theorem
+    else
+        psd_adj  = psd;
+    end
     Pf2(:,i) = psd_adj; %mean-squared sound pressure spectral density
 end
 
 spsd.data = Pf2;
 spsd.time = linspace(data.time(1), data.time(end), ns);
 spsd.freq = freq';
-spsd.name = "Mean Square Sound Pressure Spectral Density";
+if rms
+    spsd.name = "Mean Square Sound Pressure Spectral Density";
+else
+    spsd.name = "Sound Pressure Spectral Density";
+end
 spsd.units = strcat(data.units, "^2/Hz");
 spsd.fs = fs;
-spsd.nbin = strcat(string(bin_length)," s");
+spsd.bin_length = bin_length;
 spsd.overlap = "50%";
-spsd.nfft = nfft;
+spsd.n_fft = nfft;
 
 end
