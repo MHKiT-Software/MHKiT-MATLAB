@@ -385,6 +385,18 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             assertEqual(testCase, restored, row);
         end
 
+        function test_mhkit_verify_column_vector_output(testCase)
+            % Column vector and scalar pass silently
+            mhkit_verify_column_vector_output([1;2;3], 'test_fn');
+            mhkit_verify_column_vector_output(5, 'test_fn');
+
+            % Row vector and matrix both raise a function-scoped error
+            testCase.verifyError(@() mhkit_verify_column_vector_output([1 2 3], 'my_fn'), ...
+                'MHKiT:my_fn:InvalidOutput');
+            testCase.verifyError(@() mhkit_verify_column_vector_output([1 2; 3 4], 'my_fn'), ...
+                'MHKiT:my_fn:InvalidOutput');
+        end
+
     end
 
 end
