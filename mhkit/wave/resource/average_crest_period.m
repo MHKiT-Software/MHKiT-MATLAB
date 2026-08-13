@@ -72,12 +72,11 @@ function Tc = average_crest_period(S, varargin)
 %     >> S.spectrum = spectrum(:,end);
 %     >> Tc = average_crest_period(S);
 %     Tc =
-%       single
-%         3.5816
+%         3.5816  % [s]
 %
 %     Numeric (CDIP real-world data): matrix, one spectrum per column
 %     >> Tc = average_crest_period(spectrum, frequency);
-%     Tc =
+%     Tc =  % [s]
 %         3.5438
 %         3.5760
 %         3.5199
@@ -90,7 +89,7 @@ function Tc = average_crest_period(S, varargin)
 %     >> col_names = mhkit_frequency_to_column_names(frequency);
 %     >> T = array2table(spectrum', 'VariableNames', col_names);
 %     >> Tc_table = average_crest_period(T, frequency);
-%     Tc_table =
+%     Tc_table =  % [s]
 %     17520×1 table
 %         average_crest_period
 %         ____________________
@@ -105,7 +104,7 @@ function Tc = average_crest_period(S, varargin)
 %     Timetable (CDIP real-world data): RowTimes carried through to the output
 %     >> TT = array2timetable(spectrum', 'RowTimes', time, 'VariableNames', col_names);
 %     >> Tc_tt = average_crest_period(TT, frequency);
-%     Tc_tt =
+%     Tc_tt =  % [s]
 %     17520×1 timetable
 %                 time            average_crest_period
 %         ____________________    ____________________
@@ -158,12 +157,12 @@ function Tc = average_crest_period(S, varargin)
 %     >> S.spectrum = spectrum(:,end);
 %     >> Tc = average_crest_period(S);
 %     Tc =
-%         2.0289
+%         2.0289  % [s]
 %
 %     Numeric (WEC-Sim output): matrix, one spectrum per column
 %     >> Tc = average_crest_period(spectrum, frequency);
 %     Tc =
-%         2.0289
+%         2.0289  % [s]
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

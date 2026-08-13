@@ -71,12 +71,11 @@ function Hm0 = significant_wave_height(S, varargin)
 %     >> S.spectrum = spectrum(:,end);
 %     >> Hm0 = significant_wave_height(S);
 %     Hm0 =
-%       single
-%         1.7849
+%         1.7849  % [m]
 %
 %     Numeric (CDIP real-world data): matrix, one spectrum per column
 %     >> Hm0 = significant_wave_height(spectrum, frequency);
-%     Hm0 =
+%     Hm0 =  % [m]
 %         1.7168
 %         1.6646
 %         1.6532
@@ -89,7 +88,7 @@ function Hm0 = significant_wave_height(S, varargin)
 %     >> col_names = mhkit_frequency_to_column_names(frequency);
 %     >> T = array2table(spectrum', 'VariableNames', col_names);
 %     >> Hm0_table = significant_wave_height(T, frequency);
-%     Hm0_table =
+%     Hm0_table =  % [m]
 %     17520×1 table
 %         significant_wave_height
 %         _______________________
@@ -104,7 +103,7 @@ function Hm0 = significant_wave_height(S, varargin)
 %     Timetable (CDIP real-world data): RowTimes carried through to the output
 %     >> TT = array2timetable(spectrum', 'RowTimes', time, 'VariableNames', col_names);
 %     >> Hm0_tt = significant_wave_height(TT, frequency);
-%     Hm0_tt =
+%     Hm0_tt =  % [m]
 %     17520×1 timetable
 %                 time            significant_wave_height
 %         ____________________    _______________________
@@ -157,12 +156,12 @@ function Hm0 = significant_wave_height(S, varargin)
 %     >> S.spectrum = spectrum(:,end);
 %     >> Hm0 = significant_wave_height(S);
 %     Hm0 =
-%         1.7859
+%         1.7859  % [m]
 %
 %     Numeric (WEC-Sim output): matrix, one spectrum per column
 %     >> Hm0 = significant_wave_height(spectrum, frequency);
 %     Hm0 =
-%         1.7859
+%         1.7859  % [m]
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -68,12 +68,11 @@ function Tp = peak_period(S, varargin)
 %     >> S.spectrum = spectrum(:,end);
 %     >> Tp = peak_period(S);
 %     Tp =
-%       single
-%        14.2857
+%         14.2857  % [s]
 %
 %     Numeric (CDIP real-world data): matrix, one spectrum per column
 %     >> Tp = peak_period(spectrum, frequency);
-%     Tp =
+%     Tp =  % [s]
 %         7.1429
 %         7.1429
 %         6.6667
@@ -86,7 +85,7 @@ function Tp = peak_period(S, varargin)
 %     >> col_names = mhkit_frequency_to_column_names(frequency);
 %     >> T = array2table(spectrum', 'VariableNames', col_names);
 %     >> Tp_table = peak_period(T, frequency);
-%     Tp_table =
+%     Tp_table =  % [s]
 %     17520×1 table
 %         peak_period
 %         ___________
@@ -101,7 +100,7 @@ function Tp = peak_period(S, varargin)
 %     Timetable (CDIP real-world data): RowTimes carried through to the output
 %     >> TT = array2timetable(spectrum', 'RowTimes', time, 'VariableNames', col_names);
 %     >> Tp_tt = peak_period(TT, frequency);
-%     Tp_tt =
+%     Tp_tt =  % [s]
 %     17520×1 timetable
 %                 time            peak_period
 %         ____________________    ___________
@@ -154,12 +153,12 @@ function Tp = peak_period(S, varargin)
 %     >> S.spectrum = spectrum(:,end);
 %     >> Tp = peak_period(S);
 %     Tp =
-%          5
+%         5.0000  % [s]
 %
 %     Numeric (WEC-Sim output): matrix, one spectrum per column
 %     >> Tp = peak_period(spectrum, frequency);
 %     Tp =
-%          5
+%         5.0000  % [s]
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

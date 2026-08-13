@@ -68,12 +68,11 @@ function Te = energy_period(S, varargin)
 %     >> S.spectrum = spectrum(:,end);
 %     >> Te = energy_period(S);
 %     Te =
-%       single
-%         8.8095
+%         8.8095  % [s]
 %
 %     Numeric (CDIP real-world data): matrix, one spectrum per column
 %     >> Te = energy_period(spectrum, frequency);
-%     Te =
+%     Te =  % [s]
 %         6.9209
 %         6.8977
 %         6.7150
@@ -86,7 +85,7 @@ function Te = energy_period(S, varargin)
 %     >> col_names = mhkit_frequency_to_column_names(frequency);
 %     >> T = array2table(spectrum', 'VariableNames', col_names);
 %     >> Te_table = energy_period(T, frequency);
-%     Te_table =
+%     Te_table =  % [s]
 %     17520×1 table
 %         energy_period
 %         _____________
@@ -101,7 +100,7 @@ function Te = energy_period(S, varargin)
 %     Timetable (CDIP real-world data): RowTimes carried through to the output
 %     >> TT = array2timetable(spectrum', 'RowTimes', time, 'VariableNames', col_names);
 %     >> Te_tt = energy_period(TT, frequency);
-%     Te_tt =
+%     Te_tt =  % [s]
 %     17520×1 timetable
 %                 time            energy_period
 %         ____________________    _____________
@@ -154,12 +153,12 @@ function Te = energy_period(S, varargin)
 %     >> S.spectrum = spectrum(:,end);
 %     >> Te = energy_period(S);
 %     Te =
-%         6.8700
+%         6.8700  % [s]
 %
 %     Numeric (WEC-Sim output): matrix, one spectrum per column
 %     >> Te = energy_period(spectrum, frequency);
 %     Te =
-%         6.8700
+%         6.8700  % [s]
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
