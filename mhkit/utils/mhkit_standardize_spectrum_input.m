@@ -1,4 +1,4 @@
-function [spectrum, frequency, time, input_variant, remaining] = mhkit_standardize_spectrum_input(S, function_name, varargin)
+function [spectrum, frequency, time, input_kind, remaining] = mhkit_standardize_spectrum_input(S, function_name, varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -33,7 +33,7 @@ function [spectrum, frequency, time, input_variant, remaining] = mhkit_standardi
 %   Nx1 frequency
 % time : column vector or []
 %   Kx1 datetime/duration if available, otherwise empty
-% input_variant : string
+% input_kind : string
 %   "matrix", "struct", "table", or "timetable", gets passed to
 %   mhkit_restore_spectrum_output
 % remaining : cell
@@ -54,7 +54,7 @@ time = [];
 remaining = varargin;
 
 if istimetable(S)
-    input_variant = "timetable";
+    input_kind = "timetable";
     if isempty(remaining)
         error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
             '%s requires frequency as an additional argument for timetable input.', function_name);
@@ -65,7 +65,7 @@ if istimetable(S)
     time = S.Properties.RowTimes;
 
 elseif istable(S)
-    input_variant = "table";
+    input_kind = "table";
     if isempty(remaining)
         error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
             '%s requires frequency as an additional argument for table input.', function_name);
@@ -81,7 +81,7 @@ elseif istable(S)
     spectrum = S{:, :}.';
 
 elseif isstruct(S)
-    input_variant = "struct";
+    input_kind = "struct";
     if ~isfield(S, 'spectrum') || ~isfield(S, 'frequency')
         error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
             '%s requires a struct with spectrum and frequency fields.', function_name);
@@ -93,7 +93,7 @@ elseif isstruct(S)
     end
 
 elseif isnumeric(S)
-    input_variant = "matrix";
+    input_kind = "matrix";
     if isempty(remaining)
         error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
             '%s requires frequency as an additional argument for matrix input.', function_name);
