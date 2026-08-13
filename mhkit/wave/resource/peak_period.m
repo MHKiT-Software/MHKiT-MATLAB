@@ -1,60 +1,207 @@
-function Tp = peak_period(S)
+function Tp = peak_period(S, varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Calculates wave peak period from spectra
-%
-% Peak period is the inverse of the frequency at which the spectrum
-% has maximum energy (Eq 14 in IEC 62600-101 Ed. 2.0 en 2024).
+% Calculates wave peak period [seconds] from spectra per Eq 14 in IEC 62600-101 Ed. 2.0 en 2024
 %
 % Parameters
 % ------------
-% S : struct
-%   Wave spectrum structure:
-%     S.spectrum : vector or matrix [m^2/Hz]
-%       Spectral density
-%     S.frequency : vector [Hz]
-%       Frequency
-%     S.type : string (optional)
-%       Spectra type description
+% S : struct, numeric, table, or timetable
+%   struct: S.spectrum (vector or matrix [m^2/Hz]), S.frequency (vector
+%     [Hz]), optional S.time
+%   numeric: spectral density array, frequency required as second argument
+%   table: one variable per spectrum (rows), frequency required as second
+%     argument, optional 'time' variable
+%   timetable: one variable per spectrum (rows = RowTimes), frequency
+%     required as second argument
 %
 % Returns
 % ---------
-% Tp : double or vector [s]
-%   Wave peak period. Returns a vector if S.spectrum is a matrix
-%   (one value per column).
+% Tp : double, column vector, table, or timetable [s]
+%   Wave peak period, one value per spectrum. Matches the container style
+%   of S: numeric for struct/numeric input, table/timetable for
+%   table/timetable input.
+%
+% Examples
+% --------
+%     CDIP Example: Station Number 225: Kaneohe Bay, WETS, Oahu, HI
+%     https://cdip.ucsd.edu/themes/cdip?pb=1&u2=s:225:st:1&d2=p70
+%     >> station_number = '225';
+%     >> data_type = 'realtime';
+%     >> years = 2025;
+%     >> parameters = {'waveEnergyDensity'};
+%     >> data = cdip_request_parse_workflow('station_number', station_number, 'data_type', data_type, 'years', years, 'parameters', parameters);
+%     >> frequency = data.metadata.wave.waveFrequency;  % [Hz], 64x1 single
+%     frequency =
+%         0.0250
+%         0.0300
+%         0.0350
+%          :
+%         0.5600
+%         0.5700
+%         0.5800
+%
+%     >> % waveEnergyDensity is stored [time x frequency]; transpose to
+%     >> % match MHKiT's frequency-as-rows, spectra-as-columns convention.
+%     >> spectrum = data.data.wave2D.waveEnergyDensity';  % [m^2/Hz], 64x17520 double
+%     spectrum =
+%        0.0002     0.0001     0.0002  ...     0.0006     0.0003     0.0004
+%        0.0007     0.0003     0.0005  ...     0.0021     0.0007     0.0010
+%        0.0032     0.0030     0.0020  ...     0.0047     0.0029     0.0038
+%          :
+%        0.0165     0.0122     0.0138  ...     0.0186     0.0079     0.0128
+%        0.0124     0.0116     0.0080  ...     0.0128     0.0120     0.0088
+%        0.0184     0.0097     0.0116  ...     0.0095     0.0084     0.0080
+%
+%     >> time = data.data.wave.waveTime;  % 17520x1 datetime
+%     time =
+%     01-Jan-2025 00:00:00
+%     01-Jan-2025 00:30:00
+%     01-Jan-2025 01:00:00
+%          :
+%     31-Dec-2025 22:30:00
+%     31-Dec-2025 23:00:00
+%     31-Dec-2025 23:30:00
+%
+%     Struct (CDIP real-world data): single (most recent) spectrum
+%     >> S.frequency = frequency;
+%     >> S.spectrum = spectrum(:,end);
+%     >> Tp = peak_period(S);
+%     Tp =
+%       single
+%        14.2857
+%
+%     Numeric (CDIP real-world data): matrix, one spectrum per column
+%     >> Tp = peak_period(spectrum, frequency);
+%     Tp =
+%         7.1429
+%         7.1429
+%         6.6667
+%          :
+%        13.3333
+%        12.5000
+%        14.2857
+%
+%     Table (CDIP real-world data): one row per spectrum, one variable per frequency bin
+%     >> col_names = mhkit_frequency_to_column_names(frequency);
+%     >> T = array2table(spectrum', 'VariableNames', col_names);
+%     >> Tp_table = peak_period(T, frequency);
+%     Tp_table =
+%     17520×1 table
+%         peak_period
+%         ___________
+%           7.1429   
+%           7.1429   
+%           6.6667   
+%         :
+%           13.333   
+%             12.5   
+%           14.286
+%
+%     Timetable (CDIP real-world data): RowTimes carried through to the output
+%     >> TT = array2timetable(spectrum', 'RowTimes', time, 'VariableNames', col_names);
+%     >> Tp_tt = peak_period(TT, frequency);
+%     Tp_tt =
+%     17520×1 timetable
+%                 time            peak_period
+%         ____________________    ___________
+%         01-Jan-2025 00:00:00      7.1429   
+%         01-Jan-2025 00:30:00      7.1429   
+%         01-Jan-2025 01:00:00      6.6667   
+%         :
+%         31-Dec-2025 22:30:00      13.333   
+%         31-Dec-2025 23:00:00        12.5   
+%         31-Dec-2025 23:30:00      14.286
+%
+%     WEC-Sim Output Example
+%     >> S = load('examples/data/RM3MooringMatrix_matlabWorkspace.mat', 'output');
+%     >> elevation = S.output.wave.elevation;  % [m], RM3 float, 40001x1 double
+%     >> raw_time = S.output.wave.time;  % [s], 40001x1 double
+%     >> sample_rate = 1 / (raw_time(2) - raw_time(1));  % [Hz], 100
+%     >> % Note: IEC 62600-101 Ed. 2.0 en 2024, "Wave energy resource
+%     >> % assessment and characterization", section 6.5.2 specifies a
+%     >> % wave record length of minimum 1200 s (20 min), up to 3600 s
+%     >> % (60 min) for better spectral resolution/precision. This
+%     >> % WEC-Sim record is only ~6.7 min, so treat this as illustrative,
+%     >> % not a fully representative sea-state estimate.
+%     >> %
+%     >> % Note: spectral statistics assume an irregular wave record.
+%     >> % They are not meant for regular, single-frequency (sine) wave
+%     >> % tests, which WEC-Sim is often used to run.
+%     >> Sxx = elevation_spectrum(elevation, sample_rate, 1000, raw_time);
+%     >> frequency = Sxx.frequency;  % [Hz], 501x1 double
+%     frequency =
+%         0.0000
+%         0.1000
+%         0.2000
+%          :
+%        49.8000
+%        49.9000
+%        50.0000
+%
+%     >> spectrum = Sxx.spectrum;  % [m^2/Hz], 501x1 double
+%     spectrum =
+%         0.1439
+%         0.8485
+%         0.8739
+%          :
+%         0.0000
+%         0.0000
+%         0.0000
+%
+%     Struct (WEC-Sim output): the single spectrum
+%     >> S.frequency = frequency;
+%     >> S.spectrum = spectrum(:,end);
+%     >> Tp = peak_period(S);
+%     Tp =
+%          5
+%
+%     Numeric (WEC-Sim output): matrix, one spectrum per column
+%     >> Tp = peak_period(spectrum, frequency);
+%     Tp =
+%          5
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
-    S struct
+    S
+end
+
+arguments (Repeating)
+    varargin
 end
 
 arguments (Output)
-    Tp {mustBeNumeric}
+    Tp
 end
 
-% Validate input structure
-if ~isfield(S, 'spectrum') || ~isfield(S, 'frequency')
-    error('MHKiT:peak_period:InvalidInput', ...
-        'S must be a structure with spectrum and frequency fields');
-end
-
-spectrum = S.spectrum;
-frequency = S.frequency(:);
+[spectrum, frequency, time, input_style] = mhkit_standardize_spectrum_input(S, 'peak_period', varargin{:});
 
 % Handle both vector and matrix spectra
 if isvector(spectrum)
     spectrum = spectrum(:);
+    if length(frequency) ~= length(spectrum)
+        error('MHKiT:peak_period:InvalidInput', ...
+            'frequency length (%d) must match spectrum length (%d)', ...
+            length(frequency), length(spectrum));
+    end
     [~, idx] = max(spectrum);
     fp = frequency(idx);
 else
+    if length(frequency) ~= size(spectrum, 1)
+        error('MHKiT:peak_period:InvalidInput', ...
+            'frequency length (%d) must match number of rows in spectrum (%d)', ...
+            length(frequency), size(spectrum, 1));
+    end
     % Matrix case: find max along first dimension (frequency)
     [~, idx] = max(spectrum, [], 1);
     fp = frequency(idx);
 end
 
-% Eq 14 in IEC 62600-101 Ed. 2.0 en 2024
 Tp = 1 ./ fp;
+Tp = Tp(:);
+mhkit_verify_is_column_vector(Tp, 'peak_period');
+
+Tp = mhkit_restore_spectrum_output(Tp, input_style, 'peak_period', time);
 
 end
