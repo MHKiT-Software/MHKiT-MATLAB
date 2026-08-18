@@ -4,26 +4,27 @@ function m = frequency_moment(S, N, varargin)
 %
 % Calculates the Nth frequency moment of the spectrum
 %
+% Computes: m_N = sum(f^N * S(f) * df) per Eq 8 in IEC 62600-101 Ed. 2.0 en 2024
+%
 % Parameters
-% -----------
-%     S: structure or numeric array
-%         If structure:
-%             S.spectrum   - Spectral density [m^2/Hz]
-%             S.frequency  - Frequency [Hz]
-%         If numeric:
-%             S is spectral density array (vector or matrix)
-%             varargin{1} must contain frequency vector
-%
-%     N: int
-%         Moment (0 for 0th, 1 for 1st ....)
-%
-%     frequency_bins: vector (optional)
-%         Bin widths for frequency of S. Required for unevenly sized bins
+% ------------
+% S : struct or numeric
+%   If struct:
+%     S.spectrum : vector or matrix [m^2/Hz]
+%       Spectral density
+%     S.frequency : vector [Hz]
+%       Frequency
+%   If numeric: spectral density array, varargin{1} must be frequency
+% N : integer
+%   Moment order (0 for 0th, 1 for 1st, -1 for inverse, etc.)
+% frequency_bins : vector (optional)
+%   Bin widths for frequency of S. Required for unevenly sized bins.
 %
 % Returns
-% -------
-%     m: double
-%         Nth Frequency Moment indexed by S.columns
+% ---------
+% m : double or column vector
+%   Nth frequency moment. Returns a column vector if S.spectrum is a matrix
+%   (one value per column).
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -42,13 +43,14 @@ end
         frequency = S.frequency;
     elseif isnumeric(S)
         if nargin < 3
-            error('When S is numeric, frequency vector must be provided as third argument');
+            error('MHKiT:frequency_moment:InvalidInput', ...
+                'When S is numeric, frequency vector must be provided as third argument');
         end
         spectrum = S;
         frequency = varargin{1};
         varargin(1) = [];
     else
-        error('Input S must be a struct or numeric array');
+        error('MHKiT:frequency_moment:InvalidInput', 'Input S must be a struct or numeric array');
     end
 
     % Standardize frequency, spectrum, and frequency bins
@@ -64,5 +66,7 @@ end
 
     % Calculate Nth moment: m_N = sum(f^N * S * df)
     m = sum((frequency.^N) .* spectrum .* freq_bins, 1);
+    m = m(:);
+    mhkit_verify_column_vector_output(m, 'frequency_moment');
 
 end

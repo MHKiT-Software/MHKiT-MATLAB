@@ -78,6 +78,20 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             end
         end
 
+        function test_standardize_wave_spectra_frequency_nonuniform_bins(testCase)
+            % Non-uniform spacing after the omitted zero-frequency point,
+            % following MHKiT-Python convention (frequency_moment, v1.1.2):
+            % https://github.com/MHKiT-Software/MHKiT-Python/blob/6bad8fe4f2bd8a9bff66fb9607ed0900f09d0258/mhkit/wave/resource.py#L455-L464
+            frequency = [0; 0.1; 0.3; 0.6; 1.0];
+            spectrum = [0; 1; 2; 3; 4];
+
+            [out_freq, out_spectrum, out_bins] = standardize_wave_spectra_frequency(frequency, spectrum);
+
+            assertEqual(testCase, out_freq, [0.1; 0.3; 0.6; 1.0], 'AbsTol', 1e-12);
+            assertEqual(testCase, out_spectrum, [1; 2; 3; 4]);
+            assertEqual(testCase, out_bins, [0.2; 0.2; 0.3; 0.4], 'AbsTol', 1e-12);
+        end
+
        function test_metrics_HsP(testCase)
 
             relative_file_name = '../../examples/data/wave/ValData2.mat';
