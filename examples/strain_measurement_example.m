@@ -170,23 +170,11 @@ data.shear_strain = data.eb - (data.ea + data.ec) / 2;
 % force and moment are calculated using rosette pairs to eliminate the
 % effect of the bending moment on axial strain when calculating the normal
 % force, and vice versa.
-
-% Define helper functions
-function normal = calculate_normal(axial_strain_1, axial_strain_2, elastic_modulus, shear_modulus, width, height, radius)
-    normal = 0.5 * (axial_strain_1 + axial_strain_2) * elastic_modulus * ...
-        (width * height - pi * radius^2);
-end
-
-function moment = calculate_moment(axial_strain_1, axial_strain_2, elastic_modulus, shear_modulus, width, height, radius)
-    moment = (axial_strain_1 - axial_strain_2) / height * elastic_modulus * ...
-        (width * height^3 / 12 - pi * radius^4 / 4);
-end
-
-function torsion = calculate_torsion(shear_strain, shear_modulus, width, height, radius)
-    polar_moment_of_inertia = (width^3 * height + width * height^3) / 12 - ...
-        pi * radius^4 / 2;
-    torsion = shear_strain * shear_modulus * polar_moment_of_inertia / (height / 2);
-end
+%
+% MATLAB requires local functions in a script to be defined at the end of
+% the file, so |calculate_normal|, |calculate_moment| and |calculate_torsion|
+% are defined in the *Helper Functions* section at the bottom of this
+% example.
 
 %% Calculate Normal Force and Bending Moments
 %
@@ -306,3 +294,24 @@ grid on;
 % GitHub Repository (ca9709f), July 17, 2024.
 % https://github.com/MHKiT-Software/MHKiT-Python/commit/ca9709f1df066b32305ebf85acae3886b15003bd
 %
+
+%% Helper Functions
+%
+% Functions used to calculate the normal force, moment, and torsion from
+% strain and the geometry of the cuboid.
+
+function normal = calculate_normal(axial_strain_1, axial_strain_2, elastic_modulus, shear_modulus, width, height, radius)
+    normal = 0.5 * (axial_strain_1 + axial_strain_2) * elastic_modulus * ...
+        (width * height - pi * radius^2);
+end
+
+function moment = calculate_moment(axial_strain_1, axial_strain_2, elastic_modulus, shear_modulus, width, height, radius)
+    moment = (axial_strain_1 - axial_strain_2) / height * elastic_modulus * ...
+        (width * height^3 / 12 - pi * radius^4 / 4);
+end
+
+function torsion = calculate_torsion(shear_strain, shear_modulus, width, height, radius)
+    polar_moment_of_inertia = (width^3 * height + width * height^3) / 12 - ...
+        pi * radius^4 / 2;
+    torsion = shear_strain * shear_modulus * polar_moment_of_inertia / (height / 2);
+end
