@@ -179,25 +179,16 @@ arguments (Repeating)
     varargin
 end
 
-    % Extract spectrum and frequency
-    if isstruct(S)
-        spectrum = S.spectrum;
-        frequency = S.frequency;
-    elseif isnumeric(S)
-        if nargin < 3
-            error('MHKiT:frequency_moment:InvalidInput', ...
-                'When S is numeric, frequency vector must be provided as third argument');
-        end
-        spectrum = S;
-        frequency = varargin{1};
-        varargin(1) = [];
-    else
-        error('MHKiT:frequency_moment:InvalidInput', 'Input S must be a struct or numeric array');
-    end
+arguments (Output)
+    m
+end
+
+    [spectrum, frequency, time, input_style, remaining] = ...
+        mhkit_standardize_spectrum_input(S, 'frequency_moment', varargin{:});
 
     % Standardize frequency, spectrum, and frequency bins
-    if ~isempty(varargin)
-        [frequency, spectrum, freq_bins] = standardize_wave_spectra_frequency(frequency, spectrum, varargin{1});
+    if ~isempty(remaining)
+        [frequency, spectrum, freq_bins] = standardize_wave_spectra_frequency(frequency, spectrum, remaining{1});
     else
         [frequency, spectrum, freq_bins] = standardize_wave_spectra_frequency(frequency, spectrum);
     end
@@ -209,6 +200,8 @@ end
     % Calculate Nth moment: m_N = sum(f^N * S * df)
     m = sum((frequency.^N) .* spectrum .* freq_bins, 1);
     m = m(:);
-    mhkit_verify_column_vector_output(m, 'frequency_moment');
+    mhkit_verify_is_column_vector(m, 'frequency_moment');
+
+    m = mhkit_restore_spectrum_output(m, input_style, statistic_name, time);
 
 end
