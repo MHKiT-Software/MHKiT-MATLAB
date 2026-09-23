@@ -29,9 +29,10 @@ function [data, was_row] = mhkit_standardize_user_input_to_column_vectors(data, 
 %   True if the original input was a row vector (1xN, N>1) and was
 %   transposed to a column. Pass this to
 %   mhkit_restore_column_vectors_to_user_input to restore the original
-%   orientation on shape-preserving outputs only. Reduction outputs
-%   (fewer elements than the input, e.g. a moment or a peak period) always
-%   stay column-oriented per MHKiT's convention and must not be restored.
+%   orientation on shape-preserving outputs only. Spectral statistic
+%   outputs (fewer elements than the input, e.g. a moment or a peak
+%   period) always stay column-oriented per MHKiT's convention and must
+%   not be restored.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
