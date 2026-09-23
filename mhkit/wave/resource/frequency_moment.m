@@ -202,6 +202,13 @@ end
     m = m(:);
     mhkit_verify_is_column_vector(m, 'frequency_moment');
 
+    % Name follows MHKiT-Python's m.name = "m" + str(N), but stays a valid MATLAB
+    % identifier for negative N (dot-indexing t.m-1 would parse as subtraction).
+    if N < 0
+        statistic_name = sprintf('m_neg%d', abs(N));
+    else
+        statistic_name = sprintf('m%d', N);
+    end
     m = mhkit_restore_spectrum_output(m, input_style, statistic_name, time);
 
 end
