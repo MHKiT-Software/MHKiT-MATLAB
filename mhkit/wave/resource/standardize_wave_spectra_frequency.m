@@ -43,7 +43,8 @@ end
 
     % Check size consistency
     if length(frequency) ~= size(spectrum,1)
-        error('Length of frequency vector must match number of rows in spectrum');
+        error('MHKiT:standardize_wave_spectra_frequency:InvalidInput', ...
+            'Length of frequency vector must match number of rows in spectrum');
     end
 
     % Omit near-zero frequencies, following MHKiT-Python convention:
@@ -58,7 +59,8 @@ end
         if ~isscalar(freq_bins)
             freq_bins = freq_bins(:);
             if length(freq_bins) ~= length(valid_idx)
-                error('Length of freq_bins must match original frequency vector');
+                error('MHKiT:standardize_wave_spectra_frequency:InvalidInput', ...
+                    'Length of freq_bins must match original frequency vector');
             end
             freq_bins = freq_bins(valid_idx);
         else
