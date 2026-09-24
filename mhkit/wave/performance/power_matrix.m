@@ -1,106 +1,88 @@
-function PM=power_matrix(LM,JM)
+function PM = power_matrix(LM, JM)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Generates a power matrix from a capture length matrix and wave energy
-%     flux matrix
+% Generates a power matrix from a capture length matrix and wave energy flux matrix
+%
+% PM = LM * JM (element-wise multiplication)
 %
 % Parameters
 % ------------
-%     LM: Capture Length
-%        Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(Hm0_bins,L)
-%
-%        OR
-%
-%        structure of form:
-%
-%           LM.values
-%
-%           LM.stat
-%
-%           LM.Hm0_bins
-%
-%           LM.Te_bins
-%
-%
-%     JM: Wave Energy Flux
-%        Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(Hm0_bins,J)
-%
-%        OR
-%
-%        structure of form:
-%
-%           JM.values: Wave energy flux matrix
-%
-%           JM.Hm0_bins
-%
-%           JM.Te_bins
+% LM : struct
+%   Capture length matrix structure:
+%     LM.values : matrix
+%       Capture length values
+%     LM.stat : string
+%       Statistic used (e.g., 'mean')
+%     LM.Hm0_bins : vector [m]
+%       Hm0 bin centers
+%     LM.Te_bins : vector [s]
+%       Te bin centers
+% JM : struct
+%   Wave energy flux matrix structure:
+%     JM.values : matrix
+%       Wave energy flux values
+%     JM.Hm0_bins : vector [m]
+%       Hm0 bin centers
+%     JM.Te_bins : vector [s]
+%       Te bin centers
 %
 % Returns
 % ---------
-%     PM: Structure
+% PM : struct
+%   Power matrix structure:
+%     PM.values : matrix
+%       Power matrix values
+%     PM.stat : string
+%       Statistic from LM
+%     PM.Hm0_bins : vector [m]
+%       Hm0 bin centers
+%     PM.Te_bins : vector [s]
+%       Te bin centers
 %
-%
-%         PM.values: Power matrix
-%
-%         PM.stat: statistic of the matrix (i.e. "mean", "max", etc.)
-%         (string)
-%
-%         PM.Hm0_bins
-%
-%         PM.Te_bins
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
-py.importlib.import_module('mhkit_python_utils');
-
-% need to add asserts for pandas
-if (isa(LM,'py.pandas.core.frame.DataFrame')~=1)
-    x=size(LM.values);
-
-    li=py.list();
-    if x(2)>1
-        for i = 1:x(2)
-            app=py.list(LM.values(:,i));
-            li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-        end
-    end
-
-    LMpan=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,py.list(LM.Hm0_bins),int32(x(2)));
-
+arguments (Input)
+    LM struct
+    JM struct
 end
 
-if (isa(JM,'py.pandas.core.frame.DataFrame')~=1)
-    x=size(JM.values);
-    li=py.list();
-    if x(2)>1
-        for i = 1:x(2)
-            app=py.list(JM.values(:,i));
-            li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-        end
-    end
-    JMpan=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,py.list(JM.Hm0_bins),int32(x(2)));
+arguments (Output)
+    PM struct
 end
 
-PMpan=py.mhkit.wave.performance.power_matrix(LMpan,JMpan);
+% Validate input structures have values field
+if ~isfield(LM, 'values')
+    error('MHKiT:power_matrix:InvalidInput', ...
+        'LM must be a structure with a values field');
+end
+if ~isfield(JM, 'values')
+    error('MHKiT:power_matrix:InvalidInput', ...
+        'JM must be a structure with a values field');
+end
 
-% convert vals1d to original shape
-vals=double(py.array.array('d',py.numpy.nditer(PMpan.values)));
-sha=cell(PMpan.values.shape);
-x=int64(sha{1,1});
-y=int64(sha{1,2});
-vals=reshape(vals,[y,x]);
-vals=transpose(vals);
+% Validate dimensions match
+if ~isequal(size(LM.values), size(JM.values))
+    error('MHKiT:power_matrix:DimensionMismatch', ...
+        'LM.values and JM.values must have the same dimensions');
+end
 
-PM.values=vals;
-PM.stat=LM.stat;
-PM.Hm0_bins=double(LM.Hm0_bins);
-PM.Te_bins=double(LM.Te_bins);
+% Build output structure
+PM = struct();
+PM.values = LM.values .* JM.values;
 
+if isfield(LM, 'stat')
+    PM.stat = LM.stat;
+else
+    PM.stat = 'computed';
+end
+
+if isfield(LM, 'Hm0_bins')
+    PM.Hm0_bins = LM.Hm0_bins;
+end
+
+if isfield(LM, 'Te_bins')
+    PM.Te_bins = LM.Te_bins;
+end
+
+end
