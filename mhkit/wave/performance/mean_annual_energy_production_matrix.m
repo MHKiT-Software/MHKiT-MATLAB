@@ -1,16 +1,16 @@
-function maep = mean_annual_energy_production_matrix(LM, JM, frequency)
+function maep = mean_annual_energy_production_matrix(CWM, JM, frequency)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Calculates mean annual energy production (MAEP) from matrix data
 %
-% MAEP = T * nansum(LM * JM * frequency)
+% MAEP = T * nansum(CWM * JM * frequency)
 % where T = 8766 hours (average length of a year)
 %
 % Parameters
 % ------------
-% LM : struct or matrix
-%   Capture length matrix. If struct, uses LM.values
+% CWM : struct or matrix
+%   Capture width matrix. If struct, uses CWM.values
 % JM : struct or matrix
 %   Wave energy flux matrix. If struct, uses JM.values
 % frequency : struct or matrix
@@ -24,7 +24,7 @@ function maep = mean_annual_energy_production_matrix(LM, JM, frequency)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
-    LM
+    CWM
     JM
     frequency
 end
@@ -34,10 +34,10 @@ arguments (Output)
 end
 
 % Extract values from structs if needed
-if isstruct(LM)
-    LM_vals = LM.values;
+if isstruct(CWM)
+    CWM_vals = CWM.values;
 else
-    LM_vals = LM;
+    CWM_vals = CWM;
 end
 
 if isstruct(JM)
@@ -53,9 +53,9 @@ else
 end
 
 % Validate dimensions match
-if ~isequal(size(LM_vals), size(JM_vals)) || ~isequal(size(LM_vals), size(freq_vals))
+if ~isequal(size(CWM_vals), size(JM_vals)) || ~isequal(size(CWM_vals), size(freq_vals))
     error('MHKiT:mean_annual_energy_production_matrix:DimensionMismatch', ...
-        'LM, JM, and frequency must have the same dimensions');
+        'CWM, JM, and frequency must have the same dimensions');
 end
 
 % Validate frequency sums to 1
@@ -67,6 +67,6 @@ end
 
 T = 8766;  % Average length of a year in hours
 
-maep = T * sum(LM_vals(:) .* JM_vals(:) .* freq_vals(:), 'omitnan');
+maep = T * sum(CWM_vals(:) .* JM_vals(:) .* freq_vals(:), 'omitnan');
 
 end
