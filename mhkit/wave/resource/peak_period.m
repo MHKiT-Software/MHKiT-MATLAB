@@ -199,7 +199,7 @@ end
 
 Tp = 1 ./ fp;
 Tp = Tp(:);
-mhkit_verify_is_column_vector(Tp, 'peak_period');
+mhkit_verify_is_column_vector(Tp, 'function_name', mfilename);
 
 Tp = mhkit_restore_spectrum_output(Tp, input_style, 'peak_period', time);
 

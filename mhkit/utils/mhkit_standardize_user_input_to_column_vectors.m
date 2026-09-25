@@ -1,4 +1,4 @@
-function [data, was_row] = mhkit_standardize_user_input_to_column_vectors(data, function_name)
+function [data, was_row] = mhkit_standardize_user_input_to_column_vectors(data, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -17,7 +17,7 @@ function [data, was_row] = mhkit_standardize_user_input_to_column_vectors(data, 
 % ------------
 % data : numeric vector or matrix
 %   User-supplied numeric input to standardize
-% function_name : string
+% function_name : string (optional)
 %   Name of the calling function, used to scope any error this function
 %   raises (e.g. "MHKiT:<function_name>:InvalidInput")
 %
@@ -38,7 +38,7 @@ function [data, was_row] = mhkit_standardize_user_input_to_column_vectors(data, 
 
 arguments (Input)
     data {mustBeNumeric}
-    function_name (1,1) string
+    options.function_name (1,1) string = mfilename
 end
 
 arguments (Output)
@@ -47,14 +47,14 @@ arguments (Output)
 end
 
 if isempty(data)
-    error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
-        '%s requires non-empty numeric input.', function_name);
+    error(sprintf('MHKiT:%s:InvalidInput', options.function_name), ...
+        '%s requires non-empty numeric input.', options.function_name);
 end
 
 if ndims(data) > 2
-    error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
+    error(sprintf('MHKiT:%s:InvalidInput', options.function_name), ...
         ['%s requires 2-D numeric input (a vector or a matrix of column ' ...
-         'vectors), got %d-D input.'], function_name, ndims(data));
+         'vectors), got %d-D input.'], options.function_name, ndims(data));
 end
 
 was_row = isrow(data) && ~isscalar(data);

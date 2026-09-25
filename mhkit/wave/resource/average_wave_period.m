@@ -190,7 +190,7 @@ end
 
 Tm = m0 ./ m1;
 Tm = Tm(:);
-mhkit_verify_is_column_vector(Tm, 'average_wave_period');
+mhkit_verify_is_column_vector(Tm, 'function_name', mfilename);
 
 Tm = mhkit_restore_spectrum_output(Tm, input_style, 'average_wave_period', time);
 

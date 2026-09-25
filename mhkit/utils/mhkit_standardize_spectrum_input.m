@@ -116,8 +116,8 @@ if ndims(spectrum) > 2
         '%s requires a 2-D spectrum (vector or matrix), got %d-D input.', function_name, ndims(spectrum));
 end
 
-frequency = mhkit_standardize_user_input_to_column_vectors(frequency, function_name);
-mhkit_verify_is_column_vector(frequency, function_name);
+frequency = mhkit_standardize_user_input_to_column_vectors(frequency, 'function_name', function_name);
+mhkit_verify_is_column_vector(frequency, 'function_name', function_name);
 
 if any(frequency < 0)
     error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
@@ -138,7 +138,7 @@ if ~isempty(time)
     if isrow(time) && ~isscalar(time)
         time = time.';
     end
-    mhkit_verify_is_column_vector(time, function_name);
+    mhkit_verify_is_column_vector(time, 'function_name', function_name);
 end
 
 end

@@ -1,4 +1,4 @@
-function mhkit_verify_is_column_vector(data, function_name)
+function mhkit_verify_is_column_vector(data, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -14,25 +14,25 @@ function mhkit_verify_is_column_vector(data, function_name)
 % ------------
 % data : numeric, datetime, or duration
 %   Value to verify
-% function_name : string
+% function_name : string (optional)
 %   Name of the calling function, used to scope the error
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     data
-    function_name (1,1) string
+    options.function_name (1,1) string = mfilename
 end
 
 if ~(isnumeric(data) || isdatetime(data) || isduration(data))
-    error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
-        '%s expected numeric, datetime, or duration, got %s.', function_name, class(data));
+    error(sprintf('MHKiT:%s:InvalidInput', options.function_name), ...
+        '%s expected numeric, datetime, or duration, got %s.', options.function_name, class(data));
 end
 
 if ~iscolumn(data)
-    error(sprintf('MHKiT:%s:InvalidOutput', function_name), ...
+    error(sprintf('MHKiT:%s:InvalidOutput', options.function_name), ...
         '%s expected a column vector, got size [%d %d].', ...
-        function_name, size(data,1), size(data,2));
+        options.function_name, size(data,1), size(data,2));
 end
 
 end

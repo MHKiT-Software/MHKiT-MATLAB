@@ -175,7 +175,7 @@ else
 end
 
 J = J(:);
-mhkit_verify_is_column_vector(J, 'energy_flux');
+mhkit_verify_is_column_vector(J, 'function_name', mfilename);
 J = mhkit_restore_spectrum_output(J, input_style, 'energy_flux', time);
 
 end

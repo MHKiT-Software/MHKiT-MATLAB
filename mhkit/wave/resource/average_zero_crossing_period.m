@@ -192,7 +192,7 @@ end
 
 Tz = sqrt(m0 ./ m2);
 Tz = Tz(:);
-mhkit_verify_is_column_vector(Tz, 'average_zero_crossing_period');
+mhkit_verify_is_column_vector(Tz, 'function_name', mfilename);
 
 Tz = mhkit_restore_spectrum_output(Tz, input_style, 'average_zero_crossing_period', time);
 

@@ -197,7 +197,7 @@ end
 % The equation cited above. multiplies m0 by m4
 e = sqrt(1 - (m2.^2) ./ (m0 .* m4));
 e = e(:);
-mhkit_verify_is_column_vector(e, 'spectral_bandwidth');
+mhkit_verify_is_column_vector(e, 'function_name', mfilename);
 
 e = mhkit_restore_spectrum_output(e, input_style, 'spectral_bandwidth', time);
 

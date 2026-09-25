@@ -194,7 +194,7 @@ end
 
 v = sqrt(((m0 .* mn2) ./ (mn1.^2)) - 1);
 v = v(:);
-mhkit_verify_is_column_vector(v, 'spectral_width');
+mhkit_verify_is_column_vector(v, 'function_name', mfilename);
 
 v = mhkit_restore_spectrum_output(v, input_style, 'spectral_width', time);
 

@@ -200,7 +200,7 @@ end
     % Calculate Nth moment: m_N = sum(f^N * S * df)
     m = sum((frequency.^N) .* spectrum .* freq_bins, 1);
     m = m(:);
-    mhkit_verify_is_column_vector(m, 'frequency_moment');
+    mhkit_verify_is_column_vector(m, 'function_name', mfilename);
 
     % Name follows MHKiT-Python's m.name = "m" + str(N), but stays a valid MATLAB
     % identifier for negative N (dot-indexing t.m-1 would parse as subtraction).

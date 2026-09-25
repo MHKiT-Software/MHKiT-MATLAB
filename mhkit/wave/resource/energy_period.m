@@ -187,7 +187,7 @@ end
 
 Te = m_neg1 ./ m0;
 Te = Te(:);
-mhkit_verify_is_column_vector(Te, 'energy_period');
+mhkit_verify_is_column_vector(Te, 'function_name', mfilename);
 
 Te = mhkit_restore_spectrum_output(Te, input_style, 'energy_period', time);
 

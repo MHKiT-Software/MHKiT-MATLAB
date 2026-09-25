@@ -187,7 +187,7 @@ end
 
 Hm0 = 4 * sqrt(m0);
 Hm0 = Hm0(:);
-mhkit_verify_is_column_vector(Hm0, 'significant_wave_height');
+mhkit_verify_is_column_vector(Hm0, 'function_name', mfilename);
 
 Hm0 = mhkit_restore_spectrum_output(Hm0, input_style, 'significant_wave_height', time);
 

@@ -192,7 +192,7 @@ end
 
 Tc = sqrt(m2 ./ m4);
 Tc = Tc(:);
-mhkit_verify_is_column_vector(Tc, 'average_crest_period');
+mhkit_verify_is_column_vector(Tc, 'function_name', mfilename);
 
 Tc = mhkit_restore_spectrum_output(Tc, input_style, 'average_crest_period', time);
 
