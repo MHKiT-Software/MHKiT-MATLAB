@@ -1,68 +1,86 @@
-function WEFM=wave_energy_flux_matrix(Hm0,Te,J,statistic,Hm0_bins,Te_bins)
+function WEFM = wave_energy_flux_matrix(Hm0, Te, J, statistic, bin_spec)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Generates a wave eneergy flux matrix for a given statistic
-%
-%     Note that IEC/TS 62600-100 requires capture length matrices for
-%     the mean, std, count, min, and max.
+% Generates a wave energy flux matrix for a given statistic
 %
 % Parameters
 % ------------
-%     Hm0: numpy array or vector
-%         Significant wave height from spectra [m]
-%
-%     Te: numpy array or vector
-%         Energy period from spectra [s]
-%
-%     J : numpy array or vector
-%         wave energy flux from spectra [W/m]
-%
-%     statistic: string
-%         Statistic for each bin, options include: 'mean', 'std', 'median',
-%         'count', 'sum', 'min', 'max', and 'frequency'.  Note that 'std' uses
-%         a degree of freedom of 1 in accordance with IEC/TS 62600-100.
-%
-%     Hm0_bins: numpy array or vector
-%         Bin centers for Hm0 [m]
-%
-%     Te_bins: numpy array or vector
-%         Bin centers for Te [s]
+% Hm0 : vector [m]
+%   Significant wave height from spectra
+% Te : vector [s]
+%   Energy period from spectra
+% J : vector [W/m]
+%   Wave energy flux from spectra
+% statistic : char or string
+%   Statistic for each bin. Options: 'mean', 'std', 'median',
+%   'count', 'sum', 'min', 'max', 'probability', or 'frequency'.
+%   'probability' and 'frequency' are the same statistic.
+%   'std' is the population standard deviation (1/N), following
+%   MHKiT-Python convention.
+% bin_spec : struct
+%   Bin spec for each axis, see mhkit_define_bins_2d. Te is x and Hm0 is
+%   y. Each axis struct must have exactly one of these three field sets.
+%     bin_spec.x : struct
+%       Te spec [s], one of:
+%         bin_spec.x.start : double
+%           Lower edge of the first bin
+%         bin_spec.x.stop : double
+%           Upper edge of the last bin, stop - start a whole number of widths
+%         bin_spec.x.width : double
+%           Bin width, positive. Uniform bins from start to stop.
+%       or
+%         bin_spec.x.edges : numeric vector
+%           Bin edges, strictly increasing, at least two elements.
+%           Centers are the midpoints. Bins may be non-uniform.
+%       or
+%         bin_spec.x.centers : numeric vector
+%           Bin centers, strictly increasing, at least two elements.
+%           Edges are the midpoints between centers, extended half a
+%           spacing beyond the end centers. Bins may be non-uniform.
+%     bin_spec.y : struct
+%       Hm0 spec [m], same three forms as bin_spec.x
 %
 % Returns
 % ---------
-%     WEFM: Structure
+% WEFM : struct
+%   WEFM.values : matrix
+%     Wave energy flux matrix, Hm0 bins down the rows and Te bins across the columns
+%   WEFM.stat : string
+%     Statistic used
+%   WEFM.x_bins : row vector [s]
+%     Te bin centers
+%   WEFM.y_bins : row vector [m]
+%     Hm0 bin centers
+%   WEFM.x_edges : row vector [s]
+%     Te bin edges, one more than the number of columns
+%   WEFM.y_edges : row vector [m]
+%     Hm0 bin edges, one more than the number of rows
 %
-%
-%       WEFM.values
-%
-%       WEFM.stat
-%
-%       WEFM.Hm0_bins
-%
-%       WEFM.Te_bins
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+arguments (Input)
+    Hm0 {mustBeNumeric}
+    Te {mustBeNumeric}
+    J {mustBeNumeric}
+    statistic {mustBeTextScalar, mustBeMember(statistic, {'mean', 'std', 'median', 'count', 'sum', 'min', 'max', 'probability', 'frequency'})}
+    bin_spec (1,1) struct
+end
 
-py.importlib.import_module('mhkit');
+arguments (Output)
+    WEFM struct
+end
 
-Hm0=py.numpy.array(Hm0);
-Te=py.numpy.array(Te);
-J=py.numpy.array(J);
-Hm0_bins=py.numpy.array(Hm0_bins);
-Te_bins=py.numpy.array(Te_bins);
+WEFM = mhkit_binned_statistic_2d(Te, Hm0, J, statistic, bin_spec, 'function_name', mfilename);
 
-JM=py.mhkit.wave.performance.wave_energy_flux_matrix(Hm0,Te,J,statistic,Hm0_bins,Te_bins);
-vals=double(py.array.array('d',py.numpy.nditer(JM.values)));
-sha=cell(JM.values.shape);
-x=int64(sha{1,1});
-y=int64(sha{1,2});
-vals=reshape(vals,[y,x]);
-vals=transpose(vals);
+% Te is x and Hm0 is y, following the IEC TS 62600-100 convention
+if any(diff(WEFM.x_edges) > 1.0)
+    warning('MHKiT:wave_energy_flux_matrix:BinSpacing', ...
+        'Energy period bins are greater than the IEC TS 62600-100 limit of 1.0 seconds.');
+end
+if any(diff(WEFM.y_edges) > 0.5)
+    warning('MHKiT:wave_energy_flux_matrix:BinSpacing', ...
+        'Significant wave height bins are greater than the IEC TS 62600-100 limit of 0.5 meters.');
+end
 
-WEFM.values=vals;
-WEFM.stat=statistic;
-WEFM.Hm0_bins=double(Hm0_bins);
-WEFM.Te_bins=double(Te_bins);
-
+end
