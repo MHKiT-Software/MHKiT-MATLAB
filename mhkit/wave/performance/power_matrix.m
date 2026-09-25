@@ -1,31 +1,31 @@
-function PM = power_matrix(LM, JM)
+function PM = power_matrix(CWM, JM)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Generates a power matrix from a capture length matrix and wave energy flux matrix
+% Generates a power matrix from a capture width matrix and wave energy flux matrix
 %
-% PM = LM * JM (element-wise multiplication)
+% PM = CWM * JM (element-wise multiplication)
 %
 % Parameters
 % ------------
-% LM : struct
-%   Capture length matrix structure:
-%     LM.values : matrix
-%       Capture length values
-%     LM.stat : string
+% CWM : struct
+%   Capture width matrix from capture_width_matrix:
+%     CWM.values : matrix
+%       Capture width values
+%     CWM.stat : string
 %       Statistic used (e.g., 'mean')
-%     LM.Hm0_bins : vector [m]
-%       Hm0 bin centers
-%     LM.Te_bins : vector [s]
-%       Te bin centers
+%     CWM.x_bins, CWM.y_bins : row vectors
+%       Te and Hm0 bin centers
+%     CWM.x_edges, CWM.y_edges : row vectors
+%       Te and Hm0 bin edges, must match JM
 % JM : struct
 %   Wave energy flux matrix structure:
 %     JM.values : matrix
 %       Wave energy flux values
-%     JM.Hm0_bins : vector [m]
-%       Hm0 bin centers
-%     JM.Te_bins : vector [s]
-%       Te bin centers
+%     JM.x_bins, JM.y_bins : row vectors
+%       Te and Hm0 bin centers
+%     JM.x_edges, JM.y_edges : row vectors
+%       Te and Hm0 bin edges, must match CWM
 %
 % Returns
 % ---------
@@ -34,16 +34,16 @@ function PM = power_matrix(LM, JM)
 %     PM.values : matrix
 %       Power matrix values
 %     PM.stat : string
-%       Statistic from LM
-%     PM.Hm0_bins : vector [m]
-%       Hm0 bin centers
-%     PM.Te_bins : vector [s]
-%       Te bin centers
+%       Statistic from CWM
+%     PM.x_bins, PM.y_bins : row vectors
+%       Te and Hm0 bin centers from CWM
+%     PM.x_edges, PM.y_edges : row vectors
+%       Te and Hm0 bin edges from CWM
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
-    LM struct
+    CWM struct
     JM struct
 end
 
@@ -51,38 +51,25 @@ arguments (Output)
     PM struct
 end
 
-% Validate input structures have values field
-if ~isfield(LM, 'values')
-    error('MHKiT:power_matrix:InvalidInput', ...
-        'LM must be a structure with a values field');
+% Both inputs must be matrix structs from mhkit_binned_statistic_2d on the same grid
+for f = {'values', 'stat', 'x_bins', 'y_bins', 'x_edges', 'y_edges'}
+    if ~isfield(CWM, f{1}) || ~isfield(JM, f{1})
+        error('MHKiT:power_matrix:InvalidInput', ...
+            'CWM and JM must both be matrix structs from capture_width_matrix and wave_energy_flux_matrix, missing field %s', f{1});
+    end
 end
-if ~isfield(JM, 'values')
+if ~isequal(CWM.x_edges, JM.x_edges) || ~isequal(CWM.y_edges, JM.y_edges)
     error('MHKiT:power_matrix:InvalidInput', ...
-        'JM must be a structure with a values field');
-end
-
-% Validate dimensions match
-if ~isequal(size(LM.values), size(JM.values))
-    error('MHKiT:power_matrix:DimensionMismatch', ...
-        'LM.values and JM.values must have the same dimensions');
+        'CWM and JM must be binned on the same x and y edges');
 end
 
 % Build output structure
 PM = struct();
-PM.values = LM.values .* JM.values;
-
-if isfield(LM, 'stat')
-    PM.stat = LM.stat;
-else
-    PM.stat = 'computed';
-end
-
-if isfield(LM, 'Hm0_bins')
-    PM.Hm0_bins = LM.Hm0_bins;
-end
-
-if isfield(LM, 'Te_bins')
-    PM.Te_bins = LM.Te_bins;
-end
+PM.values = CWM.values .* JM.values;
+PM.stat = CWM.stat;
+PM.x_bins = CWM.x_bins;
+PM.y_bins = CWM.y_bins;
+PM.x_edges = CWM.x_edges;
+PM.y_edges = CWM.y_edges;
 
 end
