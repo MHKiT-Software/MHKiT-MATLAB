@@ -1,4 +1,4 @@
-function cwm = capture_width_matrix(Hm0, Te, CW, statistic, Hm0_bins, Te_bins)
+function cwm = capture_width_matrix(Hm0, Te, CW, statistic, bin_spec)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -15,27 +15,50 @@ function cwm = capture_width_matrix(Hm0, Te, CW, statistic, Hm0_bins, Te_bins)
 %   Energy period from spectra
 % CW : vector [m]
 %   Capture width
-% statistic : string or function_handle
+% statistic : char or string
 %   Statistic for each bin. Options: 'mean', 'std', 'median',
-%   'count', 'sum', 'min', 'max', 'frequency', or a function handle.
-%   Note that 'std' uses a degree of freedom of N in accordance with
-%   Formula D.5 of IEC TS 62600-100 Ed. 2.0 en 2024.
-% Hm0_bins : vector [m]
-%   Bin centers for Hm0
-% Te_bins : vector [s]
-%   Bin centers for Te
+%   'count', 'sum', 'min', 'max', 'probability', or 'frequency'.
+%   'probability' and 'frequency' are the same statistic.
+%   'std' is the population standard deviation (1/N), following
+%   MHKiT-Python convention.
+% bin_spec : struct
+%   Bin spec for each axis, see mhkit_define_bins_2d. Te is x and Hm0 is
+%   y. Each axis struct must have exactly one of these three field sets.
+%     bin_spec.x : struct
+%       Te spec [s], one of:
+%         bin_spec.x.start : double
+%           Lower edge of the first bin
+%         bin_spec.x.stop : double
+%           Upper edge of the last bin, stop - start a whole number of widths
+%         bin_spec.x.width : double
+%           Bin width, positive. Uniform bins from start to stop.
+%       or
+%         bin_spec.x.edges : numeric vector
+%           Bin edges, strictly increasing, at least two elements.
+%           Centers are the midpoints. Bins may be non-uniform.
+%       or
+%         bin_spec.x.centers : numeric vector
+%           Bin centers, strictly increasing, at least two elements.
+%           Edges are the midpoints between centers, extended half a
+%           spacing beyond the end centers. Bins may be non-uniform.
+%     bin_spec.y : struct
+%       Hm0 spec [m], same three forms as bin_spec.x
 %
 % Returns
 % ---------
 % cwm : struct
 %   cwm.values : matrix
-%     Capture width matrix (Hm0_bins x Te_bins)
+%     Capture width matrix, Hm0 bins down the rows and Te bins across the columns
 %   cwm.stat : string
 %     Statistic used
-%   cwm.Hm0_bins : vector [m]
-%     Hm0 bin centers
-%   cwm.Te_bins : vector [s]
+%   cwm.x_bins : row vector [s]
 %     Te bin centers
+%   cwm.y_bins : row vector [m]
+%     Hm0 bin centers
+%   cwm.x_edges : row vector [s]
+%     Te bin edges, one more than the number of columns
+%   cwm.y_edges : row vector [m]
+%     Hm0 bin edges, one more than the number of rows
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -43,75 +66,24 @@ arguments (Input)
     Hm0 {mustBeNumeric}
     Te {mustBeNumeric}
     CW {mustBeNumeric}
-    statistic
-    Hm0_bins {mustBeNumeric, mustBeVector}
-    Te_bins {mustBeNumeric, mustBeVector}
+    statistic {mustBeTextScalar, mustBeMember(statistic, {'mean', 'std', 'median', 'count', 'sum', 'min', 'max', 'probability', 'frequency'})}
+    bin_spec (1,1) struct
 end
 
 arguments (Output)
     cwm struct
 end
 
-% Ensure column vectors
-Hm0 = Hm0(:);
-Te = Te(:);
-CW = CW(:);
-Hm0_bins = Hm0_bins(:);
-Te_bins = Te_bins(:);
+cwm = mhkit_binned_statistic_2d(Te, Hm0, CW, statistic, bin_spec, 'function_name', mfilename);
 
-% Convert bin centers to edges
-Hm0_edges = bin_centers_to_edges(Hm0_bins);
-Te_edges = bin_centers_to_edges(Te_bins);
-
-% Check bin spacing against IEC limits
-Hm0_spacing = diff(Hm0_edges);
-if any(Hm0_spacing > 0.5)
+% Te is x and Hm0 is y, following the IEC TS 62600-100 convention
+if any(diff(cwm.x_edges) > 1.0)
+    warning('MHKiT:capture_width_matrix:BinSpacing', ...
+        'Energy period bins are greater than the IEC TS 62600-100 limit of 1.0 seconds.');
+end
+if any(diff(cwm.y_edges) > 0.5)
     warning('MHKiT:capture_width_matrix:BinSpacing', ...
         'Significant wave height bins are greater than the IEC TS 62600-100 limit of 0.5 meters.');
 end
 
-Te_spacing = diff(Te_edges);
-if any(Te_spacing > 1.0)
-    warning('MHKiT:capture_width_matrix:BinSpacing', ...
-        'Energy period bins are greater than the IEC TS 62600-100 limit of 1.0 seconds.');
-end
-
-% Handle std with ddof=0 (population std) per IEC/TS 62600-100
-if ischar(statistic) || isstring(statistic)
-    if strcmpi(statistic, 'std')
-        % Use population std (ddof=0) per IEC Formula D.5
-        stat_func = @(x) std_ddof0(x);
-    else
-        stat_func = statistic;
-    end
-else
-    stat_func = statistic;
-end
-
-% Compute binned statistic
-values = binned_statistic_2d(Hm0, Te, CW, Hm0_edges, Te_edges, stat_func);
-
-% Build output structure
-cwm = struct();
-cwm.values = values;
-if ischar(statistic) || isstring(statistic)
-    cwm.stat = char(statistic);
-else
-    cwm.stat = 'custom';
-end
-cwm.Hm0_bins = Hm0_bins';
-cwm.Te_bins = Te_bins';
-
-end
-
-function s = std_ddof0(x)
-    % Standard deviation with degree of freedom = N (population std)
-    % Per IEC/TS 62600-100 Ed. 2.0 Formula D.5
-    if isempty(x)
-        s = NaN;
-    elseif length(x) == 1
-        s = 0;
-    else
-        s = std(x, 1);  % MATLAB std with w=1 gives population std
-    end
 end

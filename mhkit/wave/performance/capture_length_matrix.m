@@ -1,4 +1,4 @@
-function clm = capture_length_matrix(Hm0, Te, L, statistic, Hm0_bins, Te_bins)
+function clm = capture_length_matrix(Hm0, Te, L, statistic, bin_spec)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -16,25 +16,18 @@ function clm = capture_length_matrix(Hm0, Te, L, statistic, Hm0_bins, Te_bins)
 %   Energy period from spectra
 % L : vector [m]
 %   Capture length
-% statistic : string or function_handle
+% statistic : char or string
 %   Statistic for each bin. Options: 'mean', 'std', 'median',
-%   'count', 'sum', 'min', 'max', 'frequency', or a function handle.
-% Hm0_bins : vector [m]
-%   Bin centers for Hm0
-% Te_bins : vector [s]
-%   Bin centers for Te
+%   'count', 'sum', 'min', 'max', 'probability', or 'frequency'.
+%   'probability' and 'frequency' are the same statistic.
+% bin_spec : struct
+%   Bin spec for each axis, see capture_width_matrix
 %
 % Returns
 % ---------
 % clm : struct
-%   clm.values : matrix
-%     Capture length matrix (Hm0_bins x Te_bins)
-%   clm.stat : string
-%     Statistic used
-%   clm.Hm0_bins : vector [m]
-%     Hm0 bin centers
-%   clm.Te_bins : vector [s]
-%     Te bin centers
+%   Same layout as capture_width_matrix: values (Hm0 rows x Te columns),
+%   stat, x_bins, y_bins, x_edges, y_edges with Te on x and Hm0 on y
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -42,9 +35,8 @@ arguments (Input)
     Hm0 {mustBeNumeric}
     Te {mustBeNumeric}
     L {mustBeNumeric}
-    statistic
-    Hm0_bins {mustBeNumeric, mustBeVector}
-    Te_bins {mustBeNumeric, mustBeVector}
+    statistic {mustBeTextScalar}
+    bin_spec (1,1) struct
 end
 
 arguments (Output)
@@ -56,6 +48,6 @@ warning('MHKiT:capture_length_matrix:DeprecatedFunction', ...
     'width". capture_length_matrix will be removed in MHKiT-MATLAB v1.3. ' ...
     'Use capture_width_matrix instead.']);
 
-clm = capture_width_matrix(Hm0, Te, L, statistic, Hm0_bins, Te_bins);
+clm = capture_width_matrix(Hm0, Te, L, statistic, bin_spec);
 
 end
