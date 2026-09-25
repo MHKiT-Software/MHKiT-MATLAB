@@ -1,6 +1,6 @@
-function figure=plot_matrix(M,Mtype, options)
+function figure = plot_matrix(M, Mtype, options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    Plots the matrix with Hm0 and Te on the y and x axis
+% Plot matrix with Hm0 and Te on the y and x axis
 %
 % Parameters
 % ----------
@@ -8,9 +8,9 @@ function figure=plot_matrix(M,Mtype, options)
 %
 %         M.values: matrix
 %
-%         M.Hm0_bins
+%         M.x_bins
 %
-%         M.Te_bins
+%         M.y_bins
 %
 %         M.stat
 %
@@ -36,7 +36,7 @@ arguments
     options.annotate = true;
 end
 
-figure=pcolor(M.Te_bins,M.Hm0_bins,M.values);
+figure=pcolor(M.x_bins,M.y_bins,M.values);
 colormap(flipud(hot(256)))
 ylabel('Hm0 [m]','FontSize',20)
 xlabel('Te [s]','FontSize',20)

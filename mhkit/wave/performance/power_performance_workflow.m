@@ -1,4 +1,4 @@
-function [clmat,maep_matrix] = power_performance_workflow(S, h, P, statistic, options)
+function [cwmat, maep_matrix] = power_performance_workflow(S, h, P, statistic, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     High-level function to compute power performance quantities of
@@ -18,14 +18,13 @@ function [clmat,maep_matrix] = power_performance_workflow(S, h, P, statistic, op
 %   P: array or vector
 %        Power [W]
 %
-%   statistic: string or array of strings
-%        Capture width statistics for plotting
-%        options include: "mean", "std", "median",
-%        "count", "sum", "min", "max", and "frequency".
-%        Note that "std" uses a degree of freedom of N in accordance with
-%        Formula D.5 of IEC TS 62600-100 Ed. 2.0 en 2024.
-%        To output capture width matrices for multiple binning parameters,
-%        define as a string array: statistic = ["", "", ""];
+%   statistic: string or string array
+%        Capture width statistics to compute and plot, one figure each.
+%        Options: "mean", "std", "median", "count", "sum", "min", "max",
+%        "probability", "frequency". "probability" and "frequency" are the
+%        same statistic. "std" is the population standard deviation,
+%        matching MHKiT-Python. "mean" and "probability" are always
+%        computed because MAEP needs them.
 %
 %   savepath: string (optional)
 %        Path to save figure.
@@ -44,7 +43,9 @@ function [clmat,maep_matrix] = power_performance_workflow(S, h, P, statistic, op
 %
 % Returns
 % ---------
-%   cl_matrix: figure
+%   cwmat: struct
+%        One capture width matrix struct per computed statistic, keyed by
+%        statistic name, e.g. cwmat.mean
 %       Capture width matrix
 %
 %   maep_matrix: float
@@ -78,17 +79,19 @@ function [clmat,maep_matrix] = power_performance_workflow(S, h, P, statistic, op
 %     >> rng(1);
 %     >> P = 50000 + 20000*randn(size(S.time));  % [W], illustrative only, 17520x1 double
 %
-%     >> [clmat, maep_matrix] = power_performance_workflow(S, h, P, "mean");
+%     >> [cwmat, maep_matrix] = power_performance_workflow(S, h, P, "mean");
 %     maep_matrix =
 %         456328960.94  % [W*h]
 %
-%     >> clmat.mean
+%     >> cwmat.mean
 %     ans = 
 %       struct with fields:
-%           values: [9×14 double]
-%             stat: 'mean'
-%         Hm0_bins: [-0.2500 0.2500 0.7500 1.2500 1.7500 2.2500 2.7500 3.2500 3.7500]
-%          Te_bins: [0.5000 1.5000 2.5000 3.5000 4.5000 5.5000 … ] (1×14 double)
+%            values: [8×14 double]
+%              stat: 'mean'
+%            x_bins: [0.5000 1.5000 2.5000 3.5000 4.5000 5.5000 … ] (1×14 double)
+%            y_bins: [0.2500 0.7500 1.2500 1.7500 2.2500 2.7500 3.2500 3.7500]
+%           x_edges: [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14]
+%           y_edges: [0 0.5000 1 1.5000 2 2.5000 3 3.5000 4]
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -96,7 +99,7 @@ arguments
     S
     h
     P
-    statistic
+    statistic (1,:) string {mustBeMember(statistic, ["mean", "std", "median", "count", "sum", "min", "max", "probability", "frequency"])}
     options.rho = 1025;
     options.g = 9.80665;
     options.frequency_bins = "";
@@ -129,47 +132,33 @@ J = energy_flux(S, h, 'rho', options.rho, 'g', options.g);
 P = P(:);
 CW = capture_width(P, J);
 
-% Need to set our Hm0 and Te bins for the capture width matrix
-Hm0_bins = -0.5:0.5:max(fix(Hm0))+0.5; % Input is min, max, and n indecies for vector
-Hm0_bins = Hm0_bins+0.25 ;
-Te_bins = 0:1:max(fix(Te));
-Te_bins = Te_bins+0.5;
+% Te (x) and Hm0 (y) bins start at 0 with IEC TS 62600-100 widths of 1 s and
+% 0.5 m, so the edges fall on 0, 1, 2, ... s and 0, 0.5, 1, ... m.
+% stop must be a whole number of widths, so round the data maximum up
+Hm0_stop = ceil(max(Hm0) / 0.5) * 0.5;
+Te_stop = ceil(max(Te) / 1) * 1;
+bin_spec.x = struct('start', 0, 'stop', Te_stop, 'width', 1);
+bin_spec.y = struct('start', 0, 'stop', Hm0_stop, 'width', 0.5);
 
-% Calculate the necessary capture width matrices for each statistic based
-% on IEC/TS 62600-100
-clmat.mean   = capture_width_matrix(Hm0, Te, CW, "mean", Hm0_bins, Te_bins);
-clmat.std    = capture_width_matrix(Hm0, Te, CW, "std", Hm0_bins, Te_bins);
-clmat.median = capture_width_matrix(Hm0 ,Te, CW, "median", Hm0_bins, Te_bins);
-clmat.count  = capture_width_matrix(Hm0 ,Te, CW, "count", Hm0_bins, Te_bins);
-clmat.sum    = capture_width_matrix(Hm0 ,Te, CW, "sum", Hm0_bins, Te_bins);
-clmat.min    = capture_width_matrix(Hm0 ,Te, CW, "min", Hm0_bins, Te_bins);
-clmat.max    = capture_width_matrix(Hm0 ,Te, CW, "max", Hm0_bins, Te_bins);
-clmat.freq   = capture_width_matrix(Hm0 ,Te, CW, "frequency", Hm0_bins, Te_bins);
+% mean and probability are always needed for MAEP. Any other requested
+% statistic is computed once and stored under its own name.
+cwmat = struct();
+for stat = unique(["mean", "probability", statistic])
+    cwmat.(stat) = capture_width_matrix(Hm0, Te, CW, stat, bin_spec);
+end
 
-% Create wave energy flux matrix using statistic
-jmat = wave_energy_flux_matrix(Hm0, Te, J, "mean", Hm0_bins, Te_bins);
+jmat = wave_energy_flux_matrix(Hm0, Te, J, "mean", bin_spec);
 
-% Calcaulte MAEP from matrix
-maep_matrix = mean_annual_energy_production_matrix(clmat.mean, jmat, clmat.freq);
-stats_cell = {'mean', 'std', 'median','count', 'sum', 'min', 'max','frequency'};
+maep_matrix = mean_annual_energy_production_matrix(cwmat.mean, jmat, cwmat.probability);
 
-% Capture Length Matrix using statistic
-cl_matrix = [];
-len = strlength(options.savepath);
-for i = 1:length(statistic)
-    if any(strcmp(stats_cell,statistic(i)))
-        figure('Name',sprintf('Capture Length Matrix %s', statistic(i)),'NumberTitle','off')
-        cl_matrix(i) = plot_matrix(clmat.(statistic(i)),"Capture Length");
-        name = [options.savepath, filesep, sprintf('Capture Length Matrix %s', statistic(i)), '.png'];
-
-        if len > 1
-            saveas(cl_matrix(i), name);
-        end
-    else
-        error('MHKiT:power_performance_workflow:InvalidInput', ...
-            ['statistic must be a string or string array defined by one or ' ...
-             'multiple of the following: "mean", "std", "median", "count", ' ...
-             '"sum", "min", "max", "frequency".']);
+% Plot each requested statistic
+cw_matrix = gobjects(1, numel(statistic));
+for i = 1:numel(statistic)
+    figure('Name', sprintf('Capture Width Matrix %s', statistic(i)), 'NumberTitle', 'off')
+    cw_matrix(i) = plot_matrix(cwmat.(statistic(i)), "Capture Width");
+    if strlength(options.savepath) > 0
+        name = fullfile(options.savepath, sprintf('Capture Width Matrix %s.png', statistic(i)));
+        saveas(cw_matrix(i), name);
     end
 end
 
