@@ -31,7 +31,7 @@ arguments
 end
 
 figure=plot(datetime(Q.time, 'convertfrom','posixtime'),Q.Discharge);
-datetick('x',1,'keeplimits');
+xtickformat('yyyy-MM-dd');
 grid on
 xlabel('Date','FontSize',20)
 ylabel('Discharge [m^{3}/s]','FontSize',20)

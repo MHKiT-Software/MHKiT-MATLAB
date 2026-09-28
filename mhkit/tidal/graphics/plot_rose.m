@@ -91,7 +91,7 @@ end
 % Plot Variables
 radialLabelDir = 30;
 propRingRad    = 5;
-CMaPType = 'spring';
+CMaPType = spring(256);
 
 % Calculating the 2D histogram
 DirEdges = 0:width_dir:360;
@@ -101,7 +101,7 @@ VelEdges = 0:width_vel:max(data.s);
 theta = data.d/180*pi;
 
 % setting the colors
-cmap = colormap(CMaPType);
+cmap = CMaPType;
 colors = interp1(linspace(0,max(data.s),length(cmap)),cmap,VelEdges);
 
 %tx = Q.s'<Yedges(end)

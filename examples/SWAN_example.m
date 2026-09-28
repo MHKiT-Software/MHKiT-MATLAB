@@ -17,7 +17,7 @@
 % # An ASCII block file ('SWANOUTBlock.DAT')
 % # A binary block file ('SWANOUT.mat')
 
-swan_path = "./examples/data/wave/SWAN/";
+swan_path = "./data/wave/SWAN/";
 swan_table_file = append(swan_path,"SWANOUT.DAT");
 swan_block_file = append(swan_path,"SWANOUTBlock.DAT");
 swan_block_mat_file = append(swan_path,"SWANOUT.mat") ;

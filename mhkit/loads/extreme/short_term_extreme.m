@@ -66,7 +66,9 @@ end
 py.importlib.import_module('mhkit');
 
 t = py.numpy.array(t);
+t = py.numpy.squeeze(t);
 data = py.numpy.array(data);
+data = py.numpy.squeeze(data);
 
 result = py.mhkit.loads.extreme.short_term_extreme(t, data, t_st, type);
 

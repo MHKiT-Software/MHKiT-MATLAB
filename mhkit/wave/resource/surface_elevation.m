@@ -1,106 +1,115 @@
-function wave_elevation=surface_elevation(S,time_index,options)
+function wave_elevation = surface_elevation(S, time_index, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Calculates wave elevation time series from spectrum using a random phase
+%
+% Calculates wave elevation time-series from spectrum
 %
 % Parameters
 % ------------
-%    S: Spectral Density (m^2/Hz)
-%       Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,spectra)
+%     S: structure
+%         Spectral data with fields:
+%             S.spectrum: (n_freq x 1) spectral density [m^2/Hz]
+%             S.frequency: (n_freq x 1) frequency vector [Hz]
+%     
+%     time_index: vector
+%         Time used to create the wave elevation time-series [s],
+%         for example, time = 0:0.01:100
 %
-%       OR
-%
-%       structure of form:
-%           S.spectrum: Spectral Density (m^2/Hz)
-%
-%           S.type: String of the spectra type, i.e. Bretschneider,
-%           time series, date stamp etc.
-%
-%           S.frequency: frequency (Hz)
-%
-%    time_index: array
-%        Time used to create the wave elevation time series [s]
-%
-%    seed: Int (optional)
-%        random seed
-%        to call: wave_elevation(S,time_index,"seed",seed)
-%
-%    frequency_bins: vector (optional)
-%       Bin widths for frequency of S. Required for unevenly sized bins
-%       to call: wave_elevation(S,time_index,"frequency_bins",frequency_bins)
-%
-%    phases: vector or matrix (optional)
-%       Explicit phases for frequency components (overrides seed)
-%       to call: wave_elevation(S,time_index,"phases",phases)
-%
-%    method: str (optional)
-%       Method used to calculate the surface elevation. 'ifft' (Inverse Fast Fourier
-%       Transform) used by default if the given frequency_bins==None. 'sum_of_sines'
-%       explicitly sums each frequency component and used by default if
-%       frequency_bins are provided. The 'ifft' method is significantly faster.
+%     options: structure (optional)
+%         Optional fields:
+%             seed: Random seed (default = 123)
+%             frequency_bins: Bin widths for frequency of S. Required for unevenly sized bins
+%             phases: Explicit phases for frequency components (overrides seed)
+%                     for example, phases = rand(length(S.frequency),1) * 2 * pi
+%             method: Method used to calculate the surface elevation. 'ifft'
+%                     (Inverse Fast Fourier Transform) used by default if the
+%                     given frequency_bins==[] or is evenly spaced.
+%                     'sum_of_sines' explicitly sums each frequency component
+%                     and used by default if uneven frequency_bins are provided.
+%                     The 'ifft' method is significantly faster.
 %
 % Returns
 % ---------
-%    wave_elevation: structure
+%     wave_elevation: structure
+%         Generated wave elevation with fields:
+%             elevation: Wave surface elevation [m]
+%             time: time vector [s]
+%             type: description string
 %
-%         wave_elevation.elevation: Wave surface elevation (m)
-%
-%         wave_elevation.type: 'Time Series from Spectra'
-%
-%         wave_elevation.time
-%
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 arguments
-    S
-    time_index
-    options.seed {mustBeNumeric} = 123;
-    options.frequency_bins = py.None;
-    options.phases = py.None;
-    options.method = "ifft";
+    S struct
+    time_index (:,1) double
+    options.seed (1,1) double = 123
+    options.frequency_bins = []
+    options.phases = []
+    options.method char {mustBeMember(options.method, {'ifft','sum_of_sines'})} = 'ifft'
 end
 
-S_py = typecast_spectra_to_mhkit_python(S);
+% Extract frequency and spectrum
+f = S.frequency(:);
+Sf = S.spectrum(:);
+Nf = numel(f);
+Nt = numel(time_index);
 
-frequency = S.frequency ;
-
-if (isa(time_index,'py.numpy.ndarray') ~= 1)
-
-    time_index = py.numpy.array(time_index);
-
+% Handle frequency bins
+if isempty(options.frequency_bins)
+    % Calculate individual frequency bin widths to match MHKiT-Python implementation
+    % MHKiT-Python uses: delta_f = f.diff() then prepends first difference
+    % This creates a vector where each frequency has its own bin width,
+    % which is critical for accurate numerical integration when frequencies
+    % are not perfectly uniform (using mean(df) introduces systematic error)
+    df = diff(f);
+    delta_f = [df(1); df(:)];  % Prepend first difference, ensure column vector
+    df_uniform = all(abs(df - df(1)) < 1e-8);
+else
+    delta_f = options.frequency_bins(:);
+    if length(delta_f) ~= length(f)
+        error('frequency_bins must match the length of frequency vector.');
+    end
+    df_val = delta_f(1);
+    df_uniform = all(abs(delta_f - df_val) < 1e-8);
 end
 
-if (isa(options.frequency_bins,'py.NoneType')~=1)
-    if isnumeric(options.frequency_bins)
-
-        options.frequency_bins = py.numpy.array(options.frequency_bins);
-    else
-        ME = MException('MATLAB:significant_wave_height','frequency_bins need to be of numeric type');
-        throw(ME);
+% Handle phases
+if isempty(options.phases)
+    rng(options.seed);
+    phase = 2*pi*rand(Nf, 1);
+else
+    phase = options.phases(:);
+    if length(phase) ~= Nf
+        error('phases must match the length of frequency vector.');
     end
 end
 
-if (isa(options.phases,'py.NoneType')~=1)
-    if isnumeric(options.phases)
-        options.phases = py.numpy.array(options.phases);
-    else
-        ME = MException('MATLAB:significant_wave_height','phases need to be of numeric type');
-        throw(ME);
+% Choose method
+omega = 2*pi*f;
+A = sqrt(2 * Sf .* delta_f);
+
+switch options.method
+    case 'ifft'
+        if f(1) ~= 0 || ~df_uniform
+            warning('Switching to sum_of_sines because ifft requires f(1)==0 and uniform spacing.');
+            options.method = 'sum_of_sines';
+        else
+            % Match MHKiT-Python implementation: A_cmplx = A * (cos(phase) + 1j * sin(phase))
+            A_complex = A .* (cos(phase) + 1i * sin(phase));
+            % Match MHKiT-Python scaling: 0.5 * A_cmplx * time_index.size
+            A_scaled = 0.5 * A_complex * length(time_index);
+            % Use MATLAB's equivalent of irfft
+            eta = real(ifft(A_scaled, length(time_index), 'symmetric'));
+            wave_elevation.elevation = eta;
     end
 
+    case 'sum_of_sines'
+        B = omega .* time_index';
+        B = B'; % (Nt x Nf)
+        C = cos(B + phase');
+        eta = C * A;
+        wave_elevation.elevation = eta;
 end
 
-if ~(strcmp(options.method, "ifft") || strcmp(options.method, "sum_of_sines"))
-    ME = MException('MATLAB:significant_wave_height','Invalid method. method should be either "ifft" or "sum_of_sines"');
-    throw(ME);
+wave_elevation.time = time_index;
+wave_elevation.type = 'Time Series from Spectra';
 end
-
-eta_py=py.mhkit.wave.resource.surface_elevation(S_py, time_index);
-
-eta = typecast_from_mhkit_python(eta_py);
-
-wave_elevation.type='Time Series from Spectra';
-wave_elevation.time=eta.index.data;
-wave_elevation.elevation = eta.data;

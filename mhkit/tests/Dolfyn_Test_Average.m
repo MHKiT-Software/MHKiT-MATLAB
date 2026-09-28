@@ -55,8 +55,9 @@ classdef Dolfyn_Test_Average < matlab.unittest.TestCase
             test_case.verifySize(result.echo_intensity.data, [6 28 4]);
             test_case.verifySize(result.temperature.data, [6 1]);
 
-            % Verify coordinate preservation
-            test_case.verifyEqual(result.coords.time, test_case.time_vec(1:4:24));
+            % Verify coordinate preservation (bins are averaged, not subsampled)
+            expected_time_coords = [2.5; 6.5; 10.5; 14.5; 18.5; 22.5];
+            test_case.verifyEqual(result.coords.time, expected_time_coords);
             test_case.verifyEqual(result.coords.range, test_case.range_vec);
             test_case.verifyEqual(result.coords.dir, test_case.dir_vec);
         end
@@ -69,9 +70,10 @@ classdef Dolfyn_Test_Average < matlab.unittest.TestCase
             test_case.verifySize(result.velocity.data, [24 14 4]);
             test_case.verifySize(result.echo_intensity.data, [24 14 4]);
 
-            % Verify coordinate preservation
+            % Verify coordinate preservation (bins are averaged, not subsampled)
             test_case.verifyEqual(result.coords.time, test_case.time_vec);
-            test_case.verifyEqual(result.coords.range, test_case.range_vec(1:2:28));
+            expected_range_coords = (1.5:2:27.5)';
+            test_case.verifyEqual(result.coords.range, expected_range_coords);
             test_case.verifyEqual(result.coords.dir, test_case.dir_vec);
         end
 
@@ -83,10 +85,11 @@ classdef Dolfyn_Test_Average < matlab.unittest.TestCase
             test_case.verifySize(result.velocity.data, [24 28 2]);
             test_case.verifySize(result.echo_intensity.data, [24 28 2]);
 
-            % Verify coordinate preservation
+            % Verify coordinate preservation (bins are averaged, not subsampled)
             test_case.verifyEqual(result.coords.time, test_case.time_vec);
             test_case.verifyEqual(result.coords.range, test_case.range_vec);
-            test_case.verifyEqual(result.coords.dir, test_case.dir_vec(1:2:4));
+            expected_dir_coords = [45; 225];  % Mean of [0,90] and [180,270]
+            test_case.verifyEqual(result.coords.dir, expected_dir_coords);
         end
 
         function test_nan_handling(test_case)
@@ -108,8 +111,9 @@ classdef Dolfyn_Test_Average < matlab.unittest.TestCase
             expected_size = [4 1];  % 24/6 = 4 time points
             test_case.verifySize(result.temperature.data, expected_size);
 
-            % Verify coordinate preservation
-            test_case.verifyEqual(result.temperature.coords.time, test_case.time_vec(1:6:24));
+            % Verify coordinate preservation (bins are averaged, not subsampled)
+            expected_time_coords = [3.5; 9.5; 15.5; 21.5];  % Mean of bins: [1,2,3,4,5,6], [7,8,9,10,11,12], etc.
+            test_case.verifyEqual(result.temperature.coords.time, expected_time_coords);
         end
 
         function test_uneven_samples(test_case)

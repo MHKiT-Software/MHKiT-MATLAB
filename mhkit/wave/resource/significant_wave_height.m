@@ -1,47 +1,52 @@
-function Hm0 = significant_wave_height(S,varargin)
+function Hm0 = significant_wave_height(S, varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Calculates wave height from spectra
+%
+% Calculates significant wave height Hm0 from spectra
 %
 % Parameters
 % ------------
-%     S: Spectral Density (m^2/Hz)
-%       Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(frequency,spectra)
-%
-%       OR
-%
-%       structure of form:
-%           S.spectrum: Spectral Density (m^2/Hz)
-%
-%           S.type: String of the spectra type, i.e. Bretschneider,
-%           time series, date stamp etc.
-%
-%           S.frequency: frequency (Hz)
+%     S: structure or numeric array
+%         If structure:
+%             S.spectrum: Spectral density [m^2/Hz]
+%             S.frequency: frequency [Hz]
+%         If numeric:
+%             S is assumed to be spectral density vector/matrix
+%             varargin{1} must contain frequency vector
 %
 %     frequency_bins: vector (optional)
-%       Bin widths for frequency of S. Required for unevenly sized bins
+%         Bin widths for frequency of S. Required for unevenly sized bins
 %
 % Returns
 % ---------
 %     Hm0: double
-%         Significant Wave Height (m)
+%         Significant wave height [m] index by S.columns
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% assign freq_bin
-if nargin == 2
-    freq_bins = py.numpy.array(varargin{1});
-elseif nargin == 1
-    freq_bins = py.None;
-else
-    ME = MException('MATLAB:significant_wave_height','Incorrect number of input arguments');
-        throw(ME);
+arguments
+    S
 end
 
-S_py = typecast_spectra_to_mhkit_python(S);
+arguments (Repeating)
+    varargin
+end
 
-Hm0 = py.mhkit.wave.resource.significant_wave_height(S_py, pyargs('frequency_bins',freq_bins));
+    % Calculate zeroth moment m0 using frequency_moment function
+    if isstruct(S)
+        % Pass struct directly
+        m0 = frequency_moment(S, 0, varargin{:});
+    elseif isnumeric(S)
+        % Pass numeric spectrum with frequency vector
+        if nargin < 2
+            error('When S is numeric, frequency vector must be provided as second argument');
+        end
+        m0 = frequency_moment(S, 0, varargin{:});
+    else
+        error('Input S must be either a struct with fields .spectrum and .frequency, or a numeric array');
+    end
 
-Hm0 = typecast_from_mhkit_python(Hm0).data;
+    % Calculate significant wave height Hm0
+    Hm0 = 4 * sqrt(m0);
+
+end

@@ -1,0 +1,59 @@
+name: MHKiT-MATLAB Native Examples
+
+# Execute example live scripts (examples/*.mlx) that run native MATLAB code only
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ master, develop ]
+    paths:
+      - 'mhkit/**/*.m'
+      - 'examples/**'
+      - '.github/workflows/matlab_only_examples.yml'
+  pull_request:
+    branches: [ master, develop ]
+    paths:
+      - 'mhkit/**/*.m'
+      - 'examples/**'
+      - '.github/workflows/matlab_only_examples.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  examples:
+    name: ${{ matrix.matlab-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Examples are slower than unit tests, so only the oldest and newest
+        # supported releases are exercised per OS.
+        include:
+          - os: macos-15
+            matlab-version: R2023b
+          - os: macos-15
+            matlab-version: R2025b
+          - os: windows-2025
+            matlab-version: R2023b
+          - os: windows-2025
+            matlab-version: R2025b
+
+    steps:
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v7
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: ${{ matrix.matlab-version }}
+
+      - name: Run MATLAB only examples
+        uses: matlab-actions/run-command@v3
+        with:
+          command: |
+            addpath(fullfile("mhkit", "tests"));
+            results = runMatlabOnlyExamples();
+            assertSuccess(results);
+          startup-options: -noFigureWindows

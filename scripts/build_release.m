@@ -5,7 +5,20 @@ project_name = 'mhkit';
 % This is unique to this project and first setup in the .prj file. DO NOT CHANGE THIS!
 toolbox_guid = '1f426c5c-9e72-4f83-8e42-1e51b296aa29';
 display_name = 'Marine and Hydrokinetic Toolkit (MHKiT)';
-project_version = '0.6.0';
+% MATLAB only supports <Major>.<Minor>.<Patch>.<Build>
+% MHKIT-MATLAB uses the following encoding scheme to add version number for non release builds
+% Major.Minor.Patch.<Build>
+% For release builds version number:
+%    * Version should only have Major.Minor.Patch, i.e.: 0.7.0
+%
+% For dev, alpha, beta and release builds we include an encoded build number
+% Where a prefix of
+%   9 indicates a dev version
+%   8 indicates a alpha version
+%   7 indicates a beta version
+%   6 indicates a release candidate version
+% i.e.: Development build for version 0.7.0-dev.2 would be 0.7.0.9002
+project_version = '1.0.1';
 matlab_minimum_release_supported = 'R2022b';
 summary = 'Marine energy data analysis and visualization toolbox';
 description = sprintf([ ...
@@ -28,7 +41,7 @@ description = sprintf([ ...
 
 author_name = 'Rebecca Fao';
 author_email = 'rebecca.fao@nrel.gov';
-author_company = 'National Renewable Energy Laboratory';
+author_company = 'National Laboratory of the Rockies';
 
 fprintf('Starting %s toolbox build process...\n\n', project_name);
 

@@ -45,6 +45,7 @@ arguments
 end
 
 data_signal_py = py.numpy.array(data_signal);
+data_signal_py = py.numpy.squeeze(data_signal_py);
 m_py = double(m);
 
 DEL_py = py.mhkit.loads.general.damage_equivalent_load(data_signal_py, m_py, pyargs('bin_num',int32(options.bin_num),'data_length',int32(options.data_length)));

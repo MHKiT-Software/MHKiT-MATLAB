@@ -17,6 +17,9 @@ function results = runTests()
 
     % Add HTML plugin
     htmlFolder = fullfile(testsFolder, 'test_results');
+    if ~exist(htmlFolder, 'dir')
+        mkdir(htmlFolder);
+    end
     plugin = TestReportPlugin.producingHTML(htmlFolder);
     runner.addPlugin(plugin);
 

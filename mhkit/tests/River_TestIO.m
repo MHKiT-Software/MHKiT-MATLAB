@@ -16,8 +16,8 @@ classdef River_TestIO < matlab.unittest.TestCase
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             data = read_usgs_file(full_file_name);
 
-            expected_index = datestr(datetime(2019,01,01):datetime(2019,01,31));
-            data.time = datestr(data.time/86400 + datenum(1970,1,1));
+            expected_index = string(datetime(2019,01,01):datetime(2019,01,31));
+            data.time = string(datetime(data.time, 'ConvertFrom', 'posixtime'));
 
             assertEqual(testCase,data.units, struct('Discharge', " cubic feet per second"));
             assertEqual(testCase,data.time, expected_index);

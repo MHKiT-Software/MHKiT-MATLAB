@@ -45,14 +45,19 @@ function ds_out = average_by_dimension(ds, n_samples, dim_to_find)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-   if nargin < 3
-        dim_to_find = 'time';
-    end
-    if nargin < 2
-        error('n_samples is required');
-    end
+arguments
+    ds (1,1) struct
+    n_samples (1,1) double {mustBePositive, mustBeInteger}
+    dim_to_find {mustBeTextScalar} = 'time'
+end
 
     ds_out = ds;  % Start with a copy of the input
+    
+    % Store n_bin in attrs for compatibility with turbulence functions
+    if ~isfield(ds_out, 'attrs')
+        ds_out.attrs = struct();
+    end
+    ds_out.attrs.n_bin = n_samples;
 
     % Validate dimension name exists in at least one field
     dim_exists = false;
@@ -124,6 +129,19 @@ function ds_out = average_by_dimension(ds, n_samples, dim_to_find)
                     inv_perm_order(perm_order) = 1:length(perm_order);
                     ds_out.(current_field).data = permute(reshape(mean_data, [n_bins sz(perm_order(2:end))]), inv_perm_order);
 
+                    % Calculate standard deviation for velocity fields (following Python DOLfYN)
+                    if strcmp(current_field, 'vel') || contains(current_field, 'vel')
+                        % Calculate standard deviation along first dimension
+                        std_data = squeeze(std(reshaped, 0, 1, 'omitnan'));
+                        
+                        % Create vel_std field
+                        std_field_name = [current_field '_std'];
+                        ds_out.(std_field_name) = ds_out.(current_field); % Copy structure
+                        ds_out.(std_field_name).data = permute(reshape(std_data, [n_bins sz(perm_order(2:end))]), inv_perm_order);
+                        ds_out.(std_field_name).long_name = 'Velocity Standard Deviation';
+                        ds_out.(std_field_name).description = 'Standard deviation calculated during ensemble averaging';
+                    end
+
                     % Update coordinates for this dimension if they exist
                     if isfield(ds.(current_field), 'coords')
                         coord_fields = fieldnames(ds.(current_field).coords);
@@ -131,7 +149,10 @@ function ds_out = average_by_dimension(ds, n_samples, dim_to_find)
                             coord_field = coord_fields{k};
                             if contains(lower(coord_field), lower(dim_to_find))
                                 coord_data = ds.(current_field).coords.(coord_field);
-                                ds_out.(current_field).coords.(coord_field) = coord_data(1:n_samples:usable_samples);
+                                % For numeric data (like Unix timestamps), take arithmetic mean of each bin
+                                % This matches Python's sequential chunking with mean per bin
+                                coord_reshaped = reshape(coord_data(1:usable_samples), n_samples, n_bins);
+                                ds_out.(current_field).coords.(coord_field) = mean(coord_reshaped, 1, 'omitnan')';
                             end
                         end
                     end
@@ -147,8 +168,41 @@ function ds_out = average_by_dimension(ds, n_samples, dim_to_find)
             if contains(lower(coord_fields{i}), lower(dim_to_find))
                 coord_data = ds.coords.(coord_fields{i});
                 usable_samples = floor(length(coord_data)/n_samples) * n_samples;
-                ds_out.coords.(coord_fields{i}) = coord_data(1:n_samples:usable_samples);
+                n_bins = usable_samples / n_samples;
+                % For numeric data (like Unix timestamps), take arithmetic mean of each bin
+                % This matches Python's sequential chunking with mean per bin
+                coord_reshaped = reshape(coord_data(1:usable_samples), n_samples, n_bins);
+                ds_out.coords.(coord_fields{i}) = mean(coord_reshaped, 1, 'omitnan')';
             end
+        end
+    end
+    
+    % Calculate U_std from horizontal velocity components (following Python DOLfYN)
+    if isfield(ds_out, 'vel') && isfield(ds_out, 'vel_std')
+        % Calculate horizontal velocity magnitude standard deviation
+        if size(ds_out.vel.data, 3) >= 2  % Check we have at least u and v components
+            u_mean = ds_out.vel.data(:, :, 1);
+            v_mean = ds_out.vel.data(:, :, 2);
+            u_std = ds_out.vel_std.data(:, :, 1);
+            v_std = ds_out.vel_std.data(:, :, 2);
+            
+            % Calculate U_mag standard deviation using error propagation formula
+            % U_std = sqrt((u*u_std)^2 + (v*v_std)^2) / U_mag
+            u_mag = sqrt(u_mean.^2 + v_mean.^2);
+            u_std_mag = sqrt((u_mean .* u_std).^2 + (v_mean .* v_std).^2) ./ u_mag;
+            
+            % Handle division by zero
+            u_std_mag(u_mag == 0) = 0;
+            
+            % Create U_std field
+            ds_out.U_std = struct();
+            ds_out.U_std.data = single(u_std_mag);
+            ds_out.U_std.dims = ds_out.vel.dims(1:2);  % Remove direction dimension
+            ds_out.U_std.coords = ds_out.vel.coords;
+            ds_out.U_std.coords = rmfield(ds_out.U_std.coords, 'dir');  % Remove dir coordinate
+            ds_out.U_std.units = "m s-1";
+            ds_out.U_std.long_name = "Water Velocity Standard Deviation";
+            ds_out.U_std.description = 'Horizontal velocity magnitude standard deviation from ensemble averaging';
         end
     end
 end

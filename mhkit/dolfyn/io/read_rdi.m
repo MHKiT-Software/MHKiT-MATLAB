@@ -622,8 +622,10 @@ function ds = read_rdi(filename,options)
         date = datetime(utim(3) + utim(4) * 256, utim(2), utim(1), ...
             0, 0, milliseconds/1000);
         fseek(fid, 4, 0);
+        % TODO: Research replacing datenum with posixtime. 
+        % This will likely require updating downstream functions that use time
         ensemble.time_gps.data(ensemble.k) = ...
-            datenum(datestr(date),'dd-mmm-yyyy HH:MM:SS');
+            datenum(date);
         ensemble.latitude_gps.data(ensemble.k) = fread(fid,1,'int32') ...
             * cfac_;
         ensemble.longitude_gps.data(ensemble.k) = fread(fid,1,'int32') ...
@@ -631,8 +633,10 @@ function ds = read_rdi(filename,options)
         milliseconds = int32(fread(fid,1,'uint32') * 10);
         date = datetime(utim(3) + utim(4) * 256, utim(2), utim(1), ...
             0, 0, milliseconds/1000);
+        % TODO: Research replacing datenum with posixtime. 
+        % This will likely require updating downstream functions that use time
         ensemble.etime_gps.data(ensemble.k) = ...
-            datenum(datestr(date),'dd-mmm-yyyy HH:MM:SS');
+            datenum(date);
         ensemble.elatitude_gps.data(ensemble.k) = fread(fid,1,'int32') ...
             * cfac_;
         ensemble.elongitude_gps.data(ensemble.k) = fread(fid,1,'int32') ...
@@ -644,8 +648,10 @@ function ds = read_rdi(filename,options)
         milliseconds = int32(fread(fid,1,'uint32') / 10);
         date = datetime(utim(1) + utim(2) * 256, utim(4), utim(3),...
             0, 0, milliseconds/1000);
+        % TODO: Research replacing datenum with posixtime. 
+        % This will likely require updating downstream functions that use time
         ensemble.ntime.data(ensemble.k) = ...
-            datenum(datestr(date),'dd-mmm-yyyy HH:MM:SS');
+            datenum(date);
         fseek(fid, 16, 0);
         nbyte_ = 2 + 76;
     end
@@ -676,8 +682,10 @@ function ds = read_rdi(filename,options)
             end
             tmp_time = ...
                 datetime(cat(2, squeeze(ensemble.rtc.data(1:3))', time));
+            % TODO: Research replacing datenum with posixtime. 
+            % This will likely require updating downstream functions that use time
             ensemble.time_gps.data(ensemble.k) = ...
-                datenum(datestr(tmp_time),'dd-mmm-yyyy HH:MM:SS');
+                datenum(tmp_time);
             fseek(fid, 1, 0);
             ensemble.latitude_gps.data(ensemble.k) = ...
                 fread(fid, 1, "float64");

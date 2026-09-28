@@ -3,7 +3,7 @@ function R = tensorproduct_core(A,B,A_permute,B_permute,R_permute,A_reshape,B_re
 A = reshape( permute( A , A_permute ) , A_reshape );
 B = reshape( permute( B , B_permute ) , B_reshape );
 %% Multiplication
-if ~verLessThan('matlab','9.9')
+if ~isMATLABReleaseOlderThan('R2020b')
     % ------ Matlab 2020b and newer releases: ------
     R = pagemtimes(A,B);
 else

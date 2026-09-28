@@ -288,16 +288,17 @@ function dolfyn_plot(ds, field, varargin)
         % Set colormap based on field type
         switch field
             case 'vel'
-                colormap(bluewhitered_colormap(256))
+                colormap(cmocean('balance', 256))
             case 'corr'
-                colormap(viridis_colormap(256))
+                colormap(cmocean('haline', 256))
             otherwise
-                colormap('default')  % Use MATLAB's default colormap
+                % Default colormap
+                colormap(cmocean('thermal', 256))
         end
 
         % Set colorbar limits if provided
         if ~isempty(options.cbar_min) && ~isempty(options.cbar_max)
-            caxis([options.cbar_min options.cbar_max]);
+            clim([options.cbar_min options.cbar_max]);
         end
 
         cb = colorbar;
@@ -309,7 +310,7 @@ function dolfyn_plot(ds, field, varargin)
 
         % Set colorbar limits if provided
         if ~isempty(options.cbar_min) && ~isempty(options.cbar_max)
-            caxis([options.cbar_min options.cbar_max]);
+            clim([options.cbar_min options.cbar_max]);
         end
 
         try

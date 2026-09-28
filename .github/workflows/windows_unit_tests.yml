@@ -1,10 +1,19 @@
 name: MHKiT-MATLAB Windows Unit Tests
 
+# Only run tests when MATLAB files or this workflow file changes
 on:
   push:
     branches: [ master, develop ]
+    paths:
+      - 'mhkit/**/*.m'
+      - 'examples/**/*.m'
+      - '.github/workflows/windows_unit_tests.yml'
   pull_request:
     branches: [ master, develop ]
+    paths:
+      - 'mhkit/**/*.m'
+      - 'examples/**/*.m'
+      - '.github/workflows/windows_unit_tests.yml'
 
 jobs:
   cache_population:

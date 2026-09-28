@@ -8,8 +8,8 @@ function results = runCodeCompatibilityReport()
     r = analyzeCodeCompatibility(sourceCodeFolder, 'IncludeSubfolders', true);
 
     % Print code compatability report
-    display("MHKiT MATLAB Code Compatibility Report");
-    display(r.Recommendations);
+    disp("MHKiT MATLAB Code Compatibility Report");
+    disp(r.Recommendations);
 
     % Search for error string in the `Severity` column. If found exit with status code 1 to indicate to the test runner that ther
     error_string = 'Error';

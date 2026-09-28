@@ -1,28 +1,48 @@
 function ds=dolfyn_read(filename,options)
 
-%%%%%%%%%%%%%%%%%%%%
-%     Read a binary Nortek (e.g., .VEC, .wpr, .ad2cp, etc.) or RDI
-%    (.000, .PD0, .ENX, etc.) data file.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Read binary ADCP data files from Nortek or RDI instruments
+%
+% This function reads binary ADCP data files in .VEC, .wpr, .ad2cp (Nortek)-
+% and .000, .PD0, .ENX, (RDI) formats into MATLAB structures that can be saved
+% as .nc files and used with MHKiT-MATLAB dolfyn ADCP analysis functions.
 %
 % Parameters
 % ------------
-%     filename: string
-%         Filename of instrument file to read.
-%     userdata: bool or string (optional)
-%         true, false, or string of userdata.json filename (default true)
-%         Whether to read the '<base-filename>.userdata.json' file.
-%     nens: nan, int, or 2-element array (optional)
-%         nan (default: read entire file), int, or 2-element tuple
-%         (start, stop) Number of pings to read from the file.
-%
-%     call with options -> dolfyn_read(filename,'userdata',false,'nens',12)
+%   filename : string
+%       Path to instrument file to read
+%   userdata : logical or string, optional (name-value)
+%       Whether to read '<base-filename>.userdata.json' file
+%       - true: read userdata.json file (default)
+%       - false: skip userdata.json file  
+%       - string: path to specific userdata.json file
+%   nens : double or array, optional (name-value)
+%       Number of pings/ensembles to read
+%       - nan: read entire file (default)
+%       - scalar: read first N pings
+%       - [start, stop]: read pings from start to stop
 %
 % Returns
 % ---------
-%     ds: structure
-%         Structure from the binary instrument data
+%   ds : structure
+%       ADCP dataset structure containing:
+%       ds.vel.data : Velocity data [range x time x beam] [m/s]
+%       ds.coords : Coordinate information (time, range, beam)
+%       ds.attrs : Instrument metadata and deployment information
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Examples
+% --------
+% Read entire ADCP file, may be slow for large (>1GB) files
+% ds = dolfyn_read('deployment.ad2cp');
+%
+% Read first 1000 ensembles without userdata
+% ds = dolfyn_read('deployment.ad2cp', 'userdata', false, 'nens', 1000);
+%
+% Read specific ensemble range
+% ds = dolfyn_read('deployment.ad2cp', 'nens', [500, 1500]);
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     arguments
         filename
         options.userdata = true;
