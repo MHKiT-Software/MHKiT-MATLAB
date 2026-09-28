@@ -132,22 +132,19 @@ J = energy_flux(S, h, 'rho', options.rho, 'g', options.g);
 P = P(:);
 CW = capture_width(P, J);
 
-% Te (x) and Hm0 (y) bins start at 0 with IEC TS 62600-100 widths of 1 s and
-% 0.5 m, so the edges fall on 0, 1, 2, ... s and 0, 0.5, 1, ... m.
-% stop must be a whole number of widths, so round the data maximum up
-Hm0_stop = ceil(max(Hm0) / 0.5) * 0.5;
-Te_stop = ceil(max(Te) / 1) * 1;
-bin_spec.x = struct('start', 0, 'stop', Te_stop, 'width', 1);
-bin_spec.y = struct('start', 0, 'stop', Hm0_stop, 'width', 0.5);
+% Bin centers with IEC TS 62600-100 widths of 0.5 m for Hm0 and 1 s for Te,
+% so the edges fall on 0, 0.5, 1, ... m and 0, 1, 2, ... s.
+Hm0_bins = 0.25:0.5:ceil(max(Hm0) / 0.5) * 0.5;
+Te_bins = 0.5:1:ceil(max(Te));
 
 % mean and probability are always needed for MAEP. Any other requested
 % statistic is computed once and stored under its own name.
 cwmat = struct();
 for stat = unique(["mean", "probability", statistic])
-    cwmat.(stat) = capture_width_matrix(Hm0, Te, CW, stat, bin_spec);
+    cwmat.(stat) = capture_width_matrix(Hm0, Te, CW, stat, Hm0_bins, Te_bins);
 end
 
-jmat = wave_energy_flux_matrix(Hm0, Te, J, "mean", bin_spec);
+jmat = wave_energy_flux_matrix(Hm0, Te, J, "mean", Hm0_bins, Te_bins);
 
 maep_matrix = mean_annual_energy_production_matrix(cwmat.mean, jmat, cwmat.probability);
 

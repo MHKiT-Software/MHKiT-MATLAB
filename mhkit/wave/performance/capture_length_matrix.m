@@ -1,4 +1,4 @@
-function clm = capture_length_matrix(Hm0, Te, L, statistic, bin_spec)
+function clm = capture_length_matrix(Hm0, Te, L, statistic, Hm0_bins, Te_bins)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -20,8 +20,10 @@ function clm = capture_length_matrix(Hm0, Te, L, statistic, bin_spec)
 %   Statistic for each bin. Options: 'mean', 'std', 'median',
 %   'count', 'sum', 'min', 'max', 'probability', or 'frequency'.
 %   'probability' and 'frequency' are the same statistic.
-% bin_spec : struct
-%   Bin spec for each axis, see capture_width_matrix
+% Hm0_bins : numeric vector [m]
+%   Hm0 bin centers, see capture_width_matrix
+% Te_bins : numeric vector [s]
+%   Te bin centers, see capture_width_matrix
 %
 % Returns
 % ---------
@@ -36,7 +38,8 @@ arguments (Input)
     Te {mustBeNumeric}
     L {mustBeNumeric}
     statistic {mustBeTextScalar}
-    bin_spec (1,1) struct
+    Hm0_bins {mustBeNumeric, mustBeVector}
+    Te_bins {mustBeNumeric, mustBeVector}
 end
 
 arguments (Output)
@@ -48,6 +51,6 @@ warning('MHKiT:capture_length_matrix:DeprecatedFunction', ...
     'width". capture_length_matrix will be removed in MHKiT-MATLAB v1.3. ' ...
     'Use capture_width_matrix instead.']);
 
-clm = capture_width_matrix(Hm0, Te, L, statistic, bin_spec);
+clm = capture_width_matrix(Hm0, Te, L, statistic, Hm0_bins, Te_bins);
 
 end
