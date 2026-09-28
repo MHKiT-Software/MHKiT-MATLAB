@@ -496,13 +496,13 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             k.frequency=f;
 
             % all shallow
-            cg_shallow1 = wave_celerity(k,0.0001,"depth_check",py.True);
-            cg_shallow2 = wave_celerity(k, 0.0001,"depth_check",py.False);
+            cg_shallow1 = wave_celerity(k,0.0001,"depth_check",true);
+            cg_shallow2 = wave_celerity(k, 0.0001,"depth_check",false);
             assertEqual(testCase,cg_shallow1, cg_shallow2);
 
             x = (3.14.*f)./k.values;
             % all deep
-            cg = wave_celerity(k, 1000,"depth_check",py.True);
+            cg = wave_celerity(k, 1000,"depth_check",true);
             assertEqual(testCase,x,cg.values,'RelTol',0.01);
         end
 
@@ -522,7 +522,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             J = coeff*(Hm0^2)*Te;
 
             h=-1; % not used when deep=True
-            J_calc = energy_flux(S, h, "deep",py.True);
+            J_calc = energy_flux(S, h, "deep",true);
 
             assertEqual(testCase,J_calc,J,'RelTol',0.01);
         end
