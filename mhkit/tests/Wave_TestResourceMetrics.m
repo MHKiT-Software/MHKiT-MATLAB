@@ -401,57 +401,57 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             delete(filename);
         end
 
-        function test_plot_environmental_contour_multiyear(testCase)
-
-            assumeFail(testCase, "Not compatible with latest MHKIT-Python")
-            % not sure about why this test exists...return period has to be float or
-            % int and cannot be a list...
-            relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
-            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
-
-            fid = fopen(full_file_name); % Opening the file
-            raw = fread(fid,inf); % Reading the contents
-            str = char(raw'); % Transformation
-            fclose(fid); % Closing the file
-            valdata1 = jsondecode(str); % Using the jsondecode function to parse JSON from string
-            Te_table = struct2table(valdata1.Te,'AsArray',true);
-            Te = table2array(Te_table);
-            Hm0_table = struct2table(valdata1.Hm0,'AsArray',true);
-            Hm0 = table2array(Hm0_table);
-
-            filter = Hm0 < 20;
-            Hm0 = Hm0(filter);
-            Te = Te(filter);
-            [row, col] = find(~isnan(Te));
-            Hm0 = Hm0(col);
-            Te = Te(col);
-            [row, col] = find(~isnan(Hm0));
-            Hm0 = Hm0(col);
-            Te = Te(col);
-
-            time_str = Hm0_table.Properties.VariableNames;
-
-            time1 = str2num(erase(time_str{1},'x'));
-            time2 = str2num(erase(time_str{2},'x'));
-
-            dt = (time2-time1)/1000.;
-            time_R = [100, 120, 130];
-
-            contour = environmental_contours(Hm0, Te, dt, time_R, 'PCA');
-
-            filename = 'wave_plot_env_contour_multiyear.png';
-            if isfile(filename)
-                delete(filename);
-            end
-
-
-            plot_environmental_contours(Te, Hm0,contour.contour2,contour.contour1,"savepath",filename...
-                ,"x_label",...
-                'Energy Period (s)', "y_label",'Significant Wave Height (m)',"data_label",'NDBC 46022',...
-                "contour_label",{'100 Year Contour','120 Year Contour','130 Year Contour'});
-            assertTrue(testCase,isfile(filename));
-            delete(filename);
-        end
+        % function test_plot_environmental_contour_multiyear(testCase)
+        %
+        %     assumeFail(testCase, "Not compatible with latest MHKIT-Python")
+        %     % not sure about why this test exists...return period has to be float or
+        %     % int and cannot be a list...
+        %     relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
+        %     full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
+        %
+        %     fid = fopen(full_file_name); % Opening the file
+        %     raw = fread(fid,inf); % Reading the contents
+        %     str = char(raw'); % Transformation
+        %     fclose(fid); % Closing the file
+        %     valdata1 = jsondecode(str); % Using the jsondecode function to parse JSON from string
+        %     Te_table = struct2table(valdata1.Te,'AsArray',true);
+        %     Te = table2array(Te_table);
+        %     Hm0_table = struct2table(valdata1.Hm0,'AsArray',true);
+        %     Hm0 = table2array(Hm0_table);
+        %
+        %     filter = Hm0 < 20;
+        %     Hm0 = Hm0(filter);
+        %     Te = Te(filter);
+        %     [row, col] = find(~isnan(Te));
+        %     Hm0 = Hm0(col);
+        %     Te = Te(col);
+        %     [row, col] = find(~isnan(Hm0));
+        %     Hm0 = Hm0(col);
+        %     Te = Te(col);
+        %
+        %     time_str = Hm0_table.Properties.VariableNames;
+        %
+        %     time1 = str2num(erase(time_str{1},'x'));
+        %     time2 = str2num(erase(time_str{2},'x'));
+        %
+        %     dt = (time2-time1)/1000.;
+        %     time_R = [100, 120, 130];
+        %
+        %     contour = environmental_contours(Hm0, Te, dt, time_R, 'PCA');
+        %
+        %     filename = 'wave_plot_env_contour_multiyear.png';
+        %     if isfile(filename)
+        %         delete(filename);
+        %     end
+        %
+        %
+        %     plot_environmental_contours(Te, Hm0,contour.contour2,contour.contour1,"savepath",filename...
+        %         ,"x_label",...
+        %         'Energy Period (s)', "y_label",'Significant Wave Height (m)',"data_label",'NDBC 46022',...
+        %         "contour_label",{'100 Year Contour','120 Year Contour','130 Year Contour'});
+        %     assertTrue(testCase,isfile(filename));
+        %     delete(filename);
+        % end
 
         function test_chakrabarti(testCase)
             D = 5;
