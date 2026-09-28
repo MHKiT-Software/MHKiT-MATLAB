@@ -126,7 +126,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             assertLessThan(testCase,error, 0.01);
 
             % Tm
-            expected = sqrt(H5SP.waveMoments.Tm);
+            expected = H5SP.waveMoments.Tm;
             calculated = average_wave_period(S1);
             error = abs(expected-calculated)/expected;
             assertLessThan(testCase,error, 0.01);
@@ -184,7 +184,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             assertLessThan(testCase,error, 0.01);
 
             % Tm
-            expected = sqrt(AH1.waveMoments.Tm);
+            expected = AH1.waveMoments.Tm;
             calculated = average_wave_period(S1);
             error = abs(expected-calculated)/expected;
             assertLessThan(testCase,error, 0.01);
@@ -242,7 +242,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             assertLessThan(testCase,error, 0.01);
 
             % Tm
-            expected = sqrt(CDIP1.waveMoments.Tm);
+            expected = CDIP1.waveMoments.Tm;
             calculated = average_wave_period(S1,CDIP1.freqBinWidth);
             error = abs(expected-calculated)/expected;
             assertLessThan(testCase,error, 0.01);
