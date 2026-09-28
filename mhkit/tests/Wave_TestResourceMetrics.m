@@ -271,29 +271,17 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             relative_file_name = '../../examples/data/wave/ValData2.mat';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             data = load(full_file_name);
-            Valdata = data.CalcSpecCheckData;
-            H5sP = Valdata.H5sP;
+            H5sP = data.CalcSpecCheckData.H5sP;
 
             df = 0.01/(2*pi);
             Trep = 1/df;
             time = 0:0.062838:Trep;
-
-            elevation = H5sP.TimeSeries;
-            sample_rate = H5sP.Fs;
-            NFFT = H5sP.NFFT;
-            H5sP.S = elevation_spectrum(elevation',sample_rate,NFFT,time);
+            wave_elevation = struct('time', time', 'elevation', H5sP.TimeSeries');
 
             filename = 'wave_plot_elevation_timeseries.png';
             if isfile(filename)
                 delete(filename);
             end
-
-            wave_elevation = struct('time',time','elevation',H5sP.S.spectrum);
-
-            df = 0.01/(2*pi);
-            Trep = 1/df;
-            time = 0:0.12566:Trep;
-            wave_elevation.time = time';
 
             plot_elevation_timeseries(wave_elevation,"savepath",filename);
             assertTrue(testCase,isfile(filename));
