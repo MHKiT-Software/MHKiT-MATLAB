@@ -85,8 +85,14 @@ classdef Wave_TestIOcdip < matlab.unittest.TestCase
                 'station_number', station_number, ...
                 'data_type', data_type);
 
-            assertEqual(testCase, data.data.wave.waveTime(1), ...
-                datetime('30-Jan-2001 00:17:11', 'TimeZone', 'UTC'));
+            % The dataset's global attributes declare time_coverage_start
+            % 2001-01-30T00:00:00Z at a 30 minute time_coverage_resolution.
+            % CDIP regenerates the archive occasionally, which moves the exact
+            % first sample by seconds, so check it lies in that first interval.
+            coverage_start = datetime(2001, 1, 30, 0, 0, 0, 'TimeZone', 'UTC');
+            first_time = data.data.wave.waveTime(1);
+            assertGreaterThanOrEqual(testCase, first_time, coverage_start);
+            assertLessThan(testCase, first_time, coverage_start + minutes(30));
         end
 
         function test_plot_boxplot(testCase)
