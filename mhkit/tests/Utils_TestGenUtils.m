@@ -269,9 +269,12 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                     vnms,0);
                 res1 = read_nc_file_var(strcat('example_ncfiles/',fnm),...
                     vnms,1);
-                sz = length(vnms);
+                % Only check numeric variables. For string and char variables
+                % (e.g. inst, earth, dir) read_nc_file_var reports a NaN
+                % FillValue while ncinfo reports "", so they always fail.
+                numeric_idx = find(~ismember({ginfo.Variables.Datatype}, {'string', 'char'}));
                 % 2.1 check Data Field:
-                idx = randi([1,sz],1);%max([fix(sz*0.1),1]));
+                idx = numeric_idx(randi(numel(numeric_idx)));
                 var2check = vnms{idx};
                 vname = check_name(var2check);
                 val1 = res.(vname).Data;
