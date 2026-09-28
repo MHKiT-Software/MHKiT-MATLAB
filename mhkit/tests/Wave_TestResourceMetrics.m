@@ -477,7 +477,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
 
          function test_depth_regime(testCase)
-             expected = [1,1,0,1];
+             expected = logical([1,1,0,1]);
              l_vector=[1,2,10,3];
 
              h = 10;
