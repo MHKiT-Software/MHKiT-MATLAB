@@ -118,6 +118,37 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             assertLessThan(testCase, surface_elevation_diff, 0.01);
         end
 
+        function test_pierson_moskowitz_spectrum_zero_freq(testCase)
+            % f=0 should always evaluate to exactly 0 spectral density.
+            % https://github.com/MHKiT-Software/MHKiT-Python/blob/6bad8fe4f2bd8a9bff66fb9607ed0900f09d0258/mhkit/wave/resource.py#L146-L155
+            Obj.Tp = 8;
+            Obj.Hs = 2.5;
+            df = 0.1;
+            f_zero = 0:df:1-df;
+            f_nonzero = df:df:1-df;
+
+            S_zero = pierson_moskowitz_spectrum(f_zero, Obj.Tp, Obj.Hs);
+            S_nonzero = pierson_moskowitz_spectrum(f_nonzero, Obj.Tp, Obj.Hs);
+
+            assertEqual(testCase, S_zero.spectrum(1), 0.0);
+            assertGreaterThan(testCase, S_nonzero.spectrum(1), 0.0);
+        end
+
+        function test_jonswap_spectrum_zero_freq(testCase)
+            % f=0 should always evaluate to exactly 0 spectral density.
+            % https://github.com/MHKiT-Software/MHKiT-Python/blob/6bad8fe4f2bd8a9bff66fb9607ed0900f09d0258/mhkit/wave/resource.py#L204-L213
+            Obj.Tp = 8;
+            Obj.Hs = 2.5;
+            df = 0.1;
+            f_zero = 0:df:1-df;
+            f_nonzero = df:df:1-df;
+
+            S_zero = jonswap_spectrum(f_zero, Obj.Tp, Obj.Hs);
+            S_nonzero = jonswap_spectrum(f_nonzero, Obj.Tp, Obj.Hs);
+
+            assertEqual(testCase, S_zero.spectrum(1), 0.0);
+            assertGreaterThan(testCase, S_nonzero.spectrum(1), 0.0);
+        end
     end
 
 end
