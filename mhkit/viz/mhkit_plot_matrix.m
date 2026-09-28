@@ -2,11 +2,10 @@ function ax = mhkit_plot_matrix(M, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Plot a binned matrix as a scatter diagram, one colored cell per bin
+% Plot a binned matrix visualization, one colored cell per bin
 %
 % Cells are drawn between the bin edges so every bin is visible, with the
-% tick marks at the bin centers and empty (NaN) bins left blank, following
-% MHKiT-Python convention. Option names follow MHKiT-Python plot_matrix.
+% tick marks at the bin centers and empty (NaN) bins left blank.
 %
 % Parameters
 % ------------

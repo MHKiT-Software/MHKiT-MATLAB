@@ -4,9 +4,6 @@ function ax = plot_matrix(M, Mtype, options)
 %
 % Plots a wave performance matrix with Hm0 on the y axis and Te on the x axis
 %
-% Thin wrapper around mhkit_plot_matrix that adds the MHKiT-MATLAB axis
-% labels and a title from the matrix type and statistic.
-%
 % Parameters
 % ------------
 % M : struct
