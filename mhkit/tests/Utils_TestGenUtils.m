@@ -403,6 +403,26 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                 'MHKiT:my_fn:InvalidInput');
         end
 
+        function test_mhkit_frequency_to_column_names(testCase)
+            frequency = [0.1; 0.2; 0.3; 0.4];
+            names = mhkit_frequency_to_column_names(frequency);
+            assertEqual(testCase, names, ["f_0_1000Hz"; "f_0_2000Hz"; "f_0_3000Hz"; "f_0_4000Hz"]);
+
+            % Every generated name must be a valid MATLAB identifier
+            for i = 1:numel(names)
+                assertTrue(testCase, isvarname(names(i)));
+            end
+
+            % Custom decimal precision
+            names2 = mhkit_frequency_to_column_names([0.1; 0.2], 'decimals', 2);
+            assertEqual(testCase, names2, ["f_0_10Hz"; "f_0_20Hz"]);
+
+            % Frequencies that collide once formatted must error, not
+            % silently produce duplicate table variable names
+            testCase.verifyError(@() mhkit_frequency_to_column_names([0.101; 0.102], 'decimals', 2), ...
+                'MHKiT:mhkit_frequency_to_column_names:DuplicateNames');
+        end
+
     end
 
 end
