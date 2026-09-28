@@ -502,6 +502,31 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
             assertEqual(testCase, style, "timetable");
         end
 
+        function test_mhkit_restore_spectrum_output(testCase)
+            result = [5; 2.5];
+            time = datetime(2026,1,1) + hours(0:1)';
+
+            % matrix/struct: unchanged
+            assertEqual(testCase, mhkit_restore_spectrum_output(result, "matrix", "Tp"), result);
+            assertEqual(testCase, mhkit_restore_spectrum_output(result, "struct", "Tp"), result);
+
+            % table, no time
+            out_table = mhkit_restore_spectrum_output(result, "table", "Tp");
+            assertTrue(testCase, istable(out_table));
+            assertEqual(testCase, out_table.Tp, result);
+
+            % table, with time
+            out_table_t = mhkit_restore_spectrum_output(result, "table", "Tp", time);
+            assertEqual(testCase, out_table_t.time, time);
+            assertEqual(testCase, out_table_t.Tp, result);
+
+            % timetable
+            out_tt = mhkit_restore_spectrum_output(result, "timetable", "Tp", time);
+            assertTrue(testCase, istimetable(out_tt));
+            assertEqual(testCase, out_tt.Properties.RowTimes, time);
+            assertEqual(testCase, out_tt.Tp, result);
+        end
+
     end
 
 end
