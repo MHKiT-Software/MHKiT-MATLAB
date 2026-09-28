@@ -1,4 +1,4 @@
-function bins = mhkit_define_bins_1d(spec, function_name)
+function bins = mhkit_define_bins_1d(spec, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -26,10 +26,10 @@ function bins = mhkit_define_bins_1d(spec, function_name)
 %     spec.centers : vector
 %       Bin centers, strictly increasing, at least two elements
 %
-% function_name : char
+% function_name : char (optional)
 %   Name of the public function the user called, used in error
-%   identifiers so errors read as coming from that function, following
-%   mhkit_standardize_spectrum_input
+%   identifiers so errors read as coming from that function. Default is
+%   this function's name.
 %
 % Returns
 % ---------
@@ -43,7 +43,7 @@ function bins = mhkit_define_bins_1d(spec, function_name)
 
 arguments (Input)
     spec (1,1) struct
-    function_name {mustBeTextScalar}
+    options.function_name {mustBeTextScalar} = mfilename
 end
 
 arguments (Output)
@@ -57,23 +57,23 @@ if isequal(fields, {'start', 'stop', 'width'})
     for f = fields
         v = spec.(f{1});
         if ~(isnumeric(v) && isscalar(v) && isfinite(v))
-            error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
+            error(sprintf('MHKiT:%s:InvalidInput', options.function_name), ...
                 '%s must be a finite numeric scalar', f{1});
         end
     end
     if spec.width <= 0
-        error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
+        error(sprintf('MHKiT:%s:InvalidInput', options.function_name), ...
             'width (%g) must be positive', spec.width);
     end
     if spec.stop <= spec.start
-        error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
+        error(sprintf('MHKiT:%s:InvalidInput', options.function_name), ...
             'stop (%g) must be greater than start (%g)', spec.stop, spec.start);
     end
     n_widths = (spec.stop - spec.start) / spec.width;
     n_bins = round(n_widths);
     % Small tolerance because 0.3 / 0.1 is 3.0000000000000004 in floating point
     if abs(n_widths - n_bins) > 1e-9
-        error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
+        error(sprintf('MHKiT:%s:InvalidInput', options.function_name), ...
             ['stop - start (%g) must be a whole number of widths (%g). ' ...
              'Round stop up to the next multiple of width, or pass explicit ' ...
              'edges for a non-uniform grid.'], ...
@@ -85,7 +85,7 @@ if isequal(fields, {'start', 'stop', 'width'})
 elseif isequal(fields, {'edges'}) || isequal(fields, {'centers'})
     v = spec.(fields{1});
     if ~(isnumeric(v) && isvector(v) && numel(v) >= 2)
-        error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
+        error(sprintf('MHKiT:%s:InvalidInput', options.function_name), ...
             '%s must be a numeric vector with at least two elements', fields{1});
     end
     % Force a column vector
@@ -93,7 +93,7 @@ elseif isequal(fields, {'edges'}) || isequal(fields, {'centers'})
     % Written as "not greater than" so a NaN, which fails every comparison,
     % is rejected along with repeated or decreasing values
     if any(~(diff(v) > 0))
-        error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
+        error(sprintf('MHKiT:%s:InvalidInput', options.function_name), ...
             '%s must be strictly increasing with no NaN', fields{1});
     end
     if isequal(fields, {'edges'})
@@ -110,7 +110,7 @@ elseif isequal(fields, {'edges'}) || isequal(fields, {'centers'})
         edges = [first; mid; last];
     end
 else
-    error(sprintf('MHKiT:%s:InvalidInput', function_name), ...
+    error(sprintf('MHKiT:%s:InvalidInput', options.function_name), ...
         'spec must have exactly the fields start, stop, and width; or edges; or centers');
 end
 

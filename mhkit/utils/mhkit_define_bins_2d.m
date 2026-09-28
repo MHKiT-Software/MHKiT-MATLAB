@@ -1,4 +1,4 @@
-function bins = mhkit_define_bins_2d(x, y)
+function bins = mhkit_define_bins_2d(x, y, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -34,6 +34,9 @@ function bins = mhkit_define_bins_2d(x, y)
 %       x bin centers, strictly increasing, at least two elements
 % y : struct
 %   Exactly one of the same three field sets, same rules as x.
+% function_name : char (optional)
+%   Name of the public function the user called, used in error
+%   identifiers. Default is this function's name.
 %
 % Returns
 % ---------
@@ -72,6 +75,7 @@ function bins = mhkit_define_bins_2d(x, y)
 arguments (Input)
     x (1,1) struct
     y (1,1) struct
+    options.function_name {mustBeTextScalar} = mfilename
 end
 
 arguments (Output)
@@ -79,7 +83,7 @@ arguments (Output)
 end
 
 bins = struct();
-bins.x = mhkit_define_bins_1d(x, mfilename);
-bins.y = mhkit_define_bins_1d(y, mfilename);
+bins.x = mhkit_define_bins_1d(x, 'function_name', options.function_name);
+bins.y = mhkit_define_bins_1d(y, 'function_name', options.function_name);
 
 end
