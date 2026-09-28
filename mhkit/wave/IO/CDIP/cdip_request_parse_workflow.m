@@ -59,12 +59,18 @@ nc_info = ncinfo_autoretry(url_query);
 nc_info.Variables = struct2table(nc_info.Variables);
 nc_info.Variables.Properties.RowNames = nc_info.Variables.Name;
 
+% Open the remote dataset once and read every variable through this handle.
+% Opening per variable costs several HTTP requests each and gets the client
+% rate limited by the CDIP THREDDS server.
+ncid = netcdf_open_autoretry(url_query);
+close_dataset = onCleanup(@() netcdf.close(ncid));
+
 % Build list of data to query
 data_to_query = make_data_list(options, nc_info, DATA_GROUPS);
 
 % Create list of start and end datetimes/indices for which to query data
-datetimes = start_end_datetimes(options);
-indices = data_indices(url_query, datetimes, data_to_query, DATA_GROUPS);
+datetimes = start_end_datetimes(options, ncid);
+indices = data_indices(ncid, datetimes, data_to_query, DATA_GROUPS);
 
 % Query data and compile into output structure
 for i = 1:length(data_to_query)                     % for each data metric
@@ -79,7 +85,7 @@ for i = 1:length(data_to_query)                     % for each data metric
     if type ~= "data" || shape == "0D"
         % Query it all and add to output
         try
-            value = ncread_autoretry(url_query, name);
+            value = ncread_autoretry(ncid, name);
             data.(type).(group_name).(name) = value;
         catch
             warning("MATLAB:cdip_request_parse_workflow", ...
@@ -100,15 +106,17 @@ for i = 1:length(data_to_query)                     % for each data metric
             index_count = index_end - index_start + 1;
             try
                 if shape == "2D"
-                    value = ncread_autoretry(url_query, name, ...
+                    value = ncread_autoretry(ncid, name, ...
                                    [1, index_start], [Inf, index_count]);
                     value = value';
                 elseif shape == "1D"
-                    value = ncread_autoretry(url_query, name, ...
+                    value = ncread_autoretry(ncid, name, ...
                                    index_start, index_count);
                 end
             catch ME
-                if ME.identifier == "MATLAB:imagessci:netcdf:libraryFailure"
+                if ME.identifier == "MHKiT:cdip_request_parse_workflow:AccessDenied"
+                    rethrow(ME)
+                elseif ME.identifier == "MATLAB:imagesci:netcdf:libraryFailure"
                     warning("MATLAB:cdip_request_parse_workflow", ...
                             "Access failure to NetCDF file when querying %s.", name);
                 else
@@ -139,7 +147,7 @@ end
 
 % Add buoy name to output
 data.metadata.name = deblank(convertCharsToStrings( ...
-    ncread_autoretry(url_query, 'metaStationName')));
+    ncread_autoretry(ncid, 'metaStationName')));
 end
 
 
@@ -170,7 +178,7 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function indices = data_indices(url_query, datetime_ranges, ...
+function indices = data_indices(ncid, datetime_ranges, ...
                                 data_to_query, all_groups)
 %DATA_INDICES Returns data indices to query for each group and range
 % e.g.,  indices.wave.start = <index>
@@ -181,7 +189,7 @@ groups_in_data = data_groups(data_to_query, all_groups);
 indices = struct;
 for i = 1:length(groups_in_data)
     posixtimes = ncread_autoretry( ...
-            url_query, strcat(groups_in_data{i}, 'Time'));
+            ncid, strcat(groups_in_data{i}, 'Time'));
     if isscalar(posixtimes) && isnan(posixtimes)
         continue
     end
@@ -315,117 +323,199 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function info = ncinfo_autoretry(source, name)
+function info = ncinfo_autoretry(source)
 %NCINFO_AUTORETRY Query info and auto retry until success or max tries met
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-MAX_RETRIES = 5;                         % number of query retries if error
-
-% Submit query and get info
-for i = 0:MAX_RETRIES
-    try
-        switch nargin
-            case 1
-                info = ncinfo(source);
-            case 2
-                info = ncinfo(source, name);
-            otherwise
-                MException('MATLAB:cdip_request_parse_workflow:ncinfo_autoretry ', ...
-                    'Invalid number of arguments');
-        end
-        break;
-    catch ME
-        if i == MAX_RETRIES
-            rethrow(ME)
-        else
-            pause(0.5);   % pause(seconds) and retry query
-        end
-    end
-end
+info = retry_remote_request(@() ncinfo(source));
 end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function data = ncread_autoretry(source, varname, start, count, stride)
+function ncid = netcdf_open_autoretry(source)
+%NETCDF_OPEN_AUTORETRY Open the remote dataset and auto retry until success or max tries met
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ncid = retry_remote_request(@() netcdf.open(source, 'NOWRITE'));
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function data = ncread_autoretry(ncid, varname, start, count)
 %NCREAD_AUTORETRY Query data and auto retry until success or max tries met
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-MAX_RETRIES = 5;                         % number of query retries if error
+% Returns NaN when the variable does not exist in the dataset
+if nargin == 2
+    request = @() read_variable(ncid, varname);
+else
+    request = @() read_variable(ncid, varname, start, count);
+end
+try
+    data = retry_remote_request(request);
+catch ME
+    if contains(ME.message, "Variable not found")
+        data = NaN;
+    else
+        rethrow(ME)
+    end
+end
+end
 
-% Submit query and get info
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function result = retry_remote_request(request)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Run a remote NetCDF request, retrying transient failures with
+%    exponential backoff
+%
+%    Missing variables and an access denial from the server are not
+%    transient, so they are raised immediately. Retrying after a denial
+%    only extends the block the CDIP THREDDS server has placed on the client.
+%
+% Parameters
+% ------------
+%     request : function handle
+%         Zero-argument function that performs the request
+%
+% Returns
+% ---------
+%     result : any
+%         Whatever the request returns
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+MAX_RETRIES = 5;
 for i = 0:MAX_RETRIES
     try
-        switch nargin
-            case 2
-%                 data = ncread(source, varname);
-                data = ncread_lowlevel(source, varname);
-            case 4
-%                 data = ncread(source, varname, start, count);
-                data = ncread_lowlevel(source, varname, start, count);
-            case 5
-%                 data = ncread(source, varname, start, count, stride);
-                data = ncread_lowlevel(source, varname, start, count, stride);
-            otherwise
-                MException('MATLAB:cdip_request_parse_workflow:ncread_autoretry ', ...
-                    'Invalid number of arguments');
-        end
-        break;
+        result = request();
+        return
     catch ME
-        if i == MAX_RETRIES
+        if contains(ME.message, "Authorization failure")
+            error('MHKiT:cdip_request_parse_workflow:AccessDenied', ...
+                ['The CDIP THREDDS server refused the request (HTTP access denied). ' ...
+                 'This is usually rate limiting; wait before retrying. ' ...
+                 'NetCDF reported: %s'], ME.message);
+        elseif contains(ME.message, "Variable not found") || i == MAX_RETRIES
             rethrow(ME)
-        elseif ME.identifier == "MATLAB:imagesci:netcdf:unknownLocation" || ...
-                contains(ME.message, "Variable not found")
-            data = NaN;
-            break;          % no need to retry
-        else
-            pause(0.5);     % pause(seconds) and retry query
         end
+        pause(0.5 * 2^i);   % 0.5, 1, 2, 4, 8 seconds
     end
 end
 end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function data = ncread_lowlevel(source, varname, start, count, stride)
-%NCREAD_LOWLEVEL Query data using low-level NetCDF functions
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ncid = netcdf.open(source);
+function data = read_variable(ncid, varname, start, count)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Read a variable, or a slice of it, through an open NetCDF handle
+%
+%    The sliced read applies the _FillValue, scale_factor, and add_offset
+%    attributes the way ncread does, so the output matches the previous
+%    ncread based implementation.
+%
+% Parameters
+% ------------
+%     ncid : double
+%         Handle from netcdf.open
+%     varname : char
+%         Variable name
+%     start : vector (optional)
+%         One-based start index per dimension, as for ncread
+%     count : vector (optional)
+%         Elements to read per dimension, Inf reads to the end
+%
+% Returns
+% ---------
+%     data : array
+%         Variable data in MATLAB dimension order
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+varid = netcdf.inqVarID(ncid, varname);
+if nargin == 2
+    data = netcdf.getVar(ncid, varid);
+    return
+end
+
+% Replace any inf's for reading to end with actual counts
+[~, ~, dimids] = netcdf.inqVar(ncid, varid);
+for i = find(isinf(count))
+    [~, dimlen] = netcdf.inqDim(ncid, dimids(i));
+    count(i) = dimlen - start(i) + 1;
+end
+
+% netcdf.getVar takes zero-based start indices
+data = netcdf.getVar(ncid, varid, start - 1, count);
+data = apply_cf_attributes(ncid, varid, data);
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function data = apply_cf_attributes(ncid, varid, data)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Apply the _FillValue, scale_factor, and add_offset attributes to raw
+%    variable data following ncread
+%
+%    Fill values become NaN in floating point output. scale_factor and
+%    add_offset convert the data to double.
+%
+% Parameters
+% ------------
+%     ncid : double
+%         Handle from netcdf.open
+%     varid : double
+%         Variable id
+%     data : array
+%         Raw data from netcdf.getVar
+%
+% Returns
+% ---------
+%     data : array
+%         Converted data
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+fill_value = get_attribute(ncid, varid, '_FillValue');
+scale_factor = get_attribute(ncid, varid, 'scale_factor');
+add_offset = get_attribute(ncid, varid, 'add_offset');
+
+is_fill = false(size(data));
+if ~isempty(fill_value)
+    is_fill = data == fill_value;
+end
+if ~isempty(scale_factor) || ~isempty(add_offset)
+    data = double(data);
+    if ~isempty(scale_factor)
+        data = data * double(scale_factor);
+    end
+    if ~isempty(add_offset)
+        data = data + double(add_offset);
+    end
+end
+if isfloat(data)
+    data(is_fill) = NaN;
+end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function value = get_attribute(ncid, varid, name)
+%GET_ATTRIBUTE Return a variable attribute, or empty if it is not defined
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 try
-    varid = netcdf.inqVarID(ncid, varname);
-
-    % Replace any inf's for reading to end with actual counts
-    if nargin > 2 && any(isinf(count))
-        [~, ~, dimids, ~] = netcdf.inqVar(ncid,varid);
-        for i=1:length(count)
-            if isinf(count(i))
-                [~, dimlen] = netcdf.inqDim(ncid, dimids(i));
-                count(i) = dimlen - start(i) + 1;
-            end
-        end
-    end
-
-    % Submit query and get info
-    switch nargin
-        case 2
-            data = netcdf.getVar(ncid, varid);
-        case 4
-            data = ncread(source, varname, start, count);
-        case 5
-            data = ncread(source, varname, start, count, stride);
-        otherwise
-            MException('MATLAB:cdip_request_parse_workflow:ncread_autoretry ', ...
-                'Invalid number of arguments');
-    end
-
-    netcdf.close(ncid);
-catch ME
-    netcdf.close(ncid);
-    rethrow(ME)
+    value = netcdf.getAtt(ncid, varid, name);
+catch
+    value = [];
 end
 end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function datetimes = start_end_datetimes(options)
+function datetimes = start_end_datetimes(options, ncid)
 %START_END_DATETIMES Creates structure of start and end datetimes to query
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 datetimes.start = {};
@@ -440,9 +530,8 @@ if options.years(1) > 0     % invalid/missing value = -1
     end
 else
     % If start or end date is needed, query times from the netCDF data
-    if options.start_date == "" && options.end_date == ""
-        url_query = get_url_query(options);
-        waveTime = ncread_autoretry(url_query, 'waveTime');
+    if options.start_date == "" || options.end_date == ""
+        waveTime = ncread_autoretry(ncid, 'waveTime');
     end
     % Substitute in netCDF start/end dates as needed
     if options.start_date ~= ""
