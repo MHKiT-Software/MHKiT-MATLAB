@@ -423,6 +423,85 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                 'MHKiT:mhkit_frequency_to_column_names:DuplicateNames');
         end
 
+        function test_mhkit_standardize_spectrum_input_matrix(testCase)
+            frequency = [0.1; 0.2; 0.3];
+            spectrum = [1 4; 2 5; 3 6];
+            [out_spec, out_freq, out_time, style] = mhkit_standardize_spectrum_input(spectrum, 'test_fn', frequency);
+
+            assertEqual(testCase, out_spec, spectrum);
+            assertEqual(testCase, out_freq, frequency);
+            assertTrue(testCase, isempty(out_time));
+            assertEqual(testCase, style, "matrix");
+        end
+
+        function test_mhkit_standardize_spectrum_input_rejects_matrix_frequency(testCase)
+            % frequency must be 1-D; a caller mixing up spectrum/frequency
+            % args should get a clear error here, not a confusing one later.
+            spectrum = [1 4; 2 5; 3 6];
+            bad_frequency = [1 2; 3 4; 5 6];
+            testCase.verifyError(@() mhkit_standardize_spectrum_input(spectrum, 'my_fn', bad_frequency), ...
+                'MHKiT:my_fn:InvalidOutput');
+        end
+
+        function test_mhkit_standardize_spectrum_input_struct(testCase)
+            S.frequency = [0.1; 0.2; 0.3];
+            S.spectrum = [1 4; 2 5; 3 6];
+            S.time = datetime(2026,1,1) + hours(0:1)';
+
+            [out_spec, out_freq, out_time, style] = mhkit_standardize_spectrum_input(S, 'test_fn');
+
+            assertEqual(testCase, out_spec, S.spectrum);
+            assertEqual(testCase, out_freq, S.frequency);
+            assertEqual(testCase, out_time, S.time);
+            assertEqual(testCase, style, "struct");
+        end
+
+        function test_mhkit_standardize_spectrum_input_table(testCase)
+            frequency = [0.1; 0.2; 0.3];
+            % Time as rows: one row per spectrum, one column per frequency bin
+            T = table([1;4], [2;5], [3;6], 'VariableNames', {'f1','f2','f3'});
+
+            [out_spec, out_freq, out_time, style] = mhkit_standardize_spectrum_input(T, 'test_fn', frequency);
+
+            assertEqual(testCase, out_spec, [1 4; 2 5; 3 6]);
+            assertEqual(testCase, out_freq, frequency);
+            assertTrue(testCase, isempty(out_time));
+            assertEqual(testCase, style, "table");
+
+            % Optional 'time' variable is extracted and excluded from spectrum
+            T.time = datetime(2026,1,1) + hours(0:1)';
+            [out_spec2, ~, out_time2, ~] = mhkit_standardize_spectrum_input(T, 'test_fn', frequency);
+            assertEqual(testCase, out_spec2, [1 4; 2 5; 3 6]);
+            assertEqual(testCase, out_time2, T.time);
+        end
+
+        function test_mhkit_standardize_spectrum_input_rejects_negative_frequency(testCase)
+            spectrum = [1; 2; 3];
+            bad_frequency = [-0.1; 0.2; 0.3];
+            testCase.verifyError(@() mhkit_standardize_spectrum_input(spectrum, 'my_fn', bad_frequency), ...
+                'MHKiT:my_fn:InvalidInput');
+        end
+
+        function test_mhkit_standardize_spectrum_input_warns_on_high_frequency(testCase)
+            spectrum = [1; 2; 3];
+            high_frequency = [0.1; 0.2; 150];
+            testCase.verifyWarning(@() mhkit_standardize_spectrum_input(spectrum, 'my_fn', high_frequency), ...
+                'MHKiT:my_fn:HighFrequency');
+        end
+
+        function test_mhkit_standardize_spectrum_input_timetable(testCase)
+            frequency = [0.1; 0.2; 0.3];
+            time = datetime(2026,1,1) + hours(0:1)';
+            TT = timetable(time, [1;4], [2;5], [3;6], 'VariableNames', {'f1','f2','f3'});
+
+            [out_spec, out_freq, out_time, style] = mhkit_standardize_spectrum_input(TT, 'test_fn', frequency);
+
+            assertEqual(testCase, out_spec, [1 4; 2 5; 3 6]);
+            assertEqual(testCase, out_freq, frequency);
+            assertEqual(testCase, out_time, time);
+            assertEqual(testCase, style, "timetable");
+        end
+
     end
 
 end
