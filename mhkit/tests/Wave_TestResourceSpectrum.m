@@ -149,6 +149,56 @@ classdef Wave_TestResourceSpectrum < matlab.unittest.TestCase
             assertEqual(testCase, S_zero.spectrum(1), 0.0);
             assertGreaterThan(testCase, S_nonzero.spectrum(1), 0.0);
         end
+
+        function test_surface_elevation_uses_sum_of_sines_when_input_frequency_index_does_not_have_zero(testCase)
+            % ifft requires f(1)==0; without it, the default method must
+            % silently fall back to sum_of_sines and match it exactly.
+            % https://github.com/MHKiT-Software/MHKiT-Python/blob/6bad8fe4f2bd8a9bff66fb9607ed0900f09d0258/mhkit/tests/wave/test_resource_spectrum.py#L216-L227
+            f = linspace(1/30, 1/2, 32);
+            Hs = 2.5;
+            Tp = 8;
+            Trep = 600;
+            t = 0:0.05:Trep-0.05; % matches np.arange(0, Trep, 0.05), which excludes the endpoint
+
+            S = jonswap_spectrum(f, Tp, Hs);
+
+            eta_default = surface_elevation(S, t, "seed", 1);
+            eta_sos = surface_elevation(S, t, "seed", 1, "method", "sum_of_sines");
+
+            assertTrue(testCase, isfield(eta_default, 'elevation'));
+            assertEqual(testCase, eta_default.elevation, eta_sos.elevation, 'AbsTol', 1e-6);
+        end
+
+        function test_surface_elevation_warn_user_if_zero_frequency_not_defined_and_using_ifft(testCase)
+            % https://github.com/MHKiT-Software/MHKiT-Python/blob/6bad8fe4f2bd8a9bff66fb9607ed0900f09d0258/mhkit/tests/wave/test_resource_spectrum.py#L229-L236
+            f = linspace(1/30, 1/2, 32);
+            Hs = 2.5;
+            Tp = 8;
+            Trep = 600;
+            t = 0:0.05:Trep-0.05; % matches np.arange(0, Trep, 0.05), which excludes the endpoint
+
+            S = jonswap_spectrum(f, Tp, Hs);
+
+            testCase.verifyWarning(@() surface_elevation(S, t, "seed", 1, "method", "ifft"), ...
+                'MHKiT:surface_elevation:MethodFallback');
+        end
+
+        function test_surface_elevation_uses_ifft_when_input_frequency_index_has_zero(testCase)
+            % https://github.com/MHKiT-Software/MHKiT-Python/blob/6bad8fe4f2bd8a9bff66fb9607ed0900f09d0258/mhkit/tests/wave/test_resource_spectrum.py#L238-L244
+            Trep = 600;
+            df = 1 / Trep;
+            f = 0:df:1-df; % matches np.arange(0, 1, df), which excludes the endpoint
+            Hs = 2.5;
+            Tp = 8;
+            t = 0:0.05:Trep-0.05; % matches np.arange(0, Trep, 0.05), which excludes the endpoint
+
+            S = jonswap_spectrum(f, Tp, Hs);
+
+            eta_default = surface_elevation(S, t, "seed", 1);
+            eta_ifft = surface_elevation(S, t, "seed", 1, "method", "ifft");
+
+            assertEqual(testCase, eta_default.elevation, eta_ifft.elevation);
+        end
     end
 
 end
