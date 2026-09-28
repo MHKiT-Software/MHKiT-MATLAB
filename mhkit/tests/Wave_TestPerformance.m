@@ -97,10 +97,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
         end
 
         function test_mean_annual_energy_production(testCase)
-            import matlab.unittest.constraints.IsEqualTo
-            import matlab.unittest.TestCase
-            import matlab.unittest.constraints.AbsoluteTolerance
-
+            rng(123);
             a = 40;
             b = 200;
             Obj.P = (b-a).*randn(1,100000) + a;
@@ -111,7 +108,9 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
 
             CW = capture_width(Obj.P, Obj.J);
             maep = mean_annual_energy_production_timeseries(CW, Obj.J);
-            testCase.verifyThat(1754020.077,IsEqualTo(maep,'Within',AbsoluteTolerance(2e+06)))
+            % CW .* J is P, so MAEP is the mean power over 8766 hours
+            expected = 8766 * mean(Obj.P);
+            assertEqual(testCase, maep, expected, 'RelTol', 1e-10);
         end
 
         function test_plot_matrix(testCase)
