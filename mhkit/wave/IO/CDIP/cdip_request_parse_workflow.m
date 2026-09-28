@@ -1,41 +1,43 @@
 function [data] = cdip_request_parse_workflow(options)
 
-%CDIP_REQUEST_PARSE_WORKFLOW Parses CDIP data from a web request
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Requests data for a station number (from http://cdip.ucsd.edu/) and
-%   parses. Years may be non-consecutive e.g. [2001, 2010]. Time may be
-%   sliced by dates (start_date or end date in YYYY-MM-DD). By default 2D
-%   variables are not parsed if all 2D variables are needed.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%   Parameters
-%   ----------
-%       station_number: string
-%           Station number of CDIP wave buoy
-%       parameters: string or array of strings
-%           Parameters to return. If nan, will return all variables except
-%           2D-variables.
-%       years: int or array of int
-%           Year date, e.g. 2001 or [2001, 2010]
-%       start_date: string
-%           Start date in YYYY-MM-DD, e.g. '2012-04-01'
-%       end_date: string
-%           End date in YYYY-MM-DD, e.g. '2012-04-30'
-%       data_type: string
-%           Either 'historic' or 'realtime'
-%       all_2D_variables: boolean
-%           Will return all 2D data. Enabling this will add significant
-%           processing time. If all 2D variables are not needed it is
-%           recommended to pass 2D parameters of interest using the
-%           'parameters' keyword and leave this set to the default false.
+% Request and parse CDIP buoy data from the CDIP THREDDS server
 %
-%   Returns
-%   -------
-%       data: structure
-%           'data': structure
-%               grouped 1D and 2D structures of array data with datetimes
-%           'metadata': structure
-%               Anything not of length time, including buoy name
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Requests data for a station number (from http://cdip.ucsd.edu/) and
+% parses it into grouped structures. Years may be non-consecutive, e.g.
+% [2001, 2010]. Time may be sliced by dates (start_date or end_date in
+% YYYY-MM-DD). 2D variables are only returned when requested.
+%
+% Parameters
+% ------------
+%     station_number : string
+%         Station number of the CDIP wave buoy
+%     parameters : string or array of strings (optional)
+%         Variables to return. Default returns all variables except 2D
+%         variables
+%     years : int or array of int (optional)
+%         Year, e.g. 2001 or [2001, 2010]
+%     start_date : string (optional)
+%         Start date in YYYY-MM-DD, e.g. '2012-04-01'
+%     end_date : string (optional)
+%         End date in YYYY-MM-DD, e.g. '2012-04-30'
+%     data_type : string (optional)
+%         'historic' (default) or 'realtime'
+%     all_2D_variables : logical (optional)
+%         Return all 2D data. This adds significant processing time, so
+%         pass the 2D variables of interest in parameters instead where
+%         possible. Default false
+%
+% Returns
+% ---------
+%     data : structure
+%         data.data : structure
+%             Grouped 1D and 2D structures of array data with datetimes
+%         data.metadata : structure
+%             Anything not of length time, including the buoy name
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments
     options.station_number string;
@@ -151,10 +153,26 @@ data.metadata.name = deblank(convertCharsToStrings( ...
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function group = data_group(data_name, all_groups)
-%DATA_GROUP Returns the group name for the data based on its name
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Return the data group of a variable from its name prefix
+%
+% Parameters
+% ------------
+%     data_name : char
+%         Variable name
+%     all_groups : cell
+%         Group prefixes to match
+%
+% Returns
+% ---------
+%     group : char
+%         Matching group, or 'other' if no prefix matches
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 group = 'other';
 for i = 1:length(all_groups)
     if startsWith(data_name, all_groups{i})     % group is the prefix
@@ -165,11 +183,26 @@ end
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function groups = data_groups(data_names, all_groups)
-%DATA_GROUPS Returns the group set in data_names based on its names
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Groups are non-duplicate. Definitely not most efficient algorithm.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Return the unique set of data groups for a list of variable names
+%
+% Parameters
+% ------------
+%     data_names : cell
+%         Variable names
+%     all_groups : cell
+%         Group prefixes to match
+%
+% Returns
+% ---------
+%     groups : cell
+%         Unique groups present in data_names
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 wrapper_fun = @(x) data_group(x, all_groups);
 group_of_each = cellfun(wrapper_fun, data_names, ...
                            'UniformOutput', false);
@@ -177,13 +210,32 @@ groups = unique(group_of_each);
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function indices = data_indices(ncid, datetime_ranges, ...
-                                data_to_query, all_groups)
-%DATA_INDICES Returns data indices to query for each group and range
-% e.g.,  indices.wave.start = <index>
-%        indices.wave.end = <index>
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function indices = data_indices(ncid, datetime_ranges, data_to_query, all_groups)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Return the start and end indices to query for each data group and
+% time range
+%
+% Parameters
+% ------------
+%     ncid : double
+%         Handle from netcdf.open
+%     datetime_ranges : structure
+%         datetime_ranges.start and .end cell arrays of datetimes
+%     data_to_query : cell
+%         Variable names to be queried
+%     all_groups : cell
+%         Group prefixes to match
+%
+% Returns
+% ---------
+%     indices : structure
+%         indices.<group>.start and indices.<group>.end index vectors, one
+%         entry per time range that holds data
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 groups_in_data = data_groups(data_to_query, all_groups);
 
 indices = struct;
@@ -210,15 +262,32 @@ end
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [type, group, shape] = datum_categories(datum_name, nc_info, all_groups)
-%DATUM_CATEGORIES Returns the categorizations for the datum
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% type = {'data', 'metadata'}
-% group = {'wave', 'sst', 'gps', 'dwr', 'other'}
-% shape = {'0D', '1D', '2D'}
 
-% Determine group
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Return the type, group, and shape of a variable
+%
+% Parameters
+% ------------
+%     datum_name : char
+%         Variable name
+%     nc_info : structure
+%         ncinfo output with Variables as a table
+%     all_groups : cell
+%         Group prefixes to match
+%
+% Returns
+% ---------
+%     type : char
+%         'data' if the variable is of length time, else 'metadata'
+%     group : char
+%         'wave', 'sst', 'gps', 'dwr', 'meta', or 'other'
+%     shape : char
+%         '0D', '1D', or '2D'
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 group = data_group(datum_name, all_groups);
 
 % Determine shape
@@ -247,10 +316,24 @@ end
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function data_2D_names = find_data_2D_names(nc_info)
-%FIND_DATA_2D_NAMES Finds names of available 2D data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Find the names of the 2D (frequency by time) variables
+%
+% Parameters
+% ------------
+%     nc_info : structure
+%         ncinfo output with Variables as a table
+%
+% Returns
+% ---------
+%     data_2D_names : cell
+%         Variable names sized [waveFrequency, waveTime]
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 N_freq = nc_info.Variables{'waveFrequency', 'Size'}{1};
 N_time = nc_info.Variables{'waveTime', 'Size'}{1};
 data_2D_names = {};
@@ -262,10 +345,24 @@ end
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function url_query = get_url_query(options)
-%GET_URL_QUERY Builds the URL for querying the netCDF data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Build the OPeNDAP URL of the station dataset
+%
+% Parameters
+% ------------
+%     options : structure
+%         Parsed name-value options with station_number and data_type
+%
+% Returns
+% ---------
+%     url_query : string
+%         THREDDS URL of the historic or realtime NetCDF file
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 data_url = "http://thredds.cdip.ucsd.edu/thredds/dodsC/cdip";
 if options.data_type == "historic"
     url_query = sprintf("%s/archive/%sp1/%sp1_historic.nc", ...
@@ -280,10 +377,30 @@ end
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function data_to_query = make_data_list(options, nc_info, DATA_GROUPS)
-%MAKE_DATA_LIST Compiles list of data to query
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Compile the sorted list of variables to query
+%
+% Requested parameters are checked against the dataset, and the
+% waveFrequency and <group>Time variables they depend on are added.
+%
+% Parameters
+% ------------
+%     options : structure
+%         Parsed name-value options
+%     nc_info : structure
+%         ncinfo output with Variables as a table
+%     DATA_GROUPS : cell
+%         Group prefixes
+%
+% Returns
+% ---------
+%     data_to_query : cell
+%         Sorted variable names
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 data_2D_names = find_data_2D_names(nc_info);
 
@@ -322,27 +439,74 @@ data_to_query = sort(data_to_query);
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function info = ncinfo_autoretry(source)
-%NCINFO_AUTORETRY Query info and auto retry until success or max tries met
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Query dataset info, retrying transient failures
+%
+% Parameters
+% ------------
+%     source : string
+%         Dataset URL
+%
+% Returns
+% ---------
+%     info : structure
+%         ncinfo output
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 info = retry_remote_request(@() ncinfo(source));
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function ncid = netcdf_open_autoretry(source)
-%NETCDF_OPEN_AUTORETRY Open the remote dataset and auto retry until success or max tries met
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Open the remote dataset read only, retrying transient failures
+%
+% Parameters
+% ------------
+%     source : string
+%         Dataset URL
+%
+% Returns
+% ---------
+%     ncid : double
+%         Handle from netcdf.open
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 ncid = retry_remote_request(@() netcdf.open(source, 'NOWRITE'));
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function data = ncread_autoretry(ncid, varname, start, count)
-%NCREAD_AUTORETRY Query data and auto retry until success or max tries met
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Returns NaN when the variable does not exist in the dataset
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Read a variable, or a slice of it, retrying transient failures
+%
+% Parameters
+% ------------
+%     ncid : double
+%         Handle from netcdf.open
+%     varname : char
+%         Variable name
+%     start : vector (optional)
+%         One-based start index per dimension
+%     count : vector (optional)
+%         Elements to read per dimension, Inf reads to the end
+%
+% Returns
+% ---------
+%     data : array
+%         Variable data, or NaN if the variable does not exist
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 if nargin == 2
     request = @() read_variable(ncid, varname);
 else
@@ -360,17 +524,16 @@ end
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function result = retry_remote_request(request)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%    Run a remote NetCDF request, retrying transient failures with
-%    exponential backoff
+% Run a remote NetCDF request, retrying transient failures with
+% exponential backoff
 %
-%    Missing variables and an access denial from the server are not
-%    transient, so they are raised immediately. Retrying after a denial
-%    only extends the block the CDIP THREDDS server has placed on the client.
+% Missing variables and an access denial from the server are not
+% transient, so they are raised immediately. Retrying after a denial
+% only extends the block the CDIP THREDDS server has placed on the client.
 %
 % Parameters
 % ------------
@@ -404,16 +567,15 @@ end
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function data = read_variable(ncid, varname, start, count)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%    Read a variable, or a slice of it, through an open NetCDF handle
+% Read a variable, or a slice of it, through an open NetCDF handle
 %
-%    The sliced read applies the _FillValue, scale_factor, and add_offset
-%    attributes the way ncread does, so the output matches the previous
-%    ncread based implementation.
+% The sliced read applies the _FillValue, scale_factor, and add_offset
+% attributes the way ncread does, so the output matches the previous
+% ncread based implementation.
 %
 % Parameters
 % ------------
@@ -452,16 +614,15 @@ data = apply_cf_attributes(ncid, varid, data);
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function data = apply_cf_attributes(ncid, varid, data)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%    Apply the _FillValue, scale_factor, and add_offset attributes to raw
-%    variable data following ncread
+% Apply the _FillValue, scale_factor, and add_offset attributes to raw
+% variable data following ncread
 %
-%    Fill values become NaN in floating point output. scale_factor and
-%    add_offset convert the data to double.
+% Fill values become NaN in floating point output. scale_factor and
+% add_offset convert the data to double.
 %
 % Parameters
 % ------------
@@ -502,10 +663,28 @@ end
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function value = get_attribute(ncid, varid, name)
-%GET_ATTRIBUTE Return a variable attribute, or empty if it is not defined
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Return a variable attribute, or empty if it is not defined
+%
+% Parameters
+% ------------
+%     ncid : double
+%         Handle from netcdf.open
+%     varid : double
+%         Variable id
+%     name : char
+%         Attribute name
+%
+% Returns
+% ---------
+%     value : any
+%         Attribute value, or [] when the attribute is absent
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 try
     value = netcdf.getAtt(ncid, varid, name);
 catch
@@ -514,10 +693,30 @@ end
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function datetimes = start_end_datetimes(options, ncid)
-%START_END_DATETIMES Creates structure of start and end datetimes to query
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Create the start and end datetimes of each time range to query
+%
+% Years give one range per year. Otherwise a single range is built from
+% start_date and end_date, falling back to the first and last waveTime
+% in the dataset for whichever is not given.
+%
+% Parameters
+% ------------
+%     options : structure
+%         Parsed name-value options
+%     ncid : double
+%         Handle from netcdf.open
+%
+% Returns
+% ---------
+%     datetimes : structure
+%         datetimes.start and datetimes.end cell arrays of datetimes
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 datetimes.start = {};
 datetimes.end = {};
 if options.years(1) > 0     % invalid/missing value = -1
