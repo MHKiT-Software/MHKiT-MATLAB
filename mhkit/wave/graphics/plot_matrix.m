@@ -22,6 +22,14 @@ function ax = plot_matrix(M, Mtype, options)
 %   Path and filename to save the figure. Default none
 % annotate : logical (optional)
 %   Print each bin value in its cell. Default true
+% value_format : string (optional)
+%   sprintf format for the bin labels, e.g. '%.2f m'. Default '%.2f'
+% font_size : double (optional)
+%   Font size of the bin labels in points. Default 7
+% trim_to_data : logical (optional)
+%   Limit the axes to the bins with data plus one empty bin around them. Default false
+% zlabel : string (optional)
+%   Colorbar label, e.g. "Capture Width [m]". Default none
 %
 % Returns
 % ---------
@@ -35,6 +43,10 @@ arguments (Input)
     Mtype {mustBeTextScalar}
     options.savepath {mustBeTextScalar} = ""
     options.annotate (1,1) logical = true
+    options.zlabel {mustBeTextScalar} = ""
+    options.trim_to_data (1,1) logical = false
+    options.value_format {mustBeTextScalar} = '%.2f'
+    options.font_size (1,1) {mustBeNumeric, mustBePositive} = 7
 end
 
 arguments (Output)
@@ -42,7 +54,9 @@ arguments (Output)
 end
 
 ax = mhkit_plot_matrix(M, 'xlabel', 'Te [s]', 'ylabel', 'Hm0 [m]', ...
-    'show_values', options.annotate);
+    'show_values', options.annotate, 'zlabel', options.zlabel, ...
+    'trim_to_data', options.trim_to_data, 'value_format', options.value_format, ...
+    'font_size', options.font_size);
 title(ax, string(Mtype) + ": " + string(M.stat));
 
 if strlength(options.savepath) > 0
