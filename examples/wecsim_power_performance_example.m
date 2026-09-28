@@ -19,11 +19,10 @@
 % 
 % 5. Assess results and visualize quantities of interest
 % 
-% This example uses WEC-Sim to simulate the [Oscillating Surge Wave Energy Converter 
-% (OSWEC)](https://wec-sim.github.io/WEC-Sim/main/user/tutorials.html#oscillating-surge-wec-oswec), 
-% a flap-type device.
+% This example uses WEC-Sim to simulate the <https://wec-sim.github.io/WEC-Sim/main/user/tutorials.html#oscillating-surge-wec-oswec 
+% Oscillating Surge Wave Energy Converter (OSWEC)>, a flap-type device.
 %% 1. Characterize the available resource at a location
-% This example will use an abbreviated version of `PacWave_resource_characterization_example.ipynb`. 
+% This example will use an abbreviated version of |PacWave_resource_characterization_example.ipynb|. 
 % 
 % For full details on downloading, calculating, and visualizing the k-means 
 % clusters representation of the site's wave resouce, see that example.
@@ -31,19 +30,19 @@
 % We select the N=32 cluster as it's total energy flux is closet to the total 
 % energy flux of the site considering all wave conditions. We will load the PacWave 
 % example output, which can be easily saved after running the example with the 
-% command `results[32].to_csv("pacwave_cluster_32.csv")`. We will start this example 
+% command |results[32].to_csv("pacwave_cluster_32.csv")|. We will start this example 
 % by reading in that csv output and formatting it for WEC-Sim.
 
 % Relative location and filename of simulated WEC-Sim data (run with mooring)
 filename = './data/wave/pacwave_cluster_32.csv'
 results = readtable(filename)
 %% 2. Write a WEC-Sim batch file for the given clusters
-% WEC-Sim MCR (multiple condition run) files should contain a structure `mcr` 
-% that contains two variables: `header` and `cases`. Each column of `header` and 
-% `cases` denotes a variable and it's value respectively. Each row is distinct 
+% WEC-Sim MCR (multiple condition run) files should contain a structure |mcr| 
+% that contains two variables: |header| and |cases|. Each column of |header| and 
+% |cases| denotes a variable and it's value respectively. Each row is distinct 
 % simulation. WEC-Sim defines waves using the significant wave height and peak 
 % period. We will isolate these values from the results of the cluster analysis 
-% and create a dictionary that is written to the `.mat` file.
+% and create a dictionary that is written to the |.mat| file.
 
 mcr = struct();
 mcr.header = {'waves.height','waves.period'};
@@ -66,7 +65,7 @@ save('mcr_mhkit.mat', 'mcr');
 % pto(1).damping = 5e7;
 %% 
 % To reduce the amount of extranenous data saved for this example, we limit 
-% the WEC-Sim output to the PTO's power output in the `userDefinedFunctions.m` 
+% the WEC-Sim output to the PTO's power output in the |userDefinedFunctions.m| 
 % script:
 
 % if exist('imcr','var')
@@ -85,8 +84,8 @@ save('mcr_mhkit.mat', 'mcr');
 % end
 % bodies = output.bodies;
 %% 4. Load WEC-Sim batch results
-% Note that in this example we do not save the entire WEC-Sim `output` structure 
-% for each case. See the `wecsim_example.ipynb` for information on loading the 
+% Note that in this example we do not save the entire WEC-Sim |output| structure 
+% for each case. See the |wecsim_example.ipynb| for information on loading the 
 % WEC-Sim responseClass. Here, the output is one array of average power output 
 % that we will load and compare to the resource characterization.
 % 
@@ -95,7 +94,7 @@ save('mcr_mhkit.mat', 'mcr');
 
 % Relative location and filename of simulated WEC-Sim data (run with mooring)
 filename = './data/wave/mcr_mhkit_power.mat';
-% Load the WEC-Sim output data which contains the variable `power`.
+% Load the WEC-Sim output data which contains the variable |power|.
 load(filename)
 results.Power = power'
 %% 5. Assess results and visualize quantities of interest
@@ -103,7 +102,7 @@ results.Power = power'
 % relative to the incoming wave and calculate the mean annual energy production 
 % (MAEP) using MHKiT.
 
-results.CW = capture_length(results.Power, results.J)';
+results.CW = capture_width(results.Power, results.J);
 
 oswec_width = 18;
 results.CWR = results.CW / oswec_width
