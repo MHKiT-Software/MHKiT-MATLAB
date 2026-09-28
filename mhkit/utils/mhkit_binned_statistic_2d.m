@@ -1,4 +1,4 @@
-function M = mhkit_binned_statistic_2d(x, y, values, statistic, bins, options)
+function M = mhkit_binned_statistic_2d(x, y, values, statistic, bin_spec, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
