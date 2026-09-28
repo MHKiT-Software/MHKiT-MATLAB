@@ -2,7 +2,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
 
     methods (Test)
 
-        function test_capture_length(testCase)
+        function test_capture_width(testCase)
             a = 40;
             b = 200;
             Obj.P = (b-a).*rand(1,100000) + a;
@@ -12,12 +12,12 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             Obj.J = (b-a).*rand(1,100000) + a;
             %Obj.J = normrnd(300, 10, [1,100000]);
 
-            L = capture_length(Obj.P, Obj.J);
-            L_stats = mean(L);
-            assertEqual(testCase,L_stats, 1.4, 'RelTol',0.1);
+            CW = capture_width(Obj.P, Obj.J);
+            CW_stats = mean(CW);
+            assertEqual(testCase,CW_stats, 1.4, 'RelTol',0.1);
         end
 
-        function test_capture_length_matrix(testCase)
+        function test_capture_width_matrix(testCase)
             seednum = 123;
             rng(seednum);
             a = 0.8;
@@ -38,11 +38,11 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             Obj.Hm0_bins = 0:0.5:18.5;
             Obj.Te_bins = 0:1:8;
 
-            L = capture_length(Obj.P, Obj.J);
-            LM = capture_length_matrix(Obj.Hm0, Obj.Te, L, 'std', Obj.Hm0_bins, Obj.Te_bins);
+            CW = capture_width(Obj.P, Obj.J);
+            CWM = capture_width_matrix(Obj.Hm0, Obj.Te, CW, 'std', Obj.Hm0_bins, Obj.Te_bins);
 
-            assertEqual(testCase,size(LM.values), [38 9]);
-            assertEqual(testCase,sum(sum(isnan(LM.values))), 34, 'RelTol',0.1);
+            assertEqual(testCase,size(CWM.values), [38 9]);
+            assertEqual(testCase,sum(sum(isnan(CWM.values))), 34, 'RelTol',0.1);
         end
 
         function test_wave_energy_flux_matrix(testCase)
@@ -88,10 +88,10 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             Obj.Hm0_bins = 0:0.5:18.5;
             Obj.Te_bins = 0:1:8;
 
-            L = capture_length(Obj.P, Obj.J);
-            LM = capture_length_matrix(Obj.Hm0, Obj.Te,L, 'mean', Obj.Hm0_bins, Obj.Te_bins);
+            CW = capture_width(Obj.P, Obj.J);
+            CWM = capture_width_matrix(Obj.Hm0, Obj.Te,CW, 'mean', Obj.Hm0_bins, Obj.Te_bins);
             JM = wave_energy_flux_matrix(Obj.Hm0, Obj.Te,Obj.J, 'mean', Obj.Hm0_bins, Obj.Te_bins);
-            PM = power_matrix(LM, JM);
+            PM = power_matrix(CWM, JM);
             assertEqual(testCase,size(PM.values), [38 9]);
             assertEqual(testCase,sum(sum(isnan(PM.values))), 34, 'RelTol',0.1);
         end
@@ -109,8 +109,8 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
             b = 300;
             Obj.J = (b-a).*randn(1,100000) + a;
 
-            L = capture_length(Obj.P, Obj.J);
-            maep = mean_annual_energy_production_timeseries(L, Obj.J);
+            CW = capture_width(Obj.P, Obj.J);
+            maep = mean_annual_energy_production_timeseries(CW, Obj.J);
             testCase.verifyThat(1754020.077,IsEqualTo(maep,'Within',AbsoluteTolerance(2e+06)))
         end
 
@@ -146,7 +146,7 @@ classdef Wave_TestPerformance < matlab.unittest.TestCase
         end
 
         function test_power_performance_workflow(testCase)
-            filename = 'Capture Length Matrix mean.png';
+            filename = 'Capture Width Matrix mean.png';
             if isfile(filename)
                 delete(filename);
             end
