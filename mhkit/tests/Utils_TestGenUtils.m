@@ -2,8 +2,6 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
 
     methods (Test)
 
-
-
         function test_get_statistics(testCase)
             relative_file_name = '../../examples/data/loads/loads_data_dict.json'; % filename in JSON extension
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
@@ -331,39 +329,38 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
                 end
             end
 
-
         end
 
         function test_mhkit_standardize_user_input_to_column_vectors(testCase)
             % Row vector is transposed and flagged
             row = [1 2 3 4];
-            [out, was_row] = mhkit_standardize_user_input_to_column_vectors(row, 'test_fn');
+            [out, was_row] = mhkit_standardize_user_input_to_column_vectors(row, 'function_name', 'test_fn');
             assertEqual(testCase, out, row(:));
             assertTrue(testCase, was_row);
 
             % Column vector passes through unchanged, not flagged
             col = [1; 2; 3; 4];
-            [out, was_row] = mhkit_standardize_user_input_to_column_vectors(col, 'test_fn');
+            [out, was_row] = mhkit_standardize_user_input_to_column_vectors(col, 'function_name', 'test_fn');
             assertEqual(testCase, out, col);
             assertFalse(testCase, was_row);
 
             % Scalar passes through unchanged, not flagged
-            [out, was_row] = mhkit_standardize_user_input_to_column_vectors(5, 'test_fn');
+            [out, was_row] = mhkit_standardize_user_input_to_column_vectors(5, 'function_name', 'test_fn');
             assertEqual(testCase, out, 5);
             assertFalse(testCase, was_row);
 
             % Matrix (multiple column-oriented vectors) passes through unchanged
             mat = [1 2; 3 4; 5 6];
-            [out, was_row] = mhkit_standardize_user_input_to_column_vectors(mat, 'test_fn');
+            [out, was_row] = mhkit_standardize_user_input_to_column_vectors(mat, 'function_name', 'test_fn');
             assertEqual(testCase, out, mat);
             assertFalse(testCase, was_row);
 
             % Empty input errors with the calling function's name in the identifier
-            testCase.verifyError(@() mhkit_standardize_user_input_to_column_vectors([], 'my_fn'), ...
+            testCase.verifyError(@() mhkit_standardize_user_input_to_column_vectors([], 'function_name', 'my_fn'), ...
                 'MHKiT:my_fn:InvalidInput');
 
             % 3-D input errors with the calling function's name in the identifier
-            testCase.verifyError(@() mhkit_standardize_user_input_to_column_vectors(ones(2,2,2), 'my_fn'), ...
+            testCase.verifyError(@() mhkit_standardize_user_input_to_column_vectors(ones(2,2,2), 'function_name', 'my_fn'), ...
                 'MHKiT:my_fn:InvalidInput');
         end
 
@@ -380,21 +377,27 @@ classdef Utils_TestGenUtils < matlab.unittest.TestCase
 
             % Round trip through standardize + restore recovers the original orientation
             row = [1 2 3 4];
-            [standardized, was_row] = mhkit_standardize_user_input_to_column_vectors(row, 'test_fn');
+            [standardized, was_row] = mhkit_standardize_user_input_to_column_vectors(row, 'function_name', 'test_fn');
             restored = mhkit_restore_column_vectors_to_user_input(standardized, was_row);
             assertEqual(testCase, restored, row);
         end
 
-        function test_mhkit_verify_column_vector_output(testCase)
-            % Column vector and scalar pass silently
-            mhkit_verify_column_vector_output([1;2;3], 'test_fn');
-            mhkit_verify_column_vector_output(5, 'test_fn');
+        function test_mhkit_verify_is_column_vector(testCase)
+            % Column vector and scalar pass silently, numeric or datetime/duration
+            mhkit_verify_is_column_vector([1;2;3], 'function_name', 'test_fn');
+            mhkit_verify_is_column_vector(5, 'function_name', 'test_fn');
+            mhkit_verify_is_column_vector(datetime(2026,1,1) + hours(0:1)', 'function_name', 'test_fn');
+            mhkit_verify_is_column_vector(hours(0:1)', 'function_name', 'test_fn');
 
             % Row vector and matrix both raise a function-scoped error
-            testCase.verifyError(@() mhkit_verify_column_vector_output([1 2 3], 'my_fn'), ...
+            testCase.verifyError(@() mhkit_verify_is_column_vector([1 2 3], 'function_name', 'my_fn'), ...
                 'MHKiT:my_fn:InvalidOutput');
-            testCase.verifyError(@() mhkit_verify_column_vector_output([1 2; 3 4], 'my_fn'), ...
+            testCase.verifyError(@() mhkit_verify_is_column_vector([1 2; 3 4], 'function_name', 'my_fn'), ...
                 'MHKiT:my_fn:InvalidOutput');
+
+            % Unsupported type raises a function-scoped error
+            testCase.verifyError(@() mhkit_verify_is_column_vector("not numeric", 'function_name', 'my_fn'), ...
+                'MHKiT:my_fn:InvalidInput');
         end
 
     end
