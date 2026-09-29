@@ -37,6 +37,9 @@ function ax = mhkit_plot_matrix(M, options)
 %   value_format when given. Empty labels are skipped. Default none
 % font_size : double (optional)
 %   Font size of the bin labels in points. Default 7
+% colormap : string or matrix (optional)
+%   Colormap name ("viridis", any cmocean or MATLAB colormap name,
+%   "-<colormap name>" or "<colormap name>_r" to flip) or an N x 3 RGB matrix, see mhkit_colormap. Default "viridis"
 % ax : axes handle (optional)
 %   Axes to plot into. Default is the current axes, which opens a new
 %   figure only if none exists, like the built-in plot functions
@@ -60,6 +63,7 @@ arguments (Input)
     options.value_format {mustBeTextScalar} = '%.2f'
     options.labels cell = {}
     options.font_size (1,1) {mustBeNumeric, mustBePositive} = 7
+    options.colormap = "viridis"
     options.ax = []
     options.savepath {mustBeTextScalar} = ""
 end
@@ -98,7 +102,7 @@ h = pcolor(ax, x_edges, y_edges, padded);
 % Light grid on every cell edge so the bins read as bins, including empty ones
 h.EdgeColor = [0.8 0.8 0.8];
 h.LineWidth = 0.25;
-colormap(ax, viridis_colormap());
+colormap(ax, mhkit_colormap(options.colormap));
 cb = colorbar(ax);
 if strlength(options.zlabel) > 0
     cb.Label.String = options.zlabel;
