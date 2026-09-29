@@ -3,20 +3,20 @@
 % MHKiT wave module> to 1) generate a capture width matrix, 2) calculate MAEP,
 % and 3) plot the scatter diagrams.
 %% Load CDIP Wave Measurement Data PacWave North, CDIP 277
-% This example uses one month (January 2026) of wave spectra from the PacWave
+% This example uses one year (2025) of wave spectra from the PacWave
 % North buoy off Newport, Oregon, published by CDIP as
 % <https://cdip.ucsd.edu/m/products/?stn=277p1 station 277>. The spectra are
 % requested from the CDIP THREDDS server with |cdip_request_parse_workflow|.
 %
 % A saved copy of that request is shipped with the examples so this script
-% runs without network access. The request itself is shown commented out
-% below; it takes a minute or two.
+% runs without network access. A working request is shown commented out
+% below.
 
 station_number = '277';
 
 % cdip = cdip_request_parse_workflow('station_number', station_number, ...
 %     'data_type', 'historic', ...
-%     'start_date', '2026-01-01', 'end_date', '2026-01-31', ...
+%     'start_date', '2025-01-01', 'end_date', '2025-12-31', ...
 %     'parameters', {'waveEnergyDensity', 'metaWaterDepth'});
 % % waveEnergyDensity is stored [time x frequency]; MHKiT uses frequency
 % % down the rows and one spectrum per column
@@ -28,9 +28,9 @@ station_number = '277';
 % h = double(cdip.metadata.meta.metaWaterDepth);
 
 % Saved copy of the request above
-saved = load('./data/wave/cdip_277_2026_01.mat');
+saved = load('./data/wave/cdip_277_2025.mat');
 S.frequency = saved.cdip_277.frequency;
-S.spectrum = saved.cdip_277.spectrum;
+S.spectrum = double(saved.cdip_277.spectrum);  % stored as single, as CDIP publishes it
 S.time = saved.cdip_277.time;
 h = saved.cdip_277.water_depth;  % [m], from metaWaterDepth
 fprintf('Using saved CDIP 277 data downloaded %s UTC\n', saved.cdip_277.downloaded);
@@ -38,7 +38,7 @@ disp(S)
 time = S.time;
 
 % Shared plot title suffix
-title_suffix = sprintf('CDIP %s, %s', station_number, datetime(time(1), 'Format', 'MMMM yyyy'));
+title_suffix = sprintf('CDIP %s, %s', station_number, datetime(time(1), 'Format', 'yyyy'));
 %% Compute Wave Metrics
 % We will now use MHKiT to compute the significant wave height, energy period,
 % and energy flux from each wave spectrum.
@@ -50,8 +50,8 @@ J = energy_flux(S, h);             % [W/m], uses the water depth
 figure('Position', [100 100 900 700]);
 tiledlayout(3, 1, 'TileSpacing', 'compact');
 sgtitle(sprintf('Wave Metrics | %s', title_suffix))
-nexttile; plot(time, Hm0); ylabel('Hm0 [m]'); title('Significant Wave Height'); grid on
-nexttile; plot(time, Te); ylabel('Te [s]'); title('Energy Period'); grid on
+nexttile; plot(time, Hm0); ylabel('H_{m0} [m]'); title('Significant Wave Height'); grid on
+nexttile; plot(time, Te); ylabel('T_e [sec]'); title('Energy Period'); grid on
 nexttile; plot(time, J / 1000); ylabel('J [kW/m]'); title('Wave Energy Flux'); grid on; xlabel('Time [UTC]')
 %% Generate Random Power Data
 % For demonstration purposes, this example uses synthetic power data generated
