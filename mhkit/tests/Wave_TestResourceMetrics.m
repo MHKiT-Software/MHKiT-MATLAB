@@ -301,6 +301,31 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             delete(filename);
         end
 
+        function test_plot_wave_joint_probability_distribution(testCase)
+            rng(1);
+            Hm0 = 0.5 + 3 * rand(500, 1);
+            Te = 4 + 10 * rand(500, 1);
+            filename = 'wave_plot_jpd.png';
+            if isfile(filename)
+                delete(filename);
+            end
+            [ax, jpd] = plot_wave_joint_probability_distribution(Hm0, Te, 'savepath', filename);
+            assertTrue(testCase, isfile(filename));
+            delete(filename);
+            assertEqual(testCase, jpd.stat, 'probability');
+            assertEqual(testCase, sum(jpd.values(:)), 1, 'AbsTol', 1e-12);
+            % IEC bins: 0.5 m Hm0 edges and 1 s Te edges starting at zero
+            assertEqual(testCase, jpd.y_edges(1:3), [0 0.5 1]);
+            assertEqual(testCase, jpd.x_edges(1:3), [0 1 2]);
+            assertEqual(testCase, numel(findobj(ax, 'Type', 'text')), nnz(jpd.values));
+
+            % Custom bins and no annotation
+            ax2 = plot_wave_joint_probability_distribution(Hm0, Te, ...
+                'Hm0_bins', 0.5:1:3.5, 'Te_bins', 5:2:13, 'annotate', false);
+            assertEqual(testCase, numel(findobj(ax2, 'Type', 'text')), 0);
+            close all force
+        end
+
         function test_wave_length(testCase)
             k=[1,2,10,3];
             l_expected = (2.*3.14)./k;
