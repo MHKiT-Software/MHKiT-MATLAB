@@ -196,6 +196,29 @@ classdef Utils_TestMhkitUtils < matlab.unittest.TestCase
             assertEqual(testCase, out_tt.Tp, result);
         end
 
+
+        function test_mhkit_colormap(testCase)
+            % Default is 256 viridis colors
+            map = mhkit_colormap();
+            assertEqual(testCase, size(map), [256 3]);
+            assertEqual(testCase, map, viridis_colormap(256));
+            % cmocean and MATLAB names, case insensitive, with n
+            assertEqual(testCase, mhkit_colormap('Thermal', 8), cmocean('thermal', 8));
+            assertEqual(testCase, mhkit_colormap("parula", 5), parula(5));
+            % MATLAB cmocean "-<colormap name>" and Python "<colormap name>_r" flip
+            % cmocean colormaps; "_r" also flips viridis. MATLAB names have no such form
+            assertEqual(testCase, mhkit_colormap('-thermal', 8), cmocean('-thermal', 8));
+            assertEqual(testCase, mhkit_colormap('thermal_r', 8), cmocean('-thermal', 8));
+            assertEqual(testCase, mhkit_colormap('viridis_r', 8), flipud(viridis_colormap(8)));
+            testCase.verifyError(@() mhkit_colormap('-parula'), 'MHKiT:mhkit_colormap:InvalidInput');
+            testCase.verifyError(@() mhkit_colormap('parula_r'), 'MHKiT:mhkit_colormap:InvalidInput');
+            testCase.verifyError(@() mhkit_colormap('-viridis'), 'MHKiT:mhkit_colormap:InvalidInput');
+            % A matrix passes through unchanged
+            rgb = [0 0 0; 1 1 1];
+            assertEqual(testCase, mhkit_colormap(rgb), rgb);
+            testCase.verifyError(@() mhkit_colormap('not_a_colormap'), 'MHKiT:mhkit_colormap:InvalidInput');
+            testCase.verifyError(@() mhkit_colormap([1 2; 3 4]), 'MHKiT:mhkit_colormap:InvalidInput');
+        end
     end
 
 end
