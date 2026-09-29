@@ -26,8 +26,13 @@ function ax = mhkit_plot_matrix(M, options)
 % zlabel : string (optional)
 %   Colorbar label. Default none
 % trim_to_data : logical (optional)
-%   Limit the axes to the bins that hold data plus one empty bin on every
-%   side, instead of the full grid. Default false
+%   Limit the axes to the bins that hold data plus padding empty bins on
+%   every side, instead of the full grid. Default false
+% padding : integer (optional)
+%   Number of empty bins shown around the occupied bins when trim_to_data
+%   is true. Where the grid ends before the padding does, it is extended
+%   with empty bins of the same width, except below an edge at zero since
+%   the binned quantities are normally nonnegative. Default 1
 % show_values : logical (optional)
 %   Print a label in each bin that holds data. Default true
 % value_format : string (optional)
@@ -59,6 +64,7 @@ arguments (Input)
     options.ylabel {mustBeTextScalar} = "Hm0"
     options.zlabel {mustBeTextScalar} = ""
     options.trim_to_data (1,1) logical = false
+    options.padding (1,1) {mustBeInteger, mustBeNonnegative} = 1
     options.show_values (1,1) logical = true
     options.value_format {mustBeTextScalar} = '%.2f'
     options.labels cell = {}
@@ -95,9 +101,31 @@ else
     error('MHKiT:mhkit_plot_matrix:InvalidInput', 'ax must be an axes handle');
 end
 
+values = M.values;
+if options.trim_to_data && any(~isnan(values(:)))
+    % Index range of the occupied bins plus the padding on every side
+    occupied_cols = find(any(~isnan(values), 1));
+    occupied_rows = find(any(~isnan(values), 2));
+    first_col = occupied_cols(1) - options.padding;
+    last_col = occupied_cols(end) + options.padding;
+    first_row = occupied_rows(1) - options.padding;
+    last_row = occupied_rows(end) + options.padding;
+    % Extend the grid with empty bins where the padding runs past it
+    [x_edges, values, first_col, last_col, col_shift] = extend_grid(x_edges, values, first_col, last_col, 2);
+    [y_edges, values, first_row, last_row, row_shift] = extend_grid(y_edges, values, first_row, last_row, 1);
+    x_limits = x_edges([first_col, last_col + 1]);
+    y_limits = y_edges([first_row, last_row + 1]);
+else
+    x_limits = x_edges([1 end]);
+    y_limits = y_edges([1 end]);
+    row_shift = 0;
+    col_shift = 0;
+end
+[rows, cols] = size(values);
+
 % pcolor colors cell (i,j) with C(i,j) and ignores the last row and column
 % of C, so pad values by one so every bin is drawn between its edges
-padded = [M.values, nan(rows, 1); nan(1, cols + 1)];
+padded = [values, nan(rows, 1); nan(1, cols + 1)];
 h = pcolor(ax, x_edges, y_edges, padded);
 % Light grid on every cell edge so the bins read as bins, including empty ones
 h.EdgeColor = [0.8 0.8 0.8];
@@ -112,16 +140,11 @@ x_centers = (x_edges(1:end-1) + x_edges(2:end)) / 2;
 y_centers = (y_edges(1:end-1) + y_edges(2:end)) / 2;
 xticks(ax, x_edges);
 yticks(ax, y_edges);
-if options.trim_to_data && any(~isnan(M.values(:)))
-    % Bounding box of the occupied bins, padded by one bin and clamped to the grid
-    occupied_cols = find(any(~isnan(M.values), 1));
-    occupied_rows = find(any(~isnan(M.values), 2));
-    xlim(ax, x_edges([max(occupied_cols(1) - 1, 1), min(occupied_cols(end) + 2, cols + 1)]));
-    ylim(ax, y_edges([max(occupied_rows(1) - 1, 1), min(occupied_rows(end) + 2, rows + 1)]));
-else
-    xlim(ax, x_edges([1 end]));
-    ylim(ax, y_edges([1 end]));
-end
+% Keep tick labels upright; MATLAB rotates them automatically when they crowd
+ax.XTickLabelRotation = 0;
+ax.YTickLabelRotation = 0;
+xlim(ax, x_limits);
+ylim(ax, y_limits);
 xlabel(ax, options.xlabel);
 ylabel(ax, options.ylabel);
 
@@ -131,16 +154,21 @@ if options.show_values
         error('MHKiT:mhkit_plot_matrix:InvalidInput', ...
             'labels must be a cell array the same size as M.values');
     end
+    if use_labels
+        % Place the labels on the extended grid
+        labels = cell(size(values));
+        labels(row_shift + (1:size(M.values, 1)), col_shift + (1:size(M.values, 2))) = options.labels;
+    end
     % Dark text on the bright upper half of the colormap, white on the rest
     mid = mean(clim(ax));
     for i = 1:rows
         for j = 1:cols
-            v = M.values(i, j);
+            v = values(i, j);
             if isnan(v)
                 continue
             end
             if use_labels
-                label = options.labels{i, j};
+                label = labels{i, j};
             else
                 % Round small nonzero values up so they never print as zero
                 if v ~= 0 && abs(v) < 0.005
@@ -151,7 +179,7 @@ if options.show_values
             if isempty(label)
                 continue
             end
-            if M.values(i, j) > mid
+            if values(i, j) > mid
                 color = [0 0 0];
             else
                 color = [1 1 1];
@@ -166,5 +194,70 @@ end
 if strlength(options.savepath) > 0
     saveas(ancestor(ax, 'figure'), options.savepath);
 end
+
+end
+
+
+function [edges, values, first, last, n_before] = extend_grid(edges, values, first, last, dim)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Extend one axis of the grid with empty bins so the bin index range
+%    first:last exists, keeping the width of the end bins
+%
+%    The grid is not extended below an edge at zero, so first is clamped
+%    there instead.
+%
+% Parameters
+% ------------
+%     edges : row vector
+%         Bin edges along the axis
+%     values : matrix
+%         Bin values, y rows by x columns
+%     first : integer
+%         Wanted first bin index, may be less than 1
+%     last : integer
+%         Wanted last bin index, may exceed the number of bins
+%     dim : integer
+%         1 to extend the rows (y axis), 2 to extend the columns (x axis)
+%
+% Returns
+% ---------
+%     edges : row vector
+%         Extended bin edges
+%     values : matrix
+%         Values padded with NaN bins
+%     first : integer
+%         First bin index in the extended grid
+%     last : integer
+%         Last bin index in the extended grid
+%     n_before : integer
+%         Number of empty bins added before the first original bin
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+n_bins = numel(edges) - 1;
+n_before = max(1 - first, 0);
+if edges(1) == 0
+    n_before = 0;
+    first = max(first, 1);
+end
+n_after = max(last - n_bins, 0);
+if n_before > 0
+    width = edges(2) - edges(1);
+    edges = [edges(1) - width * (n_before:-1:1), edges];
+end
+if n_after > 0
+    width = edges(end) - edges(end-1);
+    edges = [edges, edges(end) + width * (1:n_after)];
+end
+pad_shape = size(values);
+pad_shape(dim) = n_before;
+before = nan(pad_shape);
+pad_shape(dim) = n_after;
+after = nan(pad_shape);
+values = cat(dim, before, values, after);
+first = first + n_before;
+last = last + n_before;
 
 end
