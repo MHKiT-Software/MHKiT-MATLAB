@@ -22,9 +22,16 @@ function Fr=Froude_number(v,h,g)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if nargin == 3
-     Fr=py.mhkit.river.resource.Froude_number(v,h,pyargs('g',g));
-else
-     Fr=py.mhkit.river.resource.Froude_number(v,h);
+arguments (Input)
+    v (1,1) {mustBeNumeric}
+    h (1,1) {mustBeNumeric}
+    g (1,1) {mustBeNumeric} = 9.80665
+end
+arguments (Output)
+    Fr (1,1) {mustBeNumeric}
+end
+
+Fr = v / sqrt(g * h);
+
 end
 

@@ -23,7 +23,18 @@ function TSR=tip_speed_ratio(rotor_speed, rotor_diameter, inflow_speed)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py_tsr = py.mhkit.river.performance.tip_speed_ratio(py.numpy.array(rotor_speed),double(rotor_diameter),py.numpy.array(inflow_speed));
+arguments (Input)
+    rotor_speed {mustBeNumeric}
+    rotor_diameter (1,1) {mustBeNumeric}
+    inflow_speed {mustBeNumeric}
+end
+arguments (Output)
+    TSR {mustBeNumeric}
+end
 
-TSR = double(py.array.array('d',py.numpy.nditer(py_tsr,pyargs("flags",{"refs_ok"}))));
+rotor_velocity = rotor_speed .* pi .* rotor_diameter;
+
+TSR = rotor_velocity ./ inflow_speed;
+
+end
 

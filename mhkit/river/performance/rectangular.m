@@ -22,11 +22,17 @@ function [D_E,projected_capture_area]=rectangular(h,w)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
+arguments (Input)
+    h (1,1) {mustBeNumeric}
+    w (1,1) {mustBeNumeric}
+end
+arguments (Output)
+    D_E (1,1) {mustBeNumeric}
+    projected_capture_area (1,1) {mustBeNumeric}
+end
 
-result=py.mhkit.river.performance.rectangular(h,w);
+D_E = sqrt(4.0 * h * w / pi);
+projected_capture_area = h * w;
 
-resultc=cell(result);
-D_E=resultc{1};
-projected_capture_area=resultc{2};
+end
 

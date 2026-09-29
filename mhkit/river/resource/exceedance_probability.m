@@ -7,13 +7,6 @@ function F=exceedance_probability(Q)
 % ----------
 %     Q : Discharge data [m3/s]
 %
-%         Pandas dataframe indexed by time [datetime or s]
-%
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(timeseries,time,x)
-%
-%         OR
-%
 %         structure of form:
 %
 %           Q.Discharge
@@ -33,62 +26,51 @@ function F=exceedance_probability(Q)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-py.importlib.import_module('mhkit_python_utils');
-py.importlib.import_module('mhkit');
+arguments (Input)
+    Q struct
+end
+arguments (Output)
+    F struct
+end
 
-% Check if Q is a dataframe
-% If it is not, it is expecting a struct with Discharge and time "keys"
-if (isa(Q,'py.pandas.core.frame.DataFrame')~=1)
-    x=size(Q.Discharge);
-    li=py.list();
-    if x(2)>1
-        for i = 1:x(2)
-            app=py.list(Q.Discharge(:,i));
-            li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
+time = Q.time;
+if any(isdatetime(time))
+    time = posixtime(time);
+end
 
-        end
-    elseif x(2) ==1
-        li=Q.Discharge;
-    end
+discharge = Q.Discharge;
+n = size(discharge, 1);
 
-    if (~isempty(Q.time))
-        if any(isdatetime(Q.time(1)))
-            si=size(Q.time);
-            for i=1:si(2)
-            Q.time(i)=posixtime(Q.time(i));
-            end
-        end
-    end
-    % Q=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,Q.time,int32(x(2)));
+rank_ascending = zeros(size(discharge));
+for col = 1:size(discharge, 2)
+    rank_ascending(:, col) = local_average_rank(discharge(:, col));
+end
 
-    if (~isempty(Q.time))
-        Q = py.mhkit_python_utils.pandas_dataframe.list_to_series(Q.Discharge, Q.time);
-    else
-        Q = py.mhkit_python_utils.pandas_dataframe.list_to_series(Q.Discharge);
-    end
+% Convert to descending rank so the smallest value has the highest
+% exceedance probability
+rank_descending = n - rank_ascending + 1;
+F.F = 100 * rank_descending / (n + 1);
+F.time = time;
 
 end
 
-EPpd=py.mhkit.river.resource.exceedance_probability(Q);
+function r = local_average_rank(x)
+% Assigns ascending ranks (starting at 1) to the elements of x, averaging
+% the ranks of tied values. This mirrors the "average" tie-breaking method
+% used by xarray/scipy when computing exceedance probability.
+x = x(:);
+n = numel(x);
+[sorted_x, order] = sort(x);
+r = zeros(n, 1);
 
-xx=cell(EPpd.axes);
-v=xx{2};
-vv=cell(py.list(py.numpy.nditer(v.values,pyargs("flags",{"refs_ok"}))));
-
-vals=double(py.array.array('d',py.numpy.nditer(EPpd.values)));
-sha=cell(EPpd.values.shape);
-x=int64(sha{1,1});
-y=int64(sha{1,2});
-
-vals=reshape(vals,[x,y]);
-
-si=size(vals);
- for i=1:si(2)
-    test=string(py.str(vv{i}));
-    newname=split(test,",");
-
-    F.(newname(1))=vals(:,i);
-
- end
- F.time=double(py.array.array('d',py.numpy.nditer(EPpd.index)));
+i = 1;
+while i <= n
+    j = i;
+    while j < n && sorted_x(j + 1) == sorted_x(i)
+        j = j + 1;
+    end
+    r(order(i:j)) = (i + j) / 2;
+    i = j + 1;
+end
+end
 

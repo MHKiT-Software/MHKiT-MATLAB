@@ -26,8 +26,20 @@ function Cp=power_coefficient(power, inflow_speed, capture_area, rho)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py_cp = py.mhkit.river.performance.power_coefficient(py.numpy.array(power),...
-    py.numpy.array(inflow_speed),capture_area,rho);
+arguments (Input)
+    power {mustBeNumeric}
+    inflow_speed {mustBeNumeric}
+    capture_area (1,1) {mustBeNumeric}
+    rho (1,1) {mustBeNumeric}
+end
+arguments (Output)
+    Cp {mustBeNumeric}
+end
 
-Cp = double(py.array.array('d',py.numpy.nditer(py_cp,pyargs("flags",{"refs_ok"}))));
+% Predicted power from inflow
+power_in = 0.5 .* rho .* capture_area .* inflow_speed.^3;
+
+Cp = power ./ power_in;
+
+end
 

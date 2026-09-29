@@ -19,11 +19,16 @@ function [D_E,projected_capture_area]=circular(diameter)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
+arguments (Input)
+    diameter (1,1) {mustBeNumeric}
+end
+arguments (Output)
+    D_E (1,1) {mustBeNumeric}
+    projected_capture_area (1,1) {mustBeNumeric}
+end
 
-result=py.mhkit.river.performance.circular(diameter);
+D_E = diameter;
+projected_capture_area = (1/4) * pi * (D_E.^2);
 
-resultc=cell(result);
-D_E=resultc{1};
-projected_capture_area=resultc{2};
+end
 

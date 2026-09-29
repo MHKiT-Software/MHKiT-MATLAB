@@ -19,11 +19,17 @@ function [D_E,projected_capture_area]=multiple_circular(diameters)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
-diameters=py.list(diameters);
-result=py.mhkit.river.performance.multiple_circular(diameters);
+arguments (Input)
+    diameters {mustBeNumeric, mustBeVector}
+end
+arguments (Output)
+    D_E (1,1) {mustBeNumeric}
+    projected_capture_area (1,1) {mustBeNumeric}
+end
 
-resultc=cell(result);
-D_E=resultc{1};
-projected_capture_area=resultc{2};
+diameters_squared = diameters.^2;
+D_E = sqrt(sum(diameters_squared));
+projected_capture_area = 0.25 * pi * sum(diameters_squared);
+
+end
 

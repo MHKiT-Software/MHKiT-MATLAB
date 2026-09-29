@@ -18,11 +18,16 @@ function [D_E,projected_capture_area]=ducted(diameter)
 %         Projected capture area [m^2]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
+arguments (Input)
+    diameter (1,1) {mustBeNumeric}
+end
+arguments (Output)
+    D_E (1,1) {mustBeNumeric}
+    projected_capture_area (1,1) {mustBeNumeric}
+end
 
-result=py.mhkit.river.performance.ducted(diameter);
+D_E = diameter;
+projected_capture_area = (1/4) * pi * (D_E.^2);
 
-resultc=cell(result);
-D_E=resultc{1};
-projected_capture_area=resultc{2};
+end
 

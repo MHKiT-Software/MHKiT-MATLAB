@@ -8,13 +8,6 @@ function E=energy_produced(P,seconds)
 % ----------
 %     P : Power [W]
 %
-%         Pandas dataframe indexed by time [datetime or s]:
-%
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(timeseries,time,x)
-%
-%         OR
-%
 %         structure of form:
 %
 %           P.P
@@ -26,37 +19,47 @@ function E=energy_produced(P,seconds)
 %
 % Returns
 % -------
-%     E : Structure
-%
-%
-%        P.P: Power [W]
-%
-%        P.time: epoch time [s]
+%     E : float
+%         Energy [J] produced in the given length of time
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit_python_utils');
-py.importlib.import_module('mhkit');
-
-
-if (isa(P,'py.pandas.core.frame.DataFrame')~=1)
-    x=size(P.P);
-    li=py.list();
-    if x(2)>1
-        for i = 1:x(2)
-            app=py.list(P.P(:,i));
-            li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-        end
-    elseif x(2) ==1
-        li=P.P;
-    end
-
-
-    % P=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,P.time,int32(x(2)));
-    P = py.mhkit_python_utils.pandas_dataframe.list_to_series(li, P.time);
+arguments (Input)
+    P struct
+    seconds (1,1) {mustBeNumeric}
+end
+arguments (Output)
+    E (1,1) {mustBeNumeric}
 end
 
-E=py.mhkit.river.resource.energy_produced(P,seconds);
+power_data = P.P(:);
+
+% Histogram of power with 100 equal-width bins spanning the data range
+[counts, edges] = histcounts(power_data, 100);
+bin_widths = diff(edges);
+total_count = sum(counts);
+
+% Piecewise-constant probability density function of the histogram
+density = counts ./ (total_count * bin_widths);
+
+x = linspace(edges(1), edges(end), 1000);
+pdf_x = zeros(size(x));
+
+nbins = numel(counts);
+for i = 1:nbins
+    if i < nbins
+        mask = x >= edges(i) & x < edges(i + 1);
+    else
+        mask = x >= edges(i) & x <= edges(i + 1);
+    end
+    pdf_x(mask) = density(i);
+end
+
+% Expected value of power via trapezoidal integration of x*pdf(x)
+expected_power = trapz(x, x .* pdf_x);
+
+E = seconds * expected_power;
+
+end
 

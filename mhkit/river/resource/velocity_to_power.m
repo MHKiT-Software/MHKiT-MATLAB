@@ -8,13 +8,6 @@ function p=velocity_to_power(V,polynomial_coefficients,cut_in,cut_out)
 % ----------
 %     V : Velocity [m/s]
 %
-%          Pandas dataframe indexed by time [datetime or s]
-%
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(timeseries,time,x)
-%
-%         OR
-%
 %         structure of form:
 %
 %           V.V: Velocity [m/s]
@@ -44,52 +37,30 @@ function p=velocity_to_power(V,polynomial_coefficients,cut_in,cut_out)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-py.importlib.import_module('mhkit_python_utils');
-py.importlib.import_module('mhkit');
-
-if (isa(V,'py.pandas.core.frame.DataFrame')~=1)
-    x=size(V.V);
-    li=py.list();
-    if x(2)>1
-        for i = 1:x(2)
-            app=py.list(V.V(:,i));
-            li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-        end
-    elseif x(2) ==1
-        li=V.V;
-    end
-
-
-    % V=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,V.time,int32(x(2)));
-    V = py.mhkit_python_utils.pandas_dataframe.list_to_series(li, V.time);
+arguments (Input)
+    V struct
+    polynomial_coefficients {mustBeNumeric, mustBeVector}
+    cut_in (1,1) {mustBeNumeric}
+    cut_out (1,1) {mustBeNumeric}
+end
+arguments (Output)
+    p struct
 end
 
-polynomial_coefficients=py.numpy.poly1d(polynomial_coefficients);
-cut_in=py.float(cut_in);
-cut_out=py.float(cut_out);
-Pdf=py.mhkit.river.resource.velocity_to_power(V,polynomial_coefficients,cut_in,cut_out);
+time = V.time;
+if any(isdatetime(time))
+    time = posixtime(time);
+end
 
+velocity = V.V;
+power = polyval(polynomial_coefficients, velocity);
 
+% Turbine produces 0 power outside of the cut-in/cut-out bounds
+power(velocity < cut_in) = 0.0;
+power(velocity > cut_out) = 0.0;
 
-xx=cell(Pdf.axes);
-v=xx{2};
-vv=cell(py.list(py.numpy.nditer(v.values,pyargs("flags",{"refs_ok"}))));
+p.P = power;
+p.time = time;
 
-vals=double(py.array.array('d',py.numpy.nditer(Pdf.values)));
-sha=cell(Pdf.values.shape);
-x=int64(sha{1,1});
-y=int64(sha{1,2});
-
-vals=reshape(vals,[x,y]);
-
-si=size(vals);
- for i=1:si(2)
-    test=string(py.str(vv{i}));
-    newname=split(test,",");
-
-    p.(newname(1))=vals(:,i);
-
- end
- p.time=double(py.array.array('d',py.numpy.nditer(Pdf.index)));
+end
 

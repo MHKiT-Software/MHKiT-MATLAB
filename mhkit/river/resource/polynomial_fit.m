@@ -25,17 +25,27 @@ function poly=polynomial_fit(x,y,n)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
-x=py.numpy.array(x);
-y=py.numpy.array(y);
-n=int32(n);
+arguments (Input)
+    x {mustBeNumeric, mustBeVector}
+    y {mustBeNumeric, mustBeVector}
+    n (1,1) {mustBeInteger}
+end
+arguments (Output)
+    poly struct
+end
 
-polyt=py.mhkit.river.resource.polynomial_fit(x,y,n);
+% Coefficients ordered highest degree first, matching numpy's poly1d
+coef = polyfit(x, y, n);
+y_fit = polyval(coef, x);
 
-polyc=cell(polyt);
-coef=polyc{1};
-fit=polyc{2};
-poly.coef=double(py.array.array('d',py.numpy.nditer(coef.coef)));
-poly.fit=fit;
+% R-squared is the squared Pearson correlation between actual and fitted
+% values, matching scipy.stats.linregress(y, polynomial_coefficients(x))
+correlation = corrcoef(y, y_fit);
+r_squared = correlation(1, 2)^2;
+
+poly.coef = coef;
+poly.fit = r_squared;
+
+end
 
 
