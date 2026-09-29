@@ -53,26 +53,64 @@ sgtitle(sprintf('Wave Metrics | %s', title_suffix))
 nexttile; plot(time, Hm0); ylabel('H_{m0} [m]'); title('Significant Wave Height'); grid on
 nexttile; plot(time, Te); ylabel('T_e [sec]'); title('Energy Period'); grid on
 nexttile; plot(time, J / 1000); ylabel('J [kW/m]'); title('Wave Energy Flux'); grid on; xlabel('Time [UTC]')
-%% Generate Random Power Data
-% For demonstration purposes, this example uses synthetic power data generated
-% from a uniform distribution. In a real application, the user would provide
-% power values measured from a WEC.
+%% Joint Probability Distribution
+% The joint probability distribution (JPD) is the fraction of records that
+% fall in each Hm0 and Te bin, and it depends only on the wave resource.
+% |plot_wave_joint_probability_distribution| bins the sea states on the
+% IEC/TS 62600-100 grid (0.5 m Hm0 and 1 s Te bins with edges on 0, 0.5, 1,
+% ... m and 0, 1, 2, ... s), plots the JPD as a percentage with the empty bins
+% left blank, and returns the JPD matrix struct.
 
-rng(1);  % fixed seed so the example is repeatable
-Power = randi([40, 200], numel(time), 1);  % [W]
-%% Capture Width Matrices
+figure('Position', [100 100 1000 800]);
+[~, jpd] = plot_wave_joint_probability_distribution(Hm0, Te, ...
+    'title', sprintf('Joint Probability Distribution | %s', title_suffix));
+
+% The same bins are used for the capture width and power matrices below
+Hm0_bins = jpd.y_bins;
+Te_bins = jpd.x_bins;
+%% Model Device Power Using DOE Reference Models
+% In a real application, the user would provide power values measured from a
+% WEC. This example instead looks up each sea state in the power matrix of a
+% device from the <https://openei.org/wiki/PRIMRE/Signature_Projects/Reference_Model
+% Reference Model Project>, a U.S. Department of Energy effort that developed
+% open-source marine energy point designs to benchmark technology performance
+% and costs. MHKiT ships the matrices for Reference Model 3 (wave point
+% absorber), 5 (oscillating surge flap), and 6 (oscillating water column) from
+% the <https://github.com/NatLabRockies/SAM National Laboratory of the Rockies
+% (NLR) System Advisor Model (SAM)>; change |device| to switch. The devices are
+% described in Neary et al. (2014), <https://doi.org/10.2172/1159756 Methodology
+% for Design and Economic Analysis of Marine Energy Conversion (MEC) Technologies>,
+% SAND2014-9040, Sandia National Laboratories.
+
+device = "RM3";  % "RM3", "RM5", or "RM6"
+reference_model = reference_model_power_matrix(device);
+disp(reference_model.description)
+disp(reference_model.data_source)
+
+reference_model_kW = reference_model;
+reference_model_kW.values = reference_model.values / 1000;
+figure('Position', [100 100 1000 800]);
+ax_device = mhkit_plot_matrix(reference_model_kW, ...
+    'xlabel', 'Energy Period, T_e [sec]', 'ylabel', 'Significant Wave Height, H_{m0} [m]', ...
+    'zlabel', 'Power [kW]', 'trim_to_data', true, 'value_format', '%.0f', 'font_size', 8);
+title(ax_device, sprintf('%s Power Matrix | Neary et al. (2014)', device));
+
+% Interpolate between bin centers; sea states outside the matrix produce no power
+Power = interp2(reference_model.x_bins, reference_model.y_bins, reference_model.values, ...
+    Te, Hm0, 'linear', 0);  % [W]
+
+figure('Position', [100 100 900 350]);
+plot(time, Power / 1000); ylabel('Modeled Power [kW]'); xlabel('Time [UTC]'); grid on
+title(sprintf('Modeled %s Power | %s', device, title_suffix))
+%% Capture Width
 % The following operations create capture width matrices, as specified by the
-% IEC/TS 62600-100. But first, we need to calculate capture width and define
-% bin centers. Keep in mind that the power has been artificially generated, so
-% the capture width is not representative of a real WEC.
+% IEC/TS 62600-100, on the same Hm0 and Te bins as the JPD. But first, we need
+% to calculate capture width. Keep in mind that the power comes from a modeled
+% power matrix, not measurements, so the capture width varies smoothly with
+% the sea state.
 
 % calculating capture width with power and wave flux in vectors
 CW = capture_width(Power, J);
-
-% Bin centers with IEC TS 62600-100 widths of 0.5 m for Hm0 and 1 s for Te,
-% so the edges fall on 0, 0.5, 1, ... m and 0, 1, 2, ... s.
-Hm0_bins = 0.25:0.5:ceil(max(Hm0) / 0.5) * 0.5;
-Te_bins = 0.5:1:ceil(max(Te));
 
 % Calculate the necessary capture width matrices for each statistic based
 % on IEC/TS 62600-100
@@ -81,15 +119,17 @@ cwmat.std = capture_width_matrix(Hm0, Te, CW, "std", Hm0_bins, Te_bins);
 cwmat.count = capture_width_matrix(Hm0, Te, CW, "count", Hm0_bins, Te_bins);
 cwmat.min = capture_width_matrix(Hm0, Te, CW, "min", Hm0_bins, Te_bins);
 cwmat.max = capture_width_matrix(Hm0, Te, CW, "max", Hm0_bins, Te_bins);
-
-% Calculate the frequency matrix for convenience
-cwmat.freq = capture_width_matrix(Hm0, Te, CW, "frequency", Hm0_bins, Te_bins);
 %%
-% Let's see what the data in the mean matrix looks like. Te bins run across
-% the columns and Hm0 bins down the rows.
+% The graphics function |plot_matrix| visualizes a matrix struct. Each bin is
+% drawn between its edges with the tick marks at the bin edges, and
+% |trim_to_data| limits the axes to the bins that hold data plus one empty
+% bin around them.
 
-disp(cwmat.mean.values)
-%% Power Matrices
+figure('Position', [100 100 1000 800]);
+ax_cw = plot_matrix(cwmat.mean, "Capture Width", "zlabel", "Capture Width [m]", ...
+    "trim_to_data", true, "font_size", 8);
+title(ax_cw, sprintf('Modeled %s Mean Capture Width Matrix | %s', device, title_suffix));
+%% Power Matrix
 % As specified in IEC/TS 62600-100, the power matrix is generated from the capture
 % width matrix and wave energy flux matrix, as shown below
 
@@ -109,37 +149,6 @@ std_power_mat = power_matrix(cwmat.std, jmat);
 % be generated in the following manner:
 
 avgpowmat_not_standard = capture_width_matrix(Hm0, Te, Power, 'mean', Hm0_bins, Te_bins);
-%% MAEP
-% There are two ways to calculate mean annual energy production (MAEP). One
-% is from capture width and wave energy flux matrices, the other is from time
-% series data, as shown below.
-
-% Calculate maep from timeseries
-maep_timeseries = mean_annual_energy_production_timeseries(CW, J)
-% Calculate maep from matrix
-maep_matrix = mean_annual_energy_production_matrix(cwmat.mean, jmat, cwmat.freq)
-%% Graphics
-% The graphics function |plot_matrix| can be used to visualize results. Each
-% bin is drawn between its edges with the tick marks at the bin edges, and
-% |trim_to_data| limits the axes to the bins that hold data.
-
-% Plot the capture width matrix
-figure('Position', [100 100 1000 800]);
-ax1 = plot_matrix(cwmat.mean, "Capture Width", "zlabel", "Capture Width [m]", ...
-    "trim_to_data", true, "font_size", 8);
-title(ax1, sprintf('Mean Capture Width Matrix | %s', title_suffix));
-%%
-% The frequency matrix is the joint probability distribution (JPD) of the sea
-% states: the fraction of records that fall in each Hm0 and Te bin. It is
-% plotted here as a percentage with the empty bins left blank.
-
-jpd_percent = cwmat.freq;
-jpd_percent.values = 100 * cwmat.freq.values;
-jpd_percent.values(jpd_percent.values == 0) = NaN;
-figure('Position', [100 100 1000 800]);
-ax2 = mhkit_plot_matrix(jpd_percent, 'xlabel', 'Te [s]', 'ylabel', 'Hm0 [m]', ...
-    'zlabel', 'Occurrence [%]', 'trim_to_data', true, 'value_format', '%.2f %%', 'font_size', 8);
-title(ax2, sprintf('Joint Probability Distribution | %s', title_suffix));
 %%
 % The underlying |mhkit_plot_matrix| function accepts any matrix struct and
 % custom axis labels. Here the mean power matrix is plotted in kW.
@@ -147,6 +156,38 @@ title(ax2, sprintf('Joint Probability Distribution | %s', title_suffix));
 avg_power_mat_kW = avg_power_mat;
 avg_power_mat_kW.values = avg_power_mat.values / 1000;
 figure('Position', [100 100 1000 800]);
-ax3 = mhkit_plot_matrix(avg_power_mat_kW, 'xlabel', 'Te [s]', 'ylabel', 'Hm0 [m]', ...
-    'zlabel', 'Mean Power [kW]', 'trim_to_data', true, 'value_format', '%.2f kW', 'font_size', 8);
-title(ax3, sprintf('Mean Power Matrix | %s', title_suffix));
+ax_power = mhkit_plot_matrix(avg_power_mat_kW, 'xlabel', 'Energy Period, T_e [sec]', 'ylabel', 'Significant Wave Height, H_{m0} [m]', ...
+    'zlabel', 'Mean Power [kW]', 'trim_to_data', true, 'value_format', '%.1f kW', 'font_size', 8);
+title(ax_power, sprintf('Modeled %s Mean Power Matrix | %s', device, title_suffix));
+%% Energy Production
+% The modeled power series gives the energy production of the device at this
+% site, first month by month and then as the mean annual energy production
+% (MAEP) defined by IEC/TS 62600-100.
+%% Monthly Energy Production
+% Each record is a 30 minute average, so the energy per record is the power
+% times that duration. Summing the records by month shows how the energy
+% production is distributed through the year.
+
+record_hours = hours(median(diff(time)));
+energy_MWh = Power * record_hours / 1e6;  % [MWh] per record
+monthly_MWh = accumarray(month(time), energy_MWh, [12 1]);
+
+figure('Position', [100 100 900 400]);
+bar(1:12, monthly_MWh);
+xticks(1:12); xticklabels(month(datetime(2025, 1:12, 1), 'shortname'));
+ylabel('Energy [MWh]'); grid on
+yline(mean(monthly_MWh), '--', 'Monthly mean', 'LabelHorizontalAlignment', 'left');
+title(sprintf('Modeled %s Monthly Energy Production | %s', device, title_suffix))
+%% Mean Annual Energy Production
+% There are two ways to calculate mean annual energy production (MAEP). One
+% is from capture width and wave energy flux matrices, the other is from time
+% series data, as shown below.
+
+% Calculate maep from timeseries
+maep_timeseries = mean_annual_energy_production_timeseries(CW, J);  % [W*h]
+% Calculate maep from matrix
+maep_matrix = mean_annual_energy_production_matrix(cwmat.mean, jmat, jpd);  % [W*h]
+
+% MHKiT returns energy in W*h; report in MWh
+fprintf('Modeled %s MAEP from time series: %.0f MWh\n', device, maep_timeseries / 1e6);
+fprintf('Modeled %s MAEP from matrices:    %.0f MWh\n', device, maep_matrix / 1e6);
