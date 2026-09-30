@@ -44,6 +44,18 @@ function [Rfic,Lfic]=calc_Rfic_Lfic(Sr,SCR,Un,fg)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    arguments (Input)
+        Sr (1,1) {mustBeNumeric}
+        SCR (1,1) {mustBeNumeric}
+        Un (1,1) {mustBeNumeric}
+        fg (1,1) {mustBeNumeric}
+    end
+
+    arguments (Output)
+        Rfic {mustBeNumeric}
+        Lfic {mustBeNumeric}
+    end
+
     % impedance angles in degrees
     Phi_k = [30,50,70,85];
     S_kfic = SCR*Sr;

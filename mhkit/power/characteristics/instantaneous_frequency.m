@@ -1,51 +1,97 @@
-function frequency=instantaneous_frequency(voltage)
+function frequency = instantaneous_frequency(voltage)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Calculates the instantaneous frequency of a measured voltage
+%
+% Calculate instantaneous frequency of measured voltage
 %
 % Parameters
-% -----------
-%     um: structure with handles- um.voltage and um.time
-%         measured voltage source (V) with each timeseries in its own column
+% ------------
+% voltage : struct
+%   Measured voltage time series
+%     voltage.voltage : double [V]
+%       Measured voltage, n_samples x n_signals, one time series per column
+%     voltage.time : double [s]
+%       Time vector, n_samples x 1
 %
 % Returns
-% -------
-%     frequency: structure
-%         frequency of the measured voltage with handles frequency.time and
-%         frequency.frequency
+% ---------
+% frequency : struct
+%   Instantaneous frequency of each voltage signal
+%     frequency.frequency : double [Hz]
+%       Instantaneous frequency, (n_samples - 1) x n_signals
+%     frequency.time : double [s]
+%       Time vector, (n_samples - 1) x 1. One element shorter than the
+%       input because the phase is differentiated.
 %
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
-% py.importlib.import_module('numpy');
-py.importlib.import_module('mhkit_python_utils');
+    arguments (Input)
+        voltage struct
+    end
 
-time= voltage.time ;
-data = voltage.voltage;
-dname = 'voltage';
+    arguments (Output)
+        frequency struct
+    end
 
-dsize=size(data);
+    % Validate input structure has required fields
+    if ~isfield(voltage, 'voltage')
+        error('MHKiT:instantaneous_frequency:InvalidInput', 'voltage structure must contain voltage field');
+    end
+    if ~isfield(voltage, 'time')
+        error('MHKiT:instantaneous_frequency:InvalidInput', 'voltage structure must contain time field');
+    end
 
-li=py.list();
-if dsize(2)>1
-   for i = 1:dsize(2)
-      app=py.list(data(:,i));
-      li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
+    % Extract data from structure
+    voltage_data = voltage.voltage;
+    time_vector = voltage.time;
 
-   end
-   data_pd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time(:,1),li,int32(dsize(2)));
-elseif dsize(2)==1
-   data_pd=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(time,py.numpy.array(data),dsize(2));
+    % Validate dimensions
+    if size(voltage_data, 1) ~= length(time_vector)
+        error('MHKiT:instantaneous_frequency:InvalidInput', 'voltage data rows must match time vector length');
+    end
+
+    % Get data dimensions
+    [num_samples, num_columns] = size(voltage_data);
+
+    % Validate minimum data length for meaningful frequency calculation
+    if num_samples < 4
+        error('MHKiT:instantaneous_frequency:InvalidInput', 'voltage data must have at least 4 samples for frequency calculation');
+    end
+
+    % Warn the user if the sample interval varies by more than the tolerance.
+    % The phase derivative below divides by each local dt, but the FFT-based
+    % Hilbert transform that produces the phase assumes uniform sampling.
+    % Irregular intervals corrupt the phase itself before dt is applied, so
+    % using the local dt cannot correct for them.
+    sample_rate = mhkit_validate_sample_rate_hz(time_vector);
+    if ~sample_rate.is_uniform
+        warning('MHKiT:instantaneous_frequency:SampleRateVariation', ...
+                ['The sample interval of this signal varies by more than %g%% from the mean. ', ...
+                 'The FFT-based Hilbert transform assumes uniform sampling, so the ', ...
+                 'instantaneous phase, and therefore the instantaneous frequency, is ', ...
+                 'likely to be inaccurate. ', ...
+                 'Mean sample rate: %g Hz, max: %g Hz, min: %g Hz, standard deviation: %g Hz'], ...
+                sample_rate.tolerance_percent, sample_rate.mean_sample_rate_hz, ...
+                sample_rate.max_sample_rate_hz, sample_rate.min_sample_rate_hz, ...
+                sample_rate.std_sample_rate_hz);
+    end
+
+    % Calculate time differences for frequency calculation
+    time_diff = diff(time_vector(:));  % Ensure column vector
+
+    % Analytic signal of every column
+    analytic_signal = mhkit_hilbert(voltage_data);
+
+    % Instantaneous phase with 2*pi discontinuities removed
+    unwrapped_phase = unwrap(angle(analytic_signal), [], 1);
+
+    % Instantaneous frequency
+    frequency_data = diff(unwrapped_phase, 1, 1) ./ (2.0 * pi * time_diff);
+
+    % Create output structure
+    frequency = struct();
+    frequency.frequency = frequency_data;
+    frequency.time = time_vector(2:end);
+
 end
-
-harmonics_pd = py.mhkit.power.characteristics.instantaneous_frequency(data_pd);
-vals=double(py.array.array('d',py.numpy.nditer(harmonics_pd.values)));
-sha=cell(harmonics_pd.values.shape);
-x=int64(sha{1,1});
-y=int64(sha{1,2});
-vals=reshape(vals,[x,y]);
-
-frequency.frequency = vals;
-frequency.time = time(2:end);
 
