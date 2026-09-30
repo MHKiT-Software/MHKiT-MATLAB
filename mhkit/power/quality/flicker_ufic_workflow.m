@@ -77,9 +77,7 @@ function out = flicker_ufic_workflow(Sr,Un,SCR,fg, ...
 % check input:
 if ~isfield(u_m,'time') || ~isfield(u_m, 'data') ||...
         ~isfield(i_m,'time') || ~isfield(i_m, 'data')
-    ME = MException('MATLAB:flicker_ufic',...
-        'invalid handles in structure, must contain x.data & x.time');
-    throw(ME);
+    error('MHKiT:flicker_ufic_workflow:InvalidInput', 'invalid handles in structure, must contain x.data & x.time');
 end
 %% Step 1. Construct the fictitious grid:
 [Rfic,Lfic] = calc_Rfic_Lfic(Sr, SCR, Un, fg);

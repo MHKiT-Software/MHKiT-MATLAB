@@ -41,9 +41,7 @@ function [alpha0,freq] = calc_fundamental_freq(u_m,method,methodopts)
 
     % check input:
     if ~isfield(u_m,'time') || ~isfield(u_m, 'data')
-        ME = MException('MATLAB:calc_fundamental_freq',...
-            'invalid handles in structure, must contain x.data & x.time');
-        throw(ME);
+        error('MHKiT:calc_fundamental_freq:InvalidInput', 'invalid handles in structure, must contain x.data & x.time');
     end
     % 1. make sure time starts at 0.0
     u_m.time = u_m.time-u_m.time(1);

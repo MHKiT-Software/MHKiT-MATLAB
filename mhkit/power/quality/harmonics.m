@@ -52,7 +52,7 @@ function harmonics_result = harmonics(input_data, data_sample_rate_hz, grid_freq
 
     % Validate input data structure
     if ~isfield(input_data, 'time')
-        error('MHKiT:harmonics: input_data structure must contain time field');
+        error('MHKiT:harmonics:InvalidInput', 'input_data structure must contain time field');
     end
 
     if isfield(input_data, 'current')
@@ -62,11 +62,11 @@ function harmonics_result = harmonics(input_data, data_sample_rate_hz, grid_freq
         signal_data = input_data.voltage;
         signal_type = 'voltage';
     else
-        error('MHKiT:harmonics: input_data structure must contain either current or voltage field');
+        error('MHKiT:harmonics:InvalidInput', 'input_data structure must contain either current or voltage field');
     end
 
     if ~isnumeric(signal_data) || ~isreal(signal_data)
-        error('MHKiT:harmonics: %s data must be a real numeric array', signal_type);
+        error('MHKiT:harmonics:InvalidInput', '%s data must be a real numeric array', signal_type);
     end
 
     % Validate time vector sample rate
@@ -74,7 +74,8 @@ function harmonics_result = harmonics(input_data, data_sample_rate_hz, grid_freq
         'tolerance_percent', options.tolerance_percent);
 
     if ~sample_rate_validation.pass
-        error(['MHKiT:harmonics: Time vector sample rate validation failed.\n' ...
+        error('MHKiT:harmonics:InvalidInput', ...
+              ['Time vector sample rate validation failed.\n' ...
                'Expected: %.2f Hz, Observed: %.2f Hz (median), Deviation: %.2f%%, Tolerance: %.2f%%\n' ...
                'Time format detected: %s'], ...
                data_sample_rate_hz, sample_rate_validation.median_sample_rate_hz, ...
@@ -93,7 +94,7 @@ function harmonics_result = harmonics(input_data, data_sample_rate_hz, grid_freq
         end
         field_rows = size(input_data.(field_name), 1);
         if field_rows ~= num_time_samples
-            error('MHKiT:harmonics: %s data rows (%d) must match time vector length (%d)', ...
+            error('MHKiT:harmonics:InvalidInput', '%s data rows (%d) must match time vector length (%d)', ...
                 field_name, field_rows, num_time_samples);
         end
     end

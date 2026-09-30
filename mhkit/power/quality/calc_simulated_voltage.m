@@ -31,9 +31,7 @@ function u_fic=calc_simulated_voltage(u0,i_m,Rfic,Lfic)
 
     % check input:
     if ~isfield(i_m,'time') || ~isfield(i_m, 'data')
-        ME = MException('MATLAB:calc_simulated_voltage',...
-            'invalid handles in structure, must contain x.data & x.time');
-        throw(ME);
+        error('MHKiT:calc_simulated_voltage:InvalidInput', 'invalid handles in structure, must contain x.data & x.time');
     end
     % 1. calculate dim(t)/dt using diff()
     delta_im = diff(i_m.data);%reshape(,[],4);

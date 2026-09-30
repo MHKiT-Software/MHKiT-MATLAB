@@ -31,10 +31,10 @@ function frequency = instantaneous_frequency(voltage)
 
     % Validate input structure has required fields
     if ~isfield(voltage, 'voltage')
-        error('MHKiT:instantaneous_frequency: voltage structure must contain voltage field');
+        error('MHKiT:instantaneous_frequency:InvalidInput', 'voltage structure must contain voltage field');
     end
     if ~isfield(voltage, 'time')
-        error('MHKiT:instantaneous_frequency: voltage structure must contain time field');
+        error('MHKiT:instantaneous_frequency:InvalidInput', 'voltage structure must contain time field');
     end
 
     % Extract data from structure
@@ -43,7 +43,7 @@ function frequency = instantaneous_frequency(voltage)
 
     % Validate dimensions
     if size(voltage_data, 1) ~= length(time_vector)
-        error('MHKiT:instantaneous_frequency: voltage data rows must match time vector length');
+        error('MHKiT:instantaneous_frequency:InvalidInput', 'voltage data rows must match time vector length');
     end
 
     % Get data dimensions
@@ -51,7 +51,7 @@ function frequency = instantaneous_frequency(voltage)
 
     % Validate minimum data length for meaningful frequency calculation
     if num_samples < 4
-        error('MHKiT:instantaneous_frequency: voltage data must have at least 4 samples for frequency calculation');
+        error('MHKiT:instantaneous_frequency:InvalidInput', 'voltage data must have at least 4 samples for frequency calculation');
     end
 
     % Warn the user if the sample interval varies by more than the tolerance.

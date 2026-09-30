@@ -44,16 +44,16 @@ function power_dc = dc_power(voltage, current)
     
     % Validate input structures have required fields
     if ~isfield(voltage, 'voltage')
-        error('MHKiT:dc_power: voltage structure must contain voltage field');
+        error('MHKiT:dc_power:InvalidInput', 'voltage structure must contain voltage field');
     end
     if ~isfield(voltage, 'time')
-        error('MHKiT:dc_power: voltage structure must contain time field');
+        error('MHKiT:dc_power:InvalidInput', 'voltage structure must contain time field');
     end
     if ~isfield(current, 'current')
-        error('MHKiT:dc_power: current structure must contain current field');
+        error('MHKiT:dc_power:InvalidInput', 'current structure must contain current field');
     end
     if ~isfield(current, 'time')
-        error('MHKiT:dc_power: current structure must contain time field');
+        error('MHKiT:dc_power:InvalidInput', 'current structure must contain time field');
     end
     
     % Extract data matrices
@@ -64,12 +64,12 @@ function power_dc = dc_power(voltage, current)
     
     % Validate dimensions match
     if ~isequal(size(voltage_data), size(current_data))
-        error('MHKiT:dc_power: voltage and current must have the same dimensions');
+        error('MHKiT:dc_power:InvalidInput', 'voltage and current must have the same dimensions');
     end
     
     % Validate time vectors match
     if ~isequal(voltage_time, current_time)
-        error('MHKiT:dc_power: Time vectors must match between voltage and current structures');
+        error('MHKiT:dc_power:InvalidInput', 'Time vectors must match between voltage and current structures');
     end
     
     % Calculate power for each channel (element-wise multiplication)

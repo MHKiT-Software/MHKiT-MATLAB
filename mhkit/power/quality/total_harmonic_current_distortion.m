@@ -39,10 +39,10 @@ function THCD = total_harmonic_current_distortion(harmonic_subgroups, rated_curr
     
     % Validate input structures have required fields
     if ~isfield(harmonic_subgroups, 'amplitude')
-        error('MHKiT:total_harmonic_current_distortion: harmonic_subgroups structure must contain amplitude field');
+        error('MHKiT:total_harmonic_current_distortion:InvalidInput', 'harmonic_subgroups structure must contain amplitude field');
     end
     if ~isfield(harmonic_subgroups, 'harmonic')
-        error('MHKiT:total_harmonic_current_distortion: harmonic_subgroups structure must contain harmonic field');
+        error('MHKiT:total_harmonic_current_distortion:InvalidInput', 'harmonic_subgroups structure must contain harmonic field');
     end
     
     % Extract amplitude data
@@ -50,17 +50,12 @@ function THCD = total_harmonic_current_distortion(harmonic_subgroups, rated_curr
     
     % Validate amplitude data dimensions
     if ~isnumeric(harmonics_data)
-        error('MHKiT:total_harmonic_current_distortion: harmonic_subgroups.amplitude must be numeric');
+        error('MHKiT:total_harmonic_current_distortion:InvalidInput', 'harmonic_subgroups.amplitude must be numeric');
     end
     
     % Check if we have enough harmonic data (need at least index 2 for fundamental and some harmonics)
     if length(harmonics_data) < 3
-        error('MHKiT:total_harmonic_current_distortion: harmonic_subgroups.amplitude must contain at least 3 elements');
-    end
-    
-    % Validate rated_current is positive
-    if rated_current <= 0
-        error('MHKiT:total_harmonic_current_distortion: rated_current must be positive');
+        error('MHKiT:total_harmonic_current_distortion:InvalidInput', 'harmonic_subgroups.amplitude must contain at least 3 elements');
     end
     
     % Convert Python indexing to MATLAB indexing
@@ -75,7 +70,7 @@ function THCD = total_harmonic_current_distortion(harmonic_subgroups, rated_curr
     if harmonic_end_idx >= harmonic_start_idx
         harmonics_subset = harmonics_data(harmonic_start_idx:harmonic_end_idx);
     else
-        error('MHKiT:total_harmonic_current_distortion: Insufficient harmonic data for calculation');
+        error('MHKiT:total_harmonic_current_distortion:InvalidInput', 'Insufficient harmonic data for calculation');
     end
     
     % Square the harmonic amplitudes (element-wise operation)
@@ -88,14 +83,14 @@ function THCD = total_harmonic_current_distortion(harmonic_subgroups, rated_curr
     % Python: harmonics_subgroup.iloc[1] means index 1 (0-based)
     % MATLAB: harmonics_data(2) means index 2 (1-based)
     if length(harmonics_data) < 2
-        error('MHKiT:total_harmonic_current_distortion: harmonic_subgroups.amplitude must contain fundamental component at index 2');
+        error('MHKiT:total_harmonic_current_distortion:InvalidInput', 'harmonic_subgroups.amplitude must contain fundamental component at index 2');
     end
     
     fundamental_current = harmonics_data(2);  % Python index 1 + 1
     
     % Validate fundamental current is not zero
     if fundamental_current == 0
-        error('MHKiT:total_harmonic_current_distortion: Fundamental current component cannot be zero');
+        error('MHKiT:total_harmonic_current_distortion:InvalidInput', 'Fundamental current component cannot be zero');
     end
     
     % Calculate Total Harmonic Current Distortion

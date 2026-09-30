@@ -45,9 +45,7 @@ function Pst = calc_shortterm_flicker_severity(P)
         'p2p2','p3','p4','p0p7','p1','p1p5','p0p1'};
     for i=1:length(names_need)
         if ~isfield(P,names_need{i})
-            ME = MException('MATLAB:calc_shortterm_flicker_severity',...
-            'invalid handles in structure, must contain x.data & x.time');
-            throw(ME);
+            error('MHKiT:calc_shortterm_flicker_severity:InvalidInput', 'P structure must contain field %s', names_need{i});
         end
     end
     P_50s = (P.p30+P.p50+P.p80)/3.;

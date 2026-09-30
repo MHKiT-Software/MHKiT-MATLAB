@@ -46,7 +46,7 @@ function result = mhkit_validate_sample_rate_hz(time_vector, expected_sample_rat
     
     % Validate minimum length
     if length(time_vector) < 2
-        error('MHKiT:mhkit_validate_sample_rate_hz: time_vector must have at least 2 elements');
+        error('MHKiT:mhkit_validate_sample_rate_hz:InvalidInput', 'time_vector must have at least 2 elements');
     end
     
     % Ensure column vector for consistency
@@ -54,7 +54,7 @@ function result = mhkit_validate_sample_rate_hz(time_vector, expected_sample_rat
     
     % Validate monotonically increasing
     if any(diff(time_vector) <= 0)
-        error('MHKiT:mhkit_validate_sample_rate_hz: time_vector must be monotonically increasing');
+        error('MHKiT:mhkit_validate_sample_rate_hz:InvalidInput', 'time_vector must be monotonically increasing');
     end
     
     % Detect and handle time format
@@ -144,12 +144,12 @@ function [time_seconds, time_format] = detect_and_convert_time_format(time_vecto
         % Unknown format - assume it's already in seconds and warn
         time_format = "unknown (assuming seconds)";
         time_seconds = time_vector - time_vector(1);
-        warning('MHKiT:mhkit_validate_sample_rate_hz: Unknown time format, assuming seconds elapsed');
+        warning('MHKiT:mhkit_validate_sample_rate_hz:UnknownTimeFormat', 'Unknown time format, assuming seconds elapsed');
     end
     
     % Final validation: ensure we have positive time differences
     if any(diff(time_seconds) <= 0)
-        error('MHKiT:mhkit_validate_sample_rate_hz: Time conversion resulted in non-increasing values');
+        error('MHKiT:mhkit_validate_sample_rate_hz:InvalidInput', 'Time conversion resulted in non-increasing values');
     end
     
 end

@@ -40,10 +40,10 @@ function harmonic_subgroups = harmonic_subgroups(harmonics, grid_freq)
     
     % Validate input structures have required fields
     if ~isfield(harmonics, 'amplitude')
-        error('MHKiT:harmonic_subgroups: harmonics structure must contain amplitude field');
+        error('MHKiT:harmonic_subgroups:InvalidInput', 'harmonics structure must contain amplitude field');
     end
     if ~isfield(harmonics, 'harmonic')
-        error('MHKiT:harmonic_subgroups: harmonics structure must contain harmonic field');
+        error('MHKiT:harmonic_subgroups:InvalidInput', 'harmonics structure must contain harmonic field');
     end
     
     % Extract data
@@ -52,12 +52,7 @@ function harmonic_subgroups = harmonic_subgroups(harmonics, grid_freq)
     
     % Validate dimensions
     if size(harmonic_data, 1) ~= length(harmonic_freq)
-        error('MHKiT:harmonic_subgroups: Number of harmonic frequencies must match the number of rows in amplitude data');
-    end
-    
-    % Validate grid frequency
-    if ~(grid_freq == 50 || grid_freq == 60)
-        error('MHKiT:harmonic_subgroups: grid_freq must be either 50 or 60');
+        error('MHKiT:harmonic_subgroups:InvalidInput', 'Number of harmonic frequencies must match the number of rows in amplitude data');
     end
     
     % Create target frequency array based on grid frequency

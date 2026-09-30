@@ -67,9 +67,7 @@ function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
             sin(2*pi*cumtrapz(t,func));
         %plot(t,func);xlim([0 T]);grid on;
     else
-        ME = MException('MATLAB:gen_test_data',['option ' ...
-            'does not exist']);
-        throw(ME);
+        error('MHKiT:gen_test_data:InvalidInput', 'option does not exist');
     end
     %% u_m
     u_m = struct();u_m.time = t;
@@ -96,9 +94,7 @@ function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
             sin(2*pi*cumtrapz(t,func));
         % plot(t,u_m.data);xlim([0 1]);grid;
     else
-        ME = MException('MATLAB:gen_test_data',['option ' ...
-            'does not exist']);
-        throw(ME);
+        error('MHKiT:gen_test_data:InvalidInput', 'option does not exist');
     end
 
 end

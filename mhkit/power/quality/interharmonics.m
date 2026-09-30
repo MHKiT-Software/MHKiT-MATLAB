@@ -40,10 +40,10 @@ function interharmonics = interharmonics(harmonics, grid_freq)
     
     % Validate input structure has required fields
     if ~isfield(harmonics, 'amplitude')
-        error('MHKiT:interharmonics: harmonics structure must contain amplitude field');
+        error('MHKiT:interharmonics:InvalidInput', 'harmonics structure must contain amplitude field');
     end
     if ~isfield(harmonics, 'harmonic')
-        error('MHKiT:interharmonics: harmonics structure must contain harmonic field');
+        error('MHKiT:interharmonics:InvalidInput', 'harmonics structure must contain harmonic field');
     end
     
     % Extract data from structure
@@ -57,7 +57,7 @@ function interharmonics = interharmonics(harmonics, grid_freq)
     
     % Validate dimensions
     if size(harmonics_amplitude, 1) ~= length(harmonics_frequency)
-        error('MHKiT:interharmonics: harmonics.amplitude rows must match length of harmonics.harmonic');
+        error('MHKiT:interharmonics:InvalidInput', 'harmonics.amplitude rows must match length of harmonics.harmonic');
     end
     
     % Create frequency grid based on grid frequency

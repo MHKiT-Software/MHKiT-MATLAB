@@ -54,17 +54,17 @@ function P = ac_power_three_phase(voltage, current, power_factor, varargin)
 
     % Validate power factor is between 0 and 1
     if power_factor < 0 || power_factor > 1
-        error('MHKiT:ac_power_three_phase: power_factor must be between 0 and 1 (inclusive). Received: %.3f', power_factor);
+        error('MHKiT:ac_power_three_phase:InvalidInput', 'power_factor must be between 0 and 1 (inclusive). Received: %.3f', power_factor);
     end
 
     % Extract data and time vectors
     if isstruct(voltage)
         % Validate input structures have required fields
         if ~isfield(voltage, 'voltage')
-            error('MHKiT:ac_power_three_phase: voltage structure must contain voltage field');
+            error('MHKiT:ac_power_three_phase:InvalidInput', 'voltage structure must contain voltage field');
         end
         if ~isfield(voltage, 'time')
-            error('MHKiT:ac_power_three_phase: voltage structure must contain time field');
+            error('MHKiT:ac_power_three_phase:InvalidInput', 'voltage structure must contain time field');
         end
         voltage_data = voltage.voltage;
         voltage_time = voltage.time;
@@ -76,10 +76,10 @@ function P = ac_power_three_phase(voltage, current, power_factor, varargin)
     if isstruct(current)
         % Validate input structures have required fields
         if ~isfield(current, 'current')
-            error('MHKiT:ac_power_three_phase: current structure must contain current field');
+            error('MHKiT:ac_power_three_phase:InvalidInput', 'current structure must contain current field');
         end
         if ~isfield(current, 'time')
-            error('MHKiT:ac_power_three_phase: current structure must contain time field');
+            error('MHKiT:ac_power_three_phase:InvalidInput', 'current structure must contain time field');
         end
         current_data = current.current;
         current_time = current.time;
@@ -90,22 +90,22 @@ function P = ac_power_three_phase(voltage, current, power_factor, varargin)
 
     % Validate voltage has three columns
     if size(voltage_data, 2) ~= 3
-        error('MHKiT:ac_power_three_phase: voltage must have three columns for three-phase measurements');
+        error('MHKiT:ac_power_three_phase:InvalidInput', 'voltage must have three columns for three-phase measurements');
     end
     
     % Validate current has three columns
     if size(current_data, 2) ~= 3
-        error('MHKiT:ac_power_three_phase: current must have three columns for three-phase measurements');
+        error('MHKiT:ac_power_three_phase:InvalidInput', 'current must have three columns for three-phase measurements');
     end
     
     % Validate dimensions match
     if ~isequal(size(voltage_data), size(current_data))
-        error('MHKiT:ac_power_three_phase: voltage and current must have the same dimensions');
+        error('MHKiT:ac_power_three_phase:InvalidInput', 'voltage and current must have the same dimensions');
     end
 
     % Validate time vectors match
     if ~isequal(voltage_time, current_time)
-        error('MHKiT:ac_power_three_phase: voltage and current time vectors must match');
+        error('MHKiT:ac_power_three_phase:InvalidInput', 'voltage and current time vectors must match');
     end
 
     % After validation, use the time vector from voltage
