@@ -2,9 +2,9 @@ function out = flicker_ufic_workflow(Sr,Un,SCR,fg, ...
         u_m,i_m,method,methodopts)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Conduct flicker assessment according to IECTS62600-30 and
-%   IECTS61400-21-1.
-%   A workflow of MATLAB functions up to calculation of u_fic.
+% Conduct flicker assessment according to IEC TS 62600-30 and
+% IEC 61400-21-1:2019.
+% A workflow of MATLAB functions up to calculation of u_fic.
 %
 % Parameters
 % -----------
@@ -74,12 +74,25 @@ function out = flicker_ufic_workflow(Sr,Un,SCR,fg, ...
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+arguments (Input)
+    Sr (1,1) {mustBeNumeric}
+    Un (1,1) {mustBeNumeric}
+    SCR (1,1) {mustBeNumeric}
+    fg (1,1) {mustBeNumeric}
+    u_m struct
+    i_m struct
+    method {mustBeTextScalar}
+    methodopts cell
+end
+
+arguments (Output)
+    out struct
+end
+
 % check input:
 if ~isfield(u_m,'time') || ~isfield(u_m, 'data') ||...
         ~isfield(i_m,'time') || ~isfield(i_m, 'data')
-    ME = MException('MATLAB:flicker_ufic',...
-        'invalid handles in structure, must contain x.data & x.time');
-    throw(ME);
+    error('MHKiT:flicker_ufic_workflow:InvalidInput', 'invalid handles in structure, must contain x.data & x.time');
 end
 %% Step 1. Construct the fictitious grid:
 [Rfic,Lfic] = calc_Rfic_Lfic(Sr, SCR, Un, fg);

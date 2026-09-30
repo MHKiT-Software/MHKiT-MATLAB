@@ -1,67 +1,66 @@
-function figure=plot_matrix(M,Mtype, options)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    Plots the matrix with Hm0 and Te on the y and x axis
+function ax = plot_matrix(M, Mtype, options)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Plots a wave performance matrix with Hm0 on the y axis and Te on the x axis
 %
 % Parameters
-% ----------
-%    M: structure
-%
-%         M.values: matrix
-%
-%         M.Hm0_bins
-%
-%         M.Te_bins
-%
-%         M.stat
-%
-%    Mtype: string
-%         type of matrix (i.e. power, capture length, etc.) to be used
-%         in plot title
-%
-%     options: name-value pairs
-%         savepath: string (optional)
-%             path and filename to save figure.
-%         annotate: logical (optional)
-%             toggle text annotations on/off (default: true)
-%         to call: plot_matrix(M, Mtype,"savepath",savepath,"annotate",false)
+% ------------
+% M : struct
+%   Matrix from capture_width_matrix, wave_energy_flux_matrix, or power_matrix
+%     M.values : matrix
+%       One value per bin, Hm0 bins down the rows and Te bins across the columns
+%     M.stat : string
+%       Statistic used, shown in the title
+%     M.x_edges : vector [s]
+%       Te bin edges
+%     M.y_edges : vector [m]
+%       Hm0 bin edges
+% Mtype : string
+%   Type of matrix (e.g. "Capture Width", "Power") used in the plot title
+% savepath : string (optional)
+%   Path and filename to save the figure. Default none
+% annotate : logical (optional)
+%   Print each bin value in its cell. Default true
+% value_format : string (optional)
+%   sprintf format for the bin labels, e.g. '%.2f m'. Default '%.2f'
+% font_size : double (optional)
+%   Font size of the bin labels in points. Default 7
+% trim_to_data : logical (optional)
+%   Limit the axes to the bins with data plus one empty bin around them. Default false
+% zlabel : string (optional)
+%   Colorbar label, e.g. "Capture Width [m]". Default none
 %
 % Returns
 % ---------
-%   figure: plot of the matrix
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-arguments
-    M
-    Mtype
-    options.savepath = "";
-    options.annotate = true;
+% ax : matlab.graphics.axis.Axes
+%   Axes containing the plot
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+arguments (Input)
+    M (1,1) struct
+    Mtype {mustBeTextScalar}
+    options.savepath {mustBeTextScalar} = ""
+    options.annotate (1,1) logical = true
+    options.zlabel {mustBeTextScalar} = ""
+    options.trim_to_data (1,1) logical = false
+    options.value_format {mustBeTextScalar} = '%.2f'
+    options.font_size (1,1) {mustBeNumeric, mustBePositive} = 7
 end
 
-figure=pcolor(M.Te_bins,M.Hm0_bins,M.values);
-colormap(flipud(hot(256)))
-ylabel('Hm0 [m]','FontSize',20)
-xlabel('Te [s]','FontSize',20)
-x=strcat(Mtype,': ',M.stat);
-title(x)
-colorbar
-pos=get(gca,'position');
-[rows,cols]=size(M.values);
-width=pos(3)/(cols-1);
-height =pos(4)/(rows-1);
-
-% create textbox annotations if annotate is true
-if options.annotate
-    for i=1:cols-1
-        for j=rows-1:-1:1
-            if ~isnan(M.values(j,i))
-                annotation('textbox',[pos(1)+width*(i-1),pos(2)+height*(j-1),width,height], ...
-                'string',num2str(M.values(j,i)),'LineStyle','none','HorizontalAlignment','center',...
-                'VerticalAlignment','middle');
-            end
-        end
-    end
+arguments (Output)
+    ax (1,1) matlab.graphics.axis.Axes
 end
 
-len = strlength(options.savepath);
-if len > 1
-    saveas(figure, options.savepath);
+ax = mhkit_plot_matrix(M, 'xlabel', 'Energy Period, T_e [sec]', 'ylabel', 'Significant Wave Height, H_{m0} [m]', ...
+    'show_values', options.annotate, 'zlabel', options.zlabel, ...
+    'trim_to_data', options.trim_to_data, 'value_format', options.value_format, ...
+    'font_size', options.font_size);
+title(ax, string(Mtype) + ": " + string(M.stat));
+
+if strlength(options.savepath) > 0
+    saveas(ancestor(ax, 'figure'), options.savepath);
+end
+
 end

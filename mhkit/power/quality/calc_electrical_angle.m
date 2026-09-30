@@ -25,11 +25,18 @@ function alpha_m = calc_electrical_angle(freq,alpha0)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    arguments (Input)
+        freq struct
+        alpha0 (1,1) {mustBeNumeric}
+    end
+
+    arguments (Output)
+        alpha_m {mustBeNumeric}
+    end
+
     % check input:
     if ~isfield(freq,'time') || ~isfield(freq, 'data')
-        ME = MException('MATLAB:calc_electrail_angle',...
-            'invalid handles in structure, must contain x.data & x.time');
-        throw(ME);
+        error('MHKiT:calc_electrical_angle:InvalidInput', 'invalid handles in structure, must contain x.data & x.time');
     end
 
     % IECTS-62600-30 Eq(3)

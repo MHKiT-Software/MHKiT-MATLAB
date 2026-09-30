@@ -1,6 +1,6 @@
 function mspl = decidecade_sound_pressure_level(spsd, fmin, fmax)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Calculate sound pressure level in decidecade bands directly
 % from mean square sound pressure spectral density (SPSD).
@@ -26,7 +26,7 @@ function mspl = decidecade_sound_pressure_level(spsd, fmin, fmax)
 %       mspl.units : Units string
 %       mspl.name : Descriptive name string
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 arguments (Input)

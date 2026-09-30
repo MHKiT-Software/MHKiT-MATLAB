@@ -1,19 +1,19 @@
 function [weighting_func,exposure_func] = nmfs_auditory_weighting(frequency, group)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%   Calculates the auditory weighting and exposure functions for marine mammals
-%   based on the National Marine Fisheries Service (NMFS) guidelines.
-%
-%   The weighting function is applied to sound exposure level to determine the
-%   auditory impact on marine mammals. The exposure function is the inverse of the
-%   weighting function and illustrates how the weighting function relates to marine
-%   mammal hearing thresholds.
-%   Both functions are returned in their log10-transform, in units of dB. To transform
-%   back to linear units, use 10^(weighting_func/10).
-%
-%   https://www.fisheries.noaa.gov/national/marine-mammal-protection/marine-mammal-acoustic-technical-guidance-other-acoustic-tools
-%
+% Calculates the auditory weighting and exposure functions for marine mammals
+% based on the National Marine Fisheries Service (NMFS) guidelines.
+% 
+% The weighting function is applied to sound exposure level to determine the
+% auditory impact on marine mammals. The exposure function is the inverse of the
+% weighting function and illustrates how the weighting function relates to marine
+% mammal hearing thresholds.
+% Both function are returned in their log10-transform, in units of dB. To transform
+% back to linear units, use 10**(weighting_func/10).
+% 
+% https://www.fisheries.noaa.gov/national/marine-mammal-protection/marine-mammal-acoustic-technical-guidance-other-acoustic-tools
+% 
 % Parameters
 % ------------
 %   frequency : vector
@@ -25,11 +25,11 @@ function [weighting_func,exposure_func] = nmfs_auditory_weighting(frequency, gro
 %       'OW' (otariid pinnepeds)
 %
 % Returns
-% ---------
-%   weighting_func : vector
-%       Auditory weighting function [dB]
-%   exposure_func : vector
-%       Log-transformed auditory exposure function [dB]
+% -------
+% weighting_func: struct
+%     Auditory weighting function [unitless] indexed by frequency
+% exposure_func: struct
+%     Log-transformed auditory exposure function [dB] indexed by frequency
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

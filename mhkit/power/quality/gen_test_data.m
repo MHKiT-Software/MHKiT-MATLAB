@@ -1,8 +1,8 @@
 function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Generate test data according to IEC61400-21-1 Annex B.3 to be used for
-%   the verification test of the measurement procedure for flicker.
+% Generate test data according to IEC 61400-21-1:2019 Annex B.3 to be used for
+% the verification test of the measurement procedure for flicker.
 %
 % Parameters
 % -----------
@@ -21,7 +21,7 @@ function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
 %       into 60 different cases, with fν in [0.5:0.5:30].
 %   DeltaI_I: double array (4)
 %       Relative current changes (%) according to Table B.2 and Table B.3
-%       in IECTS61400-21-1.
+%       in IEC 61400-21-1:2019.
 %   opt: int
 %       Option number used to indicate different test datasets.
 %   T: double
@@ -49,6 +49,23 @@ function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
 % B.3.5 Slow frequency changes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    arguments (Input)
+        Un (1,1) {mustBeNumeric}
+        In (1,1) {mustBeNumeric}
+        fg (1,1) {mustBeNumeric}
+        fs (1,1) {mustBeNumeric}
+        fm (1,1) {mustBeNumeric}
+        fv (1,1) {mustBeNumeric}
+        DeltaI_I {mustBeNumeric}
+        opt (1,1) {mustBeNumeric}
+        T (1,1) {mustBeNumeric}
+    end
+
+    arguments (Output)
+        i_m struct
+        u_m struct
+    end
+
     %% time:
     t = 0:1/fs:T-1/fs; %600=10min
     t = t';
@@ -67,9 +84,7 @@ function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
             sin(2*pi*cumtrapz(t,func));
         %plot(t,func);xlim([0 T]);grid on;
     else
-        ME = MException('MATLAB:gen_test_data',['option ' ...
-            'does not exist']);
-        throw(ME);
+        error('MHKiT:gen_test_data:InvalidInput', 'option does not exist');
     end
     %% u_m
     u_m = struct();u_m.time = t;
@@ -96,9 +111,7 @@ function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
             sin(2*pi*cumtrapz(t,func));
         % plot(t,u_m.data);xlim([0 1]);grid;
     else
-        ME = MException('MATLAB:gen_test_data',['option ' ...
-            'does not exist']);
-        throw(ME);
+        error('MHKiT:gen_test_data:InvalidInput', 'option does not exist');
     end
 
 end

@@ -24,6 +24,16 @@ function u0=calc_ideal_voltage(Un,alpha_m)
 %   u0(t) = sqrt(2/3)*Un*sin(alpha_m(t)).
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    arguments (Input)
+        Un (1,1) {mustBeNumeric}
+        alpha_m {mustBeNumeric}
+    end
+
+    arguments (Output)
+        u0 {mustBeNumeric}
+    end
+
     %IECTS 62600-30(ed1.0) Eq (2)
     u0 = sqrt(2/3)*Un*sin(alpha_m);
 end

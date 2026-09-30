@@ -30,6 +30,16 @@ function coef_flicker=calc_flicker_coefficient(P_stfic,S_kfic,Sr)
 %       c(Phi_k) = P_stfic*S_kfic/Sr
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    arguments (Input)
+        P_stfic {mustBeNumeric}
+        S_kfic {mustBeNumeric}
+        Sr (1,1) {mustBeNumeric}
+    end
+
+    arguments (Output)
+        coef_flicker {mustBeNumeric}
+    end
+
     % IECTS62600-30 Eq (6):
     coef_flicker = P_stfic*S_kfic/Sr;
 end
