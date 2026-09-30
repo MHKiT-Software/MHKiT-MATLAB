@@ -40,12 +40,7 @@ function interharmonics = interharmonics(harmonics, grid_freq)
     % Extract data from structure
     harmonics_amplitude = harmonics.amplitude;
     harmonics_frequency = harmonics.harmonic;
-    
-    % Validate grid frequency
-    if ~(grid_freq == 50 || grid_freq == 60)
-        error('MHKiT:interharmonics: grid_freq must be either 50 or 60');
-    end
-    
+
     % Validate dimensions
     if size(harmonics_amplitude, 1) ~= length(harmonics_frequency)
         error('MHKiT:interharmonics:InvalidInput', 'harmonics.amplitude rows must match length of harmonics.harmonic');
@@ -54,11 +49,11 @@ function interharmonics = interharmonics(harmonics, grid_freq)
     % Create frequency grid based on grid frequency
     if grid_freq == 60
         hz_grid = 0:60:3060;  % MATLAB: 1-based, but this creates the correct range
-        hz_grid = hz_grid(1:end-1);  % Remove last element to match Python behavior
+        hz_grid = hz_grid(1:end-1);  % Remove last element, following MHKiT-Python convention
         subset_size = 10;  % Number of harmonics to include in each interharmonic group
     elseif grid_freq == 50
         hz_grid = 0:50:2550;  % MATLAB: 1-based, but this creates the correct range  
-        hz_grid = hz_grid(1:end-1);  % Remove last element to match Python behavior
+        hz_grid = hz_grid(1:end-1);  % Remove last element, following MHKiT-Python convention
         subset_size = 6;   % Number of harmonics to include in each interharmonic group
     end
     
