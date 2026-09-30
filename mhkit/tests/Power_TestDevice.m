@@ -96,6 +96,38 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             testCase.verifyLessThan(max(abs(h.amplitude(other))), 1e-3);
         end
 
+        function test_harmonics_warns_above_nyquist(testCase)
+            % At fs = 1000 Hz the lines above 500 Hz cannot be resolved
+            fs = 1000;
+            t = (0:fs-1)' / fs;
+            x = struct('current', sin(2*pi*60*t), 'time', t);
+
+            h = testCase.verifyWarning(@() harmonics(x, fs, 60), ...
+                'MHKiT:harmonics:AboveNyquist');
+            testCase.verifyEqual(numel(h.harmonic), 612);
+            testCase.verifyEqual(h.amplitude(h.harmonic > fs / 2), zeros(511, 1));
+            testCase.verifyEqual(h.amplitude(h.harmonic == 60), 1, 'AbsTol', 1e-9);
+        end
+
+        function test_harmonics_errors(testCase)
+            fs = 10000;
+            samples = (0:fs-1)' / fs;
+            current = sin(2*pi*60*samples);
+
+            % (1) Missing time field
+            x_no_time = struct('current', current);
+            testCase.verifyError(@() harmonics(x_no_time, fs, 60), ?MException);
+
+            % (2) Neither current nor voltage
+            x_no_signal = struct('time', samples);
+            testCase.verifyError(@() harmonics(x_no_signal, fs, 60), ?MException);
+
+            % (3) Time vector at 9000 Hz passed with fs = 10000 Hz
+            t9000 = (0:8999)' / 9000;
+            x9000 = struct('current', sin(2*pi*60*t9000), 'time', t9000);
+            testCase.verifyError(@() harmonics(x9000, 10000, 60), ?MException);
+        end
+
         function test_mhkit_validate_sample_rate_hz(testCase)
             % Pass case
             time_s = (0:1/1000:1)';
