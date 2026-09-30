@@ -1,11 +1,8 @@
 function harmonic_subgroups = harmonic_subgroups(harmonics, grid_freq)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Calculates the harmonic subgroups based on IEC 61000-4-7
-%     
-% Computes harmonic subgroups by grouping adjacent harmonics around 
-% target frequencies determined by the grid frequency.
+% Calculate the harmonic subgroups based on IEC 61000-4-7
 %
 % Parameters
 % ------------
@@ -21,13 +18,7 @@ function harmonic_subgroups = harmonic_subgroups(harmonics, grid_freq)
 %       harmonic_subgroups.amplitude : Harmonic subgroup amplitudes
 %       harmonic_subgroups.harmonic : Target harmonic frequencies [Hz]
 %
-% Key Equations
-% -------------
-% 1. Subgroup calculation:
-%    subgroup_value = sqrt(h_prev^2 + h_current^2 + h_next^2)
-%    where h represents harmonic amplitudes at adjacent frequencies
-%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % Create input parser
     p = inputParser;

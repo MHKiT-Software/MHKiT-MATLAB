@@ -1,12 +1,8 @@
 function P = ac_power_three_phase(voltage, current, power_factor, varargin)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Calculates magnitude of active AC power from line to neutral voltage and current
-%     
-% Computes three-phase AC power by taking absolute values of voltage and current,
-% applying line-to-line correction if specified, summing across phases, and 
-% applying power factor.
+% Calculate magnitude of active AC power from line to neutral voltage and current
 %
 % Parameters
 % ------------
@@ -29,18 +25,7 @@ function P = ac_power_three_phase(voltage, current, power_factor, varargin)
 %       P.power : Magnitude of active AC power [W]
 %       P.time : Time vector
 %
-% Key Equations
-% -------------
-% 1. Line-to-neutral power:
-%    P_phase = |V| * |I|
-%
-% 2. Line-to-line power:
-%    P_phase = |V| * sqrt(3) * |I|
-%
-% 3. Total power:
-%    P_total = sum(P_phase) * power_factor
-%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % Create input parser
     p = inputParser;

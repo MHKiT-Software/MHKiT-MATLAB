@@ -1,8 +1,8 @@
 function power_dc = dc_power(voltage, current)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Calculates DC power from voltage and current measurements
+% Calculate DC power from voltage and current
 %
 % Parameters
 % ------------
@@ -23,15 +23,7 @@ function power_dc = dc_power(voltage, current)
 %       power_dc.gross : Vector of gross power (sum of all channels) [W]
 %       power_dc.time : Time vector
 %
-% Key Equations
-% -------------
-% 1. Channel Power:
-%    P_channel = V_channel × I_channel
-%
-% 2. Gross Power:
-%    P_gross = sum(P_channel) across all channels
-%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % Create input parser
     input_parser = inputParser;

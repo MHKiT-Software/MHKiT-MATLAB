@@ -2,7 +2,7 @@ function THCD = total_harmonic_current_distortion(harmonic_subgroups, rated_curr
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Calculates the total harmonic current distortion (THC) based on IEC/TS 62600-30
+% Calculate the total harmonic current distortion (THC) based on IEC TS 62600-30
 %
 % Parameters
 % ------------
@@ -17,13 +17,7 @@ function THCD = total_harmonic_current_distortion(harmonic_subgroups, rated_curr
 %   THCD: double
 %       Total harmonic current distortion [%]
 %
-% Key Equations
-% -------------
-% 1. Harmonic current distortion calculation:
-%    THCD = (sqrt(sum(I_h^2)) / I_1) * 100
-%    where I_h are harmonic currents (orders 2-50) and I_1 is fundamental current
-%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % Create input parser
     p = inputParser;

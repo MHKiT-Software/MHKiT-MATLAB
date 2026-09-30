@@ -23,19 +23,6 @@ function analytic_signal = mhkit_hilbert(x)
 %   Analytic signal, same size as x. real(analytic_signal) equals x and
 %   imag(analytic_signal) is the Hilbert transform of x.
 %
-% Key Equations
-% -------------
-% 1. With X = fft(x) of length n, the analytic signal is ifft(X .* h):
-%    n even: h(1) = h(n/2 + 1) = 1, h(2 : n/2) = 2, all other h = 0
-%    n odd:  h(1) = 1, h(2 : (n+1)/2) = 2, all other h = 0
-%    That is, keep DC (and Nyquist for even n), double the positive
-%    frequencies and zero the negative frequencies.
-%
-% References
-% ----------
-% Marple, S. L. (1999). Computing the discrete-time analytic signal via
-% FFT. IEEE Transactions on Signal Processing, 47(9), 2600-2603.
-%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     arguments

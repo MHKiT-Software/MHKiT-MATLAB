@@ -2,10 +2,7 @@ function interharmonics = interharmonics(harmonics, grid_freq)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Calculates the interharmonics from the harmonics of current
-%     
-% This function computes interharmonic groups by analyzing harmonic amplitude data
-% at specific frequency intervals.
+% Calculate the interharmonics from the harmonic amplitudes of current
 %
 % Parameters
 % ------------
@@ -20,16 +17,6 @@ function interharmonics = interharmonics(harmonics, grid_freq)
 %   interharmonics: structure
 %       interharmonics.amplitude : Interharmonic group amplitudes [same units as input]
 %       interharmonics.harmonic : Frequency vector for interharmonic groups [Hz]
-%
-% Key Equations
-% -------------
-% 1. Interharmonic group calculation:
-%    IH_group = sqrt(sum(H_subset^2))
-%    where H_subset contains harmonics between consecutive grid frequencies
-%
-% 2. Frequency grid generation:
-%    For 60 Hz: f_grid = 0:60:3060
-%    For 50 Hz: f_grid = 0:50:2550
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
