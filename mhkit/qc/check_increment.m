@@ -73,7 +73,7 @@ end
   if (mhkit_is_pandas_dataframe(data)~=1)
     data=qc_data_to_dataframe(data);
   end
-  bound=py.list(bound);
+  bound = py.list(num2cell(double(bound)));
 
 r = struct(py.pecos.monitoring.check_increment(data,bound,...
  	      pyargs("key",options.key,"increment",int32(options.increment),...
