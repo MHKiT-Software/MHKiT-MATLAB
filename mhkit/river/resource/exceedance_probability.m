@@ -1,34 +1,36 @@
-function F=exceedance_probability(Q)
+function F = exceedance_probability(Q)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Calculates the exceedance probability
+%
+% Calculates the exceedance probability
+%
+% Tied values are assigned their average rank, matching xarray's rank
+% used by MHKiT-Python.
 %
 % Parameters
-% ----------
-%     Q : Discharge data [m3/s]
-%
-%         structure of form:
-%
-%           Q.Discharge
-%
-%           Q.time
+% ------------
+% Q : struct
+%   Discharge data
+%     Q.Discharge : vector or matrix [m^3/s]
+%       Discharge, one timeseries per column
+%     Q.time : vector [datetime or s]
+%       Time
 %
 % Returns
-% -------
-%     F : Structure
+% ---------
+% F : struct
+%   Exceedance probability data
+%     F.F : vector or matrix [%]
+%       Exceedance probability, one value per discharge value
+%     F.time : vector [s]
+%       Time, with datetime converted to epoch seconds
 %
-%
-%         F.F: Exceedance probability [unitless]
-%
-%         F.time: time [epoch time (s)]
-%
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     Q struct
 end
+
 arguments (Output)
     F struct
 end

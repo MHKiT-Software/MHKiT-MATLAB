@@ -1,37 +1,48 @@
-function poly=polynomial_fit(x,y,n)
+function poly = polynomial_fit(x, y, n)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Returns a polynomial fit for y given x of order n.
-% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Returns a polynomial fit for y given x of order n
+%
+% Also returns the R-squared score of the fit, computed as the squared
+% Pearson correlation between y and the fitted values, matching
+% MHKiT-Python's use of scipy.stats.linregress.
+%
 % Parameters
-% ----------
-%     x : array
-%         x data for polynomial fit.
+% ------------
+% x : vector
+%   x data for polynomial fit
+% y : vector
+%   y data for polynomial fit, same length as x
+% n : integer
+%   Order of the polynomial fit
 %
-%     y : array
-%         y data for polynomial fit.
-%
-%     n : int
-%         order of the polynomial fit.
-% 
 % Returns
-% --------
-%     poly: structure
+% ---------
+% poly : struct
+%   Polynomial fit
+%     poly.coef : row vector
+%       Polynomial coefficients, highest degree first (as polyval
+%       expects)
+%     poly.fit : double [-]
+%       R-squared coefficient of determination of the fit
 %
-%
-%       poly.coef: polynomial coefficients 
-%
-%       poly.fit: fit coefficients
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     x {mustBeNumeric, mustBeVector}
     y {mustBeNumeric, mustBeVector}
-    n (1,1) {mustBeInteger}
+    n (1,1) {mustBeInteger, mustBeNonnegative}
 end
+
 arguments (Output)
     poly struct
+end
+
+if numel(x) ~= numel(y)
+    error('MHKiT:polynomial_fit:InvalidInput', ...
+        'polynomial_fit requires x (%d) and y (%d) to have the same length.', ...
+        numel(x), numel(y));
 end
 
 % Coefficients ordered highest degree first, matching numpy's poly1d
@@ -47,5 +58,3 @@ poly.coef = coef;
 poly.fit = r_squared;
 
 end
-
-

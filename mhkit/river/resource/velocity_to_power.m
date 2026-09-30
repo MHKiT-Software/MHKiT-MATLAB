@@ -1,41 +1,37 @@
-function p=velocity_to_power(V,polynomial_coefficients,cut_in,cut_out)
+function p = velocity_to_power(V, polynomial_coefficients, cut_in, cut_out)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Calculates power given velocity data and the relationship
-%     between velocity and power from an individual turbine
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Calculates power given velocity data and the relationship between
+% velocity and power from an individual turbine
 %
 % Parameters
-% ----------
-%     V : Velocity [m/s]
-%
-%         structure of form:
-%
-%           V.V: Velocity [m/s]
-%
-%           V.time: time [datetime or s]
-%
-%     polynomial_coefficients : vector
-%         vector of polynomial coefficients that discribe the relationship between
-%         velocity and power at an individual turbine
-%
-%     cut_in: float
-%         Velocity values below cut_in are not used to compute P
-%
-%     cut_out: float
-%         Velocity values above cut_out are not used to compute P
+% ------------
+% V : struct
+%   Velocity data
+%     V.V : vector or matrix [m/s]
+%       Velocity
+%     V.time : vector [datetime or s]
+%       Time
+% polynomial_coefficients : vector
+%   Polynomial coefficients (highest degree first, e.g. poly.coef from
+%   polynomial_fit) that describe the relationship between velocity and
+%   power at an individual turbine
+% cut_in : double [m/s]
+%   Velocity values below cut_in produce 0 power
+% cut_out : double [m/s]
+%   Velocity values above cut_out produce 0 power
 %
 % Returns
-% -------
-%     p : Structure
+% ---------
+% p : struct
+%   Power data
+%     p.P : vector or matrix [W]
+%       Power, one value per velocity value
+%     p.time : vector [s]
+%       Time, with datetime converted to epoch seconds
 %
-%
-%        P.P: Power [W]
-%
-%        P.time: epoch time [s]
-%
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     V struct
@@ -43,6 +39,7 @@ arguments (Input)
     cut_in (1,1) {mustBeNumeric}
     cut_out (1,1) {mustBeNumeric}
 end
+
 arguments (Output)
     p struct
 end
@@ -63,4 +60,3 @@ p.P = power;
 p.time = time;
 
 end
-

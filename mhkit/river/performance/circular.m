@@ -1,27 +1,28 @@
-function [D_E,projected_capture_area]=circular(diameter)
+function [D_E, projected_capture_area] = circular(diameter)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Calculates the equivalent diameter and projected capture area of a
-%     circular turbine
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Calculates the equivalent diameter and projected capture area of a
+% circular turbine
 %
 % Parameters
 % ------------
-%     diameter : float
-%         Turbine diameter [m]
+% diameter : double [m]
+%   Turbine diameter
 %
 % Returns
 % ---------
-%     D_E : float
-%        Equivalent diameter [m]
+% D_E : double [m]
+%   Equivalent diameter
+% projected_capture_area : double [m^2]
+%   Projected capture area
 %
-%     projected_capture_area : float
-%         Projected capture area [m^2]
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     diameter (1,1) {mustBeNumeric}
 end
+
 arguments (Output)
     D_E (1,1) {mustBeNumeric}
     projected_capture_area (1,1) {mustBeNumeric}
@@ -31,4 +32,3 @@ D_E = diameter;
 projected_capture_area = (1/4) * pi * (D_E.^2);
 
 end
-

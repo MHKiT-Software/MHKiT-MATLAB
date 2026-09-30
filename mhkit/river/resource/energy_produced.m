@@ -1,29 +1,30 @@
-function E=energy_produced(P,seconds)
+function E = energy_produced(P, seconds)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Returns the energy produced for a given time period provided
-%     exceedence probability and power.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Returns the energy produced for a given time period provided power
+%
+% The expected power is computed from a 100-bin histogram of the power
+% data, matching MHKiT-Python's use of numpy.histogram and
+% scipy.stats.rv_histogram.
 %
 % Parameters
-% ----------
-%     P : Power [W]
-%
-%         structure of form:
-%
-%           P.P
-%
-%           P.time [s]
-%
-%     seconds : float
-%         seconds in the time period of interest
+% ------------
+% P : struct
+%   Power data
+%     P.P : vector or matrix [W]
+%       Power
+%     P.time : vector [s]
+%       Time
+% seconds : double [s]
+%   Seconds in the time period of interest
 %
 % Returns
-% -------
-%     E : float
-%         Energy [J] produced in the given length of time
+% ---------
+% E : double [J]
+%   Energy produced in the given length of time
 %
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     P struct
