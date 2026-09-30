@@ -10,9 +10,9 @@ function reference_model = reference_model_power_matrix(device)
 % https://openei.org/wiki/PRIMRE/Signature_Projects/Reference_Model.
 % The power matrices are from the National Laboratory of the Rockies
 % (NLR) System Advisor Model (SAM) wave energy converter library,
-% https://github.com/NatLabRockies/SAM, and are stored in
-% mhkit/wave/reference_models/<device>.mat by
-% scripts/generate_reference_model_power_matrices.m.
+% https://github.com/NatLabRockies/SAM. They ship with MHKiT as
+% pre-built .mat files, mhkit/wave/reference_models/<device>.mat; see the
+% data_source and last_modified fields for provenance.
 %
 % Parameters
 % ------------
