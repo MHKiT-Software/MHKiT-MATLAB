@@ -1,32 +1,37 @@
-function [D_E,projected_capture_area]=rectangular(h,w)
+function [D_E, projected_capture_area] = rectangular(h, w)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Calculates the equivalent diameter and projected capture area of a
-%     retangular turbine
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Calculates the equivalent diameter and projected capture area of a
+% rectangular turbine
 %
 % Parameters
 % ------------
-%     h : float
-%         Turbine height [m]
-%
-%     w : float
-%         Turbine width [m]
+% h : double [m]
+%   Turbine height
+% w : double [m]
+%   Turbine width
 %
 % Returns
 % ---------
-%     D_E : float
-%        Equivalent diameter [m]
+% D_E : double [m]
+%   Equivalent diameter
+% projected_capture_area : double [m^2]
+%   Projected capture area
 %
-%     projected_capture_area : float
-%         Projected capture area [m^2]
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
+arguments (Input)
+    h (1,1) {mustBeNumeric}
+    w (1,1) {mustBeNumeric}
+end
 
-result=py.mhkit.river.performance.rectangular(h,w);
+arguments (Output)
+    D_E (1,1) {mustBeNumeric}
+    projected_capture_area (1,1) {mustBeNumeric}
+end
 
-resultc=cell(result);
-D_E=resultc{1};
-projected_capture_area=resultc{2};
+D_E = sqrt(4.0 * h * w / pi);
+projected_capture_area = h * w;
 
+end

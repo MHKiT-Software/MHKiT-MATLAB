@@ -1,29 +1,35 @@
-function [D_E,projected_capture_area]=multiple_circular(diameters)
+function [D_E, projected_capture_area] = multiple_circular(diameters)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Calculates the equivalent diameter and projected capture area of a
-%     multiple circular turbine
+%
+% Calculates the equivalent diameter and projected capture area of a
+% multiple circular turbine
 %
 % Parameters
 % ------------
-%     diameters: array or vector
-%         vector of device diameters [m]
+% diameters : vector [m]
+%   Device diameters
 %
 % Returns
 % ---------
-%     D_E : float
-%        Equivalent diameter [m]
+% D_E : double [m]
+%   Equivalent diameter
+% projected_capture_area : double [m^2]
+%   Projected capture area
 %
-%     projected_capture_area : float
-%         Projected capture area [m^2]
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
-diameters=py.list(diameters);
-result=py.mhkit.river.performance.multiple_circular(diameters);
+arguments (Input)
+    diameters {mustBeNumeric, mustBeVector}
+end
 
-resultc=cell(result);
-D_E=resultc{1};
-projected_capture_area=resultc{2};
+arguments (Output)
+    D_E (1,1) {mustBeNumeric}
+    projected_capture_area (1,1) {mustBeNumeric}
+end
 
+diameters_squared = diameters.^2;
+D_E = sqrt(sum(diameters_squared));
+projected_capture_area = 0.25 * pi * sum(diameters_squared);
+
+end

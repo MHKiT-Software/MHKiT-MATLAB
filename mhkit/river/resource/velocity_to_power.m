@@ -1,95 +1,62 @@
-function p=velocity_to_power(V,polynomial_coefficients,cut_in,cut_out)
+function p = velocity_to_power(V, polynomial_coefficients, cut_in, cut_out)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Calculates power given velocity data and the relationship
-%     between velocity and power from an individual turbine
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Calculates power given velocity data and the relationship between
+% velocity and power from an individual turbine
 %
 % Parameters
-% ----------
-%     V : Velocity [m/s]
-%
-%          Pandas dataframe indexed by time [datetime or s]
-%
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(timeseries,time,x)
-%
-%         OR
-%
-%         structure of form:
-%
-%           V.V: Velocity [m/s]
-%
-%           V.time: time [datetime or s]
-%
-%     polynomial_coefficients : vector
-%         vector of polynomial coefficients that discribe the relationship between
-%         velocity and power at an individual turbine
-%
-%     cut_in: float
-%         Velocity values below cut_in are not used to compute P
-%
-%     cut_out: float
-%         Velocity values above cut_out are not used to compute P
+% ------------
+% V : struct
+%   Velocity data
+%     V.V : vector or matrix [m/s]
+%       Velocity
+%     V.time : vector [datetime or s]
+%       Time
+% polynomial_coefficients : vector
+%   Polynomial coefficients (highest degree first, e.g. poly.coef from
+%   polynomial_fit) that describe the relationship between velocity and
+%   power at an individual turbine
+% cut_in : double [m/s]
+%   Velocity values below cut_in produce 0 power
+% cut_out : double [m/s]
+%   Velocity values above cut_out produce 0 power
 %
 % Returns
-% -------
-%     p : Structure
+% ---------
+% p : struct
+%   Power data
+%     p.P : vector or matrix [W]
+%       Power, one value per velocity value
+%     p.time : vector [s]
+%       Time, with datetime converted to epoch seconds
 %
-%
-%        P.P: Power [W]
-%
-%        P.time: epoch time [s]
-%
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-py.importlib.import_module('mhkit_python_utils');
-py.importlib.import_module('mhkit');
-
-if (isa(V,'py.pandas.core.frame.DataFrame')~=1)
-    x=size(V.V);
-    li=py.list();
-    if x(2)>1
-        for i = 1:x(2)
-            app=py.list(V.V(:,i));
-            li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-        end
-    elseif x(2) ==1
-        li=V.V;
-    end
-
-
-    % V=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,V.time,int32(x(2)));
-    V = py.mhkit_python_utils.pandas_dataframe.list_to_series(li, V.time);
+arguments (Input)
+    V struct
+    polynomial_coefficients {mustBeNumeric, mustBeVector}
+    cut_in (1,1) {mustBeNumeric}
+    cut_out (1,1) {mustBeNumeric}
 end
 
-polynomial_coefficients=py.numpy.poly1d(polynomial_coefficients);
-cut_in=py.float(cut_in);
-cut_out=py.float(cut_out);
-Pdf=py.mhkit.river.resource.velocity_to_power(V,polynomial_coefficients,cut_in,cut_out);
+arguments (Output)
+    p struct
+end
 
+time = V.time;
+if any(isdatetime(time))
+    time = posixtime(time);
+end
 
+velocity = V.V;
+power = polyval(polynomial_coefficients, velocity);
 
-xx=cell(Pdf.axes);
-v=xx{2};
-vv=cell(py.list(py.numpy.nditer(v.values,pyargs("flags",{"refs_ok"}))));
+% Turbine produces 0 power outside of the cut-in/cut-out bounds
+power(velocity < cut_in) = 0.0;
+power(velocity > cut_out) = 0.0;
 
-vals=double(py.array.array('d',py.numpy.nditer(Pdf.values)));
-sha=cell(Pdf.values.shape);
-x=int64(sha{1,1});
-y=int64(sha{1,2});
+p.P = power;
+p.time = time;
 
-vals=reshape(vals,[x,y]);
-
-si=size(vals);
- for i=1:si(2)
-    test=string(py.str(vv{i}));
-    newname=split(test,",");
-
-    p.(newname(1))=vals(:,i);
-
- end
- p.time=double(py.array.array('d',py.numpy.nditer(Pdf.index)));
-
+end

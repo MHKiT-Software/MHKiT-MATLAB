@@ -1,62 +1,69 @@
-function E=energy_produced(P,seconds)
+function E = energy_produced(P, seconds)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Returns the energy produced for a given time period provided
-%     exceedence probability and power.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Returns the energy produced for a given time period provided power
+%
+% The expected power is computed from a 100-bin histogram of the power
+% data, matching MHKiT-Python's use of numpy.histogram and
+% scipy.stats.rv_histogram.
 %
 % Parameters
-% ----------
-%     P : Power [W]
-%
-%         Pandas dataframe indexed by time [datetime or s]:
-%
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(timeseries,time,x)
-%
-%         OR
-%
-%         structure of form:
-%
-%           P.P
-%
-%           P.time [s]
-%
-%     seconds : float
-%         seconds in the time period of interest
+% ------------
+% P : struct
+%   Power data
+%     P.P : vector or matrix [W]
+%       Power
+%     P.time : vector [s]
+%       Time
+% seconds : double [s]
+%   Seconds in the time period of interest
 %
 % Returns
-% -------
-%     E : Structure
+% ---------
+% E : double [J]
+%   Energy produced in the given length of time
 %
-%
-%        P.P: Power [W]
-%
-%        P.time: epoch time [s]
-%
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit_python_utils');
-py.importlib.import_module('mhkit');
-
-
-if (isa(P,'py.pandas.core.frame.DataFrame')~=1)
-    x=size(P.P);
-    li=py.list();
-    if x(2)>1
-        for i = 1:x(2)
-            app=py.list(P.P(:,i));
-            li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-        end
-    elseif x(2) ==1
-        li=P.P;
-    end
-
-
-    % P=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,P.time,int32(x(2)));
-    P = py.mhkit_python_utils.pandas_dataframe.list_to_series(li, P.time);
+arguments (Input)
+    P struct
+    seconds (1,1) {mustBeNumeric}
 end
 
-E=py.mhkit.river.resource.energy_produced(P,seconds);
+arguments (Output)
+    E (1,1) {mustBeNumeric}
+end
 
+power_data = P.P(:);
+
+% 100 equal-width bins spanning the data range, matching numpy.histogram,
+% which widens a zero-width range by 0.5 on either side
+lower = min(power_data);
+upper = max(power_data);
+if lower == upper
+    lower = lower - 0.5;
+    upper = upper + 0.5;
+end
+edges = linspace(lower, upper, 101);
+counts = histcounts(power_data, edges);
+
+% Piecewise-constant probability density function of the histogram
+density = counts ./ (sum(counts) * diff(edges));
+
+% Evaluate the pdf like scipy.stats.rv_histogram, which assigns x to the
+% bin on its right (searchsorted side='right'), so the pdf is 0 at the
+% upper edge
+x = linspace(edges(1), edges(end), 1000);
+bin = discretize(x, edges);
+bin(x >= edges(end)) = NaN;
+in_range = ~isnan(bin);
+pdf_x = zeros(size(x));
+pdf_x(in_range) = density(bin(in_range));
+
+% Expected value of power via trapezoidal integration of x*pdf(x)
+expected_power = trapz(x, x .* pdf_x);
+
+E = seconds * expected_power;
+
+end
