@@ -66,6 +66,42 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             assertEqual(testCase,inter_harmonics.amplitude', interharmonic,'AbsTol',0.1)
         end
 
+        function test_mhkit_validate_sample_rate_hz(testCase)
+            % Pass case
+            time_s = (0:1/1000:1)';
+            result = mhkit_validate_sample_rate_hz(time_s, 1000);
+            testCase.verifyTrue(result.pass);
+            testCase.verifyEqual(result.median_sample_rate_hz, 1000, 'RelTol', 1e-6);
+            testCase.verifyEqual(result.mean_sample_rate_hz, 1000, 'RelTol', 1e-6);
+            testCase.verifyTrue(result.is_uniform);
+
+            % Expected rate omitted: defaults to the nominal rate of the record
+            result_nominal = mhkit_validate_sample_rate_hz(time_s);
+            testCase.verifyTrue(result_nominal.pass);
+            testCase.verifyTrue(result_nominal.is_uniform);
+
+            % Outlier tolerance: one irregular interval must not fail the record
+            time_outlier = (0:1/1000:1)';
+            time_outlier(500) = time_outlier(500) + 0.4 / 1000;
+            result = mhkit_validate_sample_rate_hz(time_outlier, 1000);
+            testCase.verifyTrue(result.pass);
+            testCase.verifyEqual(result.median_sample_rate_hz, 1000, 'RelTol', 1e-6);
+            testCase.verifyGreaterThan(result.max_deviation_percent, 1);
+            testCase.verifyEqual(result.time_format, "seconds elapsed");
+            testCase.verifyFalse(result.is_uniform);
+            testCase.verifyEqual(result.max_interval_deviation_percent, 40, 'RelTol', 1e-2);
+
+            % Fail case: 1000 Hz data against an expected 1100 Hz
+            result_fail = mhkit_validate_sample_rate_hz(time_s, 1100);
+            testCase.verifyFalse(result_fail.pass);
+
+            % POSIX timestamp case
+            time_posix = 1.7e9 + (0:0.001:1)';
+            result_posix = mhkit_validate_sample_rate_hz(time_posix, 1000);
+            testCase.verifyTrue(result_posix.pass);
+            testCase.verifyEqual(result_posix.time_format, "POSIX timestamp");
+        end
+
         function test_instfreq(testCase)
             frequency = 60;
             t = 600;

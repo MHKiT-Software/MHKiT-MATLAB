@@ -22,7 +22,7 @@ function harmonics_result = harmonics(input_data, data_sample_rate_hz, grid_freq
 %
 %   options.tolerance_percent: double (optional, default = 1)
 %       Allowed deviation [%] between the sample rate implied by
-%       input_data.time and data_sample_rate_hz. See validate_sample_rate_hz.
+%       input_data.time and data_sample_rate_hz. See mhkit_validate_sample_rate_hz.
 %
 % Returns
 % ---------
@@ -70,7 +70,7 @@ function harmonics_result = harmonics(input_data, data_sample_rate_hz, grid_freq
     end
 
     % Validate time vector sample rate
-    sample_rate_validation = validate_sample_rate_hz(input_data.time, data_sample_rate_hz, ...
+    sample_rate_validation = mhkit_validate_sample_rate_hz(input_data.time, data_sample_rate_hz, ...
         'tolerance_percent', options.tolerance_percent);
 
     if ~sample_rate_validation.pass
