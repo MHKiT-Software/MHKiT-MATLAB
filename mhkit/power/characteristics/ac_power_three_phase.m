@@ -105,31 +105,19 @@ function P = ac_power_three_phase(voltage, current, power_factor, varargin)
 
     % Validate time vectors match
     if ~isequal(voltage_time, current_time)
-        error('MHKiT:ac_power_three_phase: Time vectors must match between voltage and current structures');
+        error('MHKiT:ac_power_three_phase: voltage and current time vectors must match');
     end
 
     % After validation, use the time vector from voltage
     time_vector = voltage_time;
 
-    % Calculate absolute values of voltage and current
-    abs_voltage = abs(voltage_data);
-    abs_current = abs(current_data);
-    
-    % Calculate power for each phase
+    % Instantaneous power summed across the three phases, as in MHKiT-Python
+    active_power = abs(sum(voltage_data .* current_data, 2)) * power_factor;
+
     if line_to_line
-        % For line-to-line measurements, apply sqrt(3) correction
-        power_per_phase = abs_current .* (abs_voltage * sqrt(3));
-    else
-        % For line-to-neutral measurements
-        power_per_phase = abs_current .* abs_voltage;
+        active_power = active_power * sqrt(3);
     end
-    
-    % Sum power across all three phases (sum along columns)
-    total_power = sum(power_per_phase, 2);
-    
-    % Apply power factor
-    active_power = total_power * power_factor;
-    
+
     % Create output structure
     P = struct();
     P.power = active_power;
