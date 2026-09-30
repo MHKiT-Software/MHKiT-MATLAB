@@ -1,6 +1,6 @@
 function out = band_aggregate(spsdl, octave, fmin, fmax, method)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Reorganize spectral density level frequency tensor into fractional octave bands and applies a function to them
 %

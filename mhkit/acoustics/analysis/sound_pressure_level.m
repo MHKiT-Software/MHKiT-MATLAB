@@ -1,6 +1,6 @@
 function spl = sound_pressure_level(spsd, fmin, fmax)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Calculate sound pressure level (SPL) in a specified frequency band from
 % the mean square sound pressure spectral density (SPSD)
@@ -25,7 +25,7 @@ function spl = sound_pressure_level(spsd, fmin, fmax)
 %       spl.name : Data name identifier
 %       spl.units : Data units string
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
     spsd struct
