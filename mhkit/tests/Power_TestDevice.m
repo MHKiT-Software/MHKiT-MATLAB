@@ -66,6 +66,36 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             assertEqual(testCase,inter_harmonics.amplitude', interharmonic,'AbsTol',0.1)
         end
 
+        function test_harmonics_multi_harmonic_60hz(testCase)
+            % DC + fundamental + orders 3 and 5 + one interharmonic at 1.5 x
+            % the fundamental, sampled at 10 kHz for 1 s
+            fs = 10000;
+            frequency = 60;
+            samples = (0:fs-1)' / fs;
+            current = 0.3 ...
+                + 1.0  * sin(2*pi*frequency*samples) ...
+                + 0.10 * sin(2*pi*3*frequency*samples) ...
+                + 0.05 * sin(2*pi*5*frequency*samples) ...
+                + 0.02 * sin(2*pi*1.5*frequency*samples);
+            x = struct('current', current, 'time', samples);
+
+            h = harmonics(x, fs, frequency);
+
+            testCase.verifyEqual(size(h.amplitude), [612 1]);
+            testCase.verifyEqual(size(h.harmonic), [612 1]);
+            testCase.verifyEqual(h.type, 'current');
+
+            expected_hz = [0, 60, 180, 300, 90];
+            expected_amp = [0.3, 1.0, 0.10, 0.05, 0.02];
+            for k = 1:numel(expected_hz)
+                testCase.verifyEqual(h.amplitude(h.harmonic == expected_hz(k)), ...
+                    expected_amp(k), 'AbsTol', 1e-3, ...
+                    sprintf('Amplitude at %d Hz', expected_hz(k)));
+            end
+            other = ~ismember(h.harmonic, expected_hz);
+            testCase.verifyLessThan(max(abs(h.amplitude(other))), 1e-3);
+        end
+
         function test_mhkit_validate_sample_rate_hz(testCase)
             % Pass case
             time_s = (0:1/1000:1)';
