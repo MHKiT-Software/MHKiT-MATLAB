@@ -38,10 +38,14 @@ function result = mhkit_validate_sample_rate_hz(time_vector, expected_sample_rat
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    arguments
+    arguments (Input)
         time_vector double {mustBeVector}
         expected_sample_rate_hz double {mustBePositive} = []
         options.tolerance_percent double {mustBeInRange(options.tolerance_percent, 0, 100)} = 1.0
+    end
+
+    arguments (Output)
+        result struct
     end
     
     % Validate minimum length

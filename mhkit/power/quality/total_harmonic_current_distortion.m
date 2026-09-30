@@ -19,23 +19,14 @@ function THCD = total_harmonic_current_distortion(harmonic_subgroups, rated_curr
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    % Create input parser
-    p = inputParser;
-    
-    % Define validation functions
-    validStruct = @(x) isstruct(x);
-    validNumeric = @(x) isnumeric(x) && isscalar(x);
-    
-    % Add required parameters
-    addRequired(p, 'harmonic_subgroups', validStruct);
-    addRequired(p, 'rated_current', validNumeric);
-    
-    % Parse inputs
-    parse(p, harmonic_subgroups, rated_current);
-    
-    % Extract validated inputs
-    harmonic_subgroups = p.Results.harmonic_subgroups;
-    rated_current = p.Results.rated_current;
+    arguments (Input)
+        harmonic_subgroups struct
+        rated_current (1,1) {mustBeNumeric, mustBePositive}
+    end
+
+    arguments (Output)
+        THCD
+    end
     
     % Validate input structures have required fields
     if ~isfield(harmonic_subgroups, 'amplitude')

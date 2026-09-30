@@ -29,6 +29,17 @@ function u_fic=calc_simulated_voltage(u0,i_m,Rfic,Lfic)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    arguments (Input)
+        u0 {mustBeNumeric}
+        i_m struct
+        Rfic {mustBeNumeric}
+        Lfic {mustBeNumeric}
+    end
+
+    arguments (Output)
+        u_fic {mustBeNumeric}
+    end
+
     % check input:
     if ~isfield(i_m,'time') || ~isfield(i_m, 'data')
         error('MHKiT:calc_simulated_voltage:InvalidInput', 'invalid handles in structure, must contain x.data & x.time');

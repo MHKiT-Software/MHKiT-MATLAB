@@ -39,6 +39,17 @@ function [alpha0,freq] = calc_fundamental_freq(u_m,method,methodopts)
 %   Step3. Interpolate estimated freq back to u_m.time
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    arguments (Input)
+        u_m struct
+        method {mustBeTextScalar}
+        methodopts cell
+    end
+
+    arguments (Output)
+        alpha0 {mustBeNumeric}
+        freq struct
+    end
+
     % check input:
     if ~isfield(u_m,'time') || ~isfield(u_m, 'data')
         error('MHKiT:calc_fundamental_freq:InvalidInput', 'invalid handles in structure, must contain x.data & x.time');

@@ -25,6 +25,15 @@ function alpha_m = calc_electrical_angle(freq,alpha0)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    arguments (Input)
+        freq struct
+        alpha0 (1,1) {mustBeNumeric}
+    end
+
+    arguments (Output)
+        alpha_m {mustBeNumeric}
+    end
+
     % check input:
     if ~isfield(freq,'time') || ~isfield(freq, 'data')
         error('MHKiT:calc_electrical_angle:InvalidInput', 'invalid handles in structure, must contain x.data & x.time');

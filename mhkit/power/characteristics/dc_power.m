@@ -25,22 +25,14 @@ function power_dc = dc_power(voltage, current)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    % Create input parser
-    input_parser = inputParser;
-    
-    % Define validation functions
-    valid_struct = @(x) isstruct(x);
-    
-    % Add required parameters
-    addRequired(input_parser, 'voltage', valid_struct);
-    addRequired(input_parser, 'current', valid_struct);
-    
-    % Parse inputs
-    parse(input_parser, voltage, current);
-    
-    % Extract validated inputs
-    voltage = input_parser.Results.voltage;
-    current = input_parser.Results.current;
+    arguments (Input)
+        voltage struct
+        current struct
+    end
+
+    arguments (Output)
+        power_dc struct
+    end
     
     % Validate input structures have required fields
     if ~isfield(voltage, 'voltage')

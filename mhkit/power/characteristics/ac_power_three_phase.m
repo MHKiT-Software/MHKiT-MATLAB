@@ -1,4 +1,4 @@
-function P = ac_power_three_phase(voltage, current, power_factor, varargin)
+function P = ac_power_three_phase(voltage, current, power_factor, line_to_line)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -27,30 +27,18 @@ function P = ac_power_three_phase(voltage, current, power_factor, varargin)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    % Create input parser
-    p = inputParser;
-    
-    % Define validation functions
-    validStructOrNumeric = @(x) isstruct(x) || isnumeric(x);
-    validNumeric = @(x) isnumeric(x) && isscalar(x);
-    validLogical = @(x) isscalar(x) && (islogical(x) || (isnumeric(x) && (x == 0 || x == 1)));
-    
-    % Add required parameters
-    addRequired(p, 'voltage', validStructOrNumeric);
-    addRequired(p, 'current', validStructOrNumeric);
-    addRequired(p, 'power_factor', validNumeric);
-    
-    % Add optional parameter
-    addOptional(p, 'line_to_line', false, validLogical);
-    
-    % Parse inputs
-    parse(p, voltage, current, power_factor, varargin{:});
-    
-    % Extract validated inputs
-    voltage = p.Results.voltage;
-    current = p.Results.current;
-    power_factor = p.Results.power_factor;
-    line_to_line = logical(p.Results.line_to_line);
+    arguments (Input)
+        voltage {mustBeA(voltage, ["struct", "numeric"])}
+        current {mustBeA(current, ["struct", "numeric"])}
+        power_factor (1,1) {mustBeNumeric}
+        line_to_line (1,1) {mustBeNumericOrLogical, mustBeMember(line_to_line, [0, 1])} = false
+    end
+
+    arguments (Output)
+        P struct
+    end
+
+    line_to_line = logical(line_to_line);
 
     % Validate power factor is between 0 and 1
     if power_factor < 0 || power_factor > 1

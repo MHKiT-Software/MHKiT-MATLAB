@@ -20,23 +20,14 @@ function interharmonics = interharmonics(harmonics, grid_freq)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    % Create input parser
-    p = inputParser;
-    
-    % Define validation functions
-    validStruct = @(x) isstruct(x);
-    validGridFreq = @(x) isnumeric(x) && isscalar(x) && (x == 50 || x == 60);
-    
-    % Add required parameters
-    addRequired(p, 'harmonics', validStruct);
-    addRequired(p, 'grid_freq', validGridFreq);
-    
-    % Parse inputs
-    parse(p, harmonics, grid_freq);
-    
-    % Extract validated inputs
-    harmonics = p.Results.harmonics;
-    grid_freq = p.Results.grid_freq;
+    arguments (Input)
+        harmonics struct
+        grid_freq (1,1) {mustBeNumeric, mustBeMember(grid_freq, [50, 60])}
+    end
+
+    arguments (Output)
+        interharmonics struct
+    end
     
     % Validate input structure has required fields
     if ~isfield(harmonics, 'amplitude')

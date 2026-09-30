@@ -37,11 +37,15 @@ function harmonics_result = harmonics(input_data, data_sample_rate_hz, grid_freq
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    arguments
+    arguments (Input)
         input_data struct
         data_sample_rate_hz (1,1) double {mustBePositive}
         grid_freq_hz (1,1) double {mustBeMember(grid_freq_hz, [50, 60])}
         options.tolerance_percent (1,1) double {mustBePositive} = 1
+    end
+
+    arguments (Output)
+        harmonics_result struct
     end
 
     % Frequency spacing, IEC 61000-4-7 clause 3.4.1 NOTE 2

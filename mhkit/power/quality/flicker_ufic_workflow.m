@@ -74,6 +74,21 @@ function out = flicker_ufic_workflow(Sr,Un,SCR,fg, ...
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+arguments (Input)
+    Sr (1,1) {mustBeNumeric}
+    Un (1,1) {mustBeNumeric}
+    SCR (1,1) {mustBeNumeric}
+    fg (1,1) {mustBeNumeric}
+    u_m struct
+    i_m struct
+    method {mustBeTextScalar}
+    methodopts cell
+end
+
+arguments (Output)
+    out struct
+end
+
 % check input:
 if ~isfield(u_m,'time') || ~isfield(u_m, 'data') ||...
         ~isfield(i_m,'time') || ~isfield(i_m, 'data')

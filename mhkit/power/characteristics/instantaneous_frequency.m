@@ -25,8 +25,12 @@ function frequency = instantaneous_frequency(voltage)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    arguments
+    arguments (Input)
         voltage struct
+    end
+
+    arguments (Output)
+        frequency struct
     end
 
     % Validate input structure has required fields

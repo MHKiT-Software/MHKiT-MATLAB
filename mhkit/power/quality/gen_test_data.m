@@ -49,6 +49,23 @@ function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
 % B.3.5 Slow frequency changes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    arguments (Input)
+        Un (1,1) {mustBeNumeric}
+        In (1,1) {mustBeNumeric}
+        fg (1,1) {mustBeNumeric}
+        fs (1,1) {mustBeNumeric}
+        fm (1,1) {mustBeNumeric}
+        fv (1,1) {mustBeNumeric}
+        DeltaI_I {mustBeNumeric}
+        opt (1,1) {mustBeNumeric}
+        T (1,1) {mustBeNumeric}
+    end
+
+    arguments (Output)
+        i_m struct
+        u_m struct
+    end
+
     %% time:
     t = 0:1/fs:T-1/fs; %600=10min
     t = t';
