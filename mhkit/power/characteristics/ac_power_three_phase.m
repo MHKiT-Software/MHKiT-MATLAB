@@ -16,7 +16,7 @@ function P = ac_power_three_phase(voltage, current, power_factor, varargin)
 %       current.time : Time vector (n_time x 1) (if time series data)
 %   power_factor: numeric scalar
 %       Power factor for the efficiency of the system [dimensionless]
-%   'LineToLine': name-value pair (optional)
+%   line_to_line: logical (optional)
 %       Set to true if voltage measurements are line-to-line (default: false)
 %
 % Returns
@@ -33,15 +33,15 @@ function P = ac_power_three_phase(voltage, current, power_factor, varargin)
     % Define validation functions
     validStructOrNumeric = @(x) isstruct(x) || isnumeric(x);
     validNumeric = @(x) isnumeric(x) && isscalar(x);
-    validLogical = @(x) islogical(x) && isscalar(x);
+    validLogical = @(x) isscalar(x) && (islogical(x) || (isnumeric(x) && (x == 0 || x == 1)));
     
     % Add required parameters
     addRequired(p, 'voltage', validStructOrNumeric);
     addRequired(p, 'current', validStructOrNumeric);
     addRequired(p, 'power_factor', validNumeric);
     
-    % Add optional name-value pairs
-    addParameter(p, 'LineToLine', false, validLogical);
+    % Add optional parameter
+    addOptional(p, 'line_to_line', false, validLogical);
     
     % Parse inputs
     parse(p, voltage, current, power_factor, varargin{:});
@@ -50,7 +50,7 @@ function P = ac_power_three_phase(voltage, current, power_factor, varargin)
     voltage = p.Results.voltage;
     current = p.Results.current;
     power_factor = p.Results.power_factor;
-    line_to_line = p.Results.LineToLine;
+    line_to_line = logical(p.Results.line_to_line);
 
     % Validate power factor is between 0 and 1
     if power_factor < 0 || power_factor > 1
