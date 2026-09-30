@@ -1,8 +1,8 @@
 function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Generate test data according to IEC61400-21-1 Annex B.3 to be used for
-%   the verification test of the measurement procedure for flicker.
+% Generate test data according to IEC 61400-21-1:2019 Annex B.3 to be used for
+% the verification test of the measurement procedure for flicker.
 %
 % Parameters
 % -----------
@@ -21,7 +21,7 @@ function [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,T)
 %       into 60 different cases, with fν in [0.5:0.5:30].
 %   DeltaI_I: double array (4)
 %       Relative current changes (%) according to Table B.2 and Table B.3
-%       in IECTS61400-21-1.
+%       in IEC 61400-21-1:2019.
 %   opt: int
 %       Option number used to indicate different test datasets.
 %   T: double
