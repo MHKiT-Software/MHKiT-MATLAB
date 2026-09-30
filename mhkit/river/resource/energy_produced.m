@@ -30,32 +30,36 @@ arguments (Input)
     P struct
     seconds (1,1) {mustBeNumeric}
 end
+
 arguments (Output)
     E (1,1) {mustBeNumeric}
 end
 
 power_data = P.P(:);
 
-% Histogram of power with 100 equal-width bins spanning the data range
-[counts, edges] = histcounts(power_data, 100);
-bin_widths = diff(edges);
-total_count = sum(counts);
+% 100 equal-width bins spanning the data range, matching numpy.histogram,
+% which widens a zero-width range by 0.5 on either side
+lower = min(power_data);
+upper = max(power_data);
+if lower == upper
+    lower = lower - 0.5;
+    upper = upper + 0.5;
+end
+edges = linspace(lower, upper, 101);
+counts = histcounts(power_data, edges);
 
 % Piecewise-constant probability density function of the histogram
-density = counts ./ (total_count * bin_widths);
+density = counts ./ (sum(counts) * diff(edges));
 
+% Evaluate the pdf like scipy.stats.rv_histogram, which assigns x to the
+% bin on its right (searchsorted side='right'), so the pdf is 0 at the
+% upper edge
 x = linspace(edges(1), edges(end), 1000);
+bin = discretize(x, edges);
+bin(x >= edges(end)) = NaN;
+in_range = ~isnan(bin);
 pdf_x = zeros(size(x));
-
-nbins = numel(counts);
-for i = 1:nbins
-    if i < nbins
-        mask = x >= edges(i) & x < edges(i + 1);
-    else
-        mask = x >= edges(i) & x <= edges(i + 1);
-    end
-    pdf_x(mask) = density(i);
-end
+pdf_x(in_range) = density(bin(in_range));
 
 % Expected value of power via trapezoidal integration of x*pdf(x)
 expected_power = trapz(x, x .* pdf_x);
@@ -63,4 +67,3 @@ expected_power = trapz(x, x .* pdf_x);
 E = seconds * expected_power;
 
 end
-
