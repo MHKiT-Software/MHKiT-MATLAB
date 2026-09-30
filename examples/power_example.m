@@ -5,14 +5,18 @@
 % and harmonics from time series of voltage and current.
 
 %% Load Power Data
-% We will begin by reading in time-series data of measured three phase (a,b,and,c)
-% voltage and current. The IEC TS 62600-30 requires that you perform power quality
-% assessments on a minimum of 10-min time-series data, but for this example we
-% will only look at a fraction of that.
+% We will begin by reading in time-series data of measured three-phase (A, B,
+% and C) voltage and current. IEC TS 62600-30 requires power quality assessments
+% to use time series of at least 10 minutes, but for this example we will only
+% look at a fraction of a second of data.
 
 % Read in time-series data of voltage (V) and current (I)
-power_table = readtable('./examples/data/power/2020224_181521_PowRaw.csv');
+power_table = readtable('./data/power/2020224_181521_PowRaw.csv');
+
+% Display without scientific notation, then restore the default format
+format shortG
 power_table
+format short
 
 %%
 % To use the MHKiT-MATLAB power module we need to create structures of current
@@ -24,6 +28,42 @@ T2 = mergevars(power_table, [2 3 4]); % combining the voltage time series into o
 T3 = mergevars(T2, [3 4 5]); % combining the current time series into one table variable
 current.current = T3.Var3;
 voltage.voltage = T3.Var2;
+
+%%
+% IEC TS 62600-30 clause 6.1 requires the generator sign convention: power
+% flowing from the marine energy converter to the grid is positive. In this
+% dataset every sample of the instantaneous power (the sum of voltage times
+% current over the three phases) is negative, which indicates the current
+% transformers were connected with the opposite orientation. We therefore
+% flip the sign of the measured currents so that the exported power is positive.
+
+current.current = -current.current;
+
+%%
+% Before computing anything, let's look at the first 0.1 s of the three-phase
+% voltage and current signals.
+
+% Time since the start of the record [s]
+elapsed_time = voltage.time - voltage.time(1);
+first_tenth = elapsed_time <= 0.1;
+
+figure('Position', [100, 100, 1600, 600]);
+plot(elapsed_time(first_tenth), voltage.voltage(first_tenth, :));
+title('Three-Phase Voltage');
+xlabel('Time [s]');
+ylabel('Voltage [V]');
+ax = gca;
+ax.YAxis.Exponent = 0; % show plain volts instead of scientific notation
+legend('Phase A', 'Phase B', 'Phase C');
+grid on;
+
+figure('Position', [100, 100, 1600, 600]);
+plot(elapsed_time(first_tenth), current.current(first_tenth, :));
+title('Three-Phase Current');
+xlabel('Time [s]');
+ylabel('Current [A]');
+legend('Phase A', 'Phase B', 'Phase C');
+grid on;
 
 %% Power Characteristics
 %
