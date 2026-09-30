@@ -2,9 +2,9 @@ function out = flicker_ufic_workflow(Sr,Un,SCR,fg, ...
         u_m,i_m,method,methodopts)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Conduct flicker assessment according to IECTS62600-30 and
-%   IECTS61400-21-1.
-%   A workflow of MATLAB functions up to calculation of u_fic.
+% Conduct flicker assessment according to IEC TS 62600-30 and
+% IEC 61400-21-1:2019.
+% A workflow of MATLAB functions up to calculation of u_fic.
 %
 % Parameters
 % -----------
