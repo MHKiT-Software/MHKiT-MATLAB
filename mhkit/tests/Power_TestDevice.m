@@ -256,7 +256,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             % u_m, i_m, Sr, Un, In, SCR, fg, & fs
             Sr = 3e6; Un=12e3; In=144; fg=60; fs=50e3;fv=0.5;
             %1. opt = 0, pure sine waves:
-            opt = 0; idx = randi([1,4],1);
+            opt = 0;
             fm=20; SCR=20; DeltaI_I = [0 0 0 0];% pure sine wave
             [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,10);
             method = 'ZCD'; methodopts = {};
@@ -272,11 +272,14 @@ classdef Power_TestDevice < matlab.unittest.TestCase
                 (out.alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10,string(opt));
             testCase.verifyTrue(max(abs( ...
                 (out.u0(1:100)-u00)./u00))<1e-10,string(opt));
-            testCase.verifyTrue(max(abs(( ...
-                out.u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
-                string(opt));
-            % 2. opt=randi([2,5]) tests generated according to IECTS
-            opt = randi([2,5],1); idx = randi([1,4],1);
+            for idx = 1:4
+                testCase.verifyTrue(max(abs(( ...
+                    out.u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
+                    string(opt));
+            end
+            % 2. opt=2,4,5 tests generated according to IECTS (opt=3 needs
+            %    STFT, see test_flicker_ufic_workflow_stft)
+            for opt = [2, 4, 5]
             if opt==2
                 SCR = 50; fm = 33.3;
                 % TableB.3,fg=60,SCR=50
@@ -288,14 +291,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
                 %DeltaI_I = [3.212 3.958 5.644 7.711];% fm=20
             end
             [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,10);
-            if opt==3
-                % B.3.3 Distorted um with multiple zero crossings
-                method = 'stft';methodopts = {...
-                    'Window',rectwin(int32(50000)),'OverlapLength',25000,...
-                    'FFTLength',50e3,'FrequencyRange','onesided'};
-            else
-                method = 'ZCD'; methodopts = {};
-            end
+            method = 'ZCD'; methodopts = {};
             out = flicker_ufic_workflow(...
                 Sr,Un,SCR,fg,u_m,i_m,method,methodopts);
             freq0    = readmatrix( ...
@@ -312,9 +308,12 @@ classdef Power_TestDevice < matlab.unittest.TestCase
                 (out.alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10, string(opt));
             testCase.verifyTrue(max(abs( ...
                 (out.u0(1:100)-u00)./u00))<1e-10, string(opt));
-            testCase.verifyTrue(max(abs(( ...
-                out.u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
-                string(opt));
+            for idx = 1:4
+                testCase.verifyTrue(max(abs(( ...
+                    out.u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
+                    string(opt));
+            end
+            end
         end
 
         function test_calc_Rfic_Lfic(testCase)
