@@ -1,31 +1,35 @@
-function datast=read_usgs_file(file_name)
+function dataset=read_usgs_file(file_name)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Reads a USGS JSON data file (from https://waterdata.usgs.gov/nwis)
-%     into a structure
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Reads a USGS JSON data file (from https://waterdata.usgs.gov/nwis)
+% into a structure
 %
 % Parameters
-% ----------
-%     file_name : str
-%         Name of USGS JSON data file
+% ------------
+% file_name : string
+%   Name of USGS JSON data file
 %
 % Returns
-% -------
-%     datast : structure
+% ---------
+% dataset : struct
+%   USGS data, one field per parameter
+%     dataset.(parameter) : column vector
+%       Data named according to the parameter's variable description
+%       (e.g. dataset.Discharge)
+%     dataset.time : row vector [s]
+%       Epoch time
+%     dataset.units : struct
+%       Units for each parameter (e.g. dataset.units.Discharge)
 %
-%
-%         datast.Data: named according to the parameter's variable description
-%
-%         datast.time: epoch time [s]
-%
-%         datast.units: units for each parameter
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 arguments (Input)
-    file_name (1,:) char
+    file_name {mustBeTextScalar, mustBeFile}
 end
+
 arguments (Output)
-    datast struct
+    dataset struct
 end
 
 text = jsondecode(fileread(file_name));
@@ -74,17 +78,17 @@ num_series = numel(names);
 % combine_first which outer-joins each series on its datetime index
 unique_times = unique(vertcat(series_time{:}));
 
-datast = struct();
+dataset = struct();
 for i = 1:num_series
     column = nan(numel(unique_times), 1);
     [is_member, loc] = ismember(series_time{i}, unique_times);
     column(loc(is_member)) = series_value{i}(is_member);
 
-    datast.(names(i)) = column;
-    datast.units.(names(i)) = units(i);
+    dataset.(names(i)) = column;
+    dataset.units.(names(i)) = units(i);
 end
 
-datast.time = posixtime(unique_times).';
+dataset.time = posixtime(unique_times).';
 
 end
 
