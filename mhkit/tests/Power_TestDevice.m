@@ -222,13 +222,13 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             i_m0 = readmatrix("../../examples/data/power/testdata/sinewave-pi6_im.txt");
             testCase.verifyTrue(max(abs( ...
                 (i_m.data(1:100,1)-i_m0(:,1))./i_m0(:,1) ...
-                ))<1e-10,opt);
+                ))<1e-10,string(opt));
             testCase.verifyTrue(max(abs( ...
                 (u_m.data(1:100)-u_m0)./u_m0)) ...
-                <1e-10,opt);
+                <1e-10,string(opt));
 
-            % 2. opt=randi([2,5]) tests generated according to IECTS
-            opt = randi([2,5],1);
+            % 2. opt=2:5 tests generated according to IECTS
+            for opt = 2:5
             if opt==2
                 SCR = 50; fm = 33.3;
                 % TableB.3,fg=60, SCR=50
@@ -246,9 +246,10 @@ classdef Power_TestDevice < matlab.unittest.TestCase
                 sprintf('../../examples/data/power/testdata/B.3.%i_um.txt',opt));
             testCase.verifyTrue(max(abs( ...
                 (i_m.data(1:100,1)-i_m0(:,1))./i_m0(:,1) ...
-                ))<1e-10,opt);
+                ))<1e-10,string(opt));
             testCase.verifyTrue(max(abs((u_m.data(1:100)-u_m0)./u_m0))<1e-10,...
-                opt);
+                string(opt));
+            end
         end
 
         function test_flicker_ufic_workflow(testCase)
