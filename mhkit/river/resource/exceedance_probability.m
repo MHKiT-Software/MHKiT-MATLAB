@@ -40,7 +40,10 @@ if any(isdatetime(time))
     time = posixtime(time);
 end
 
-discharge = Q.Discharge;
+% A row vector is a single timeseries, rank it as a column
+[discharge, was_row] = mhkit_standardize_user_input_to_column_vectors( ...
+    Q.Discharge, 'function_name', mfilename);
+
 n = size(discharge, 1);
 
 rank_ascending = zeros(size(discharge));
@@ -51,7 +54,9 @@ end
 % Convert to descending rank so the smallest value has the highest
 % exceedance probability
 rank_descending = n - rank_ascending + 1;
-F.F = 100 * rank_descending / (n + 1);
+exceedance = 100 * rank_descending / (n + 1);
+
+F.F = mhkit_restore_column_vectors_to_user_input(exceedance, was_row);
 F.time = time;
 
 end
@@ -75,4 +80,3 @@ while i <= n
     i = j + 1;
 end
 end
-
