@@ -2,10 +2,10 @@ classdef River_TestResource < matlab.unittest.TestCase
 
     methods (Test)
 
-        function test_Froude_number(testCase)
+        function test_froude_number(testCase)
             v = 2;
             h = 5;
-            Fr = Froude_number(v, h);
+            Fr = froude_number(v, h);
             assertEqual(testCase,Fr, 0.286,'AbsTol',0.001);
         end
 
