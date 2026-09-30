@@ -1,174 +1,147 @@
-function harmonics = harmonics(x, freq, grid_freq)
+function harmonics_result = harmonics(input_data, data_sample_rate_hz, grid_freq_hz, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Calculates the harmonics from time series of voltage or current based on IEC 61000-4-7.
+% Calculate the harmonics from time series of voltage or current based on IEC 61000-4-7.
 %
 % Parameters
 % ------------
-%   x: structure
-%       x.current : Current time series data [A] 
-%       x.voltage : Voltage time series data [V]
-%       x.time : Time vector [s]
+%   input_data: structure
+%       input_data.current : Current time series [A], n_samples x n_signals
+%                            (used if present)
+%       input_data.voltage : Voltage time series [V], n_samples x n_signals
+%                            (used if current is not present)
+%       input_data.time    : Time vector [s], n_samples x 1 (required)
 %
-%   freq: double
-%       Frequency of the time-series data [Hz]
+%   data_sample_rate_hz: double
+%       Sample rate of the time series [Hz]. IEC TS 62600-30 clause 7.1.4
+%       requires at least 20 kHz per channel for harmonic measurements.
 %
-%   grid_freq: double
-%       Value indicating if the power supply is 50 or 60 Hz. Options = 50 or 60
+%   grid_freq_hz: double
+%       Nominal grid frequency [Hz]. Options = 50 or 60
+%
+%   options.tolerance_percent: double (optional, default = 1)
+%       Allowed deviation [%] between the sample rate implied by
+%       input_data.time and data_sample_rate_hz. See validate_sample_rate_hz.
 %
 % Returns
 % ---------
-%   harmonics: structure
-%       harmonics.amplitude : Harmonic amplitude values
-%       harmonics.harmonic : Harmonic frequency values [Hz]
-%       harmonics.type : Type of signal analyzed ('current' or 'voltage')
-%
-% Key Equations
-% -------------
-% 1. Sample spacing calculation:
-%    sample_spacing = 1 / freq
-%
-% 2. FFT amplitude calculation:
-%    harmonics_amplitude = abs(fft(signal_data))
-%
-% 3. Normalization:
-%    normalized_amplitude = harmonics_amplitude / length(signal_data) * 2
-%
-% 4. Frequency bin calculation:
-%    frequency_bins = (0:length(signal_data)-1) * freq / length(signal_data)
+%   harmonics_result: structure
+%       harmonics_result.amplitude : Amplitude A of the sinusoid A*sin(2*pi*f*t)
+%                                    at each frequency f, n_freqs x n_signals
+%                                    [A] for current, [V] for voltage.
+%                                    The 0 Hz row is abs(mean) of the signal.
+%       harmonics_result.harmonic  : Frequencies [Hz], n_freqs x 1
+%                                    = 0:5:((max_harmonic + 1) * grid_freq_hz - 5)
+%       harmonics_result.type      : 'current' or 'voltage'
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    % Create input parser
-    p = inputParser;
-    
-    % Define validation functions
-    validStruct = @(x) isstruct(x);
-    validNumeric = @(x) isnumeric(x) && isscalar(x);
-    validGridFreq = @(x) isnumeric(x) && isscalar(x) && (x == 50 || x == 60);
-    
-    % Add required parameters
-    addRequired(p, 'x', validStruct);
-    addRequired(p, 'freq', validNumeric);
-    addRequired(p, 'grid_freq', validGridFreq);
-    
-    % Parse inputs
-    parse(p, x, freq, grid_freq);
-    
-    % Extract validated inputs
-    x = p.Results.x;
-    freq = p.Results.freq;
-    grid_freq = p.Results.grid_freq;
-    
-    % Validate input structure has required fields
-    if ~isfield(x, 'time')
-        error('MHKiT:harmonics: x structure must contain time field');
+    arguments
+        input_data struct
+        data_sample_rate_hz (1,1) double {mustBePositive}
+        grid_freq_hz (1,1) double {mustBeMember(grid_freq_hz, [50, 60])}
+        options.tolerance_percent (1,1) double {mustBePositive} = 1
     end
-    
-    % Determine signal type and extract data
-    if isfield(x, 'current')
-        signal_data = x.current;
+
+    % Frequency spacing, IEC 61000-4-7 clause 3.4.1 NOTE 2
+    freq_spacing_hz = 5;
+
+    % Highest harmonic order required by IEC TS 62600-30 clause 7.3
+    max_harmonic = 50;
+
+    % Validate input data structure
+    if ~isfield(input_data, 'time')
+        error('MHKiT:harmonics: input_data structure must contain time field');
+    end
+
+    if isfield(input_data, 'current')
+        signal_data = input_data.current;
         signal_type = 'current';
-    elseif isfield(x, 'voltage')
-        signal_data = x.voltage;
+    elseif isfield(input_data, 'voltage')
+        signal_data = input_data.voltage;
         signal_type = 'voltage';
     else
-        error('MHKiT:harmonics: x structure must contain either current or voltage field');
-    end
-    
-    % Validate frequency parameter
-    if freq <= 0
-        error('MHKiT:harmonics: freq must be positive');
-    end
-    
-    % Get data dimensions
-    data_size = size(signal_data);
-    data_length = data_size(1);
-    num_columns = data_size(2);
-    
-    % Validate time vector dimensions
-    if length(x.time) ~= data_length
-        error('MHKiT:harmonics: time vector length must match signal data length');
-    end
-    
-    % Calculate sample spacing
-    sample_spacing = 1.0 / freq;
-    
-    % Calculate frequency bin centers (only positive frequencies)
-    frequency_bin_centers = (0:data_length-1) * freq / data_length;
-    
-    % Calculate FFT amplitude for each column
-    harmonics_amplitude = zeros(data_length, num_columns);
-    
-    for col = 1:num_columns
-        % Calculate FFT
-        fft_result = fft(signal_data(:, col));
-        
-        % Calculate amplitude
-        harmonics_amplitude(:, col) = abs(fft_result);
-    end
-    
-    % Calculate Nyquist frequency and corresponding bin
-    nyquist_freq = freq / 2;
-    nyquist_bin = floor(data_length / 2) + 1;
-    
-    % Define parameters based on IEC 61000-4-7
-    max_harmonic_base = 51; % Base harmonic number from IEC 61000-4-7
-    harmonic_step = 5; % Step size in Hz for harmonic bins
-
-    if grid_freq == 60
-        max_freq = 3060; % Exactly 51st harmonic (60 * 51)
-    elseif grid_freq == 50
-        max_freq = 2570; % 51.4th harmonic (intentional extension)
+        error('MHKiT:harmonics: input_data structure must contain either current or voltage field');
     end
 
-    % Create frequency range (exclusive upper bound like Python's arange)
-    hz_range = 0:harmonic_step:(max_freq - harmonic_step);
-    
-    % Interpolate to standard frequency grid using nearest neighbor
-    harmonics_reindexed = zeros(length(hz_range), num_columns);
-    
-    for col = 1:num_columns
-        for i = 1:length(hz_range)
-            target_freq = hz_range(i);
-            
-            % Skip frequencies above Nyquist frequency to avoid aliasing
-            if target_freq > nyquist_freq
-                harmonics_reindexed(i, col) = 0;
-                continue;
-            end
-            
-            % Calculate the exact FFT bin for this target frequency
-            % FFT bin k corresponds to frequency k * fs / N
-            % So for target frequency f, bin = f * N / fs
-            exact_bin = target_freq * data_length / freq;
-            
-            % Round to nearest integer bin and convert to MATLAB index (+1)
-            closest_idx = round(exact_bin) + 1; % +1 for MATLAB 1-based indexing
-            
-            % Make sure index is within bounds and within positive frequency range
-            if closest_idx >= 1 && closest_idx <= nyquist_bin
-                harmonics_reindexed(i, col) = harmonics_amplitude(closest_idx, col);
-            else
-                harmonics_reindexed(i, col) = 0;
-            end
+    if ~isnumeric(signal_data) || ~isreal(signal_data)
+        error('MHKiT:harmonics: %s data must be a real numeric array', signal_type);
+    end
+
+    % Validate time vector sample rate
+    sample_rate_validation = validate_sample_rate_hz(input_data.time, data_sample_rate_hz, ...
+        'tolerance_percent', options.tolerance_percent);
+
+    if ~sample_rate_validation.pass
+        error(['MHKiT:harmonics: Time vector sample rate validation failed.\n' ...
+               'Expected: %.2f Hz, Observed: %.2f Hz (median), Deviation: %.2f%%, Tolerance: %.2f%%\n' ...
+               'Time format detected: %s'], ...
+               data_sample_rate_hz, sample_rate_validation.median_sample_rate_hz, ...
+               sample_rate_validation.deviation_percent, sample_rate_validation.tolerance_percent, ...
+               sample_rate_validation.time_format);
+    end
+
+    % Validate dimensions of every signal field against the time vector
+    num_time_samples = length(input_data.time);
+    field_names = fieldnames(input_data);
+
+    for field_idx = 1:length(field_names)
+        field_name = field_names{field_idx};
+        if strcmp(field_name, 'time')
+            continue;
+        end
+        field_rows = size(input_data.(field_name), 1);
+        if field_rows ~= num_time_samples
+            error('MHKiT:harmonics: %s data rows (%d) must match time vector length (%d)', ...
+                field_name, field_rows, num_time_samples);
         end
     end
-    
-    % Normalize: divide by length and multiply by 2
-    % But DC component (frequency = 0) should only be divided by length
-    harmonics_normalized = harmonics_reindexed / data_length * 2;
-    
-    % Correct DC component normalization (first element if hz_range starts at 0)
-    if hz_range(1) == 0
-        harmonics_normalized(1, :) = harmonics_reindexed(1, :) / data_length;
+
+    num_signal_columns = size(signal_data, 2);
+
+    % Define frequencies [Hz] for harmonic amplitude reporting: 0, 5, 10, ... up to
+    % just below harmonic order max_harmonic + 1 (3055 Hz for a 60 Hz grid,
+    % 2545 Hz for a 50 Hz grid).
+    %
+    % 5 Hz spacing matches IEC 61000-4-7, which analyzes 200 ms windows
+    % (1 / 0.2 s = 5 Hz).
+    %
+    % Frequencies above harmonic order max_harmonic are included because
+    % harmonic_subgroups and interharmonics use them for order max_harmonic.
+    max_freq_hz = (max_harmonic + 1) * grid_freq_hz - freq_spacing_hz;
+    harmonic_freq_grid_hz = (0:freq_spacing_hz:max_freq_hz)';
+    num_freqs = length(harmonic_freq_grid_hz);
+
+    % FFT amplitude of every column
+    fft_amplitude = abs(fft(signal_data, [], 1));
+
+    % Map each output frequency to the nearest FFT bin: bin k has frequency k * fs / n
+    exact_bin_index = harmonic_freq_grid_hz * num_time_samples / data_sample_rate_hz;
+    closest_bin_idx = round(exact_bin_index) + 1;  % +1 for MATLAB 1-based indexing
+    nyquist_bin_idx = floor(num_time_samples / 2) + 1;
+    nyquist_freq_hz = data_sample_rate_hz / 2;
+    in_band = harmonic_freq_grid_hz <= nyquist_freq_hz & closest_bin_idx <= nyquist_bin_idx;
+
+    if ~all(in_band)
+        warning('MHKiT:harmonics:AboveNyquist', ...
+            ['Frequencies from %.1f Hz upward are above the Nyquist frequency of the ' ...
+             '%.1f Hz sample rate and are set to zero. IEC TS 62600-30 clause 7.1.4 ' ...
+             'requires at least 20 kHz per channel.'], ...
+            min(harmonic_freq_grid_hz(~in_band)), data_sample_rate_hz);
     end
-    
+
+    harmonics_reindexed = zeros(num_freqs, num_signal_columns);
+    harmonics_reindexed(in_band, :) = fft_amplitude(closest_bin_idx(in_band), :);
+
+    % Single-sided normalization: 2/n for all frequencies, 1/n for DC
+    harmonics_normalized = harmonics_reindexed / num_time_samples * 2;
+    harmonics_normalized(1, :) = harmonics_reindexed(1, :) / num_time_samples;
+
     % Create output structure
-    harmonics = struct();
-    harmonics.amplitude = harmonics_normalized;
-    harmonics.harmonic = hz_range(:);
-    harmonics.type = signal_type;
+    harmonics_result = struct();
+    harmonics_result.amplitude = harmonics_normalized;
+    harmonics_result.harmonic = harmonic_freq_grid_hz;
+    harmonics_result.type = signal_type;
 
 end
