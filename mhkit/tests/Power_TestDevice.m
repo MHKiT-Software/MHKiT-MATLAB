@@ -66,6 +66,104 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             assertEqual(testCase,inter_harmonics.amplitude', interharmonic,'AbsTol',0.1)
         end
 
+        function test_harmonics_multi_harmonic_60hz(testCase)
+            % DC + fundamental + orders 3 and 5 + one interharmonic at 1.5 x
+            % the fundamental, sampled at 10 kHz for 1 s
+            fs = 10000;
+            frequency = 60;
+            samples = (0:fs-1)' / fs;
+            current = 0.3 ...
+                + 1.0  * sin(2*pi*frequency*samples) ...
+                + 0.10 * sin(2*pi*3*frequency*samples) ...
+                + 0.05 * sin(2*pi*5*frequency*samples) ...
+                + 0.02 * sin(2*pi*1.5*frequency*samples);
+            x = struct('current', current, 'time', samples);
+
+            h = harmonics(x, fs, frequency);
+
+            testCase.verifyEqual(size(h.amplitude), [612 1]);
+            testCase.verifyEqual(size(h.harmonic), [612 1]);
+            testCase.verifyEqual(h.type, 'current');
+
+            expected_hz = [0, 60, 180, 300, 90];
+            expected_amp = [0.3, 1.0, 0.10, 0.05, 0.02];
+            for k = 1:numel(expected_hz)
+                testCase.verifyEqual(h.amplitude(h.harmonic == expected_hz(k)), ...
+                    expected_amp(k), 'AbsTol', 1e-3, ...
+                    sprintf('Amplitude at %d Hz', expected_hz(k)));
+            end
+            other = ~ismember(h.harmonic, expected_hz);
+            testCase.verifyLessThan(max(abs(h.amplitude(other))), 1e-3);
+        end
+
+        function test_harmonics_warns_above_nyquist(testCase)
+            % At fs = 1000 Hz the lines above 500 Hz cannot be resolved
+            fs = 1000;
+            t = (0:fs-1)' / fs;
+            x = struct('current', sin(2*pi*60*t), 'time', t);
+
+            h = testCase.verifyWarning(@() harmonics(x, fs, 60), ...
+                'MHKiT:harmonics:AboveNyquist');
+            testCase.verifyEqual(numel(h.harmonic), 612);
+            testCase.verifyEqual(h.amplitude(h.harmonic > fs / 2), zeros(511, 1));
+            testCase.verifyEqual(h.amplitude(h.harmonic == 60), 1, 'AbsTol', 1e-9);
+        end
+
+        function test_harmonics_errors(testCase)
+            fs = 10000;
+            samples = (0:fs-1)' / fs;
+            current = sin(2*pi*60*samples);
+
+            % (1) Missing time field
+            x_no_time = struct('current', current);
+            testCase.verifyError(@() harmonics(x_no_time, fs, 60), ?MException);
+
+            % (2) Neither current nor voltage
+            x_no_signal = struct('time', samples);
+            testCase.verifyError(@() harmonics(x_no_signal, fs, 60), ?MException);
+
+            % (3) Time vector at 9000 Hz passed with fs = 10000 Hz
+            t9000 = (0:8999)' / 9000;
+            x9000 = struct('current', sin(2*pi*60*t9000), 'time', t9000);
+            testCase.verifyError(@() harmonics(x9000, 10000, 60), ?MException);
+        end
+
+        function test_mhkit_validate_sample_rate_hz(testCase)
+            % Pass case
+            time_s = (0:1/1000:1)';
+            result = mhkit_validate_sample_rate_hz(time_s, 1000);
+            testCase.verifyTrue(result.pass);
+            testCase.verifyEqual(result.median_sample_rate_hz, 1000, 'RelTol', 1e-6);
+            testCase.verifyEqual(result.mean_sample_rate_hz, 1000, 'RelTol', 1e-6);
+            testCase.verifyTrue(result.is_uniform);
+
+            % Expected rate omitted: defaults to the nominal rate of the record
+            result_nominal = mhkit_validate_sample_rate_hz(time_s);
+            testCase.verifyTrue(result_nominal.pass);
+            testCase.verifyTrue(result_nominal.is_uniform);
+
+            % Outlier tolerance: one irregular interval must not fail the record
+            time_outlier = (0:1/1000:1)';
+            time_outlier(500) = time_outlier(500) + 0.4 / 1000;
+            result = mhkit_validate_sample_rate_hz(time_outlier, 1000);
+            testCase.verifyTrue(result.pass);
+            testCase.verifyEqual(result.median_sample_rate_hz, 1000, 'RelTol', 1e-6);
+            testCase.verifyGreaterThan(result.max_deviation_percent, 1);
+            testCase.verifyEqual(result.time_format, "seconds elapsed");
+            testCase.verifyFalse(result.is_uniform);
+            testCase.verifyEqual(result.max_interval_deviation_percent, 40, 'RelTol', 1e-2);
+
+            % Fail case: 1000 Hz data against an expected 1100 Hz
+            result_fail = mhkit_validate_sample_rate_hz(time_s, 1100);
+            testCase.verifyFalse(result_fail.pass);
+
+            % POSIX timestamp case
+            time_posix = 1.7e9 + (0:0.001:1)';
+            result_posix = mhkit_validate_sample_rate_hz(time_posix, 1000);
+            testCase.verifyTrue(result_posix.pass);
+            testCase.verifyEqual(result_posix.time_format, "POSIX timestamp");
+        end
+
         function test_instfreq(testCase)
             frequency = 60;
             t = 600;
@@ -124,13 +222,13 @@ classdef Power_TestDevice < matlab.unittest.TestCase
             i_m0 = readmatrix("../../examples/data/power/testdata/sinewave-pi6_im.txt");
             testCase.verifyTrue(max(abs( ...
                 (i_m.data(1:100,1)-i_m0(:,1))./i_m0(:,1) ...
-                ))<1e-10,opt);
+                ))<1e-10,string(opt));
             testCase.verifyTrue(max(abs( ...
                 (u_m.data(1:100)-u_m0)./u_m0)) ...
-                <1e-10,opt);
+                <1e-10,string(opt));
 
-            % 2. opt=randi([2,5]) tests generated according to IECTS
-            opt = randi([2,5],1);
+            % 2. opt=2:5 tests generated according to IECTS
+            for opt = 2:5
             if opt==2
                 SCR = 50; fm = 33.3;
                 % TableB.3,fg=60, SCR=50
@@ -148,16 +246,17 @@ classdef Power_TestDevice < matlab.unittest.TestCase
                 sprintf('../../examples/data/power/testdata/B.3.%i_um.txt',opt));
             testCase.verifyTrue(max(abs( ...
                 (i_m.data(1:100,1)-i_m0(:,1))./i_m0(:,1) ...
-                ))<1e-10,opt);
+                ))<1e-10,string(opt));
             testCase.verifyTrue(max(abs((u_m.data(1:100)-u_m0)./u_m0))<1e-10,...
-                opt);
+                string(opt));
+            end
         end
 
         function test_flicker_ufic_workflow(testCase)
             % u_m, i_m, Sr, Un, In, SCR, fg, & fs
             Sr = 3e6; Un=12e3; In=144; fg=60; fs=50e3;fv=0.5;
             %1. opt = 0, pure sine waves:
-            opt = 0; idx = randi([1,4],1);
+            opt = 0;
             fm=20; SCR=20; DeltaI_I = [0 0 0 0];% pure sine wave
             [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,10);
             method = 'ZCD'; methodopts = {};
@@ -173,11 +272,14 @@ classdef Power_TestDevice < matlab.unittest.TestCase
                 (out.alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10,string(opt));
             testCase.verifyTrue(max(abs( ...
                 (out.u0(1:100)-u00)./u00))<1e-10,string(opt));
-            testCase.verifyTrue(max(abs(( ...
-                out.u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
-                string(opt));
-            % 2. opt=randi([2,5]) tests generated according to IECTS
-            opt = randi([2,5],1); idx = randi([1,4],1);
+            for idx = 1:4
+                testCase.verifyTrue(max(abs(( ...
+                    out.u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
+                    string(opt));
+            end
+            % 2. opt=2,4,5 tests generated according to IECTS (opt=3 needs
+            %    STFT, see test_flicker_ufic_workflow_stft)
+            for opt = [2, 4, 5]
             if opt==2
                 SCR = 50; fm = 33.3;
                 % TableB.3,fg=60,SCR=50
@@ -189,14 +291,7 @@ classdef Power_TestDevice < matlab.unittest.TestCase
                 %DeltaI_I = [3.212 3.958 5.644 7.711];% fm=20
             end
             [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,10);
-            if opt==3
-                % B.3.3 Distorted um with multiple zero crossings
-                method = 'stft';methodopts = {...
-                    'Window',rectwin(int32(50000)),'OverlapLength',25000,...
-                    'FFTLength',50e3,'FrequencyRange','onesided'};
-            else
-                method = 'ZCD'; methodopts = {};
-            end
+            method = 'ZCD'; methodopts = {};
             out = flicker_ufic_workflow(...
                 Sr,Un,SCR,fg,u_m,i_m,method,methodopts);
             freq0    = readmatrix( ...
@@ -213,9 +308,51 @@ classdef Power_TestDevice < matlab.unittest.TestCase
                 (out.alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10, string(opt));
             testCase.verifyTrue(max(abs( ...
                 (out.u0(1:100)-u00)./u00))<1e-10, string(opt));
-            testCase.verifyTrue(max(abs(( ...
-                out.u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
-                string(opt));
+            for idx = 1:4
+                testCase.verifyTrue(max(abs(( ...
+                    out.u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
+                    string(opt));
+            end
+            end
+        end
+
+        function test_flicker_ufic_workflow_stft(testCase)
+            % B.3.3 Distorted um with multiple zero crossings requires the
+            % STFT method, which needs the Signal Processing Toolbox
+            testCase.assumeTrue(exist('stft', 'file') ~= 0 && exist('rectwin', 'file') ~= 0, ...
+                'Requires the Signal Processing Toolbox (stft, rectwin)');
+
+            % u_m, i_m, Sr, Un, In, SCR, fg, & fs
+            Sr = 3e6; Un=12e3; In=144; fg=60; fs=50e3;fv=0.5;
+            opt = 3;
+            SCR = 20; fm = 25;
+            % TableB.2,fg=60,SCR=20
+            DeltaI_I = [4.763 5.726 7.640 9.488];% fm=25
+            [i_m,u_m]=gen_test_data(Un,In,fg,fs,fm,fv,DeltaI_I,opt,10);
+            method = 'stft';methodopts = {...
+                'Window',rectwin(int32(50000)),'OverlapLength',25000,...
+                'FFTLength',50e3,'FrequencyRange','onesided'};
+            out = flicker_ufic_workflow(...
+                Sr,Un,SCR,fg,u_m,i_m,method,methodopts);
+            freq0    = readmatrix( ...
+                sprintf('../../examples/data/power/testdata/B.3.%i_freq.txt',opt));
+            alpha_m0 = readmatrix( ...
+                sprintf('../../examples/data/power/testdata/B.3.%i_alpham.txt',opt));
+            u00      = readmatrix( ...
+                sprintf('../../examples/data/power/testdata/B.3.%i_u0.txt',opt));
+            u_fic0   = readmatrix(...
+                sprintf('../../examples/data/power/testdata/B.3.%i_ufic.txt',opt));
+            testCase.verifyTrue(max(abs( ...
+                (out.freq.data(1:100)-freq0)./freq0))<1e-10, string(opt));
+            testCase.verifyTrue(max(abs( ...
+                (out.alpha_m(1:100)-alpha_m0)./alpha_m0))<1e-10, string(opt));
+            testCase.verifyTrue(max(abs( ...
+                (out.u0(1:100)-u00)./u00))<1e-10, string(opt));
+            for idx = 1:4
+                testCase.verifyTrue(max(abs(( ...
+                    out.u_fic(1:100,idx)-u_fic0(:,idx))./u_fic0(:,idx)))<1e-10, ...
+                    string(opt));
+            end
         end
 
         function test_calc_Rfic_Lfic(testCase)
