@@ -78,6 +78,20 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             end
         end
 
+        function test_standardize_wave_spectra_frequency_nonuniform_bins(testCase)
+            % Non-uniform spacing after the omitted zero-frequency point,
+            % following MHKiT-Python convention (frequency_moment, v1.1.2):
+            % https://github.com/MHKiT-Software/MHKiT-Python/blob/6bad8fe4f2bd8a9bff66fb9607ed0900f09d0258/mhkit/wave/resource.py#L455-L464
+            frequency = [0; 0.1; 0.3; 0.6; 1.0];
+            spectrum = [0; 1; 2; 3; 4];
+
+            [out_freq, out_spectrum, out_bins] = standardize_wave_spectra_frequency(frequency, spectrum);
+
+            assertEqual(testCase, out_freq, [0.1; 0.3; 0.6; 1.0], 'AbsTol', 1e-12);
+            assertEqual(testCase, out_spectrum, [1; 2; 3; 4]);
+            assertEqual(testCase, out_bins, [0.2; 0.2; 0.3; 0.4], 'AbsTol', 1e-12);
+        end
+
        function test_metrics_HsP(testCase)
 
             relative_file_name = '../../examples/data/wave/ValData2.mat';
@@ -112,7 +126,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             assertLessThan(testCase,error, 0.01);
 
             % Tm
-            expected = sqrt(H5SP.waveMoments.Tm);
+            expected = H5SP.waveMoments.Tm;
             calculated = average_wave_period(S1);
             error = abs(expected-calculated)/expected;
             assertLessThan(testCase,error, 0.01);
@@ -170,7 +184,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             assertLessThan(testCase,error, 0.01);
 
             % Tm
-            expected = sqrt(AH1.waveMoments.Tm);
+            expected = AH1.waveMoments.Tm;
             calculated = average_wave_period(S1);
             error = abs(expected-calculated)/expected;
             assertLessThan(testCase,error, 0.01);
@@ -228,7 +242,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             assertLessThan(testCase,error, 0.01);
 
             % Tm
-            expected = sqrt(CDIP1.waveMoments.Tm);
+            expected = CDIP1.waveMoments.Tm;
             calculated = average_wave_period(S1,CDIP1.freqBinWidth);
             error = abs(expected-calculated)/expected;
             assertLessThan(testCase,error, 0.01);
@@ -257,184 +271,19 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             relative_file_name = '../../examples/data/wave/ValData2.mat';
             full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
             data = load(full_file_name);
-            Valdata = data.CalcSpecCheckData;
-            H5sP = Valdata.H5sP;
+            H5sP = data.CalcSpecCheckData.H5sP;
 
             df = 0.01/(2*pi);
             Trep = 1/df;
             time = 0:0.062838:Trep;
-
-            elevation = H5sP.TimeSeries;
-            sample_rate = H5sP.Fs;
-            NFFT = H5sP.NFFT;
-            H5sP.S = elevation_spectrum(elevation',sample_rate,NFFT,time);
+            wave_elevation = struct('time', time', 'elevation', H5sP.TimeSeries');
 
             filename = 'wave_plot_elevation_timeseries.png';
             if isfile(filename)
                 delete(filename);
             end
 
-            wave_elevation = struct('time',time','elevation',H5sP.S.spectrum);
-
-            df = 0.01/(2*pi);
-            Trep = 1/df;
-            time = 0:0.12566:Trep;
-            wave_elevation.time = time';
-
             plot_elevation_timeseries(wave_elevation,"savepath",filename);
-            assertTrue(testCase,isfile(filename));
-            delete(filename);
-        end
-
-        function test_environmental_contour(testCase)
-
-            % assumeFail(testCase, "Not compatible with latest MHKIT-Python")
-
-            relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
-            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
-
-            fid = fopen(full_file_name); % Opening the file
-            raw = fread(fid,inf); % Reading the contents
-            str = char(raw'); % Transformation
-            fclose(fid); % Closing the file
-            valdata1 = jsondecode(str); % Using the jsondecode function to parse JSON from string
-            Te_table = struct2table(valdata1.Te,'AsArray',true);
-            Te = table2array(Te_table);
-            Hm0_table = struct2table(valdata1.Hm0,'AsArray',true);
-            Hm0 = table2array(Hm0_table);
-
-            filter = Hm0 < 20;
-            Hm0 = Hm0(filter);
-            Te = Te(filter);
-            [row, col] = find(~isnan(Te));
-            Hm0 = Hm0(col);
-            Te = Te(col);
-            [row, col] = find(~isnan(Hm0));
-            Hm0 = Hm0(col);
-            Te = Te(col);
-
-            time_str = Hm0_table.Properties.VariableNames;
-
-            time1 = str2num(erase(time_str{1},'x'));
-            time2 = str2num(erase(time_str{2},'x'));
-
-            dt = (time2-time1)/1000.;
-            time_R = 100;
-
-            contour = environmental_contours(Hm0, Te, dt, time_R, 'PCA');
-
-            relative_file_name= '../../examples/data/wave/Hm0_Te_contours_46022.csv';
-            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
-            expected_contours = readmatrix(full_file_name);
-
-            Hm0_expected = expected_contours(:,1);
-            Te_expected = expected_contours(:,2);
-
-            assertEqual(testCase,contour.contour1,Hm0_expected','RelTol',0.01);
-            assertEqual(testCase,contour.contour2,Te_expected','RelTol',0.01);
-
-
-        end
-
-        function test_plot_environmental_contour(testCase)
-
-            %assumeFail(testCase, "Not compatible with latest MHKIT-Python")
-
-            relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
-            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
-
-            fid = fopen(full_file_name); % Opening the file
-            raw = fread(fid,inf); % Reading the contents
-            str = char(raw'); % Transformation
-            fclose(fid); % Closing the file
-            valdata1 = jsondecode(str); % Using the jsondecode function to parse JSON from string
-            Te_table = struct2table(valdata1.Te,'AsArray',true);
-            Te = table2array(Te_table);
-            Hm0_table = struct2table(valdata1.Hm0,'AsArray',true);
-            Hm0 = table2array(Hm0_table);
-
-            filter = Hm0 < 20;
-            Hm0 = Hm0(filter);
-            Te = Te(filter);
-            [row, col] = find(~isnan(Te));
-            Hm0 = Hm0(col);
-            Te = Te(col);
-            [row, col] = find(~isnan(Hm0));
-            Hm0 = Hm0(col);
-            Te = Te(col);
-
-            time_str = Hm0_table.Properties.VariableNames;
-
-            time1 = str2num(erase(time_str{1},'x'));
-            time2 = str2num(erase(time_str{2},'x'));
-
-            dt = (time2-time1)/1000.;
-            time_R = 100;
-
-            contour = environmental_contours(Hm0, Te, dt, time_R, 'PCA');
-
-            filename = 'wave_plot_env_contour.png';
-            if isfile(filename)
-                delete(filename);
-            end
-
-
-            plot_environmental_contours(Te, Hm0,contour.contour2,contour.contour1,"savepath",filename...
-                ,"x_label",...
-                'Energy Period (s)', "y_label",'Significant Wave Height (m)',"data_label",'NDBC 46022',...
-                "contour_label",'100 Year Contour');
-            assertTrue(testCase,isfile(filename));
-            delete(filename);
-        end
-
-        function test_plot_environmental_contour_multiyear(testCase)
-
-            assumeFail(testCase, "Not compatible with latest MHKIT-Python")
-            % not sure about why this test exists...return period has to be float or
-            % int and cannot be a list...
-            relative_file_name= '../../examples/data/wave/Hm0_Te_46022.json';
-            full_file_name = fullfile(fileparts(mfilename('fullpath')), relative_file_name);
-
-            fid = fopen(full_file_name); % Opening the file
-            raw = fread(fid,inf); % Reading the contents
-            str = char(raw'); % Transformation
-            fclose(fid); % Closing the file
-            valdata1 = jsondecode(str); % Using the jsondecode function to parse JSON from string
-            Te_table = struct2table(valdata1.Te,'AsArray',true);
-            Te = table2array(Te_table);
-            Hm0_table = struct2table(valdata1.Hm0,'AsArray',true);
-            Hm0 = table2array(Hm0_table);
-
-            filter = Hm0 < 20;
-            Hm0 = Hm0(filter);
-            Te = Te(filter);
-            [row, col] = find(~isnan(Te));
-            Hm0 = Hm0(col);
-            Te = Te(col);
-            [row, col] = find(~isnan(Hm0));
-            Hm0 = Hm0(col);
-            Te = Te(col);
-
-            time_str = Hm0_table.Properties.VariableNames;
-
-            time1 = str2num(erase(time_str{1},'x'));
-            time2 = str2num(erase(time_str{2},'x'));
-
-            dt = (time2-time1)/1000.;
-            time_R = [100, 120, 130];
-
-            contour = environmental_contours(Hm0, Te, dt, time_R, 'PCA');
-
-            filename = 'wave_plot_env_contour_multiyear.png';
-            if isfile(filename)
-                delete(filename);
-            end
-
-
-            plot_environmental_contours(Te, Hm0,contour.contour2,contour.contour1,"savepath",filename...
-                ,"x_label",...
-                'Energy Period (s)', "y_label",'Significant Wave Height (m)',"data_label",'NDBC 46022',...
-                "contour_label",{'100 Year Contour','120 Year Contour','130 Year Contour'});
             assertTrue(testCase,isfile(filename));
             delete(filename);
         end
@@ -452,6 +301,31 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             delete(filename);
         end
 
+        function test_plot_wave_joint_probability_distribution(testCase)
+            rng(1);
+            Hm0 = 0.5 + 3 * rand(500, 1);
+            Te = 4 + 10 * rand(500, 1);
+            filename = 'wave_plot_jpd.png';
+            if isfile(filename)
+                delete(filename);
+            end
+            [ax, jpd] = plot_wave_joint_probability_distribution(Hm0, Te, 'savepath', filename);
+            assertTrue(testCase, isfile(filename));
+            delete(filename);
+            assertEqual(testCase, jpd.stat, 'probability');
+            assertEqual(testCase, sum(jpd.values(:)), 1, 'AbsTol', 1e-12);
+            % IEC bins: 0.5 m Hm0 edges and 1 s Te edges starting at zero
+            assertEqual(testCase, jpd.y_edges(1:3), [0 0.5 1]);
+            assertEqual(testCase, jpd.x_edges(1:3), [0 1 2]);
+            assertEqual(testCase, numel(findobj(ax, 'Type', 'text')), nnz(jpd.values));
+
+            % Custom bins and no annotation
+            ax2 = plot_wave_joint_probability_distribution(Hm0, Te, ...
+                'Hm0_bins', 0.5:1:3.5, 'Te_bins', 5:2:13, 'annotate', false);
+            assertEqual(testCase, numel(findobj(ax2, 'Type', 'text')), 0);
+            close all force
+        end
+
         function test_wave_length(testCase)
             k=[1,2,10,3];
             l_expected = (2.*3.14)./k;
@@ -463,7 +337,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
 
 
          function test_depth_regime(testCase)
-             expected = [1,1,0,1];
+             expected = logical([1,1,0,1]);
              l_vector=[1,2,10,3];
 
              h = 10;
@@ -482,13 +356,13 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             k.frequency=f;
 
             % all shallow
-            cg_shallow1 = wave_celerity(k,0.0001,"depth_check",py.True);
-            cg_shallow2 = wave_celerity(k, 0.0001,"depth_check",py.False);
+            cg_shallow1 = wave_celerity(k,0.0001,"depth_check",true);
+            cg_shallow2 = wave_celerity(k, 0.0001,"depth_check",false);
             assertEqual(testCase,cg_shallow1, cg_shallow2);
 
             x = (3.14.*f)./k.values;
             % all deep
-            cg = wave_celerity(k, 1000,"depth_check",py.True);
+            cg = wave_celerity(k, 1000,"depth_check",true);
             assertEqual(testCase,x,cg.values,'RelTol',0.01);
         end
 
@@ -508,7 +382,7 @@ classdef Wave_TestResourceMetrics < matlab.unittest.TestCase
             J = coeff*(Hm0^2)*Te;
 
             h=-1; % not used when deep=True
-            J_calc = energy_flux(S, h, "deep",py.True);
+            J_calc = energy_flux(S, h, "deep",true);
 
             assertEqual(testCase,J_calc,J,'RelTol',0.01);
         end

@@ -1,106 +1,75 @@
-function PM=power_matrix(LM,JM)
+function PM = power_matrix(CWM, JM)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%     Generates a power matrix from a capture length matrix and wave energy
-%     flux matrix
+% Generates a power matrix from a capture width matrix and wave energy flux matrix
+%
+% PM = CWM * JM (element-wise multiplication)
 %
 % Parameters
 % ------------
-%     LM: Capture Length
-%        Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(Hm0_bins,L)
-%
-%        OR
-%
-%        structure of form:
-%
-%           LM.values
-%
-%           LM.stat
-%
-%           LM.Hm0_bins
-%
-%           LM.Te_bins
-%
-%
-%     JM: Wave Energy Flux
-%        Pandas data frame
-%           To make a pandas data frame from user supplied frequency and spectra
-%           use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(Hm0_bins,J)
-%
-%        OR
-%
-%        structure of form:
-%
-%           JM.values: Wave energy flux matrix
-%
-%           JM.Hm0_bins
-%
-%           JM.Te_bins
+% CWM : struct
+%   Capture width matrix from capture_width_matrix:
+%     CWM.values : matrix
+%       Capture width values
+%     CWM.stat : string
+%       Statistic used (e.g., 'mean')
+%     CWM.x_bins, CWM.y_bins : row vectors
+%       Te and Hm0 bin centers
+%     CWM.x_edges, CWM.y_edges : row vectors
+%       Te and Hm0 bin edges, must match JM
+% JM : struct
+%   Wave energy flux matrix structure:
+%     JM.values : matrix
+%       Wave energy flux values
+%     JM.x_bins, JM.y_bins : row vectors
+%       Te and Hm0 bin centers
+%     JM.x_edges, JM.y_edges : row vectors
+%       Te and Hm0 bin edges, must match CWM
 %
 % Returns
 % ---------
-%     PM: Structure
+% PM : struct
+%   Power matrix structure:
+%     PM.values : matrix
+%       Power matrix values
+%     PM.stat : string
+%       Statistic from CWM
+%     PM.x_bins, PM.y_bins : row vectors
+%       Te and Hm0 bin centers from CWM
+%     PM.x_edges, PM.y_edges : row vectors
+%       Te and Hm0 bin edges from CWM
 %
-%
-%         PM.values: Power matrix
-%
-%         PM.stat: statistic of the matrix (i.e. "mean", "max", etc.)
-%         (string)
-%
-%         PM.Hm0_bins
-%
-%         PM.Te_bins
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py.importlib.import_module('mhkit');
-py.importlib.import_module('mhkit_python_utils');
-
-% need to add asserts for pandas
-if (isa(LM,'py.pandas.core.frame.DataFrame')~=1)
-    x=size(LM.values);
-
-    li=py.list();
-    if x(2)>1
-        for i = 1:x(2)
-            app=py.list(LM.values(:,i));
-            li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-        end
-    end
-
-    LMpan=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,py.list(LM.Hm0_bins),int32(x(2)));
-
+arguments (Input)
+    CWM struct
+    JM struct
 end
 
-if (isa(JM,'py.pandas.core.frame.DataFrame')~=1)
-    x=size(JM.values);
-    li=py.list();
-    if x(2)>1
-        for i = 1:x(2)
-            app=py.list(JM.values(:,i));
-            li=py.mhkit_python_utils.pandas_dataframe.lis(li,app);
-
-        end
-    end
-    JMpan=py.mhkit_python_utils.pandas_dataframe.timeseries_to_pandas(li,py.list(JM.Hm0_bins),int32(x(2)));
+arguments (Output)
+    PM struct
 end
 
-PMpan=py.mhkit.wave.performance.power_matrix(LMpan,JMpan);
+% Both inputs must be matrix structs from mhkit_binned_statistic_2d on the same grid
+for f = {'values', 'stat', 'x_bins', 'y_bins', 'x_edges', 'y_edges'}
+    if ~isfield(CWM, f{1}) || ~isfield(JM, f{1})
+        error('MHKiT:power_matrix:InvalidInput', ...
+            'CWM and JM must both be matrix structs from capture_width_matrix and wave_energy_flux_matrix, missing field %s', f{1});
+    end
+end
+if ~isequal(CWM.x_edges, JM.x_edges) || ~isequal(CWM.y_edges, JM.y_edges)
+    error('MHKiT:power_matrix:InvalidInput', ...
+        'CWM and JM must be binned on the same x and y edges');
+end
 
-% convert vals1d to original shape
-vals=double(py.array.array('d',py.numpy.nditer(PMpan.values)));
-sha=cell(PMpan.values.shape);
-x=int64(sha{1,1});
-y=int64(sha{1,2});
-vals=reshape(vals,[y,x]);
-vals=transpose(vals);
+% Build output structure
+PM = struct();
+PM.values = CWM.values .* JM.values;
+PM.stat = CWM.stat;
+PM.x_bins = CWM.x_bins;
+PM.y_bins = CWM.y_bins;
+PM.x_edges = CWM.x_edges;
+PM.y_edges = CWM.y_edges;
 
-PM.values=vals;
-PM.stat=LM.stat;
-PM.Hm0_bins=double(LM.Hm0_bins);
-PM.Te_bins=double(LM.Te_bins);
-
+end

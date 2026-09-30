@@ -1,53 +1,89 @@
-function k=wave_number(f,h,options)
+function k = wave_number(f, h, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Calculates wave number
+%
+% Calculates wave number from frequency and water depth
+%
+% Solves the linear dispersion relation (Eq 11 in IEC 62600-101 Ed. 2.0 en 2024)
+%
+% To compute wave number from angular frequency (w), convert w to f before
+% using this function (f = w / (2*pi))
 %
 % Parameters
 % ------------
-%    f: frequency (Hz)
-%           vector or numpy array
-%    h: float
-%         Water depth (m)
-%
-%    rho: float (optional)
-%         water density (kg/m^3)
-%         to call: wave_number(f,h,"rho",rho)
-%
-%    g: float (optional)
-%         gravitational acceleration (m/s^2)
-%         to call: wave_number(f,h,"g",g)
-%
-%
-%
+% f : vector or scalar [Hz]
+%   Frequency
+% h : double [m]
+%   Water depth
+% rho : double [kg/m^3] (optional)
+%   Water density. Default = 1025 kg/m^3
+% g : double [m/s^2] (optional)
+%   Gravitational acceleration. Default = 9.80665 m/s^2
 %
 % Returns
-% -------
-%     k: structure
+% ---------
+% k : struct
+%   k.values : vector [1/m]
+%     Wave number
+%   k.frequency : vector [Hz]
+%     Frequency
 %
-%
-%         k.values: wave number
-%
-%         k.frequency: frequency [Hz]
-%
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-arguments
-    f
-    h
-    options.rho = 1025;
-    options.g = 9.80665;
+arguments (Input)
+    f {mustBeNumeric}
+    h (1,1) {mustBeNumeric, mustBePositive}
+    options.rho (1,1) {mustBeNumeric, mustBePositive} = 1025
+    options.g (1,1) {mustBeNumeric, mustBePositive} = 9.80665
 end
 
-f_py = py.numpy.array(f);
+arguments (Output)
+    k struct
+end
 
-k_py = py.mhkit.wave.resource.wave_number(f_py, h, pyargs('rho', options.rho, 'g', options.rho));
+g = options.g;
 
-k_py = typecast_from_mhkit_python(k_py);
+% Ensure f is a column vector for consistent processing
+f_input = f;
+f = f(:);
 
+% Angular frequency
+w = 2 * pi * f;
+% note: = h*wa/sqrt(h*g/h)
+xi = w / sqrt(g / h);
+yi = xi.^2 ./ (1 - exp(-xi.^2.4908)).^0.4015;
+k0 = yi / h;
+
+% Solve dispersion relation: w^2 = g*k*tanh(k*h)
+% Rearranged as: w^2 - g*k*tanh(k*h) = 0
+k_values = k0;
+
+% Set solver options to suppress output
+fzero_options = optimset('Display', 'off', 'TolX', 1e-12);
+
+% Only solve for points where initial guess isn't accurate enough
+for i = 1:length(f)
+    % Eq 11 in IEC 62600-101 Ed. 2.0 en 2024 using initial guess from Guo (2002)
+    residual = w(i)^2 - g * k0(i) * tanh(k0(i) * h);
+    if abs(residual) > 1e-9
+        func = @(kk) w(i)^2 - g * kk * tanh(kk * h);
+        try
+            k_values(i) = fzero(func, k0(i), fzero_options);
+        catch ME
+            error('MHKiT:wave_number:SolverFailed', ...
+                'Wave number solver failed for f=%g Hz: %s', f(i), ME.message);
+        end
+    end
+end
+
+% Reshape output to match input shape
+if isrow(f_input)
+    k_values = k_values';
+end
+
+% Build output structure
 k = struct();
+k.values = k_values;
+k.frequency = f_input;
 
-k.values = k_py.data;
-% MHKiT Python does not output frequency
-k.frequency = f;
+end

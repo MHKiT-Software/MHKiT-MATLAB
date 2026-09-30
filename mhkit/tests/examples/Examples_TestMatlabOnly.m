@@ -1,13 +1,11 @@
 classdef Examples_TestMatlabOnly < matlab.unittest.TestCase
     % Executes the example live scripts (examples/*.mlx) that use MATLAB only code
     %
-    % Examples not included with Python bridge code
-    %   *_contour*, *_extreme*,
-    %   loads, power, qc, river,
-    %   short_term_extremes,
-    %   SWAN, tidal, wave, WPTO hindcast
-    %   delft3d_example ,
-    %   wecsim_*
+    % Examples not included because they call Python bridge code:
+    %   *_contour*, extreme_response_full_sea_state, short_term_extremes,
+    %   loads, power, qc, river, tidal, SWAN, delft3d, wecsim_example
+    % Examples not included because they make live network requests:
+    %   WPTO_hindcast
 
     properties (TestParameter)
         exampleName = { ...
@@ -19,6 +17,8 @@ classdef Examples_TestMatlabOnly < matlab.unittest.TestCase
             'power_example', ...
             'strain_measurement_example', ...
             'upcrossing_example', ...
+            'wave_example', ...
+            'wecsim_power_performance_example', ...
         };
     end
 

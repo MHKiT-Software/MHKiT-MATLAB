@@ -1,71 +1,102 @@
-function Cg=wave_celerity(k,h,options)
+function Cg = wave_celerity(k, h, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 % Calculates wave celerity (group velocity)
+%
+% Uses the formula from Eq 10 in IEC 62600-101 Ed. 2.0 en 2024:
+% Cg = (pi * f / k) * (1 + (2*h*k) / sinh(2*h*k))
+%
+% For deep water (when depth_check=true and h/l > ratio), uses the
+% simplified formula: Cg = pi * f / k
 %
 % Parameters
 % ------------
-%    k: wave number (1/m)
-%        structure of form:
-%           k.values= wave number
-%
-%           k.frequency= frequency (Hz)
-%
-%    h: double
-%         Water depth (m)
-%
-%    g: double (optional)
-%         gravitational acceleration (m/s^2)
-%         to call: energy_flux(k,h,"g",g)
-%
-%    depth_check: bool (optional)
-%         If True check depth regime. Default False.
-%         to call: energy_flux(k,h,"depth_check",py.True)
-%
-%    ratio: double or int (optional)
-%         Only applied if depth_check=True. If h/l > ratio,
-%         water depth will be set to deep. Default ratio = 2
-%         to call: energy_flux(k,h,"ratio",ratio)
+% k : struct
+%   Wave number structure:
+%     k.values : vector [1/m]
+%       Wave number values
+%     k.frequency : vector [Hz]
+%       Frequency
+% h : double [m]
+%   Water depth
+% g : double [m/s^2] (optional)
+%   Gravitational acceleration. Default = 9.80665 m/s^2
+% depth_check : logical (optional)
+%   If true, check depth regime and use deep water approximation
+%   where applicable. Default = false
+% ratio : double (optional)
+%   Only applied if depth_check=true. If h/l > ratio,
+%   water depth is set to deep. Default = 2
 %
 % Returns
-% -------
-%     Cg: structure
+% ---------
+% Cg : struct
+%   Cg.values : vector [m/s]
+%     Wave celerity (group velocity)
+%   Cg.frequency : vector [Hz]
+%     Frequency
+%   Cg.h : double [m]
+%     Water depth
 %
-%
-%       Cg.values: water celerity
-%
-%       Cg.frequency [Hz]
-%
-%       Cg.h: height [m]
-%
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-arguments
-    k
-    h
-    options.g = 9.80665;
-    options.depth_check = py.False;
-    options.ratio = 2;
-
+arguments (Input)
+    k struct
+    h (1,1) {mustBeNumeric, mustBePositive}
+    options.g (1,1) {mustBeNumeric, mustBePositive} = 9.80665
+    options.depth_check (1,1) logical = false
+    options.ratio (1,1) {mustBeNumeric, mustBePositive} = 2
 end
 
-if (isa(k,'py.pandas.core.frame.DataFrame')~=1)
-    if (isstruct(k)==1)
+arguments (Output)
+    Cg struct
+end
 
-            k=py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas(k.frequency,py.numpy.array(k.values),1);
+% Validate input structure
+if ~isfield(k, 'values') || ~isfield(k, 'frequency')
+    error('MHKiT:wave_celerity:InvalidInput', ...
+        'k must be a structure with values and frequency fields');
+end
 
-    else
-        ME = MException('MATLAB:wave_celerity','k needs to be a structure or Pandas dataframe, use py.mhkit_python_utils.pandas_dataframe.spectra_to_pandas to create one');
-        throw(ME);
+k_values = k.values(:);
+f = k.frequency(:);
+
+if options.depth_check
+    % Calculate wavelength
+    l = wave_length(k_values);
+
+    % Get depth regime (true = deep water)
+    dr = depth_regime(l, h, 'ratio', options.ratio);
+
+    % Initialize output
+    Cg_values = zeros(size(k_values));
+
+    % Deep water approximation for deep frequencies
+    if any(dr)
+        Cg_values(dr) = pi * f(dr) ./ k_values(dr);
     end
+
+    % Full formula for shallow/intermediate frequencies
+    if any(~dr)
+        sf = f(~dr);
+        sk = k_values(~dr);
+        Cg_values(~dr) = (pi * sf ./ sk) .* (1 + (2 * h * sk) ./ sinh(2 * h * sk));
+    end
+else
+    % Eq 10 in IEC 62600-101 Ed. 2.0 en 2024
+    Cg_values = (pi * f ./ k_values) .* (1 + (2 * h * k_values) ./ sinh(2 * h * k_values));
 end
 
+% Handle shape to match input
+if isrow(k.values)
+    Cg_values = Cg_values';
+end
 
-Cgdf=py.mhkit.wave.resource.wave_celerity(k,h,pyargs('g',options.g,...
-    'depth_check',options.depth_check,'ratio',options.ratio));
+% Build output structure
+Cg = struct();
+Cg.values = Cg_values;
+Cg.frequency = k.frequency;
+Cg.h = h;
 
-Cg.values=double(py.array.array('d',py.numpy.nditer(Cgdf.values)));
-Cg.frequency=double(py.array.array('d',py.numpy.nditer(Cgdf.index)));
-Cg.h=h;
-
+end
