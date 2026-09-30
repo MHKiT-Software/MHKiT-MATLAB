@@ -54,27 +54,26 @@ function frequency = instantaneous_frequency(voltage)
         error('MHKiT:instantaneous_frequency: voltage data must have at least 4 samples for frequency calculation');
     end
 
-    % Calculate time differences for frequency calculation
-    time_diff = diff(time_vector(:));  % Ensure column vector
-
-    % Warn the user if the sample interval varies by more than the tolerance
-    dt_mean = mean(time_diff);
-    dt_tolerance_percent = 1;
-    dt_tolerance = dt_tolerance_percent / 100 * dt_mean;
+    % Warn the user if the sample interval varies by more than the tolerance.
     % The phase derivative below divides by each local dt, but the FFT-based
     % Hilbert transform that produces the phase assumes uniform sampling.
     % Irregular intervals corrupt the phase itself before dt is applied, so
     % using the local dt cannot correct for them.
-    if any(abs(time_diff - dt_mean) > dt_tolerance)
+    sample_rate = mhkit_validate_sample_rate_hz(time_vector);
+    if ~sample_rate.is_uniform
         warning('MHKiT:instantaneous_frequency:SampleRateVariation', ...
                 ['The sample interval of this signal varies by more than %g%% from the mean. ', ...
                  'The FFT-based Hilbert transform assumes uniform sampling, so the ', ...
                  'instantaneous phase, and therefore the instantaneous frequency, is ', ...
                  'likely to be inaccurate. ', ...
                  'Mean sample rate: %g Hz, max: %g Hz, min: %g Hz, standard deviation: %g Hz'], ...
-                dt_tolerance_percent, 1 / dt_mean, 1 / min(time_diff), 1 / max(time_diff), ...
-                std(1 ./ time_diff));
+                sample_rate.tolerance_percent, sample_rate.mean_sample_rate_hz, ...
+                sample_rate.max_sample_rate_hz, sample_rate.min_sample_rate_hz, ...
+                sample_rate.std_sample_rate_hz);
     end
+
+    % Calculate time differences for frequency calculation
+    time_diff = diff(time_vector(:));  % Ensure column vector
 
     % Analytic signal of every column
     analytic_signal = mhkit_hilbert(voltage_data);
