@@ -46,33 +46,32 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
 %                 Site water_depth [m], latitude, longitude, distance_to_shore [m],
 %                 timezone, and jurisdiction
 %
-%         Raises MHKiT:request_wpto:RequestFailed if the data cannot be retrieved.
+%         Raises MHKiT:request_wpto:InvalidInput for invalid inputs and
+%         MHKiT:request_wpto:RequestFailed if the data cannot be retrieved.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    if ~isa(data_type,'string') & ~isa(data_type,'char')
-        error('ERROR: data_type must be a string or char')
+    if ~isa(data_type,'string') && ~isa(data_type,'char')
+        error('MHKiT:request_wpto:InvalidInput', 'data_type must be a string or char');
+    end
+    if ~ismember(data_type, {'3-hour', '1-hour'})
+        error('MHKiT:request_wpto:InvalidInput', 'data_type must be either "3-hour" or "1-hour"');
     end
     if ~isstring(parameter)
-        error('ERROR: parameter must be a string or string array')
+        error('MHKiT:request_wpto:InvalidInput', 'parameter must be a string or string array');
     end
-    if ~isa(lat_lon,'numeric')
-        error('ERROR: lat_lon must be a double or double array')
+    if ~isa(lat_lon,'numeric') || size(lat_lon,2) ~= 2
+        error('MHKiT:request_wpto:InvalidInput', 'lat_lon must be a numeric array with 2 columns [lat, lon]');
     end
-    if ~isa(year, 'numeric')
-        error('ERROR: year must be numeric')
+    if ~isa(year, 'numeric') || ~isscalar(year) || year < 1979 || year > 2010
+        error('MHKiT:request_wpto:InvalidInput', 'year must be a number between 1979 and 2010');
     end
-    if ~isa(api_key,'string') & ~isa(api_key,'char')
-        error('ERROR: api_key must be a string or string array')
+    if ~isa(api_key,'string') && ~isa(api_key,'char')
+        error('MHKiT:request_wpto:InvalidInput', 'api_key must be a string or char');
     end
 
-    % Initialize status structure
-    status = struct('success', true, ...
-                   'warnings', {{}}, ...
-                   'retry_count', 0, ...
-                   'failed_points', [], ...
-                   'error_message', '', ...
-                   'timeout_count', 0);
+    % Request warnings that do not stop the request, shown at the end
+    status = struct('warnings', {{}}, 'retry_count', 0, 'failed_points', [], 'timeout_count', 0);
 
     % Request management configuration
     REQUEST_TIMEOUT = 60;   % seconds
@@ -81,44 +80,6 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
     RATE_LIMIT_PAUSE = 2;  % seconds between requests
     BATCH_SIZE = 10;       % number of requests before cooling down
     BATCH_COOLDOWN = 30;   % seconds to pause after batch
-
-    % Input validation
-    if ~isa(data_type,'string') && ~isa(data_type,'char')
-        status.success = false;
-        status.error_message = 'ERROR: data_type must be a string or char';
-        data = [];
-        return
-    end
-    if ~ismember(data_type, {'3-hour', '1-hour'})
-        status.success = false;
-        status.error_message = 'ERROR: data_type must be either "3-hour" or "1-hour"';
-        data = [];
-        return
-    end
-    if ~isstring(parameter)
-        status.success = false;
-        status.error_message = 'ERROR: parameter must be a string or string array';
-        data = [];
-        return
-    end
-    if ~isa(lat_lon,'numeric') || size(lat_lon,2) ~= 2
-        status.success = false;
-        status.error_message = 'ERROR: lat_lon must be a numeric array with 2 columns [lat, lon]';
-        data = [];
-        return
-    end
-    if ~isa(year, 'numeric') || year < 1979 || year > 2010
-        status.success = false;
-        status.error_message = 'ERROR: year must be numeric and between 1979-2010';
-        data = [];
-        return
-    end
-    if ~isa(api_key,'string') && ~isa(api_key,'char')
-        status.success = false;
-        status.error_message = 'ERROR: api_key must be a string or char';
-        data = [];
-        return
-    end
 
     % Request queue tracking
     request_queue = struct('url', {}, 'retries', {}, 'completed', {}, 'response', {}, 'point_idx', {}, 'param_name', {});
@@ -148,10 +109,8 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
                 error('Initial request timeout');
             end
         catch ME
-            status.success = false;
-            status.error_message = 'Failed to establish initial connection';
-            data = [];
-            return
+            error('MHKiT:request_wpto:RequestFailed', ...
+                'Failed to connect to the WPTO hindcast at developer.nlr.gov: %s', ME.message);
         end
 
         % Get groups with timeout
@@ -240,6 +199,17 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
         end
         status.failed_points = failed_points;
 
+        % Shape and kind of each requested dataset, so static and time
+        % series values are read correctly
+        n_times = numel(standard_params.time_index);
+        param_info = struct();
+        for z = 1:length(parameter)
+            if ~isequal(parameter(z), 'directional_wave_spectrum')
+                param_info.(matlab.lang.makeValidName(parameter(z))) = hsds_dataset_info(groups, ...
+                    parameter(z), standard_params.coordinates, api_key, dom, options);
+            end
+        end
+
         % Create metadata struct & get parameter data
         for y=1:length(idx)
             if ismember(y, failed_points)
@@ -247,7 +217,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
             end
 
             [meta(y), meta_warning] = get_site_metadata(groups, standard_params.coordinates, ...
-                idx(y), api_key, dom, options);
+                n_times, idx(y), api_key, dom, options);
             if ~isempty(meta_warning)
                 status.warnings{end+1} = meta_warning;
             end
@@ -258,14 +228,15 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
                 if isequal(parameter(z),'directional_wave_spectrum')
                     continue
                 else
-                    paramURL = ['https://developer.nlr.gov/api/hsds/datasets/' paramID{:} '/value?api_key=' api_key '&select=[:,' num2str(idx(y)-1) ']' dom];
+                    info = param_info.(matlab.lang.makeValidName(parameter(z)));
 
                     % Attempt request with retries
                     success = false;
                     for retry=1:MAX_RETRIES
                         t_start = tic;
                         try
-                            param = cached_webread(paramURL, options);
+                            [param_values, read_warning] = hsds_read_site(info, idx(y), n_times, ...
+                                api_key, dom, options);
                             if toc(t_start) <= REQUEST_TIMEOUT
                                 success = true;
                                 break;
@@ -281,7 +252,10 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
 
                     if success
                         param_fieldname = strrep(parameter(z), "-", "_");
-                        data(y).(param_fieldname) = param.value;
+                        data(y).(param_fieldname) = param_values;
+                        if ~isempty(read_warning)
+                            status.warnings{end+1} = read_warning;
+                        end
                     else
                         status.warnings{end+1} = sprintf('Failed to get parameter %s for point %d', parameter(z), y);
                     end
@@ -365,6 +339,9 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
         end
 
     catch ME
+        if strcmp(ME.identifier, 'MHKiT:request_wpto:RequestFailed')
+            rethrow(ME);
+        end
         error('MHKiT:request_wpto:RequestFailed', ...
             'Failed to request WPTO hindcast data: %s', ME.message);
     end
@@ -397,6 +374,8 @@ function [meta, meta_warning] = get_site_metadata(groups, coordinates, idx, api_
 %   Dataset links of the hindcast file, with title and id columns
 % coordinates : array
 %   Latitude and longitude of every site, one row per site
+% n_times : double
+%   Number of time steps in the time_index dataset
 % idx : double
 %   1-based index of the site
 % api_key : char
@@ -464,15 +443,150 @@ function [meta, meta_warning] = get_site_metadata(groups, coordinates, idx, api_
         % Fall back to the coordinates and water_depth datasets below
     end
 
-    depth_id = groups.id(strcmpi(groups.title, 'water_depth'));
-    if ~isempty(depth_id)
+    if any(strcmpi(groups.title, 'water_depth'))
         try
-            depth = webread([base_url depth_id{1} '/value?api_key=' api_key ...
-                '&select=[' site ']' dom], meta_options);
-            meta.water_depth = double(depth.value(1));
+            depth_info = hsds_dataset_info(groups, "water_depth", coordinates, api_key, dom, options);
+            meta.water_depth = hsds_read_site(depth_info, idx, n_times, api_key, dom, options);
         catch
         end
     end
-    meta_warning = sprintf(['Site metadata is unavailable from the hindcast for site %d, ' ...
-        'distance_to_shore, timezone, and jurisdiction are not returned'], idx);
+    missing_fields = 'distance_to_shore, timezone, and jurisdiction';
+    if isnan(meta.water_depth)
+        missing_fields = ['water_depth, ' missing_fields];
+    end
+    meta_warning = sprintf('Site metadata is unavailable from the hindcast for site %d, %s are not returned', ...
+        idx, missing_fields);
+end
+
+function info = hsds_dataset_info(groups, name, coordinates, api_key, dom, options)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Find a hindcast dataset and classify it by shape
+%
+% Hindcast files store per-site values, such as water_depth, as [site]
+% arrays and time series as [time, site] arrays. Some uploads store
+% per-site values as [time, site] arrays instead, for example water_depth
+% in West_Coast 2010, so variables that do not vary in time are listed in
+% STATIC_VARIABLES and read from the first row.
+%
+% Parameters
+% ------------
+% groups : table
+%   Dataset links of the hindcast file, with title and id columns
+% name : string
+%   Dataset name
+% coordinates : array
+%   Latitude and longitude of every site, one row per site
+% api_key : char
+%   NLR developer API key
+% dom : char
+%   Domain query parameter of the hindcast file
+% options : weboptions
+%   Web request options
+%
+% Returns
+% ---------
+% info : struct
+%   Dataset description
+%     info.name : string
+%       Dataset name
+%     info.id : char
+%       HSDS dataset id
+%     info.dims : array
+%       Dataset dimensions
+%     info.kind : char
+%       'static' for [site] arrays, 'static_2d' for per-site values stored
+%       as [time, site] arrays, 'time_series' for [time, site] arrays, or
+%       'other'
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    STATIC_VARIABLES = "water_depth";
+
+    id = groups.id(strcmpi(groups.title, name));
+    if isempty(id)
+        error('MHKiT:request_wpto:DatasetNotFound', 'Dataset %s is not in the hindcast file', name);
+    end
+    dataset = cached_webread(['https://developer.nlr.gov/api/hsds/datasets/' id{1} ...
+        '?api_key=' api_key dom], options);
+
+    info = struct('name', string(name), 'id', id{1}, 'dims', dataset.shape.dims(:)', 'kind', 'other');
+    n_sites = size(coordinates, 1);
+    if isequal(info.dims, n_sites)
+        info.kind = 'static';
+    elseif numel(info.dims) == 2 && info.dims(2) == n_sites
+        if ismember(lower(info.name), STATIC_VARIABLES)
+            info.kind = 'static_2d';
+        else
+            info.kind = 'time_series';
+        end
+    end
+end
+
+function [values, read_warning] = hsds_read_site(info, idx, n_times, api_key, dom, options)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Read the values of one hindcast site from a dataset
+%
+% Per-site datasets return one value. Time series return one value per
+% time step. Some time series have more rows than the time_index dataset,
+% the extra rows are removed and a warning is returned.
+%
+% Parameters
+% ------------
+% info : struct
+%   Dataset description from hsds_dataset_info
+% idx : double
+%   1-based index of the site
+% n_times : double
+%   Number of time steps in the time_index dataset
+% api_key : char
+%   NLR developer API key
+% dom : char
+%   Domain query parameter of the hindcast file
+% options : weboptions
+%   Web request options
+%
+% Returns
+% ---------
+% values : double
+%   Value of a per-site dataset, or column vector of a time series
+% read_warning : char
+%   Description of removed rows, empty otherwise
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    read_warning = '';
+    site = num2str(idx - 1);
+    switch info.kind
+        case 'static'
+            selection = ['[' site ']'];
+        case 'static_2d'
+            selection = ['[0,' site ']'];
+        case 'time_series'
+            selection = ['[:,' site ']'];
+        otherwise
+            error('MHKiT:request_wpto:UnsupportedDataset', ...
+                'Dataset %s has unsupported dimensions [%s]', info.name, num2str(info.dims));
+    end
+
+    response = cached_webread(['https://developer.nlr.gov/api/hsds/datasets/' info.id ...
+        '/value?api_key=' api_key '&select=' selection dom], options);
+    if ~isstruct(response) || ~isfield(response, 'value')
+        error('MHKiT:request_wpto:RequestFailed', 'No values returned for %s', info.name);
+    end
+    values = double(response.value(:));
+
+    if ~strcmp(info.kind, 'time_series')
+        values = values(1);
+    elseif numel(values) > n_times
+        read_warning = sprintf(['%s has %d time steps but time_index has %d, ' ...
+            'the last %d values were removed'], info.name, numel(values), n_times, numel(values) - n_times);
+        values = values(1:n_times);
+    elseif numel(values) < n_times
+        read_warning = sprintf('%s has %d time steps but time_index has %d', ...
+            info.name, numel(values), n_times);
+    end
 end
