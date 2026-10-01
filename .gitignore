@@ -1,6 +1,7 @@
 # MHKiT-MATLAB Specific Files
 # Test results
 mhkit/tests/test_results/*
+mhkit/tests/coverage_report/
 
 # Hindcast data cache
 mhkit_webread_cache
