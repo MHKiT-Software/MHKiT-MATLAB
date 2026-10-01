@@ -8,10 +8,13 @@
 
         scripts\run_python_tests_windows.ps1 C:\path\to\python.exe
 
-    The Python interpreter must have mhkit and mhkit_python_utils installed:
+    The Python interpreter must have mhkit and mhkit_python_utils installed.
+    Use Python from python.org with a virtual environment, not conda. conda
+    builds of Python load libexpat.dll, which clashes with the version MATLAB
+    loads ("DLL load failed while importing pyexpat"):
 
-        conda create -n mhkit_matlab -c conda-forge python=3.12 "numpy>=2" pip netcdf4 hdf5
-        conda activate mhkit_matlab
+        py -3.12 -m venv .venv
+        .venv\Scripts\activate
         pip install "mhkit[all]==1.1.2" "pandas<3"  # pecos 1.0.0 check_delta fails with pandas 3
         pip install -e .
         scripts\run_python_tests_windows.ps1 (python -c "import sys; print(sys.executable)")

@@ -21,9 +21,11 @@ function results = runPythonTests(pythonExecutable, options)
 % DYLD_INSERT_LIBRARIES fixes this without affecting MATLAB.
 %
 % On Windows the same conflict appears as "DLL load failed while importing
-% pyexpat". The Python environment's folders, including conda's
-% Library\bin, are placed first on PATH so the Python host finds the
-% environment's DLLs.
+% pyexpat" with conda builds of Python, which load a shared libexpat.dll.
+% MATLAB's copy is already loaded, so changing PATH cannot fix it. Use
+% Python from python.org, which builds expat into pyexpat, with packages
+% from PyPI. The Python environment's folders are still placed first on
+% PATH so its other DLLs are found.
 %
 % Parameters
 % ------------

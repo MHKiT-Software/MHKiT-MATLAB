@@ -5,11 +5,9 @@ name: MHKiT-MATLAB Windows Unit Tests
 # Run locally with:
 # - Windows: scripts\run_python_tests_windows.ps1 C:\path\to\python.exe
 #
-# The script and this workflow both call mhkit/tests/runPythonTests.m, which
-# places the Python environment's DLL folders first on PATH so MATLAB's bundled
-# expat and OpenSSL DLLs do not break Python imports. This workflow runs MATLAB
-# with run-command instead of the script because public project MATLAB licensing
-# on GitHub Actions requires the MATLAB actions.
+# The script and this workflow both call mhkit/tests/runPythonTests.m. This
+# workflow runs MATLAB with run-command instead of the script because public
+# project MATLAB licensing on GitHub Actions requires the MATLAB actions.
 
 on:
   workflow_dispatch: {}
@@ -50,21 +48,20 @@ jobs:
       - name: Check out MHKiT-MATLAB
         uses: actions/checkout@v7
 
-      # conda-forge provides netcdf4, hdf5, and BLAS builds that are consistent
-      # with each other, which avoids native library conflicts with MATLAB
-      - name: Set up conda environment
-        uses: conda-incubator/setup-miniconda@v3
+      # Use python.org Python and PyPI wheels, not conda. python.org builds
+      # compile expat into pyexpat, and the PyPI netCDF4 and h5py wheels bundle
+      # renamed copies of their DLLs. conda-forge links these to shared DLLs
+      # (libexpat.dll, hdf5.dll) that clash with the versions MATLAB loads,
+      # causing "DLL load failed while importing pyexpat"
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          miniforge-version: latest
           python-version: ${{ matrix.python-version }}
-          activate-environment: mhkit_conda_env
-          channels: conda-forge
-          conda-remove-defaults: true
 
       - name: Install MHKiT-Python and mhkit_python_utils
-        shell: bash -l {0}
+        shell: bash
         run: |
-          conda install -y "numpy>=2" pip netcdf4 hdf5
+          python -m pip install --upgrade pip
           # pecos 1.0.0 (used by the qc module) check_delta fails with pandas 3
           pip install "mhkit[all]==${{ matrix.mhkit-python-version }}" "pandas<3"
           pip install -e .
