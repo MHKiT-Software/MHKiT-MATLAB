@@ -104,7 +104,14 @@ end
 % Set MATLAB release compatibility
 opts.MinimumMatlabRelease = matlab_minimum_release_supported;
 
+% Many modules call MHKiT-Python, which requires a local Python install
+opts.SupportedPlatforms.Win64 = true;
+opts.SupportedPlatforms.Maci64 = true;
+opts.SupportedPlatforms.Glnxa64 = true;
+opts.SupportedPlatforms.MatlabOnline = false;
+
 opts.ToolboxFiles = toolbox_files;
+opts.ToolboxMatlabPath = toolbox_matlab_path;
 
 % Set output path for the .mltbx file
 output_file = fullfile(project_root, sprintf('%s_v%s.mltbx', project_name, project_version));
