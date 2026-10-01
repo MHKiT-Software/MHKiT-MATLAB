@@ -205,3 +205,47 @@ classdef Wave_TestIO < matlab.unittest.TestCase
     end
 
 end
+
+function verify_site_metadata(testCase, expected_meta, row, metadata)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Compare request_wpto site metadata with the expected values
+%
+% The expected metadata was read from the hindcast source files on AWS
+% S3. As of 2026-09-30, HSDS returns an empty response for the
+% West_Coast 3-hour meta dataset, so request_wpto reads latitude,
+% longitude, and water_depth from other datasets and leaves
+% distance_to_shore, timezone, and jurisdiction missing. Both cases are
+% checked so the tests stay valid when HSDS is fixed.
+%
+% Parameters
+% ------------
+% testCase : matlab.unittest.TestCase
+%   Test case
+% expected_meta : table
+%   Expected metadata, one row per site
+% row : double
+%   Row of expected_meta to compare
+% metadata : struct
+%   Site metadata returned by request_wpto
+%
+% Returns
+% ---------
+% None
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    assertEqual(testCase, expected_meta.latitude(row), metadata.latitude, 'RelTol', 0.000001);
+    assertEqual(testCase, expected_meta.longitude(row), metadata.longitude, 'RelTol', 0.000001);
+    assertEqual(testCase, expected_meta.water_depth(row), metadata.water_depth, 'RelTol', 0.000001);
+    if isnan(metadata.timezone)
+        % meta dataset unavailable from HSDS
+        assertTrue(testCase, isnan(metadata.distance_to_shore));
+        assertEqual(testCase, metadata.jurisdiction, '');
+    else
+        assertEqual(testCase, expected_meta.timezone(row), metadata.timezone);
+        assertEqual(testCase, expected_meta.jurisdiction{row}, metadata.jurisdiction);
+        assertEqual(testCase, expected_meta.distance_to_shore(row), metadata.distance_to_shore, 'RelTol', 0.000001);
+    end
+end
