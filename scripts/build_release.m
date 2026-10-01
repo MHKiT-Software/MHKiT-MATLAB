@@ -20,7 +20,7 @@ display_name = 'Marine and Hydrokinetic Toolkit (MHKiT)';
 %   6 indicates a release candidate version
 % i.e.: Development build for version 0.7.0-dev.2 would be 0.7.0.9002
 project_version = '1.1.0';
-matlab_minimum_release_supported = 'R2022b';
+matlab_minimum_release_supported = 'R2023b';
 summary = 'Marine energy data analysis and visualization toolbox';
 description = sprintf([ ...
 'MHKiT-MATLAB is a MATLAB package designed for marine energy applications to assist in data processing and visualization. The software package includes functionality for:\n\n' ...

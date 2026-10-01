@@ -20,20 +20,23 @@ See the [MHKiT MATLAB Installation Instructions](https://mhkit-software.github.i
 
 ### Software Requirements
 
-MHKiT-MATLAB utilizes Python functions from MHKiT-Python and requires the user to have
+Some MHKiT-MATLAB modules utilize Python functions from MHKiT-Python and require the user to have
 compatible versions of Python and MHKiT-Python installed.
 
 MHKiT-MATLAB supports the following combinations of MATLAB and Python versions.[^1]
 
-|      | R2022b | R2023a | R2023b | R2024a | R2024b |
-| ---- | ------ | ------ | ------ | ------ | ------ |
-| 3.13 | -      | -      | -      | -      | -      |
-| 3.12 | -      | -      | -      | -      | ✓      |
-| 3.11 | -      | -      | ✓      | ✓      | ✓      |
-| 3.10 | ✓      | ✓      | ✓      | ✓      | ✓      |
+| Python | R2023b | R2024a | R2024b | R2025a | R2025b | R2026a | R2026b |
+| ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
+| 3.13   | -      | -      | -      | -      | -      | ✓      | ✓      |
+| 3.12   | -      | -      | ✓      | ✓      | ✓      | ✓      | ✓      |
+| 3.11   | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
+| 3.10   | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
 
 - ✓: MATLAB/Python versions compatible
 - `-`: MATLAB/Python versions not compatible
+
+The minimum supported MATLAB release is R2023b. MHKiT-Python 1.1 requires Python 3.10 or newer. R2026b also
+supports Python 3.14, which has not yet been tested with MHKiT-Python and MHKiT-MATLAB.
 
 Before installing MHKiT-MATLAB, please ensure your system has compatible versions of Python and MATLAB installed per the table above.
 
@@ -47,25 +50,29 @@ To ensure software reliability and stability. MHKiT-MATLAB software [runs a suit
 
 ### Test Matrices
 
-The test matrices below detail the current state of unit testing. An "X" indicates a OS/MATLAB/Python version with a failing MHKiT-MATLAB unit test on GitHub Action that is due to Actions environment.
+#### MATLAB-only modules (no Python)
 
-#### Linux (`ubuntu-latest`)
+Tests for the native MATLAB modules (acoustics, dolfyn, mooring, power, river, tidal, and most wave functions)
+run without Python.
 
-|      | R2022b | R2023a | R2023b | R2024a | R2024b |
-| ---- | ------ | ------ | ------ | ------ | ------ |
-| 3.12 | -      | -      | -      | -      | ✓      |
-| 3.11 | -      | -      | ✓      | ✓      | ✓      |
-| 3.10 | ✓      | ✓      | ✓      | ✓      | ✓      |
+| OS                       | R2023b | R2024a | R2024b | R2025a | R2025b | R2026a | R2026b |
+| ------------------------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
+| macOS (`macos-15`)       | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
+| Windows (`windows-2025`) | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      | ✓      |
 
-#### macOS (`macos-latest`)
+The MATLAB examples are additionally run on the oldest and newest supported releases, R2023b and R2026b, on
+both operating systems.
 
-|      | R2022b | R2023a | R2023b | R2024a | R2024b |
-| ---- | ------ | ------ | ------ | ------ | ------ |
-| 3.12 | -      | -      | -      | -      | ✓      |
-| 3.11 | -      | -      | ✓      | ✓      | ✓      |
-| 3.10 | ✓      | ✓      | ✓      | ✓      | ✓      |
+#### Full test suite with MHKiT-Python
 
-#### Windows (`windows-latest`)
+The complete test suite, including modules that call MHKiT-Python, runs on the latest release, R2026b, and on R2025b on each OS.
+
+| OS                       | MATLAB | Python | MHKiT-Python |
+| ------------------------ | ------ | ------ | ------------ |
+| macOS (`macos-15`)       | R2025b | 3.12   | 1.1.2        |
+| macOS (`macos-15`)       | R2026b | 3.12   | 1.1.2        |
+| Windows (`windows-2025`) | R2025b | 3.12   | 1.1.2        |
+| Windows (`windows-2025`) | R2026b | 3.12   | 1.1.2        |
 
 |      | R2022b | R2023a | R2023b | R2024a | R2024b |
 | ---- | ------ | ------ | ------ | ------ | ------ |

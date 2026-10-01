@@ -35,7 +35,7 @@ jobs:
       matrix:
         # Linux is intentionally omitted, may be added back in the future.
         os: [macos-15, windows-2025]
-        matlab-version: [R2023b, R2024a, R2024b, R2025a, R2025b]
+        matlab-version: [R2023b, R2024a, R2024b, R2025a, R2025b, R2026a, R2026b]
 
     steps:
       - name: Check out MHKiT-MATLAB

@@ -14,7 +14,7 @@ jobs:
       matrix:
         # os: [macos-13, ubuntu-latest, windows-latest]
         os: ["ubuntu-22.04"]
-        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b, R2025a, latest]
+        matlab-version: [R2023b, R2024a, R2024b, R2025a, R2025b, R2026a, R2026b]
 
     runs-on: ${{ matrix.os }}
 
