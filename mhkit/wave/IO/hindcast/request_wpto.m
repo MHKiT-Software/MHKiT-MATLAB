@@ -354,7 +354,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
     end
 end
 
-function [meta, meta_warning] = get_site_metadata(groups, coordinates, idx, api_key, dom, options)
+function [meta, meta_warning] = get_site_metadata(groups, coordinates, n_times, idx, api_key, dom, options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
