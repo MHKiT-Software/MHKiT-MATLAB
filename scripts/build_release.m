@@ -2,7 +2,8 @@
 
 % Define project properties
 project_name = 'mhkit';
-% This is unique to this project and first setup in the .prj file. DO NOT CHANGE THIS!
+% This is unique to this project, first set up in the original toolbox .prj file. DO NOT CHANGE THIS!
+% It identifies the toolbox so new versions install over existing ones.
 toolbox_guid = '1f426c5c-9e72-4f83-8e42-1e51b296aa29';
 display_name = 'Marine and Hydrokinetic Toolkit (MHKiT)';
 % MATLAB only supports <Major>.<Minor>.<Patch>.<Build>
