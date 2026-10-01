@@ -69,6 +69,11 @@ function data = cached_webread(url, options)
     for attempt = 1:maxRetries
         try
             data = webread(url, options);
+            % A truncated transfer only warns and returns an empty response,
+            % treat it as a failure so it is retried and not cached
+            if (ischar(data) || isstring(data)) && strlength(strtrim(string(data))) == 0
+                error('MHKiT:cached_webread:EmptyResponse', 'Empty response from %s', truncateUrl(url));
+            end
             fprintf('Successfully downloaded data\n');
             break;
         catch exception
@@ -76,7 +81,8 @@ function data = cached_webread(url, options)
                 fprintf('Download failed, attempt %d of %d. Retrying...\n', attempt, maxRetries);
                 pause(retryPause);
             else
-                error('Failed to download after %d attempts', maxRetries);
+                error('MHKiT:cached_webread:DownloadFailed', ...
+                    'Failed to download after %d attempts: %s', maxRetries, exception.message);
             end
         end
     end
