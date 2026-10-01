@@ -4,18 +4,6 @@ on:
     branches:
       - master
       - develop
-  # Builds the toolbox on pull requests so packaging problems show up before
-  # merging. Releases are only created on pushes to master and develop.
-  pull_request:
-    branches:
-      - master
-      - develop
-    paths:
-      - 'mhkit/**'
-      - 'scripts/build_release.m'
-      - 'pyproject.toml'
-      - 'mhkit_python_utils/**'
-      - '.github/workflows/build_release.yml'
 jobs:
   build-toolbox:
     runs-on: ubuntu-latest
