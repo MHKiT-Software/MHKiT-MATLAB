@@ -1,336 +1,96 @@
 name: MHKiT-MATLAB Unix Unit Tests
 
-# Only run tests when MATLAB files or this workflow file changes
+# Runs the full unit test suite, including tests that call MHKiT-Python
+#
+# Run locally with:
+# - MacOS: scripts/run_python_tests_macos.sh /path/to/python
+#
+# Linux is intentionally omitted. Recent MATLAB installers require a newer
+# libstdc++ than ubuntu-22.04 provides, and MATLAB's bundled libraries conflict
+# with the conda environment. It may be added back in the future.
+
 on:
+  workflow_dispatch: {}
   push:
     branches: [ master, develop ]
     paths:
       - 'mhkit/**/*.m'
-      - 'examples/**/*.m'
+      - 'mhkit_python_utils/**'
+      - 'examples/data/**'
+      - 'pyproject.toml'
       - '.github/workflows/unix_unit_tests.yml'
   pull_request:
     branches: [ master, develop ]
     paths:
       - 'mhkit/**/*.m'
-      - 'examples/**/*.m'
+      - 'mhkit_python_utils/**'
+      - 'examples/data/**'
+      - 'pyproject.toml'
       - '.github/workflows/unix_unit_tests.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
-  cache_population:
+  unit_tests:
+    name: ${{ matrix.matlab-version }}, Python ${{ matrix.python-version }}, MHKiT-Python ${{ matrix.mhkit-python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-
       matrix:
-        os: ["ubuntu-22.04"]
-        python-version: ["3.11"]
-        matlab-version: [R2023b]
+        os: [macos-15]
+        matlab-version: [R2025b, R2026b]
+        python-version: ["3.12"]
+        mhkit-python-version: ["1.1.2"]
 
-    runs-on: ${{ matrix.os }}
-
-    env:
-      mhkit-python-dir: "MHKiT-Python"
-      MHKIT_PYTHON_VERSION: '0.9.0'
     steps:
-      - name: Install & Setup Miniconda
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v7
+
+      # conda-forge provides netcdf4, hdf5, and BLAS builds that are consistent
+      # with each other, which avoids native library conflicts with MATLAB
+      - name: Set up conda environment
         uses: conda-incubator/setup-miniconda@v3
         with:
-          miniconda-version: latest
-          auto-update-conda: true
+          miniforge-version: latest
           python-version: ${{ matrix.python-version }}
           activate-environment: mhkit_conda_env
-          channels: conda-forge,defaults
+          channels: conda-forge
+          conda-remove-defaults: true
 
-      - name: "Conda install netcdf4, hdf5"
+      - name: Install MHKiT-Python and mhkit_python_utils
         shell: bash -l {0}
         run: |
-          conda activate mhkit_conda_env
-          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
-
-      - name: Fix libstdc++ compatibility
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          # Force MATLAB to use system libstdc++
-          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6:/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
-
-      - name: Check out MHKiT-MATLAB
-        uses: actions/checkout@v4
-
-      - name: pip install mhkit from pypi
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip install mhkit==$MHKIT_PYTHON_VERSION
-
-      - name: pip install mhkit-python-utils module from source
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
+          conda install -y "numpy>=2" pip netcdf4 hdf5
+          # pecos 1.0.0 (used by the qc module) check_delta fails with pandas 3
+          pip install "mhkit[all]==${{ matrix.mhkit-python-version }}" "pandas<3"
           pip install -e .
-
-      - name: Pin scipy version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip uninstall -y scipy
-          pip install scipy==1.12.0
-
-      - name: List installed pip modules
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip freeze
-
-      # Create the cache and add a dummy file
-      # The dummy file ensures that the artifact download
-      - name: Setup mhkit_webread_cache
-        shell: bash -l {0}
-        run: |
-          mkdir mhkit_webread_cache
-          touch mhkit_webread_cache/test.txt
-          echo "Hello World" > mhkit_webread_cache/test.txt
+          pip list
+          python -c "import mhkit, mhkit_python_utils; print('MHKiT-Python', mhkit.__version__)"
+          echo "MHKIT_PYTHON_EXE=$(python -c 'import sys; print(sys.executable)')" >> "$GITHUB_ENV"
 
       - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2
+        uses: matlab-actions/setup-matlab@v3
         with:
           release: ${{ matrix.matlab-version }}
 
-      # OutOfProcess is required to properly call netcdf/hdf5 and works reliably on macos and ubuntu
-      - name: Configure MATLAB Python Environment
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") > run.m
-
-      - name: Add MATLAB test commands
-        shell: bash
-        run: echo "version,
-          addpath(genpath('mhkit')),
-          import matlab.unittest.TestSuite,
-          import matlab.unittest.TestRunner,
-          testFolder = ['mhkit' filesep 'tests'],
-          suite = TestSuite.fromFolder(testFolder),
-          runner = TestRunner.withTextOutput,
-          results = runner.run(suite),
-          assertSuccess(results)" >> run.m
-
-      - name: Output run.m
-        shell: bash
-        run: cat run.m
-
-      - name: Run MATLAB Unit Tests
-        uses: matlab-actions/run-command@v2
+      # Fails fast with a readable summary if MATLAB cannot import the Python
+      # modules, usually from native library conflicts between MATLAB and Python
+      - name: Check Python imports from MATLAB
+        uses: matlab-actions/run-command@v3
         with:
-          command: run
+          command: |
+            addpath(fullfile("mhkit", "tests"));
+            runPythonTests(getenv("MHKIT_PYTHON_EXE"), ImportCheckOnly=true);
           startup-options: -noFigureWindows
 
-      - name: Save mhkit_webread_cache directory as an artifact
-        uses: actions/upload-artifact@v4
+      - name: Run MATLAB unit tests
+        uses: matlab-actions/run-command@v3
         with:
-          # GitHub Action "Name" of artifact
-          name: mhkit_webread_cache
-          # Filesystem path of directory
-          path: mhkit_webread_cache
-
-  main:
-    needs: cache_population
-    strategy:
-      fail-fast: false
-
-      matrix:
-        os: [macos-13, "ubuntu-22.04"]
-        python-version: ["3.10", 3.11, 3.12]
-        # Note: It is preferred to use an actual release name as opposed to 'latest'
-        matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
-        mhkit-python-version: ["0.9.0"]
-        exclude:
-          - python-version: "3.10" # cache_population job
-            matlab-version: R2022b
-            os: "ubuntu-22.04"
-          # Python 3.12 + MATLAB incompatability
-          - matlab-version: R2024a
-            python-version: 3.12
-          - matlab-version: R2023b
-            python-version: 3.12
-          - matlab-version: R2023a
-            python-version: 3.12
-          - matlab-version: R2022b
-            python-version: 3.12
-          # Python 3.11 + MATLAB incompatability
-          - matlab-version: R2023a
-            python-version: 3.11
-          - matlab-version: R2022b
-            python-version: 3.11
-          # Specific MATLAB/Python/OS Errors
-          # Error using _cythonized_array_utils>init
-          # scipy.linalg._cythonized_array_utils (line 1)
-          # Python Error: ValueError: numpy.dtype size changed, may indicate binary
-          # incompatibility. Expected 96 from C header, got 88 from PyObject
-          - matlab-version: R2024b
-            python-version: 3.12
-            os: macos-13
-          # Unable to resolve the name 'py.mhkit.wave.resource.jonswap_spectrum'
-          - matlab-version: R2023a
-            python-version: 3.10
-            os: "ubuntu-22.04"
-
-    runs-on: ${{ matrix.os }}
-
-    env:
-      mhkit-python-dir: "MHKiT-Python"
-      MHKIT_PYTHON_VERSION: ${{  matrix.mhkit-python-version }}
-    steps:
-      - name: Check out MHKiT-MATLAB
-        uses: actions/checkout@v4
-
-      - name: Install & Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          miniconda-version: latest
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-          activate-environment: mhkit_conda_env
-          channels: conda-forge,defaults
-
-      # This is necessary to fix any issues with netcdf4 and hdf5 headers
-      - name: "Conda install netcdf4, hdf5"
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          conda install numpy cython pip pytest hdf5 libnetcdf cftime netcdf4
-
-      - name: Fix libstdc++ compatibility
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          # Force MATLAB to use system libstdc++
-          echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6:/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
-
-      # - name: Setup MATLAB Path on Ubuntu
-      #   if: ${{ matrix.os == '"ubuntu-22.04"' }}
-      #   run: echo "LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6" >> "$GITHUB_ENV"
-
-      - name: Print Python executable
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          python -c "import sys; print(sys.executable)"
-
-      - name: Print Python Version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          python --version
-
-      - name: pip install mhkit from pypi
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-          pip install mhkit==$MHKIT_PYTHON_VERSION
-
-      - name: pip upgrade netcdf4
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          export PATH="${CONDA_PREFIX}/bin:${CONDA_PREFIX}/Library/bin:$PATH" # so setup.py finds nc-config
-          pip install --upgrade netcdf4
-
-      - name: pip install mhkit-python-utils module from source
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip install -e .
-
-      - name: Pin scipy version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip uninstall -y scipy
-          pip install scipy==1.12.0
-
-      - name: List installed pip modules
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip freeze
-
-      - name: Print MHKiT-Python Version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          python -c "import mhkit; print(mhkit.__version__)"
-
-      - name: Verify MHKiT-Python Operation
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
-
-      - name: Download mhkit_webread_cache artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: mhkit_webread_cache
-          path: mhkit_webread_cache
-
-      - name: Display structure mhkit_webread_cache
-        run: ls -R
-        working-directory: .
-
-      - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2
-        with:
-          release: ${{ matrix.matlab-version }}
-
-      - name: Configure OpenSSL for MacOS/MATLAB
-        if: matrix.os == 'macos-13'
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          conda install openssl=="3.0.*"
-          CONDA_LIB_PATH=$(python -c "import sys; import os; print(os.path.join(os.path.dirname(sys.executable), 'lib'))")
-          export DYLD_LIBRARY_PATH="$CONDA_LIB_PATH:$DYLD_LIBRARY_PATH"
-          echo "export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
-
-      - name: Add Python Dir to Path
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
-
-      # OutOfProcess is required to properly call netcdf/hdf5 and works reliably on macos and ubuntu
-      - name: Configure MATLAB Python Environment
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          printf 'pyenv(Version="%s", ExecutionMode="OutOfProcess")\n' $(python -c "import sys; print(sys.executable)") >> run.m
-          # Pass dynamic library paths to MATLAB only on macOS
-          if [[ $OSTYPE == "darwin"* ]]; then
-            echo "setenv('DYLD_LIBRARY_PATH', getenv('DYLD_LIBRARY_PATH'));" >> run.m
-          fi
-
-      - name: Add MATLAB test commands
-        shell: bash
-        run: echo "version,
-          addpath(genpath('mhkit')),
-          import matlab.unittest.TestSuite,
-          import matlab.unittest.TestRunner,
-          testFolder = ['mhkit' filesep 'tests'],
-          suite = TestSuite.fromFolder(testFolder),
-          runner = TestRunner.withTextOutput,
-          results = runner.run(suite),
-          assertSuccess(results)" >> run.m
-
-      - name: Output run.m
-        shell: bash
-        run: cat run.m
-
-      # This is a good idea but does not work because you cannot explicitly set the python execution mode
-      #   - name: Run MHKiT-MATLAB Unit Tests
-      #     uses: matlab-actions/run-tests@v1
-      #     with:
-      #         select-by-folder: mhkit/tests
-
-      - name: Run MATLAB Unit Tests
-        uses: matlab-actions/run-command@v2
-        with:
-          command: run
+          command: |
+            addpath(fullfile("mhkit", "tests"));
+            results = runPythonTests(getenv("MHKIT_PYTHON_EXE"));
+            disp(table(results));
+            assertSuccess(results);
           startup-options: -noFigureWindows

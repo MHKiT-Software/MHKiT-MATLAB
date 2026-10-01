@@ -2,7 +2,8 @@
 
 % Define project properties
 project_name = 'mhkit';
-% This is unique to this project and first setup in the .prj file. DO NOT CHANGE THIS!
+% This is unique to this project, first set up in the original toolbox .prj file. DO NOT CHANGE THIS!
+% It identifies the toolbox so new versions install over existing ones.
 toolbox_guid = '1f426c5c-9e72-4f83-8e42-1e51b296aa29';
 display_name = 'Marine and Hydrokinetic Toolkit (MHKiT)';
 % MATLAB only supports <Major>.<Minor>.<Patch>.<Build>
@@ -18,8 +19,8 @@ display_name = 'Marine and Hydrokinetic Toolkit (MHKiT)';
 %   7 indicates a beta version
 %   6 indicates a release candidate version
 % i.e.: Development build for version 0.7.0-dev.2 would be 0.7.0.9002
-project_version = '1.0.1';
-matlab_minimum_release_supported = 'R2022b';
+project_version = '1.1.0';
+matlab_minimum_release_supported = 'R2023b';
 summary = 'Marine energy data analysis and visualization toolbox';
 description = sprintf([ ...
 'MHKiT-MATLAB is a MATLAB package designed for marine energy applications to assist in data processing and visualization. The software package includes functionality for:\n\n' ...
@@ -40,7 +41,7 @@ description = sprintf([ ...
 ]);
 
 author_name = 'Rebecca Fao';
-author_email = 'rebecca.fao@nrel.gov';
+author_email = 'rebecca.fao@nlr.gov';
 author_company = 'National Laboratory of the Rockies';
 
 fprintf('Starting %s toolbox build process...\n\n', project_name);
@@ -56,8 +57,22 @@ fprintf('Setting up paths from %s', project_root);
 mhkit_path = fullfile(project_root, 'mhkit');
 examples_path = fullfile(project_root, 'examples');
 
-% These are the folders and files included in the output MATLAB toolbox
-toolbox_files = {mhkit_path};
+% These are the files included in the output MATLAB toolbox
+% Unit tests, their data and coverage reports, and the legacy setup.py are excluded
+excluded_paths = {fullfile(mhkit_path, 'tests'), fullfile(mhkit_path, 'setup.py')};
+is_excluded = @(p) any(cellfun(@(e) strcmp(p, e) || startsWith(p, [e filesep]), excluded_paths));
+
+all_files = dir(fullfile(mhkit_path, '**', '*'));
+all_files = all_files(~[all_files.isdir]);
+toolbox_files = fullfile({all_files.folder}, {all_files.name});
+toolbox_files = toolbox_files(~cellfun(is_excluded, toolbox_files));
+toolbox_files = toolbox_files(~endsWith(toolbox_files, {'.DS_Store', '.asv'}));
+fprintf('\nIncluding %d files in toolbox\n', numel(toolbox_files));
+
+% Folders added to the user's MATLAB path on install
+toolbox_matlab_path = strsplit(genpath(mhkit_path), pathsep);
+toolbox_matlab_path = toolbox_matlab_path(~cellfun(@isempty, toolbox_matlab_path));
+toolbox_matlab_path = toolbox_matlab_path(~cellfun(is_excluded, toolbox_matlab_path));
 
 fprintf('\nStarting MATLAB toolbox build of %s version %s\n', project_name, project_version);
 
@@ -90,7 +105,14 @@ end
 % Set MATLAB release compatibility
 opts.MinimumMatlabRelease = matlab_minimum_release_supported;
 
+% Many modules call MHKiT-Python, which requires a local Python install
+opts.SupportedPlatforms.Win64 = true;
+opts.SupportedPlatforms.Maci64 = true;
+opts.SupportedPlatforms.Glnxa64 = true;
+opts.SupportedPlatforms.MatlabOnline = false;
+
 opts.ToolboxFiles = toolbox_files;
+opts.ToolboxMatlabPath = toolbox_matlab_path;
 
 % Set output path for the .mltbx file
 output_file = fullfile(project_root, sprintf('%s_v%s.mltbx', project_name, project_version));
@@ -135,6 +157,13 @@ mkdir(temp_dir);
 % Copy files to temporary directory
 copyfile(python_utils_folder, fullfile(temp_dir, 'mhkit_python_utils'));
 copyfile(pyproject_toml_file, fullfile(temp_dir, 'pyproject.toml'));
+
+% Remove Python bytecode caches left by local installs
+pycache_dirs = dir(fullfile(temp_dir, '**', '__pycache__'));
+pycache_dirs = unique({pycache_dirs([pycache_dirs.isdir]).folder});
+for i = 1:numel(pycache_dirs)
+    rmdir(pycache_dirs{i}, 's');
+end
 
 % Create the zip file
 python_utils_zip_path = fullfile(project_root, sprintf('mhkit_python_utils_v%s.zip', project_version));

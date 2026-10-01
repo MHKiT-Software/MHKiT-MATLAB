@@ -65,10 +65,7 @@ plot_flow_duration_curve(data.Discharge,F.F);
 % hydrological model. The data is read into a table from the .csv file.
 
 % Import file with discharge to velocity curve at turbine location
-relative_file_name = 'data/river/tanana_DV_curve.csv';
-current_dir = fileparts(matlab.desktop.editor.getActiveFilename);
-full_file_name = fullfile(current_dir, relative_file_name);
-DV_curve = readtable(full_file_name);
+DV_curve = readtable("./data/river/tanana_DV_curve.csv");
 
 
 % Create a polynomial fit of order 3 from the DV_curve.
@@ -102,10 +99,7 @@ p2 = plot_velocity_duration_curve(V.V, F.F); % Input velocity vector and exceeda
 % a table from a .csv file.
 
 % We are importing velocity to power data
-relative_file_name = 'data/river/tanana_VP_curve.csv';
-current_dir = fileparts(matlab.desktop.editor.getActiveFilename);
-full_file_name = fullfile(current_dir, relative_file_name);
-VP_curve = readtable(full_file_name);
+VP_curve = readtable("./data/river/tanana_VP_curve.csv");
 
 % Calculate the polynomial fit for the VP curve
 p_VP = polynomial_fit(VP_curve.V, VP_curve.P,2); % Input is velocity vector, Power vector, and polynomial order

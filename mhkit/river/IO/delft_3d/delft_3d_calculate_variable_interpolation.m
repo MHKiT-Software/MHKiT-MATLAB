@@ -38,7 +38,7 @@ function result_struct = delft_3d_calculate_variable_interpolation(delft_3d_py_o
         error('MATLAB:delft_3d_calculate_variable_interpolation:InvalidInput', 'Variables must be a cell array of strings.');
     end
 
-    if ~(isstring(points) || isa(points, 'py.pandas.core.frame.DataFrame') || isstruct(points))
+    if ~(isstring(points) || mhkit_is_pandas_dataframe(points) || isstruct(points))
         error('MATLAB:delft_3d_calculate_variable_interpolation:InvalidInput', 'Points must be a string or a DataFrame.');
     end
 

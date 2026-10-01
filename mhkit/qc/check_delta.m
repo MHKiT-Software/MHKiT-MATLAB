@@ -75,10 +75,10 @@ end
 
 
   % check to see if a pandas dataframe or not
-  if (isa(data,'py.pandas.core.frame.DataFrame')~=1)
+  if (mhkit_is_pandas_dataframe(data)~=1)
     data=qc_data_to_dataframe(data);
   end
-  bound = py.list(bound);
+  bound = py.list(num2cell(double(bound)));
 
 
 r = struct(py.pecos.monitoring.check_delta(data,bound,window,...

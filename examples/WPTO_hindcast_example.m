@@ -25,37 +25,36 @@
 %
 % Variables are indexed by latitude, longitude, and time:
 %
-% * |energy_period|
-% * |maximum_energy_period|
-% * |mean_absolute_period|
-% * |mean_zero-crossing_period|
-% * |omni-directional_wave_power|
-% * |peak_period|
-% * |significant_wave_height|
-% * |water_depth|
-% * |spectral_width|
-% * |directionality_coefficient|
+% * |significant_wave_height|: significant wave height, $H_{m_0}$ [m]
+% * |energy_period|: energy period, $T_e$ [s]
+% * |peak_period|: peak period, $T_p$ [s]
+% * |mean_absolute_period|: mean absolute period, $T_m$ [s]
+% * |mean_zero-crossing_period|: mean zero-crossing period, $T_z$ [s]
+% * |omni-directional_wave_power|: omnidirectional wave power, $J$ [W/m]
+% * |spectral_width|: spectral width, $\epsilon_0$ [-]
+% * |directionality_coefficient|: directionality coefficient, $d$ [-]
+% * |maximum_energy_direction|: direction of maximum wave energy, $\theta_{J_{max}}$ [deg]
+% * |mean_wave_direction|: mean wave direction, $\theta_m$ [deg]
+% * |water_depth|: water depth, $h$ [m]
 %
 % *1-hour Dataset Variables:*
 %
 % Includes all variables from 3-hour dataset plus:
 %
-% * |directional_wave_spectrum|
-% * |maximum_energy_direction|
-% * |mean_wave_direction|
-% * |frequency_bin_edges|
+% * |directional_wave_spectrum|: directional wave spectrum, $S(f, \theta)$
+% * |frequency_bin_edges|: frequency bin edges, $f$ [Hz]
 
 %% Data Access Configuration
 %
 % To access the WPTO hindcast data:
 %
-% # Obtain API key from <https://developer.nrel.gov/signup/>
+% # Obtain API key from <https://developer.nlr.gov/signup/>
 
 %% Example 1: Request Single Location Data
 %
 % Location: <https://www.energy.gov/eere/water/pacwave-offshore-wave-energy-test-site PacWave South>
 %
-% Request 3-hour significant wave height data for 1995 at PacWave South
+% Request 3-hour significant wave height, $H_{m_0}$ [m], data for 1995 at PacWave South
 % This example demonstrates basic data retrieval for a single parameter at one location
 
 % Set parameters for data request
@@ -69,14 +68,14 @@ api_key = '3K3JQbjZmWctY0xmIfSYvYgtIcM3CN0cb1Y2w9bf';  % Demo API key (rate-limi
 wave_data = request_wpto(data_type, parameter, lat_lon, year, api_key);
 
 %%
-% Plot significant wave height (Hm0) time-series
+% Plot the significant wave height, $H_{m_0}$ [m], time series
 
 figure('Position', [100, 100, 1000, 400]);
 plot(wave_data.time, wave_data.significant_wave_height, 'LineWidth', 1.5);
-title(['Significant Wave Height (Hm0) at ' num2str(wave_data.metadata.latitude) '°N, ' ...
+title(['Significant Wave Height, H_{m_0}, at ' num2str(wave_data.metadata.latitude) '°N, ' ...
        num2str(-1 * wave_data.metadata.longitude) '°W']);
-xlabel('Time');
-ylabel('Hm0 (m)');
+xlabel('Time [UTC]');
+ylabel('Significant Wave Height, H_{m_0} [m]');
 grid on;
 xtickformat('MMM-yy');
 
@@ -87,7 +86,7 @@ xtickformat('MMM-yy');
 % * <https://www.energy.gov/eere/water/pacwave-offshore-wave-energy-test-site PacWave South>
 % * <https://www.energy.gov/eere/water/pacwave-offshore-wave-energy-test-site PacWave North>
 %
-% Request 3-hour energy period and significant wave height at two locations
+% Request 3-hour energy period, $T_e$ [s], and significant wave height, $H_{m_0}$ [m], at two locations
 % This example shows how to handle multiple parameters and locations simultaneously
 
 % Define multiple parameters and locations
@@ -99,7 +98,7 @@ lat_lon = [44.624076, -124.280097; % PacWave South
 wave_measurements = request_wpto(data_type, parameter, lat_lon, year, api_key);
 
 %%
-% Create subplots for energy period and Hm0 at both locations
+% Create subplots for energy period, $T_e$, and significant wave height, $H_{m_0}$, at both locations
 
 figure('Position', [100, 100, 1200, 800]);
 
@@ -109,9 +108,9 @@ plot(wave_measurements(1).time, wave_measurements(1).energy_period, '-', 'LineWi
 hold on;
 plot(wave_measurements(2).time, wave_measurements(2).energy_period, '--', 'LineWidth', 1.5);
 hold off;
-title('Energy Period at Two Locations');
-xlabel('Time');
-ylabel('Energy Period (s)');
+title('Energy Period, T_e, at Two Locations');
+xlabel('Time [UTC]');
+ylabel('Energy Period, T_e [s]');
 grid on;
 legend(['Location 1 (' num2str(wave_measurements(1).metadata.latitude) '°N, ' ...
         num2str(-1 * wave_measurements(1).metadata.longitude) '°W)'], ...
@@ -125,9 +124,9 @@ plot(wave_measurements(1).time, wave_measurements(1).significant_wave_height, '-
 hold on;
 plot(wave_measurements(2).time, wave_measurements(2).significant_wave_height, '--', 'LineWidth', 1.5);
 hold off;
-title('Significant Wave Height (Hm0) at Two Locations');
-xlabel('Time');
-ylabel('Hm0 (m)');
+title('Significant Wave Height, H_{m_0}, at Two Locations');
+xlabel('Time [UTC]');
+ylabel('Significant Wave Height, H_{m_0} [m]');
 grid on;
 legend(['Location 1 (' num2str(wave_measurements(1).metadata.latitude) '°N, ' ...
         num2str(-1 * wave_measurements(1).metadata.longitude) '°W)'], ...
@@ -135,40 +134,41 @@ legend(['Location 1 (' num2str(wave_measurements(1).metadata.latitude) '°N, ' .
         num2str(-1 * wave_measurements(2).metadata.longitude) '°W)']);
 xtickformat('MMM-yy');
 
-%% Example 3: Request High-Resolution 1-Hour Data
+%% Example 3: Request Peak Period and Wave Power
 %
 % Location: <https://www.energy.gov/eere/water/pacwave-offshore-wave-energy-test-site PacWave South>
 %
-% Request 1-hour temporal resolution data including directional wave spectrum
-% This example demonstrates working with high-resolution temporal data and spectral information
+% Request 3-hour peak period, $T_p$ [s], and omnidirectional wave power, $J$ [W/m], data
+% This example shows the wave resource quantities used to characterize a site
 
-% Set parameters for 1-hour data request
-data_type = '1-hour';                    % Using 1-hour dataset
+% Set parameters for the data request
+data_type = '3-hour';
 parameter = ["peak_period", "omni-directional_wave_power"];
 lat_lon = [44.624076, -124.280097]; % PacWave South
 
-% Request high-resolution data
-hourly_wave_data = request_wpto(data_type, parameter, lat_lon, year, api_key);
+% Request data
+resource_data = request_wpto(data_type, parameter, lat_lon, year, api_key);
 
 %%
-% Plot peak period and omnidirectional wave power
+% Plot the peak period, $T_p$ [s], and omnidirectional wave power, $J$. The hindcast
+% stores $J$ in [W/m], it is plotted in [kW/m]
 
 % Peak Period Plot
 figure('Position', [100, 100, 1000, 400]);
-plot(hourly_wave_data.time, hourly_wave_data.peak_period, 'LineWidth', 1.5);
-title(['Peak Period at ' num2str(hourly_wave_data.metadata.latitude) '°N, ' ...
-       num2str(-1 * hourly_wave_data.metadata.longitude) '°W']);
-xlabel('Time');
-ylabel('Peak Period (s)');
+plot(resource_data.time, resource_data.peak_period, 'LineWidth', 1.5);
+title(['Peak Period, T_p, at ' num2str(resource_data.metadata.latitude) '°N, ' ...
+       num2str(-1 * resource_data.metadata.longitude) '°W']);
+xlabel('Time [UTC]');
+ylabel('Peak Period, T_p [s]');
 grid on;
 xtickformat('MMM-yy');
 
 % Omnidirectional Wave Power Plot
 figure('Position', [100, 100, 1000, 400]);
-plot(hourly_wave_data.time, hourly_wave_data.omni_directional_wave_power, 'LineWidth', 1.5);
-title(['Omnidirectional Wave Power at ' num2str(hourly_wave_data.metadata.latitude) '°N, ' ...
-       num2str(-1 * hourly_wave_data.metadata.longitude) '°W']);
-xlabel('Time');
-ylabel('Wave Power (kW/m)');
+plot(resource_data.time, resource_data.omni_directional_wave_power / 1000, 'LineWidth', 1.5);
+title(['Omnidirectional Wave Power, J, at ' num2str(resource_data.metadata.latitude) '°N, ' ...
+       num2str(-1 * resource_data.metadata.longitude) '°W']);
+xlabel('Time [UTC]');
+ylabel('Omnidirectional Wave Power, J [kW/m]');
 grid on;
 xtickformat('MMM-yy');
