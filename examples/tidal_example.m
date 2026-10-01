@@ -17,14 +17,10 @@
 % structure names returned by NOAA are 'd' for direction and 's' for speed. Since
 % MHKiT uses SI units, speed is converted to m/s.
 
-% Create a file name to save the requested data to
-relative_file_name = "data/tidal/s08010.json"; % South Hampton Shoal LB
-current_dir = fileparts(matlab.desktop.editor.getActiveFilename);
-full_file_name = fullfile(current_dir, relative_file_name);
-
-data = read_noaa_json(full_file_name)
+% Read the saved NOAA data
+data = read_noaa_json("./data/tidal/s08010.json") % South Hampton Shoal LB
 % Example of how you could request NOAA-Currents data
-%data = request_noaa_data("s08010","currents","20161101","20180401","write_json",currents_file);
+%data = request_noaa_data("s08010","currents","20161101","20180401","write_json","./data/tidal/s08010.json");
 
 
 % Convert discharge data from cm/s to m/s
