@@ -16,7 +16,29 @@ See the [documentation](https://mhkit-software.github.io/MHKiT/) for more inform
 
 ## Installation
 
-See the [MHKiT MATLAB Installation Instructions](https://mhkit-software.github.io/MHKiT/matlab_installation.html).
+### Quick Install
+
+1. Download the MHKiT toolbox, `mhkit_v<version>.mltbx`, from the
+   [latest release](https://github.com/MHKiT-Software/MHKiT-MATLAB/releases/latest).
+2. Open the downloaded file in MATLAB (double-click it or drag it into the Command Window), or run:
+
+   ```matlab
+   matlab.addons.install("mhkit_v1.1.0.mltbx");
+   ```
+
+3. Verify the install:
+
+   ```matlab
+   matlab.addons.installedAddons
+   ```
+
+The acoustics, dolfyn, mooring, power, river, tidal, and most wave functions are native MATLAB and work after
+this step. The loads, qc, river Delft3D, and some wave and utils functions call MHKiT-Python, which also requires
+Python and MHKiT-Python, see [Software Requirements](#software-requirements) and the
+[MHKiT MATLAB Installation Instructions](https://mhkit-software.github.io/MHKiT/matlab_installation.html).
+
+To upgrade, install the new `.mltbx` over the existing one. To uninstall, go to
+Home > Add-Ons > Manage Add-Ons, right-click on "Marine and Hydrokinetic Toolkit (MHKiT)", and select "Uninstall".
 
 ### Software Requirements
 
