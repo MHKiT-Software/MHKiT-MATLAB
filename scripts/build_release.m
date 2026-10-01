@@ -56,8 +56,22 @@ fprintf('Setting up paths from %s', project_root);
 mhkit_path = fullfile(project_root, 'mhkit');
 examples_path = fullfile(project_root, 'examples');
 
-% These are the folders and files included in the output MATLAB toolbox
-toolbox_files = {mhkit_path};
+% These are the files included in the output MATLAB toolbox
+% Unit tests, their data and coverage reports, and the legacy setup.py are excluded
+excluded_paths = {fullfile(mhkit_path, 'tests'), fullfile(mhkit_path, 'setup.py')};
+is_excluded = @(p) any(cellfun(@(e) strcmp(p, e) || startsWith(p, [e filesep]), excluded_paths));
+
+all_files = dir(fullfile(mhkit_path, '**', '*'));
+all_files = all_files(~[all_files.isdir]);
+toolbox_files = fullfile({all_files.folder}, {all_files.name});
+toolbox_files = toolbox_files(~cellfun(is_excluded, toolbox_files));
+toolbox_files = toolbox_files(~endsWith(toolbox_files, {'.DS_Store', '.asv'}));
+fprintf('\nIncluding %d files in toolbox\n', numel(toolbox_files));
+
+% Folders added to the user's MATLAB path on install
+toolbox_matlab_path = strsplit(genpath(mhkit_path), pathsep);
+toolbox_matlab_path = toolbox_matlab_path(~cellfun(@isempty, toolbox_matlab_path));
+toolbox_matlab_path = toolbox_matlab_path(~cellfun(is_excluded, toolbox_matlab_path));
 
 fprintf('\nStarting MATLAB toolbox build of %s version %s\n', project_name, project_version);
 
