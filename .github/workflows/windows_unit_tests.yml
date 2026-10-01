@@ -1,312 +1,98 @@
 name: MHKiT-MATLAB Windows Unit Tests
 
-# Only run tests when MATLAB files or this workflow file changes
+# Runs the full unit test suite, including tests that call MHKiT-Python
+#
+# Run locally with:
+# - Windows: scripts\run_python_tests_windows.ps1 C:\path\to\python.exe
+#
+# The script and this workflow both call mhkit/tests/runPythonTests.m, which
+# places the Python environment's DLL folders first on PATH so MATLAB's bundled
+# expat and OpenSSL DLLs do not break Python imports. This workflow runs MATLAB
+# with run-command instead of the script because public project MATLAB licensing
+# on GitHub Actions requires the MATLAB actions.
+
 on:
+  workflow_dispatch: {}
   push:
     branches: [ master, develop ]
     paths:
       - 'mhkit/**/*.m'
-      - 'examples/**/*.m'
+      - 'mhkit_python_utils/**'
+      - 'examples/data/**'
+      - 'pyproject.toml'
       - '.github/workflows/windows_unit_tests.yml'
   pull_request:
     branches: [ master, develop ]
     paths:
       - 'mhkit/**/*.m'
-      - 'examples/**/*.m'
+      - 'mhkit_python_utils/**'
+      - 'examples/data/**'
+      - 'pyproject.toml'
       - '.github/workflows/windows_unit_tests.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
-  cache_population:
+  unit_tests:
+    name: ${{ matrix.matlab-version }}, Python ${{ matrix.python-version }}, MHKiT-Python ${{ matrix.mhkit-python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest]
-        python-version: ["3.11"]
-        matlab-version: [R2023b]
-    runs-on: ${{ matrix.os }}
+        os: [windows-2025]
+        matlab-version: [R2025b]
+        python-version: ["3.12"]
+        mhkit-python-version: ["1.1.2"]
 
-    env:
-      mhkit-python-dir: "MHKiT-Python"
-      MHKIT_PYTHON_VERSION: '0.9.0'
     steps:
-      - name: Install/Setup Miniconda
+      - name: Check out MHKiT-MATLAB
+        uses: actions/checkout@v7
+
+      # conda-forge provides netcdf4, hdf5, and BLAS builds that are consistent
+      # with each other, which avoids native library conflicts with MATLAB
+      - name: Set up conda environment
         uses: conda-incubator/setup-miniconda@v3
         with:
-          miniconda-version: latest
-          auto-update-conda: true
+          miniforge-version: latest
           python-version: ${{ matrix.python-version }}
           activate-environment: mhkit_conda_env
-          channels: conda-forge,defaults
+          channels: conda-forge
+          conda-remove-defaults: true
 
-      # This is necessary to fix any issues with netcdf4 and hdf5 headers
-      - name: Conda install mhkit
+      - name: Install MHKiT-Python and mhkit_python_utils
         shell: bash -l {0}
         run: |
-          conda activate mhkit_conda_env
-          conda install mhkit==$MHKIT_PYTHON_VERSION
-      - name: Check out MHKiT-MATLAB
-        uses: actions/checkout@v4
-
-      - name: pip install mhkit-python-utils module from source
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
+          conda install -y "numpy>=2" pip netcdf4 hdf5
+          # pecos 1.0.0 (used by the qc module) check_delta fails with pandas 3
+          pip install "mhkit[all]==${{ matrix.mhkit-python-version }}" "pandas<3"
           pip install -e .
-
-      - name: List Installed Python Packages using Conda
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          conda list
-
-      - name: List Installed Python Packages using pip
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
           pip list
-
-      - name: Check out MHKiT-MATLAB
-        uses: actions/checkout@v4
-
-      # - name: Pin scipy version
-      #   shell: bash -l {0}
-      #   run: |
-      #     conda activate mhkit_conda_env
-      #     pip uninstall -y scipy
-      #     pip install scipy==1.10.1
-
-      # Create the cache and add a dummy file
-      # The dummy file ensures that the artifact download
-      - name: Setup mhkit_webread_cache
-        shell: bash -l {0}
-        run: |
-          mkdir mhkit_webread_cache
-          touch mhkit_webread_cache/test.txt
-          echo "Hello World" > mhkit_webread_cache/test.txt
+          python -c "import mhkit, mhkit_python_utils; print('MHKiT-Python', mhkit.__version__)"
+          echo "MHKIT_PYTHON_EXE=$(python -c 'import sys; print(sys.executable)')" >> "$GITHUB_ENV"
 
       - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2
+        uses: matlab-actions/setup-matlab@v3
         with:
           release: ${{ matrix.matlab-version }}
 
-      - name: Set PYBIND11 GIL workaround
-        # if: ${{ matrix.matlab-version == 'R2025a' }}
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          export PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1
-          echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
-
-      - name: Configure MATLAB pyenv Version and ExecutionMode
-        if: ${{ matrix.os == 'windows-latest' }}
-        shell: pwsh
-        run: >
-          "pyenv(Version='{0}', ExecutionMode='OutOfProcess')" -f (python -c "import sys; print(sys.executable)") | Out-File -FilePath run.m
-
-      - name: Check Python System Path
-        shell: bash -l {0}
-        run: |
-          echo "py.sys.path" >> run.m
-
-      - name: Add MATLAB test commands
-        shell: bash
-        run: echo "version,
-          addpath(genpath('mhkit')),
-          import matlab.unittest.TestSuite,
-          import matlab.unittest.TestRunner,
-          testFolder = ['mhkit' filesep 'tests'],
-          suite = TestSuite.fromFolder(testFolder),
-          runner = TestRunner.withTextOutput,
-          results = runner.run(suite),
-          assertSuccess(results)" >> run.m
-
-      - name: Output Run.m
-        shell: bash
-        run: cat run.m
-
-      - name: Run MHKiT-MATLAB Unit Tests
-        uses: matlab-actions/run-command@v2
+      # Fails fast with a readable summary if MATLAB cannot import the Python
+      # modules, usually from native library conflicts between MATLAB and Python
+      - name: Check Python imports from MATLAB
+        uses: matlab-actions/run-command@v3
         with:
-          command: run
+          command: |
+            addpath(fullfile("mhkit", "tests"));
+            runPythonTests(getenv("MHKIT_PYTHON_EXE"), ImportCheckOnly=true);
           startup-options: -noFigureWindows
 
-      - name: Save mhkit_webread_cache directory as an artifact
-        uses: actions/upload-artifact@v4
+      - name: Run MATLAB unit tests
+        uses: matlab-actions/run-command@v3
         with:
-          # GitHub Action "Name" of artifact
-          name: mhkit_webread_cache
-          # Filesystem path of directory
-          path: mhkit_webread_cache
-
-  main:
-    needs: cache_population
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest]
-        python-version: ["3.10", 3.11, 3.12]
-        # matlab-version: [R2022b, R2023a, R2023b, R2024a, R2024b]
-        matlab-version: [R2023a, R2023b, R2024a, R2024b]
-        mhkit-python-version: ["0.9.0"]
-        exclude:
-          # Cache population job
-          - matlab-version: R2023b
-            python-version: "3.10"
-          # - matlab-version: R2023b
-          #   python-version: 3.8
-          # Python 3.12 + MATLAB incompatability
-          - matlab-version: R2024a
-            python-version: 3.12
-          - matlab-version: R2023b
-            python-version: 3.12
-          - matlab-version: R2023a
-            python-version: 3.12
-          - matlab-version: R2022b
-            python-version: 3.12
-          # Python 3.11 + MATLAB incompatability
-          - matlab-version: R2023a
-            python-version: 3.11
-          - matlab-version: R2022b
-            python-version: 3.11
-          # Failing Job
-          # Python Error: ImportError: DLL load failed while importing pyexpat: The operating system cannot run %1
-          - matlab-version: R2023a
-            python-version: "3.10"
-
-    runs-on: ${{ matrix.os }}
-
-    env:
-      mhkit-python-dir: "MHKiT-Python"
-      MHKIT_PYTHON_VERSION: ${{  matrix.mhkit-python-version }}
-    steps:
-      - name: Install/Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          miniconda-version: latest
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-          activate-environment: mhkit_conda_env
-          channels: conda-forge,defaults
-
-      # This is necessary to fix any issues with netcdf4 and hdf5 headers
-      - name: Conda install mhkit
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          conda install mhkit==$MHKIT_PYTHON_VERSION
-      - name: Output python executable
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          python -c "import sys; print(sys.executable)"
-      - name: Print Python Version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          python --version
-      - name: Check out MHKiT-MATLAB
-        uses: actions/checkout@v4
-
-      - name: pip install mhkit-python-utils module from source
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip3 install -e .
-
-      # - name: Pin scipy version
-      #   shell: bash -l {0}
-      #   run: |
-      #     conda activate mhkit_conda_env
-      #     pip uninstall -y scipy
-      #     pip install scipy==1.10.1
-      #
-
-      # Some tests fail with:
-      # Python Error: ImportError: DLL load failed while importing pyexpat: The operating system cannot run %1.
-      # One potential fix is to install expat and lxml
-      - name: Install Windows XML dependencies
-        if: ${{ matrix.os == 'windows-latest' }}
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          # Simple single package install to avoid solver issues
-          conda install expat -y
-          # Alternative: use pip for XML parsing
-          pip install lxml
-
-
-      - name: List installed pip modules
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          pip3 freeze
-      - name: Print MHKiT-Python Version
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          python -c "import mhkit; print(mhkit.__version__)"
-      - name: Verify MHKiT-Python Operation
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          python -c "import mhkit; [ED, AP] = mhkit.river.performance.circular(30); print(ED); print(AP);"
-      - name: Download mhkit_webread_cache artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: mhkit_webread_cache
-          path: mhkit_webread_cache
-
-      - name: Display structure mhkit_webread_cache
-        run: ls -R
-        working-directory: .
-
-      - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2
-        with:
-          release: ${{ matrix.matlab-version }}
-
-      - name: Set PYBIND11 GIL workaround
-        # if: ${{ matrix.matlab-version == 'R2025a' }}
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          export PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1
-          echo "PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF=1" >> $GITHUB_ENV
-
-      - name: Add Python Dir to Path
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          printf "getenv('path')\nsetenv('path', ['%s;', getenv('path')])\ngetenv('path')\n" $(python -c "import sys; import os; print(os.path.dirname(sys.executable))") >> run.m
-      # OutOfProcess works reliably on linux, macos, and windows
-      - name: Configure MATLAB pyenv Version and ExecutionMode
-        shell: bash -l {0}
-        run: |
-          conda activate mhkit_conda_env
-          printf "pyenv(Version='%s', ExecutionMode='OutOfProcess')\n" $(python -c "import sys; print(sys.executable)") >> run.m
-      - name: Check Python System Path
-        shell: bash -l {0}
-        run: |
-          echo "py.sys.path" >> run.m
-      - name: Add MATLAB test commands
-        shell: bash
-        run: echo "version,
-          pyenv,
-          addpath(genpath('mhkit')),
-          import matlab.unittest.TestSuite,
-          import matlab.unittest.TestRunner,
-          testFolder = ['mhkit' filesep 'tests'],
-          suite = TestSuite.fromFolder(testFolder),
-          runner = TestRunner.withTextOutput,
-          results = runner.run(suite),
-          assertSuccess(results)" >> run.m
-
-      - name: Output Run.m
-        shell: bash
-        run: cat run.m
-
-      - name: Run MHKiT-MATLAB Unit Tests
-        uses: matlab-actions/run-command@v2
-        with:
-          command: run
+          command: |
+            addpath(fullfile("mhkit", "tests"));
+            results = runPythonTests(getenv("MHKIT_PYTHON_EXE"));
+            disp(table(results));
+            assertSuccess(results);
           startup-options: -noFigureWindows
