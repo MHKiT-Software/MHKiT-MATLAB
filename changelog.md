@@ -1,3 +1,38 @@
+# Version 1.1.0
+
+## Release Highlights
+
+- Modules converted to native MATLAB, no Python required:
+  - Power
+  - River (except Delft3D)
+  - Wave (most functions)
+- Acoustics updates for parity with MHKiT-Python
+- Supports MATLAB R2023b through R2026b and MHKiT-Python 1.1.2
+- DOLfYN binary readers are deprecated and will be removed in v1.2
+
+## Additions
+
+- Power: native MATLAB ([#164](https://github.com/MHKiT-Software/MHKiT-MATLAB/pull/164), @simmsa)
+- Wave: native MATLAB part 1, capture width, and DOE reference models ([#196](https://github.com/MHKiT-Software/MHKiT-MATLAB/pull/196), @simmsa)
+- River: native MATLAB ([#200](https://github.com/MHKiT-Software/MHKiT-MATLAB/pull/200), @hivanov-nrel)
+- Acoustics: WISPR support and band conversions ([#198](https://github.com/MHKiT-Software/MHKiT-MATLAB/pull/198), @hivanov-nrel)
+
+## Improvements
+
+- WPTO hindcast uses `developer.nlr.gov` and handles differences between hindcast files
+- Compatible with MHKiT-Python 1.1.2, numpy 2, and pandas 3
+- Tests run on MATLAB R2023b through R2026b on macOS and Windows ([#199](https://github.com/MHKiT-Software/MHKiT-MATLAB/pull/199))
+
+## Breaking Changes and Deprecations
+
+- Minimum MATLAB release is now R2023b
+- Converted functions no longer accept pandas inputs, and some signatures changed, see the pull requests
+- DOLfYN binary readers are deprecated, convert files with the [MHKiT-DOLfYN GUI](https://github.com/MHKiT-Software/mhkit-dolfyn-gui) or MHKiT-Python and load them with `read_netcdf`
+
+## Contributors
+
+@simmsa, @hivanov-nrel, @akeeste, @rpauly18
+
 # Version 1.0.1
 
 ## Release Highlights
