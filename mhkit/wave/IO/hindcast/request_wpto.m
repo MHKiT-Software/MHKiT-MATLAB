@@ -3,11 +3,15 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     Returns data from the WPTO wave hindcast hosted on AWS at the specified latitude and longitude point(s),
-%     or the closest available pont(s).
+%     or the closest available point(s).
 %     Visit https://registry.opendata.aws/wpto-pds-us-wave/ for more information about the dataset and available
 %     locations and years.
-%     NOTE: To access the WPTO hindcast data, you will need to configure h5pyd for data access on HSDS.
-%     Please see the WPTO_hindcast_example notebook for more information.
+%     Data is read from the NLR HSDS service at https://developer.nlr.gov/api/hsds, which requires an API key.
+%     Please see the WPTO_hindcast_example for more information.
+%     Site metadata is read from the hindcast meta dataset when available. HSDS cannot return the meta dataset
+%     for some regions, for example West_Coast 3-hour data. Then latitude, longitude, and water_depth come from
+%     the coordinates and water_depth datasets, distance_to_shore and timezone are NaN, jurisdiction is empty,
+%     and a warning is shown.
 %
 %     Parameters
 %     ----------
@@ -28,12 +32,21 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
 %         year : float
 %             Year to be accessed. The years 1979-2010 available.
 %         api_key : string
-%             API key obtained from https://developer.nrel.gov/signup/
+%             API key obtained from https://developer.nlr.gov/signup/
 %
 %      Returns
 %      -------
 %         data : struct
 %             Data indexed by datetime with columns named for parameter and cooresponding metadata index
+%             data.time : datetime
+%                 Time stamps [UTC]
+%             data.<parameter> : array
+%                 Requested parameter, "-" in names replaced with "_"
+%             data.metadata : struct
+%                 Site water_depth [m], latitude, longitude, distance_to_shore [m],
+%                 timezone, and jurisdiction
+%
+%         Raises MHKiT:request_wpto:RequestFailed if the data cannot be retrieved.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -123,7 +136,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
         end
 
         % Get database links with timeout handling
-        baseURL = ['https://developer.nrel.gov/api/hsds/?api_key=' api_key dom];
+        baseURL = ['https://developer.nlr.gov/api/hsds/?api_key=' api_key dom];
         t_start = tic;
         options = weboptions('Timeout', min(REQUEST_TIMEOUT, 30));
 
@@ -142,7 +155,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
         end
 
         % Get groups with timeout
-        groupsURL = ['https://developer.nrel.gov/api/hsds/groups/' root.root '/links?api_key=' api_key dom];
+        groupsURL = ['https://developer.nlr.gov/api/hsds/groups/' root.root '/links?api_key=' api_key dom];
         t_start = tic;
         try
             groups_data = cached_webread(groupsURL, options);
@@ -157,17 +170,18 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
         end
         groups = struct2table(groups_data.links);
 
-        % Get standard parameters
+        % Get standard parameters. Site metadata is read per site after the
+        % nearest points are found, see get_site_metadata
         if isequal(data_type, "1-hour")
-            vars = ["time_index","meta","coordinates","frequency","direction"];
+            vars = ["time_index","coordinates","frequency","direction"];
         else
-            vars = ["time_index","meta","coordinates"];
+            vars = ["time_index","coordinates"];
         end
 
         standard_params = struct();
         for i=1:length(vars)
             ID = groups.id(find(strcmpi(vars(i),groups.title)));
-            URL = ['https://developer.nrel.gov/api/hsds/datasets/' ID{:} '/value?api_key=' api_key dom];
+            URL = ['https://developer.nlr.gov/api/hsds/datasets/' ID{:} '/value?api_key=' api_key dom];
 
             % Attempt request with retries
             success = false;
@@ -188,9 +202,9 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
                 end
             end
 
-            if ~success
-                status.warnings{end+1} = sprintf('Failed to get parameter %s after %d attempts', vars(i), MAX_RETRIES);
-                continue;
+            if ~success || ~isstruct(temp) || ~isfield(temp, 'value')
+                error('MHKiT:request_wpto:RequestFailed', ...
+                    'Failed to get %s from the WPTO hindcast after %d attempts', vars(i), MAX_RETRIES);
             end
 
             if isequal(vars{i},"time_index")
@@ -227,16 +241,15 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
         status.failed_points = failed_points;
 
         % Create metadata struct & get parameter data
-        fns_meta = ["water_depth","latitude","longitude","distance_to_shore","timezone","jurisdiction"];
         for y=1:length(idx)
             if ismember(y, failed_points)
                 continue
             end
 
-            % Get metadata
-            for x=1:length(fns_meta)
-                fd = standard_params.meta{idx(y)};
-                meta(y).(fns_meta{x}) = fd{x};
+            [meta(y), meta_warning] = get_site_metadata(groups, standard_params.coordinates, ...
+                idx(y), api_key, dom, options);
+            if ~isempty(meta_warning)
+                status.warnings{end+1} = meta_warning;
             end
 
             % Get parameter data with retry and timeout
@@ -245,7 +258,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
                 if isequal(parameter(z),'directional_wave_spectrum')
                     continue
                 else
-                    paramURL = ['https://developer.nrel.gov/api/hsds/datasets/' paramID{:} '/value?api_key=' api_key '&select=[:,' num2str(idx(y)-1) ']' dom];
+                    paramURL = ['https://developer.nlr.gov/api/hsds/datasets/' paramID{:} '/value?api_key=' api_key '&select=[:,' num2str(idx(y)-1) ']' dom];
 
                     % Attempt request with retries
                     success = false;
@@ -296,7 +309,7 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
                 for z = 1:time_length/486
                     i1 = num2str((z-1)*486);
                     i2 = num2str(z*486);
-                    paramURL = ['https://developer.nrel.gov/api/hsds/datasets/' paramID{:} '/value?api_key=' api_key '&select=[' i1 ':' i2 ',:,:,' num2str(idx(y)-1) ']' dom];
+                    paramURL = ['https://developer.nlr.gov/api/hsds/datasets/' paramID{:} '/value?api_key=' api_key '&select=[' i1 ':' i2 ',:,:,' num2str(idx(y)-1) ']' dom];
 
                     success = false;
                     for retry=1:MAX_RETRIES
@@ -352,9 +365,114 @@ function data = request_wpto(data_type, parameter, lat_lon, year, api_key)
         end
 
     catch ME
-        status.success = false;
-        status.error_message = sprintf('Fatal error: %s', ME.message);
-        data = [];
-        return
+        error('MHKiT:request_wpto:RequestFailed', ...
+            'Failed to request WPTO hindcast data: %s', ME.message);
     end
+
+    % Show request problems that did not stop the request
+    for i = 1:numel(status.warnings)
+        if ~startsWith(status.warnings{i}, 'Cooling down')
+            warning('MHKiT:request_wpto:RequestWarning', '%s', status.warnings{i});
+        end
+    end
+end
+
+function [meta, meta_warning] = get_site_metadata(groups, coordinates, idx, api_key, dom, options)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Read the metadata of one hindcast site
+%
+% Reads the site's record from the meta dataset and maps its fields by
+% name, because the field order differs between regions (Hawaii stores
+% water_depth last). The meta dataset cannot be read from some regions and
+% years, for example West_Coast 3-hour data, where HSDS returns an empty
+% response. In that case latitude and longitude come from the coordinates
+% dataset, water_depth from the water_depth dataset, and
+% distance_to_shore, timezone, and jurisdiction are left missing.
+%
+% Parameters
+% ------------
+% groups : table
+%   Dataset links of the hindcast file, with title and id columns
+% coordinates : array
+%   Latitude and longitude of every site, one row per site
+% idx : double
+%   1-based index of the site
+% api_key : char
+%   NLR developer API key
+% dom : char
+%   Domain query parameter of the hindcast file
+% options : weboptions
+%   Web request options
+%
+% Returns
+% ---------
+% meta : struct
+%   Site metadata
+%     meta.water_depth : double [m]
+%     meta.latitude : double [deg]
+%     meta.longitude : double [deg]
+%     meta.distance_to_shore : double [m]
+%       NaN if the meta dataset is unavailable
+%     meta.timezone : double [hours]
+%       NaN if the meta dataset is unavailable
+%     meta.jurisdiction : char
+%       Empty if the meta dataset is unavailable
+% meta_warning : char
+%   Description of missing metadata, empty if the meta dataset was read
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    base_url = 'https://developer.nlr.gov/api/hsds/datasets/';
+    meta = struct('water_depth', NaN, 'latitude', coordinates(idx, 1), ...
+        'longitude', coordinates(idx, 2), 'distance_to_shore', NaN, ...
+        'timezone', NaN, 'jurisdiction', '');
+    meta_warning = '';
+    site = num2str(idx - 1);
+    meta_options = options;
+    meta_options.Timeout = min(options.Timeout, 20);
+    % An empty meta response also raises a low level partial transfer
+    % warning, the missing metadata is reported in meta_warning instead
+    partial_warning = warning('off', 'MATLAB:webservices:PartialFileWarning');
+    restore_warning = onCleanup(@() warning(partial_warning));
+
+    meta_id = groups.id(strcmpi(groups.title, 'meta'));
+    try
+        if isempty(meta_id)
+            error('MHKiT:request_wpto:NoMeta', 'no meta dataset');
+        end
+        info = webread([base_url meta_id{1} '?api_key=' api_key dom], meta_options);
+        names = {info.type.fields.name};
+        record = webread([base_url meta_id{1} '/value?api_key=' api_key ...
+            '&select=[' site ':' num2str(idx) ']' dom], meta_options);
+        values = record.value;
+        if iscell(values)
+            values = values{1};
+        end
+        if ~iscell(values)
+            values = num2cell(values);
+        end
+        if numel(values) ~= numel(names)
+            error('MHKiT:request_wpto:BadMeta', 'unexpected meta record');
+        end
+        for i = 1:numel(names)
+            meta.(names{i}) = values{i};
+        end
+        return
+    catch
+        % Fall back to the coordinates and water_depth datasets below
+    end
+
+    depth_id = groups.id(strcmpi(groups.title, 'water_depth'));
+    if ~isempty(depth_id)
+        try
+            depth = webread([base_url depth_id{1} '/value?api_key=' api_key ...
+                '&select=[' site ']' dom], meta_options);
+            meta.water_depth = double(depth.value(1));
+        catch
+        end
+    end
+    meta_warning = sprintf(['Site metadata is unavailable from the hindcast for site %d, ' ...
+        'distance_to_shore, timezone, and jurisdiction are not returned'], idx);
 end
