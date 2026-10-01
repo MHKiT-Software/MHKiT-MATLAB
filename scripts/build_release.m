@@ -157,6 +157,13 @@ mkdir(temp_dir);
 copyfile(python_utils_folder, fullfile(temp_dir, 'mhkit_python_utils'));
 copyfile(pyproject_toml_file, fullfile(temp_dir, 'pyproject.toml'));
 
+% Remove Python bytecode caches left by local installs
+pycache_dirs = dir(fullfile(temp_dir, '**', '__pycache__'));
+pycache_dirs = unique({pycache_dirs([pycache_dirs.isdir]).folder});
+for i = 1:numel(pycache_dirs)
+    rmdir(pycache_dirs{i}, 's');
+end
+
 % Create the zip file
 python_utils_zip_path = fullfile(project_root, sprintf('mhkit_python_utils_v%s.zip', project_version));
 zip(python_utils_zip_path, temp_dir);
