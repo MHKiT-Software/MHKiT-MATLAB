@@ -114,7 +114,7 @@ classdef Wave_TestIO < matlab.unittest.TestCase
             assumeFail(testCase, "Hindcast tests skipped - slow network calls")
             % Error using matlab.internal.webservices.HTTPConnector/copyContentToByteArray (line 373)
             % The server returned the status 503 with message "Service Unavailable" in response to the request to URL
-            % https://developer.nrel.gov/api/hsds/?api_key=3K3JQbjZmWctY0xmIfSYvYgtIcM3CN0cb1Y2w9bf&domain=%2Fnrel%2FUS_wave%2Fvirtual_buoy%2FWest_Coast%2FWest_Coast_virtual_buoy_2010.h5.
+            % https://developer.nlr.gov/api/hsds/?api_key=3K3JQbjZmWctY0xmIfSYvYgtIcM3CN0cb1Y2w9bf&domain=%2Fnrel%2FUS_wave%2Fvirtual_buoy%2FWest_Coast%2FWest_Coast_virtual_buoy_2010.h5.
             api_key = '3K3JQbjZmWctY0xmIfSYvYgtIcM3CN0cb1Y2w9bf';
             hindcast_data = request_wpto('1-hour',...
                 ["energy_period"],[44.624076,-124.280097;43.489171,-125.152137],...
