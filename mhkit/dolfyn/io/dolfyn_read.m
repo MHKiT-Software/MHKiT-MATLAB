@@ -8,6 +8,13 @@ function ds=dolfyn_read(filename,options)
 % and .000, .PD0, .ENX, (RDI) formats into MATLAB structures that can be saved
 % as .nc files and used with MHKiT-MATLAB dolfyn ADCP analysis functions.
 %
+% Deprecated. The DOLfYN binary readers will be removed in MHKiT-MATLAB
+% v1.2. Convert instrument files to NetCDF (.nc) with the MHKiT-DOLfYN GUI
+% (https://github.com/MHKiT-Software/mhkit-dolfyn-gui) or MHKiT-Python
+% (mhkit.dolfyn.read and mhkit.dolfyn.save), then load them with
+% read_netcdf. All MHKiT-MATLAB dolfyn analysis functions accept the
+% structure returned by read_netcdf.
+%
 % Parameters
 % ------------
 %   filename : string
@@ -48,6 +55,14 @@ function ds=dolfyn_read(filename,options)
         options.userdata = true;
         options.nens = nan;
     end
+
+    warning('MHKiT:dolfyn_read:DeprecatedFunction', ...
+        ['dolfyn_read will be removed in MHKiT-MATLAB v1.2. Convert instrument ' ...
+        'files to NetCDF with the MHKiT-DOLfYN GUI ' ...
+        '(https://github.com/MHKiT-Software/mhkit-dolfyn-gui) or MHKiT-Python ' ...
+        '(mhkit.dolfyn.read + mhkit.dolfyn.save, ' ...
+        'https://mhkit-software.github.io/MHKiT/mhkit-python/api.dolfyn.html), ' ...
+        'then load the .nc file with read_netcdf.']);
 
     % check to see if the filename input is a string
     if ~ischar(filename)
@@ -90,12 +105,16 @@ function ds=dolfyn_read(filename,options)
 
     if isnan(reader)
         ME = MException('MATLAB:dolfyn_read',['File %s is not recognized' ...
-            [' as a file-type that is readable by DOLfYN. If you think' ...
-            ' it should be readable, try using the appropriate read' ...
-            ' function (`read_rdi`, `read_nortek`, or `read_signature`) ' ...
-            'found in dolfyn.io'], filename]);
+            ' as a file-type that is readable by DOLfYN. If you think' ...
+            ' it should be readable, try converting it to NetCDF with the' ...
+            ' MHKiT-DOLfYN GUI (https://github.com/MHKiT-Software/mhkit-dolfyn-gui)' ...
+            ' or MHKiT-Python (mhkit.dolfyn.read), then load it with read_netcdf'], filename);
         throw(ME);
     else
+        % dolfyn_read already warned, so silence the reader's deprecation warning
+        reader_warning_id = ['MHKiT:' func2str(fun_map.(reader)) ':DeprecatedFunction'];
+        reader_warning_state = warning('off', reader_warning_id);
+        restore_reader_warning = onCleanup(@() warning(reader_warning_state));
         try
             ds = feval(fun_map.(reader),...
                 filename,'userdata',options.userdata,'nens',options.nens);

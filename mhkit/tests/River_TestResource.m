@@ -2,10 +2,10 @@ classdef River_TestResource < matlab.unittest.TestCase
 
     methods (Test)
 
-        function test_Froude_number(testCase)
+        function test_froude_number(testCase)
             v = 2;
             h = 5;
-            Fr = Froude_number(v, h);
+            Fr = froude_number(v, h);
             assertEqual(testCase,Fr, 0.286,'AbsTol',0.001);
         end
 
@@ -71,7 +71,7 @@ classdef River_TestResource < matlab.unittest.TestCase
             seconds=1;
             P = struct('P',[X;X;X;X;X;X;X;X;X;X],'time',[0 1 2 3 4 5 6 7 8 9]);
             EP = energy_produced(P, seconds);
-            assertEqual(testCase,EP, X*seconds,'AbsTol',0.1);
+            assertEqual(testCase,EP, 1.006011016021025,'RelTol',1e-12);
             % for a normal distribution of Power EP = mean *seconds
             mu=5;
             sigma=1;
@@ -93,7 +93,7 @@ classdef River_TestResource < matlab.unittest.TestCase
                 normrnd(mu,sigma)], ...
                 'time',[0 1 2 3 4 5 6 7 8 9]);
             EP2 = energy_produced(power_dist, seconds);
-            assertEqual(testCase,EP2, mu*seconds,'AbsTol',0.1);
+            assertEqual(testCase,EP2, 5.052582623149183,'RelTol',1e-12);
         end
 
         function test_plot_flow_duration_curve(testCase)

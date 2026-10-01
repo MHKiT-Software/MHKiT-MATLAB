@@ -37,6 +37,10 @@ function datast=request_usgs_data(station, parameter, start_date, end_date, opti
 %     write_json : str or None (optional)
 %         Name of json file to write data
 %         to call: request_usgs_data(station,parameter,start_date,end_date,"write_json",write_json)
+%
+%     timeout : double (optional)
+%         Timeout in seconds for each HTTP request. Default = 30
+%         to call: request_usgs_data(station,parameter,start_date,end_date,"timeout",timeout)
 %         
 % Returns
 % -------
@@ -58,9 +62,8 @@ arguments
     end_date string
     options.data_type = 'Daily';
     options.write_json string = "";
+    options.timeout (1,1) {mustBeNumeric, mustBePositive} = 30;
 end
-
-MAX_RETRIES = 5;                         % number of query retries if error
 
 % Formulate query
 if strcmp(options.data_type, 'Daily')
@@ -84,19 +87,8 @@ end
 disp("Data request URL: " + data_url + api_query)
 
 % Submit query and get data
-for i = 0:MAX_RETRIES
-    try
-        response = webread(data_url + api_query);
-        break;
-    catch ME
-        if i == MAX_RETRIES
-            disp(['MATLAB:request_usgs_data: ', ME.identifier]);
-            rethrow(ME)
-        else
-            pause(1);   % pause(seconds) and retry query
-        end
-    end
-end
+web_options = weboptions('Timeout', options.timeout);
+response = webread_with_retry(data_url + api_query, web_options);
 
 % Parse data label and units
 v = response.value.timeSeries.variable.variableDescription;
@@ -130,4 +122,64 @@ datast.time = posixtime( ...
 if options.write_json ~= ""
     fid = fopen(options.write_json, 'w');
     fprintf(fid, jsonencode(response));
+end
+
+end
+
+
+function response = webread_with_retry(url, web_options)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Run a USGS web request, retrying transient failures with exponential
+% backoff and jitter
+%
+% Server errors (HTTP 5xx), rate limiting (HTTP 429), request timeouts
+% (HTTP 408), and connection failures are transient, so the request is
+% retried after 1, 2, 4, 8, 16, and 32 seconds, each scaled by a random
+% factor between 0.5 and 1.5 so repeated clients do not retry in
+% lockstep. Other client errors (HTTP 4xx, e.g. an invalid station or
+% parameter) are not transient and are raised immediately.
+%
+% Parameters
+% ------------
+%     url : string
+%         USGS request URL
+%     web_options : weboptions
+%         Options passed to webread
+%
+% Returns
+% ---------
+%     response : struct
+%         Decoded JSON response
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+MAX_RETRIES = 6;
+BASE_DELAY = 1;   % seconds, doubled after each failed attempt
+
+for attempt = 0:MAX_RETRIES
+    try
+        response = webread(url, web_options);
+        return
+    catch ME
+        status = regexp(ME.identifier, 'HTTP(\d+)StatusCodeError', 'tokens', 'once');
+        if isempty(status)
+            is_transient = true;   % timeout or connection failure
+        else
+            status = str2double(status{1});
+            is_transient = status >= 500 || status == 429 || status == 408;
+        end
+
+        if ~is_transient || attempt == MAX_RETRIES
+            disp(['MATLAB:request_usgs_data: ', ME.identifier]);
+            rethrow(ME)
+        end
+
+        delay = BASE_DELAY * 2^attempt * (0.5 + rand());
+        fprintf('USGS request failed (%s), retry %d of %d in %.1f s\n', ...
+            ME.identifier, attempt + 1, MAX_RETRIES, delay);
+        pause(delay);
+    end
+end
 end

@@ -1,29 +1,37 @@
-function TSR=tip_speed_ratio(rotor_speed, rotor_diameter, inflow_speed)
+function TSR = tip_speed_ratio(rotor_speed, rotor_diameter, inflow_speed)
 
-%%%%%%%%%%%%%%%%%%%%
-%     Function used to calculate the tip speed ratio (TSR) of a MEC device with rotor
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+% Calculates the tip speed ratio (TSR) of a MEC device with rotor
 %
 % Parameters
 % ------------
-%     rotor_speed : vector
-%         Rotor Speed [rps]
-%
-%     rotor_diameter : double or int
-%         diameter -f rotor [m]
-%
-%     inflow_speed : vector
-%         Velocity of inflow condition [m/s]
+% rotor_speed : numeric [rev/s]
+%   Rotor speed
+% rotor_diameter : double [m]
+%   Diameter of rotor
+% inflow_speed : numeric [m/s]
+%   Velocity of inflow condition
 %
 % Returns
 % ---------
-%     TSR: vector
-%         Calculated tip speed ratio (TSR)
+% TSR : numeric [-]
+%   Calculated tip speed ratio
 %
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-py_tsr = py.mhkit.river.performance.tip_speed_ratio(py.numpy.array(rotor_speed),double(rotor_diameter),py.numpy.array(inflow_speed));
+arguments (Input)
+    rotor_speed {mustBeNumeric}
+    rotor_diameter (1,1) {mustBeNumeric}
+    inflow_speed {mustBeNumeric}
+end
 
-TSR = double(py.array.array('d',py.numpy.nditer(py_tsr,pyargs("flags",{"refs_ok"}))));
+arguments (Output)
+    TSR {mustBeNumeric}
+end
 
+rotor_velocity = rotor_speed .* pi .* rotor_diameter;
+
+TSR = rotor_velocity ./ inflow_speed;
+
+end

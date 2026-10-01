@@ -9,18 +9,18 @@ name = "mhkit_python_utils"
 # Non Release version format:
 #   - <Next Major (opt)>.<Next Minor>.Patch-<label>.Build, i.e., 0.7.0-dev.1
 #   - Labels can be 'dev', 'alpha', 'beta', 'rc' (release candidate)
-version = "1.0.1"
+version = "1.1.0"
 description = "A utility package that enables data exchange and interoperability between MHKiT-MATLAB and MHKiT-Python. Part of the MHKiT (Marine and Hydrokinetic Toolkit) project."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    { name = "Rebecca Fao", email = "rebecca.fao@nrel.gov" },
-    { name = "Chris Ivanov", email = "chris.ivanov@nrel.gov" },
-    { name = "Andrew Simms", email = "andrew.simms@nrel.gov" },
+    { name = "Rebecca Fao", email = "rebecca.fao@nlr.gov" },
+    { name = "Chris Ivanov", email = "chris.ivanov@nlr.gov" },
+    { name = "Andrew Simms", email = "andrew.simms@nlr.gov" },
 ]
 maintainers = [
-    { name = "Andrew Simms", email = "andrew.simms@nrel.gov" },
-    { name = "Rebecca Fao", email = "rebecca.fao@nrel.gov" },
+    { name = "Andrew Simms", email = "andrew.simms@nlr.gov" },
+    { name = "Rebecca Fao", email = "rebecca.fao@nlr.gov" },
 ]
 license = { text = "BSD 3-Clause License" }
 classifiers = [
@@ -29,13 +29,14 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
     "License :: OSI Approved :: BSD License"
 ]
 dependencies = [
-    "mhkit>=0.9.0"
+    "mhkit[all]>=1.1.2"
 ]
 
 [tool.setuptools]

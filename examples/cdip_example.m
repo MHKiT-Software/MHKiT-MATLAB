@@ -21,16 +21,16 @@
 % here> (see BUOY VARIABLES).
 %
 %% 1. Request Data from CDIP
-% In the above example, |cdip_request_parse_workflow| is used to both request
-% and parse the CDIP data using multiple MHKiT functions in a prespecfied workflow
+% In this example, |cdip_request_parse_workflow| is used to both request
+% and parse the CDIP data using multiple MHKiT functions in a prespecified workflow
 % for the user.
 %
 % MHKiT can be used to request historical or realtime data from the CDIP buoys.
-% A station table and map can be found here to determine a buoy of interest <http://cdip.ucsd.edu/m/stn_table/
-% http://cdip.ucsd.edu/m/stn_table/>. To get started we will call historic data
+% A <http://cdip.ucsd.edu/m/stn_table/ station table and map> can be used to
+% determine a buoy of interest. To get started we will call historic data
 % from station number 100. The function will return a structure with all historic
 % 1D data and metadata. The 'data' and 'metadata' each hold different types of
-% data based based on a prefix used on the variable returned by CDIP. Example
+% data based on a prefix used on the variable returned by CDIP. Example
 % prefixes are 'wave', 'sst', and 'gps', which are described in further detail
 % below.
 

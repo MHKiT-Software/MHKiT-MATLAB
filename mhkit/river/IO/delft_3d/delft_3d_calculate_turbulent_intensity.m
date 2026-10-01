@@ -31,7 +31,7 @@ function result_struct = delft_3d_calculate_turbulent_intensity(delft_3d_py_obje
               'Invalid input Delft3D data type: `delft_3d_calculate_turbulent_intensity` expects a `py.netCDF4._netCDF4.Dataset` object. Please use the `delft_3d_open_netcdf` function to convert Delft3D netCDF files for use with this function.');
     end
 
-    if ~(isstring(points) || isa(points, 'py.pandas.core.frame.DataFrame') || isstruct(points))
+    if ~(isstring(points) || mhkit_is_pandas_dataframe(points) || isstruct(points))
         error('MATLAB:delft_3d_calculate_turbulent_intensity:InvalidInput', 'Points must be a string, a struct, or a DataFrame.');
     end
 

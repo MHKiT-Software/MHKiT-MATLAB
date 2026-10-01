@@ -17,7 +17,7 @@ function result_struct = convert_numeric_dataframe_to_struct(df)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    % Guard to check type of df
-   if ~isa(df, 'py.pandas.core.frame.DataFrame')
+   if ~mhkit_is_pandas_dataframe(df)
        error('MATLAB:convert_numeric_dataframe_to_struct:InvalidInput', 'df must be a pandas DataFrame.');
    end
 

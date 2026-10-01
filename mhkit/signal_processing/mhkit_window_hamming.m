@@ -25,7 +25,8 @@ n_fft = double(n_fft);
 % Create sample indices (0 to N-1)
 n = (0:n_fft-1)';
 
-% Compute Hamming window
-win = 0.54 - 0.46 * cos(2*pi*n/(n_fft-1));
+% Periodic (DFT-even) Hamming window, matching scipy.signal.get_window's
+% default fftbins=True convention used internally by scipy.signal.welch.
+win = 0.54 - 0.46 * cos(2*pi*n/n_fft);
 
 end

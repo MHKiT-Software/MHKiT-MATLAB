@@ -1,6 +1,7 @@
 # MHKiT-MATLAB Specific Files
 # Test results
 mhkit/tests/test_results/*
+mhkit/tests/coverage_report/
 
 # Hindcast data cache
 mhkit_webread_cache
@@ -18,7 +19,12 @@ mhkit_webread_cache
 
 # Packaged app and toolbox files
 *.mlappinstall
-# *.mltbx
+*.mltbx
+
+# scripts/build_release.m outputs
+mhkit_examples_v*.zip
+mhkit_python_utils_v*.zip
+temp_python_utils/
 
 # Generated helpsearch folders
 helpsearch*/
