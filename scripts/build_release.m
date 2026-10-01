@@ -73,6 +73,11 @@ fprintf('\nIncluding %d files in toolbox\n', numel(toolbox_files));
 toolbox_matlab_path = strsplit(genpath(mhkit_path), pathsep);
 toolbox_matlab_path = toolbox_matlab_path(~cellfun(@isempty, toolbox_matlab_path));
 toolbox_matlab_path = toolbox_matlab_path(~cellfun(is_excluded, toolbox_matlab_path));
+% Only folders that directly contain packaged files, older releases (R2024a)
+% reject path folders that only contain subfolders, such as mhkit itself
+packaged_folders = unique(cellfun(@fileparts, toolbox_files, 'UniformOutput', false));
+toolbox_matlab_path = toolbox_matlab_path(ismember(toolbox_matlab_path, packaged_folders));
+fprintf('Adding %d folders to the MATLAB path\n', numel(toolbox_matlab_path));
 
 fprintf('\nStarting MATLAB toolbox build of %s version %s\n', project_name, project_version);
 
