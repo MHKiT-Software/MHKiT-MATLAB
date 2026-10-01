@@ -14,13 +14,13 @@ description = "A utility package that enables data exchange and interoperability
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    { name = "Rebecca Fao", email = "rebecca.fao@nrel.gov" },
-    { name = "Chris Ivanov", email = "chris.ivanov@nrel.gov" },
-    { name = "Andrew Simms", email = "andrew.simms@nrel.gov" },
+    { name = "Rebecca Fao", email = "rebecca.fao@nlr.gov" },
+    { name = "Chris Ivanov", email = "chris.ivanov@nlr.gov" },
+    { name = "Andrew Simms", email = "andrew.simms@nlr.gov" },
 ]
 maintainers = [
-    { name = "Andrew Simms", email = "andrew.simms@nrel.gov" },
-    { name = "Rebecca Fao", email = "rebecca.fao@nrel.gov" },
+    { name = "Andrew Simms", email = "andrew.simms@nlr.gov" },
+    { name = "Rebecca Fao", email = "rebecca.fao@nlr.gov" },
 ]
 license = { text = "BSD 3-Clause License" }
 classifiers = [
